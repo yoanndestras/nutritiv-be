@@ -1,0 +1,23 @@
+{
+  "name": "nutritiv-be",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yoanndestras/nutritiv-be.git"
+  },
+  "author": "Yoann Destras",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yoanndestras/nutritiv-be/issues"
+  },
+  "homepage": "https://github.com/yoanndestras/nutritiv-be#readme",
+  "dependencies": {
+    "express-generator": "^4.16.1"
+  }
+}

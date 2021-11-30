@@ -1,2 +1,4 @@
 node_modules
+
+#dotenv environement variables
 .env

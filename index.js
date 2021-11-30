@@ -23,6 +23,6 @@ app.use("/api/products", productRoute);
 
 
 //process.env.PORT = value PORT in .env file
-app.listen(process.env.PORT || 5000, () =>{
+app.listen(process.env.PORT, () =>{
     console.log("Backend server is running");
 })

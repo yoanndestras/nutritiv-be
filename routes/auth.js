@@ -50,7 +50,8 @@ router.post("/login", async (req, res)=>
         OriginalPassword !== req.body.password && res.status(401).json("Wrong logs !");
     
         //JWT Token using
-        const accessToken = jwt.sign(
+        const accessToken = jwt.sign
+        (
             {
                 id: user._id,
                 isAdmin: user.isAdmin,

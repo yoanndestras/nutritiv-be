@@ -1,28 +1,32 @@
 {
   "name": "nutritiv-be",
-  "version": "0.0.0",
-  "private": true,
+  "version": "1.0.0",
+  "description": "Back-end of Nutritiv project",
+  "main": "index.js",
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "nodemon index.js"
   },
-  "dependencies": {
-    "cookie-parser": "~1.4.4",
-    "debug": "~2.6.9",
-    "express": "~4.16.1",
-    "http-errors": "~1.6.3",
-    "jade": "~1.11.0",
-    "morgan": "~1.9.1"
-  },
-  "description": "",
-  "main": "app.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/yoanndestras/nutritiv-be.git"
   },
-  "author": "Yoann Destras",
+  "keywords": [],
+  "author": "",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/yoanndestras/nutritiv-be/issues"
   },
-  "homepage": "https://github.com/yoanndestras/nutritiv-be#readme"
+  "homepage": "https://github.com/yoanndestras/nutritiv-be#readme",
+  "dependencies": {
+    "crypto-js": "^4.1.1",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.0.13",
+    "mongoose-currency": "^0.2.0",
+    "nodemon": "^2.0.15",
+    "passport": "^0.5.0",
+    "passport-jwt": "^4.0.0",
+    "passport-local": "^1.0.0"
+  }
 }

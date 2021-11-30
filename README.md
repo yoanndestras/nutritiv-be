@@ -22,7 +22,7 @@ Back-end of Nutritiv project
 - add verifyToken.js in routes file and update user.js
 - create verifyTokenAndAdmin
 - create DELETE and GET(one user, all USER, USER stats) request
-
+- update product route to do create product request
 ## Work order notes
 
 - Mongoose Schema models

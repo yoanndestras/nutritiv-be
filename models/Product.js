@@ -22,18 +22,24 @@ const ProductSchema = new Schema
         type: String,
         required: true
     },
-    categories: 
+    tags: 
     {
         type: Array,
         required: true
     },
     shape: 
     {
-        type: String
+        type: Array,
+        required: true
+    },
+    load: 
+    {
+        type: Array,
+        required: true
     },
     price:
     {
-        type: Currency,
+        type: Array, Currency,
         required: true,
         min: 0
     },

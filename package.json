@@ -11,13 +11,14 @@
     "url": "git+https://github.com/yoanndestras/nutritiv-be.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "Yoann Destras",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/yoanndestras/nutritiv-be/issues"
   },
   "homepage": "https://github.com/yoanndestras/nutritiv-be#readme",
   "dependencies": {
+    "cors": "^2.8.5",
     "crypto-js": "^4.1.1",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",

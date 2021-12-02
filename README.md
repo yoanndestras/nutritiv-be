@@ -23,6 +23,7 @@ Back-end of Nutritiv project
 - create verifyTokenAndAdmin
 - create DELETE and GET(one user, all USER, USER stats) request
 - update product route to do create product request
+- req.body -> req.body.formData to connect with reactjs form
 ## Work order notes
 
 - Mongoose Schema models

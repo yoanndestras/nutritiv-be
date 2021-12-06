@@ -27,6 +27,11 @@ const UserSchema = new Schema
         default: false,
         required: true
     },
+    refreshTokens:
+    {
+        type: Array,
+        required: false
+    }
 },
 {
     timestamps: true,   //mongoose automatically do UpdateAt and CreatedAt

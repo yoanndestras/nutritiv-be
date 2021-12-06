@@ -2,9 +2,7 @@ const router = require("express").Router();
 const User = require("../models/User");
 const CryptoJS = require("crypto-js");
 const jwt = require("jsonwebtoken");
-const authenticate = require('./verifyToken');
-
-
+const authenticate = require('./tokenAuth');
 
 //REGISTER
 router.post("/register", async(req, res) =>
@@ -37,6 +35,7 @@ router.post("/login", async (req, res)=>
 {
     try
     {
+        
         //Find user with the username of request, (username :{unique : true})
         const user = await User.findOne({username: req.body.username});
         
@@ -58,10 +57,18 @@ router.post("/login", async (req, res)=>
         const {password, ...public} = user._doc; 
         
         //JWT Token using
-        const accessToken = authenticate.GenerateAccessToken(public);
+        const accessToken = authenticate.GenerateAccessToken({username: user.username, isAdmin: user.isAdmin});
         
         //JWT RefreshToken using
-        const refreshToken = authenticate.GenerateRefreshToken(public);
+        const refreshToken = authenticate.GenerateRefreshToken({username: user.username, isAdmin: user.isAdmin});
+
+        await User.updateOne
+        (
+            {username: req.body.username},
+            {
+                $push: { refreshTokens: refreshToken}
+            },
+        )
         
         res.status(200).json({success: true, username: user.username, isAdmin: user.isAdmin, accessToken, refreshToken});
     
@@ -73,63 +80,63 @@ router.post("/login", async (req, res)=>
     
 });
 
+// REFRESH TOKEN
 
-// //REFRESHTOKEN
+router.post("/token", authenticate.verifyRefreshToken, async(req, res) =>
+{   
+    try
+    {
+        const refreshToken = req.headers.token;
 
-// router.post("/refreshToken", async (req, res)=>
-// {
-//     try
-//     {
-//         const token = req.headers.token;
+        !refreshToken && res.status(401).json({success: false, err: "No refreshToken in req.headers.token!"});
         
-//         let base64Url = token.split('.')[1]; // token you get
-//         let base64 = base64Url.replace('-', '+').replace('_', '/');
-//         let decodedData = JSON.parse(Buffer.from(base64, 'base64').toString('binary'));
+        let token = refreshToken.split(".")[1];
+        let base64 = token.replace("-", "+").replace("_", "/");
+        let decodedData = JSON.parse(Buffer.from(base64, "base64").toString("binary"));
         
-//         console.log(decodedData);
-//         const user = await User.findOne({_id: decodedData._id});
+        const user = await User.findOne({username: decodedData.username});
         
-//         // if no user, display : Wrong logs !
-//         !user && res.status(401).json("User do not exist!");
+        !user.refreshTokens.includes(refreshToken) && res.status(403).json({success: false, err: "This refreshToken isn't in user.refreshTokens!"});
         
-//         const {password, ...public} = user._doc; 
+        // Generate AccessToken at refreshToken
+        const accessToken = authenticate.GenerateAccessToken({username: user.username, isAdmin: user.isAdmin});
         
-//         //JWT RefreshToken using
-//         const refreshToken = jwt.sign
-//         (
-//             public,
-//             process.env.REF_JWT_SEC,
-//             {expiresIn: "1y"}
-//         );
-        
-//         // spread operator to only show others content
-//         res.status(200).json({accessToken: refreshToken});
-    
-//     }
-//     catch(err)
-//     {
-//         return res.status(500).json({ error: JSON.stringify(err) });
-//     }
-    
-// });
+        res.status(200).json({success: true, accessToken: accessToken});
+                
+    }
+    catch(err)
+    {
+        res.status(500).json({success: false, status: 'Refresh Token Generation Unsuccessful!', err: 'Could not /token!'});
+    }
+});
 
-// LOGOUT
+// DELETE TOKEN // LOGOUT
 
-// router.post("/logout", verifyToken, async(req, res) =>
-// {
-//     const accessToken = req.headers.token;
-//     console.log(req.headers.token);
-//     try
-//     {
+router.delete("/logout", authenticate.verifyRefreshToken, async(req, res) =>
+{   
+    try
+    {
+        const refreshToken = req.headers.token;
 
-//         accessToken = accessToken.filter((token) => token !== accessToken);
-
-//         res.status(200).json("You are succesfully logged out!");
-//     }
-//     catch(err)
-//     {
-//         res.status(500).json(err);
-//     }
-// });
+        !refreshToken && res.status(401).json({success: false, err: "No refreshToken in req.headers!"});
+        
+        let token = refreshToken.split(".")[1];
+        let base64 = token.replace("-", "+").replace("_", "/");
+        let decodedData = JSON.parse(Buffer.from(base64, "base64").toString("binary"));
+        
+        const user = await User.findOne({username: decodedData.username});        
+        !user.refreshTokens.includes(refreshToken) && res.status(403).json({success: false, err: "This refreshToken isn't in user.refreshTokens!"});
+        
+        user.refreshTokens = user.refreshTokens.filter(token => token !== refreshToken);
+        user.save();
+        
+        res.status(200).json({success: true, refreshTokenRemoved: user.refreshTokens});
+        
+    }
+    catch(err)
+    {
+        res.status(500).json({success: false, status: 'Logout Unsuccessfull!', err: 'Could not /logout!'});
+    }
+});
 
 module.exports = router;

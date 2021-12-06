@@ -19,7 +19,7 @@ Back-end of Nutritiv project
 - yarn add crypto-js
 - Login request
 - yarn add jsonwebtoken
-- add verifyToken.js in routes file and update user.js
+- add tokenAuth.js in routes file and update user.js
 - create verifyTokenAndAdmin
 - create DELETE and GET(one user, all USER, USER stats) request
 - update product route to do create product request

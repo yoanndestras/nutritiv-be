@@ -1,9 +1,9 @@
 const Cart = require("../models/Cart");
-const { verifyToken, verifyTokenAndAuthorization, verifyTokenAndAdmin } = require("./verifyToken");
+const authenticate = require('./verifyToken');
 const router = require("express").Router();
 
 // CREATE CART
-router.post("/", verifyToken, async (req, res) =>
+router.post("/", authenticate.verifyToken, async (req, res) =>
 {
     const newCart = new Cart(req.body);
     try
@@ -18,7 +18,7 @@ router.post("/", verifyToken, async (req, res) =>
     }
 })
 // UPDATE CART
-router.put("/:id", verifyTokenAndAuthorization, async(req, res) =>
+router.put("/:id", authenticate.verifyTokenAndAuthorization, async(req, res) =>
 {
     try
     {
@@ -38,7 +38,7 @@ router.put("/:id", verifyTokenAndAuthorization, async(req, res) =>
 })
 
 // DELETE CART
-router.delete("/:id", verifyTokenAndAuthorization, async (req, res) =>
+router.delete("/:id", authenticate.verifyTokenAndAuthorization, async (req, res) =>
 {
     try
     {
@@ -53,7 +53,7 @@ router.delete("/:id", verifyTokenAndAuthorization, async (req, res) =>
 })
 
 // GET USER CART
-router.get("/find/:userId", verifyTokenAndAuthorization, async (req, res) =>
+router.get("/find/:userId", authenticate.verifyTokenAndAuthorization, async (req, res) =>
 {
     try
     {
@@ -67,7 +67,7 @@ router.get("/find/:userId", verifyTokenAndAuthorization, async (req, res) =>
  })
 
 // GET ALL 
-router.get("/", verifyTokenAndAdmin, async (req, res) =>
+router.get("/", authenticate.verifyTokenAndAdmin, async (req, res) =>
 {
     try
     {

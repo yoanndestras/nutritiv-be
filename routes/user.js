@@ -1,10 +1,10 @@
 const User = require("../models/User");
-const { verifyToken, verifyTokenAndAuthorization, verifyTokenAndAdmin } = require("./verifyToken");
 const router = require("express").Router();
+const authenticate = require('./verifyToken');
 
 
 // UPDATE USER
-router.put("/:id", verifyToken, verifyTokenAndAuthorization, async(req, res) =>
+router.put("/:id", authenticate.verifyToken, authenticate.verifyTokenAndAuthorization, async(req, res) =>
 {
     if(req.body.password)
     {
@@ -31,7 +31,7 @@ router.put("/:id", verifyToken, verifyTokenAndAuthorization, async(req, res) =>
 })
 
 // DELETE
-router.delete("/:id", verifyTokenAndAuthorization, async (req, res) =>
+router.delete("/:id", authenticate.verifyTokenAndAuthorization, async (req, res) =>
 {
     try
     {
@@ -46,15 +46,15 @@ router.delete("/:id", verifyTokenAndAuthorization, async (req, res) =>
 })
 
 // GET USER
-router.get("/find/:id", verifyTokenAndAdmin, async (req, res) =>
+router.get("/find/:id", authenticate.verifyTokenAndAuthorization, async (req, res) =>
 {
     try
     {
         const user = await User.findById(req.params.id)
         
-        const {password, ...others} = user._doc;
+        const {password, ...public} = user._doc;
         
-        res.status(200).json({others});
+        res.status(200).json({public});
     }
     catch(err)
     {
@@ -64,7 +64,7 @@ router.get("/find/:id", verifyTokenAndAdmin, async (req, res) =>
 })
 
 // GET ALL USERS
-router.get("/", verifyTokenAndAdmin, async (req, res) =>
+router.get("/", authenticate.verifyTokenAndAdmin, async (req, res) =>
 {
     //method to get only new users with "?new=true" in request
     const query = req.query.new;
@@ -85,7 +85,7 @@ router.get("/", verifyTokenAndAdmin, async (req, res) =>
 })
 // GET USER STATS
 // For admin Dashboard
-router.get("/stats", verifyTokenAndAdmin, async (req, res) =>
+router.get("/stats", authenticate.verifyTokenAndAdmin, async (req, res) =>
 {
     const date = new Date();
     const lastYear = new Date(date.setFullYear(date.getFullYear() -1));

@@ -1,9 +1,9 @@
 const Order = require("../models/Order");
-const { verifyToken, verifyTokenAndAuthorization, verifyTokenAndAdmin } = require("./verifyToken");
+const authenticate = require('./verifyToken');
 const router = require("express").Router();
 
 // CREATE ORDER
-router.post("/", verifyToken, async (req, res) =>
+router.post("/", authenticate.verifyToken, async (req, res) =>
 {
     const newOrder = new Order(req.body);
     try
@@ -19,7 +19,7 @@ router.post("/", verifyToken, async (req, res) =>
 });
 
 // UPDATE ORDER
-router.put("/:id", verifyTokenAndAdmin, async(req, res) =>
+router.put("/:id", authenticate.verifyTokenAndAdmin, async(req, res) =>
 {
     try
     {
@@ -39,7 +39,7 @@ router.put("/:id", verifyTokenAndAdmin, async(req, res) =>
 });
 
 // DELETE ORDER
-router.delete("/:id", verifyTokenAndAdmin, async (req, res) =>
+router.delete("/:id", authenticate.verifyTokenAndAdmin, async (req, res) =>
 {
     try
     {
@@ -54,7 +54,7 @@ router.delete("/:id", verifyTokenAndAdmin, async (req, res) =>
 });
 
 // GET USER ORDERS
-router.get("/find/:userId", verifyTokenAndAuthorization, async (req, res) =>
+router.get("/find/:userId", authenticate.verifyTokenAndAuthorization, async (req, res) =>
 {
     try
     {
@@ -69,7 +69,7 @@ router.get("/find/:userId", verifyTokenAndAuthorization, async (req, res) =>
 });
 
 // GET ALL ORDERS
-router.get("/", verifyTokenAndAdmin, async (req, res) =>
+router.get("/", authenticate.verifyTokenAndAdmin, async (req, res) =>
 {
     try
     {
@@ -86,7 +86,7 @@ router.get("/", verifyTokenAndAdmin, async (req, res) =>
 });
 
 // GET MONTHLY INCOME
-router.get("/income", verifyTokenAndAdmin, async (req, res) =>
+router.get("/income", authenticate.verifyTokenAndAdmin, async (req, res) =>
 {
     const date = new Date();
     // 1 month ago

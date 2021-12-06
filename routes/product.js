@@ -1,9 +1,9 @@
 const Product = require("../models/Product");
-const { verifyToken, verifyTokenAndAuthorization, verifyTokenAndAdmin } = require("./verifyToken");
+const authenticate = require('./verifyToken');
 const router = require("express").Router();
 
 // CREATE PRODUCT
-router.post("/", verifyTokenAndAdmin, async (req, res) =>
+router.post("/", authenticate.verifyTokenAndAdmin, async (req, res) =>
 {
     const newProduct = new Product(req.body);
     try
@@ -19,7 +19,7 @@ router.post("/", verifyTokenAndAdmin, async (req, res) =>
 });
 
 // UPDATE PRODUCT
-router.put("/:id", verifyTokenAndAdmin, async(req, res) =>
+router.put("/:id", authenticate.verifyTokenAndAdmin, async(req, res) =>
 {
     try
     {
@@ -39,7 +39,7 @@ router.put("/:id", verifyTokenAndAdmin, async(req, res) =>
 });
 
 // DELETE
-router.delete("/:id", verifyTokenAndAdmin, async (req, res) =>
+router.delete("/:id", authenticate.verifyTokenAndAdmin, async (req, res) =>
 {
     try
     {

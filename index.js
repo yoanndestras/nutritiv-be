@@ -1,4 +1,5 @@
 const express = require("express");
+// router based on url
 const app = express();
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
@@ -19,6 +20,8 @@ mongoose
     });
 
 app.use(express.json()); // to read JSON    
+app.use(express.urlencoded({extended: true}));
+
 app.use("/api/users", userRoute);
 app.use("/api/auth", authRoute);
 app.use("/api/products", productRoute);

@@ -54,7 +54,7 @@ router.delete("/:id", authenticate.verifyTokenAndAdmin, async (req, res) =>
 });
 
 // GET USER ORDERS
-router.get("/find/:userId", authenticate.verifyTokenAndAuthorization, async (req, res) =>
+router.get("/find/:userId", authenticate.verifyAuthorization, async (req, res) =>
 {
     try
     {

@@ -107,7 +107,7 @@ router.post("/token", authenticate.verifyUser, async(req, res) =>
             });
         
         res.status(200).json({success: true, accessToken: accessToken});
-                
+        
     }
     catch(err)
     {

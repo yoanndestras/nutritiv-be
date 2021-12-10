@@ -64,7 +64,7 @@ router.get("/find/:id", authenticate.verifyAuthorization, async (req, res) =>
 })
 
 // GET ALL USERS
-router.get("/", authenticate.verifyTokenAndAdmin, async (req, res) =>
+router.get("/", authenticate.verifyAdmin, async (req, res) =>
 {
     //method to get only new users with "?new=true" in request
     const query = req.query.new;
@@ -85,7 +85,7 @@ router.get("/", authenticate.verifyTokenAndAdmin, async (req, res) =>
 })
 // GET USER STATS
 // For admin Dashboard
-router.get("/stats", authenticate.verifyTokenAndAdmin, async (req, res) =>
+router.get("/stats", authenticate.verifyAdmin, async (req, res) =>
 {
     const date = new Date();
     const lastYear = new Date(date.setFullYear(date.getFullYear() -1));

@@ -19,7 +19,7 @@ router.post("/", authenticate.verifyUser, async (req, res) =>
 });
 
 // UPDATE ORDER
-router.put("/:id", authenticate.verifyTokenAndAdmin, async(req, res) =>
+router.put("/:id", authenticate.verifyAdmin, async(req, res) =>
 {
     try
     {
@@ -39,7 +39,7 @@ router.put("/:id", authenticate.verifyTokenAndAdmin, async(req, res) =>
 });
 
 // DELETE ORDER
-router.delete("/:id", authenticate.verifyTokenAndAdmin, async (req, res) =>
+router.delete("/:id", authenticate.verifyAdmin, async (req, res) =>
 {
     try
     {
@@ -69,7 +69,7 @@ router.get("/find/:userId", authenticate.verifyAuthorization, async (req, res) =
 });
 
 // GET ALL ORDERS
-router.get("/", authenticate.verifyTokenAndAdmin, async (req, res) =>
+router.get("/", authenticate.verifyAdmin, async (req, res) =>
 {
     try
     {
@@ -86,7 +86,7 @@ router.get("/", authenticate.verifyTokenAndAdmin, async (req, res) =>
 });
 
 // GET MONTHLY INCOME
-router.get("/income", authenticate.verifyTokenAndAdmin, async (req, res) =>
+router.get("/income", authenticate.verifyAdmin, async (req, res) =>
 {
     const date = new Date();
     // 1 month ago

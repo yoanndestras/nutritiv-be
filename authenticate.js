@@ -76,6 +76,43 @@ exports.RFJwtPassport = passport.use(new JwtStrategy(opts_ref,
         ));
 
 
+// VERIFY USER TOKEN 
+exports.verifyUser = passport.authenticate('jwt', {session: false});
+
+
+// VERIFY USER TOKEN AND ADMIN
+exports.verifyAdmin = function(req, res, next)
+{
+    
+        if(req.user.isAdmin == true)
+        {
+            next();
+        }
+        else
+        {
+            var err = new Error('You are not authorized to perform this operation!');
+            err.status = 403;
+            return next(err);
+        }
+};
+
+exports.verifyAuthorization = (req, res, next) =>
+{
+    authenticate.verifyUser(req, res, () =>
+    {
+        var userId = JSON.stringify(req.user._id).replace(/\"/g, "");
+
+        if( userId === req.params.id || req.user.isAdmin == true)
+        {
+            next();
+        }
+        else
+        {
+            res.status(403).json("You are not allowed to do that !");
+        }
+    });
+};
+
 
 // GENERATE TOKENS
 exports.GenerateAccessToken = function(user) 
@@ -98,40 +135,22 @@ exports.GenerateRefreshToken = function(user)
     );
 };
 
-// VERIFY USER TOKEN 
-exports.verifyUser = passport.authenticate('jwt', {session: false});
 
 
-// VERIFY USER TOKEN AND ADMIN
-exports.verifyTokenAndAdmin = (req, res, next) =>
-{
-    authenticate.verifyUser(req, res, () =>
-    {
-        if(req.user.isAdmin == true)
-        {
-            next();
-        }
-        else
-        {
-            res.status(403).json("You are not allowed to do that !");
-        }
-    });
-};
-
-exports.verifyRefreshToken = (req, res, next) =>
-{
-    const token = req.headers.token;
+// exports.verifyRefreshToken = (req, res, next) =>
+// {
+//     const token = req.headers.token;
     
-    if(token)
-    {
-        authenticate.verifyRefreshTokenFunction({token: token});
-        next();
-    }
-    else
-    {
-        return res.status(401).json("You are not authenticated !");
-    }    
-};
+//     if(token)
+//     {
+//         authenticate.verifyRefreshTokenFunction({token: token});
+//         next();
+//     }
+//     else
+//     {
+//         return res.status(401).json("You are not authenticated !");
+//     }    
+// };
 
 
 // exports.verifyCookieRefreshToken = (req, res, next) =>
@@ -176,22 +195,6 @@ exports.verifyRefreshToken = (req, res, next) =>
 //     return  req._id;
 // }
 
-exports.verifyAuthorization = (req, res, next) =>
-{
-    authenticate.verifyUser(req, res, () =>
-    {
-        var userId = JSON.stringify(req.user._id).replace(/\"/g, "");
-
-        if( userId === req.params.id || req.user.isAdmin == true)
-        {
-            next();
-        }
-        else
-        {
-            res.status(403).json("You are not allowed to do that !");
-        }
-    });
-};
 
 
 

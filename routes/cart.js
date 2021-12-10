@@ -67,7 +67,7 @@ router.get("/find/:userId", authenticate.verifyAuthorization, async (req, res) =
  })
 
 // GET ALL 
-router.get("/", authenticate.verifyTokenAndAdmin, async (req, res) =>
+router.get("/", authenticate.verifyAdmin, async (req, res) =>
 {
     try
     {

@@ -18,16 +18,18 @@
   },
   "homepage": "https://github.com/yoanndestras/nutritiv-be#readme",
   "dependencies": {
+    "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "crypto-js": "^4.1.1",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^6.0.13",
+    "mongoose": "^6.0.14",
     "mongoose-currency": "^0.2.0",
     "nodemon": "^2.0.15",
     "passport": "^0.5.0",
     "passport-jwt": "^4.0.0",
-    "passport-local": "^1.0.0"
+    "passport-local": "^1.0.0",
+    "passport-local-mongoose": "^6.1.0"
   }
 }

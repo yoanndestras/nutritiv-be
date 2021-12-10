@@ -1,9 +1,9 @@
 const Order = require("../models/Order");
-const authenticate = require('./tokenAuth');
+const authenticate = require('../authenticate');
 const router = require("express").Router();
 
 // CREATE ORDER
-router.post("/", authenticate.verifyToken, async (req, res) =>
+router.post("/", authenticate.verifyUser, async (req, res) =>
 {
     const newOrder = new Order(req.body);
     try

@@ -1,5 +1,5 @@
 const Product = require("../models/Product");
-const authenticate = require('./tokenAuth');
+const authenticate = require('../authenticate');
 const router = require("express").Router();
 
 // CREATE PRODUCT

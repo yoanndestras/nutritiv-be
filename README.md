@@ -15,15 +15,11 @@ Back-end of Nutritiv project
 - Create .env file to prevent SecretKey and Port
 - Test Routes (Postman)
 - Create models (Cart, Order, Product, User) and routes (auth, cart, order, product, user) 
-- Register request
-- yarn add crypto-js
-- Login request
-- yarn add jsonwebtoken
-- add tokenAuth.js in routes file and update user.js
-- create verifyTokenAndAdmin
+- implement passport with JWT Token
 - create DELETE and GET(one user, all USER, USER stats) request
 - update product route to do create product request
 - req.body -> req.body.formData to connect with reactjs form
+
 ## Work order notes
 
 - Mongoose Schema models

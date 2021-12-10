@@ -1,9 +1,9 @@
 const Cart = require("../models/Cart");
-const authenticate = require('./tokenAuth');
 const router = require("express").Router();
+const authenticate = require('../authenticate');
 
 // CREATE CART
-router.post("/", authenticate.verifyToken, async (req, res) =>
+router.post("/", authenticate.verifyUser, async (req, res) =>
 {
     const newCart = new Cart(req.body);
     try

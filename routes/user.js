@@ -1,10 +1,10 @@
 const User = require("../models/User");
 const router = require("express").Router();
-const authenticate = require('./tokenAuth');
+const authenticate = require('../authenticate');
 
 
 // UPDATE USER
-router.put("/:id", authenticate.verifyToken, authenticate.verifyTokenAndAuthorization, async(req, res) =>
+router.put("/:id", authenticate.verifyUser, authenticate.verifyTokenAndAuthorization, async(req, res) =>
 {
     if(req.body.password)
     {

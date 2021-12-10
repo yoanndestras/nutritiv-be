@@ -1,9 +1,12 @@
 const express = require("express");
-// router based on url
+
 const app = express();
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+const passport = require('passport');
+const cookieParser = require("cookie-parser");
 
+// router based on url
 const userRoute = require("./routes/user");
 const authRoute = require("./routes/auth");
 const productRoute = require("./routes/product");
@@ -19,8 +22,12 @@ mongoose
         console.log(err);
     });
 
+    
 app.use(express.json()); // to read JSON    
 app.use(express.urlencoded({extended: true}));
+
+app.use(passport.initialize());
+app.use(cookieParser());
 
 app.use("/api/users", userRoute);
 app.use("/api/auth", authRoute);

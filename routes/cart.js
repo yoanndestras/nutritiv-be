@@ -18,7 +18,7 @@ router.post("/", authenticate.verifyUser, async (req, res) =>
     }
 })
 // UPDATE CART
-router.put("/:id", authenticate.verifyTokenAndAuthorization, async(req, res) =>
+router.put("/:id", authenticate.verifyAuthorization, async(req, res) =>
 {
     try
     {
@@ -38,7 +38,7 @@ router.put("/:id", authenticate.verifyTokenAndAuthorization, async(req, res) =>
 })
 
 // DELETE CART
-router.delete("/:id", authenticate.verifyTokenAndAuthorization, async (req, res) =>
+router.delete("/:id", authenticate.verifyAuthorization, async (req, res) =>
 {
     try
     {
@@ -53,7 +53,7 @@ router.delete("/:id", authenticate.verifyTokenAndAuthorization, async (req, res)
 })
 
 // GET USER CART
-router.get("/find/:userId", authenticate.verifyTokenAndAuthorization, async (req, res) =>
+router.get("/find/:userId", authenticate.verifyAuthorization, async (req, res) =>
 {
     try
     {

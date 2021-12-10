@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const passport = require('passport');
 const cookieParser = require("cookie-parser");
+const cors = require('cors');
 
 // router based on url
 const userRoute = require("./routes/user");
@@ -28,6 +29,7 @@ app.use(express.urlencoded({extended: true}));
 
 app.use(passport.initialize());
 app.use(cookieParser());
+app.use(cors()); // apply simple cors on all routes
 
 app.use("/api/users", userRoute);
 app.use("/api/auth", authRoute);

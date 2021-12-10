@@ -44,6 +44,39 @@ exports.jwtPassport = passport.use(new JwtStrategy(opts,
 }
 ));
 
+const cookieExtractor = function(req) {
+    var token = null;
+    if (req && req.cookies) token = req.cookies['refreshToken'];
+    return token;
+};
+
+const opts_ref = {}; //json web token and key
+opts_ref.jwtFromRequest = cookieExtractor;
+opts_ref.secretOrKey = process.env.REF_JWT_SEC;
+
+exports.RFJwtPassport = passport.use(new JwtStrategy(opts_ref,
+        (jwtPayload, done) =>
+        {
+            User.findOne({_id: jwtPayload._id}, (err, user) =>
+                    {                
+                        if(err)
+                        {
+                            return done(err, false);
+                        }
+                        else if(user)
+                        {
+                            return done(null, user);
+                        }
+                        else
+                        {
+                            return done(null, false);
+                        }
+                    })
+        }
+        ));
+
+
+
 // GENERATE TOKENS
 exports.GenerateAccessToken = function(user) 
 {
@@ -66,11 +99,10 @@ exports.GenerateRefreshToken = function(user)
 };
 
 // VERIFY USER TOKEN 
-
 exports.verifyUser = passport.authenticate('jwt', {session: false});
 
-// VERIFY USER TOKEN AND ADMIN
 
+// VERIFY USER TOKEN AND ADMIN
 exports.verifyTokenAndAdmin = (req, res, next) =>
 {
     authenticate.verifyUser(req, res, () =>
@@ -89,7 +121,7 @@ exports.verifyTokenAndAdmin = (req, res, next) =>
 exports.verifyRefreshToken = (req, res, next) =>
 {
     const token = req.headers.token;
-
+    
     if(token)
     {
         authenticate.verifyRefreshTokenFunction({token: token});
@@ -102,50 +134,55 @@ exports.verifyRefreshToken = (req, res, next) =>
 };
 
 
-exports.verifyCookieRefreshToken = (req, res, next) =>
-{
-    const token = req.cookies.refreshToken;
-
-    if(token)
-    {
-        authenticate.verifyRefreshTokenFunction({token: token});
-        next();
-    }
-    else
-    {
-        return res.status(401).json("You are not authenticated !");
-    }    
-};
-
-exports.verifyRefreshTokenFunction = (req, res, next) =>
-{
-    const token = req.token;
-
-    if(token)
-    {
+// exports.verifyCookieRefreshToken = (req, res, next) =>
+// {
+    
+    
+//     const token = req.cookies.refreshToken;
+    
+//     if(token)
+//     {
+//         const userId = authenticate.verifyRefreshTokenFunction({token: token});
         
-        jwt.verify(req.token, process.env.REF_JWT_SEC, (err, user) =>
-        {
-            if(err) res.status(403).json(
-                {
-                    success: false, err: "invalid_token", 
-                    error_description: "The cookie refresh token do not exist"
-                });
-            req._id = user._id
-        });
-    }
-    else
-    {
-        return res.status(401).json("You are not authenticated !");
-    }
-    return  req._id;
-}
+//         next();
+//     }
+//     else
+//     {
+//         return res.status(401).json("You are not authenticated !");
+//     }    
+// };
 
-exports.verifyTokenAndAuthorization = (req, res, next) =>
+// exports.verifyRefreshTokenFunction = (req, res, next) =>
+// {
+//     const token = req.token;
+
+//     if(token)
+//     {
+        
+//         jwt.verify(req.token, process.env.REF_JWT_SEC, (err, user) =>
+//         {
+//             if(err) res.status(403).json(
+//                 {
+//                     success: false, err: "invalid_token", 
+//                     error_description: "The cookie refresh token do not exist"
+//                 });
+//             req._id = user._id
+//         });
+//     }
+//     else
+//     {
+//         return res.status(401).json("You are not authenticated!");
+//     }
+//     return  req._id;
+// }
+
+exports.verifyAuthorization = (req, res, next) =>
 {
     authenticate.verifyUser(req, res, () =>
     {
-        if(req.user._id === req.params.id || req.user.isAdmin == true)
+        var userId = JSON.stringify(req.user._id).replace(/\"/g, "");
+
+        if( userId === req.params.id || req.user.isAdmin == true)
         {
             next();
         }

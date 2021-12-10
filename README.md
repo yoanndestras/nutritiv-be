@@ -15,8 +15,9 @@ Back-end of Nutritiv project
 - Create .env file to prevent SecretKey and Port
 - Test Routes (Postman)
 - Create models (Cart, Order, Product, User) and routes (auth, cart, order, product, user) 
-- implement passport with JWT Token
 - create DELETE and GET(one user, all USER, USER stats) request
+- implement passport with JWT Token
+- implement cors
 - update product route to do create product request
 - req.body -> req.body.formData to connect with reactjs form
 

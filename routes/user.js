@@ -4,7 +4,7 @@ const authenticate = require('../authenticate');
 
 
 // UPDATE USER
-router.put("/:id", authenticate.verifyUser, authenticate.verifyTokenAndAuthorization, async(req, res) =>
+router.put("/:id", authenticate.verifyUser, authenticate.verifyAuthorization, async(req, res) =>
 {
     if(req.body.password)
     {
@@ -31,7 +31,7 @@ router.put("/:id", authenticate.verifyUser, authenticate.verifyTokenAndAuthoriza
 })
 
 // DELETE
-router.delete("/:id", authenticate.verifyTokenAndAuthorization, async (req, res) =>
+router.delete("/:id", authenticate.verifyAuthorization, async (req, res) =>
 {
     try
     {
@@ -46,7 +46,7 @@ router.delete("/:id", authenticate.verifyTokenAndAuthorization, async (req, res)
 })
 
 // GET USER
-router.get("/find/:id", authenticate.verifyTokenAndAuthorization, async (req, res) =>
+router.get("/find/:id", authenticate.verifyAuthorization, async (req, res) =>
 {
     try
     {

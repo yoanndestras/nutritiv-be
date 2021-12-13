@@ -6,14 +6,6 @@ const authenticate = require('../authenticate');
 // UPDATE USER
 router.put("/:id", authenticate.verifyUser, authenticate.verifyAuthorization, async(req, res) =>
 {
-    if(req.body.password)
-    {
-        req.body.password = CryptoJS.AES.encrypt
-        (
-            req.body.password, 
-            process.env.PASS_SEC
-        ).toString();
-    }
     try
     {
         const updatedUser = await User.findByIdAndUpdate(req.params.id, 

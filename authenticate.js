@@ -23,28 +23,27 @@ const opts = {}; //json web token and key
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
 opts.secretOrKey = process.env.JWT_SEC;
 
-exports.jwtPassport = passport.use(new JwtStrategy(opts,
-(jwtPayload, done) =>
+exports.jwtPassport = passport.use(new JwtStrategy(opts, (jwtPayload, done) =>
 {
     User.findOne({_id: jwtPayload._id}, (err, user) =>
-            {                
-                if(err)
-                {
-                    return done(err, false);
-                }
-                else if(user)
-                {
-                    return done(null, user);
-                }
-                else
-                {
-                    return done(null, false);
-                }
-            })
-}
-));
+        {                
+            if(err)
+            {
+                return done(err, false);
+            }
+            else if(user)
+            {
+                return done(null, user);
+            }
+            else
+            {
+                return done(null, false);
+            }
+        })
+}));
 
-const cookieExtractor = function(req) {
+const cookieExtractor = function(req) 
+{
     var token = null;
     if (req && req.cookies) token = req.cookies['refreshToken'];
     return token;
@@ -54,36 +53,50 @@ const opts_ref = {}; //json web token and key
 opts_ref.jwtFromRequest = cookieExtractor;
 opts_ref.secretOrKey = process.env.REF_JWT_SEC;
 
-exports.RFJwtPassport = passport.use(new JwtStrategy(opts_ref,
-        (jwtPayload, done) =>
-        {
-            User.findOne({_id: jwtPayload._id}, (err, user) =>
-                    {                
-                        if(err)
-                        {
-                            return done(err, false);
-                        }
-                        else if(user)
-                        {
-                            return done(null, user);
-                        }
-                        else
-                        {
-                            return done(null, false);
-                        }
-                    })
-        }
-        ));
-
+exports.RFJwtPassport = passport.use(new JwtStrategy(opts_ref, (jwtPayload, done) =>
+{
+    User.findOne({_id: jwtPayload._id}, (err, user) =>
+        {                
+            if(err)
+            {
+                return done(err, false);
+            }
+            else if(user)
+            {
+                return done(null, user);
+            }
+            else
+            {
+                return done(null, false);
+            }
+        });
+}));
 
 // VERIFY USER TOKEN 
-exports.verifyUser = passport.authenticate('jwt', {session: false});
+exports.verifyUser = (req, res, next) => 
+{
+    passport.authenticate('jwt', { session: false }, (err, user, info) => 
+    {
+        if (err || !user) 
+        {   
+            return res.status(500).json(
+                {
+                    success: false, 
+                    status: 'Logout Unsuccessfull!', 
+                    err: 'No user connected',
+                    info: info.message
+                });
+        }
+        req.user = user;
+        return next(); 
+        
+    })(req, res, next); 
+};
 
-
-// VERIFY USER TOKEN AND ADMIN
+// VERIFY ADMIN
 exports.verifyAdmin = function(req, res, next)
 {
-    
+    console.log(req.user)
         if(req.user.isAdmin == true)
         {
             next();
@@ -113,7 +126,6 @@ exports.verifyAuthorization = (req, res, next) =>
     });
 };
 
-
 // GENERATE TOKENS
 exports.GenerateAccessToken = function(user) 
 {
@@ -134,7 +146,6 @@ exports.GenerateRefreshToken = function(user)
         {expiresIn: "7d"} // expires in 7 days
     );
 };
-
 
 
 // exports.verifyRefreshToken = (req, res, next) =>

@@ -37,6 +37,7 @@ router.route('/')
             status: 'GET operation not supported on /imageUpload', 
         });
 })
+//imageFile is the name of the input button to upload image
 .post(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, upload.single('imageFile'), (req, res) => 
 {
     res.status(200).json(

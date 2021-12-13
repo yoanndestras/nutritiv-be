@@ -96,7 +96,6 @@ exports.verifyUser = (req, res, next) =>
 // VERIFY ADMIN
 exports.verifyAdmin = function(req, res, next)
 {
-    console.log(req.user)
         if(req.user.isAdmin == true)
         {
             next();

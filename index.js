@@ -5,6 +5,7 @@ const dotenv = require("dotenv");
 const passport = require('passport');
 const cookieParser = require("cookie-parser");
 const cors = require('cors');
+const path = require('path');
 
 // router based on url
 const userRoute = require("./routes/user");
@@ -34,6 +35,9 @@ app.use(cookieParser());
 
 app.use(cors()); // apply simple cors on all routes
 // app.options('*', cors());
+
+app.use(express.static(path.join(__dirname, 'public')));
+// http://localhost:3001/images/image.jpg
 
 app.use("/api/users", userRoute);
 app.use("/api/auth", authRoute);

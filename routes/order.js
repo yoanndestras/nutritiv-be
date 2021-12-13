@@ -1,5 +1,5 @@
 const Order = require("../models/Order");
-const authenticate = require('../authenticate');
+const authenticate = require('../middleware/authenticate');
 const router = require("express").Router();
 
 // CREATE ORDER

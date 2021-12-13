@@ -1,9 +1,9 @@
 const router = require("express").Router();
 const User = require("../models/User");
-const cors = require('../cors');
+const cors = require('../middleware/cors');
 
 const passport = require("passport");
-const authenticate = require("../authenticate");
+const authenticate = require("../middleware/authenticate");
 
 
 //OPTIONS FOR CORS CHECK

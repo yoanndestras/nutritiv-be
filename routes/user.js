@@ -1,6 +1,6 @@
 const User = require("../models/User");
 const router = require("express").Router();
-const authenticate = require('../authenticate');
+const authenticate = require('../middleware/authenticate');
 
 
 // UPDATE USER

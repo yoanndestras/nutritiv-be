@@ -1,6 +1,6 @@
 const Cart = require("../models/Cart");
 const router = require("express").Router();
-const authenticate = require('../authenticate');
+const authenticate = require('../middleware/authenticate');
 
 // CREATE CART
 router.post("/", authenticate.verifyUser, async (req, res) =>

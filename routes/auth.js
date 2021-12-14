@@ -95,7 +95,11 @@ router.post("/token", cors.corsWithOptions, authenticate.verifyUser, async(req, 
         // Generate new accessToken
         const accessToken = authenticate.GenerateAccessToken({_id: req.user._id});
         
-        res.status(200).json({success: true, accessToken: accessToken});
+        res.status(200).json(
+            {
+                success: true, 
+                accessToken: accessToken
+            });
     }
     catch(err)
     {
@@ -132,33 +136,5 @@ router.get("/logout", cors.corsWithOptions, authenticate.verifyUser, async(req, 
             });
     }
 });
-
-//CHECK JWT VALIDITY
-// router.get('/checkJWTToken', (req, res) =>
-// {
-//     passport.authenticate('jwt', {session: false}, (err, user, info) =>
-//     {
-        
-//         if(err)
-//         {
-//             return res.status(401).json(
-//                 {
-//                     success: false, 
-//                     status: 'JWT invalid!', 
-//                     info: info,
-//                     err: err
-//                 });
-//         }
-//         else
-//         {
-//             return res.status(200).json(
-//                 {
-//                     status: 'JWT valid!', 
-//                     success: true, 
-//                     user: user
-//                 });
-//         }
-//     })(req, res);
-// });
 
 module.exports = router;

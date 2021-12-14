@@ -21,7 +21,7 @@ Back-end of Nutritiv project
 - npm init -y
 
 - In package.json, add
-    <!--"start":"nodemon index.js" -->
+    <!--"start":"nodemon app.js" -->
 
 - Create .env file for SecretKeys
 

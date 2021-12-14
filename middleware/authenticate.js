@@ -53,7 +53,8 @@ const opts_ref = {}; //json web token and key
 opts_ref.jwtFromRequest = cookieExtractor;
 opts_ref.secretOrKey = process.env.REF_JWT_SEC;
 
-exports.RFJwtPassport = passport.use(new JwtStrategy(opts_ref, (jwtPayload, done) =>
+// named "jwt_rt" to check only the refreshtoken in cookies
+exports.RFJwtPassport = passport.use("jwt_rt", new JwtStrategy(opts_ref, (jwtPayload, done) => 
 {
     User.findOne({_id: jwtPayload._id}, (err, user) =>
         {                
@@ -76,17 +77,18 @@ exports.RFJwtPassport = passport.use(new JwtStrategy(opts_ref, (jwtPayload, done
 exports.verifyUser = (req, res, next) => 
 {
     passport.authenticate('jwt', { session: false }, (err, user, info) => 
-    {
+    {        
         if (err || !user) 
         {   
             return res.status(500).json(
                 {
                     success: false, 
-                    status: 'Logout Unsuccessfull!', 
+                    status: 'No token', 
                     err: 'No user connected',
                     info: info.message
                 });
         }
+        
         req.user = user;
         return next(); 
         
@@ -126,11 +128,12 @@ exports.verifyAuthorization = (req, res, next) =>
 };
 
 // GENERATE TOKENS
-exports.GenerateAccessToken = function(user) 
+exports.GenerateAccessToken = function(_id) 
 {
+    
     return jwt.sign
     (
-        user, 
+        _id, 
         process.env.JWT_SEC, 
         {expiresIn: "1800s"} // expires in 15 minutes
     );
@@ -145,92 +148,3 @@ exports.GenerateRefreshToken = function(user)
         {expiresIn: "7d"} // expires in 7 days
     );
 };
-
-
-// exports.verifyRefreshToken = (req, res, next) =>
-// {
-//     const token = req.headers.token;
-    
-//     if(token)
-//     {
-//         authenticate.verifyRefreshTokenFunction({token: token});
-//         next();
-//     }
-//     else
-//     {
-//         return res.status(401).json("You are not authenticated !");
-//     }    
-// };
-
-
-// exports.verifyCookieRefreshToken = (req, res, next) =>
-// {
-    
-    
-//     const token = req.cookies.refreshToken;
-    
-//     if(token)
-//     {
-//         const userId = authenticate.verifyRefreshTokenFunction({token: token});
-        
-//         next();
-//     }
-//     else
-//     {
-//         return res.status(401).json("You are not authenticated !");
-//     }    
-// };
-
-// exports.verifyRefreshTokenFunction = (req, res, next) =>
-// {
-//     const token = req.token;
-
-//     if(token)
-//     {
-        
-//         jwt.verify(req.token, process.env.REF_JWT_SEC, (err, user) =>
-//         {
-//             if(err) res.status(403).json(
-//                 {
-//                     success: false, err: "invalid_token", 
-//                     error_description: "The cookie refresh token do not exist"
-//                 });
-//             req._id = user._id
-//         });
-//     }
-//     else
-//     {
-//         return res.status(401).json("You are not authenticated!");
-//     }
-//     return  req._id;
-// }
-
-
-
-
-
-// exports.verifyToken = (req, res, next) =>
-// {
-//     const autHeader = req.headers["authorization"];
-    
-//     if(autHeader)
-//     {
-        
-//         const token = autHeader.split(" ")[1];
-//         jwt.verify(token, process.env.JWT_SEC, (err, user) =>
-//         {
-//             if(err) res.status(403).json(
-//                 {
-//                     success: false, 
-//                     err: "invalid_token", 
-//                     error_description: "The access token expired"
-//                 });
-//             req.user = user;
-//             next();
-//         });
-//     }
-//     else
-//     {
-//         return res.status(401).json("You are not authenticated !");
-//     }
-// };

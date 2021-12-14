@@ -3,7 +3,7 @@ const authenticate = require('../middleware/authenticate');
 const router = require("express").Router();
 
 // CREATE PRODUCT
-router.post("/", authenticate.verifyAdmin, async (req, res) =>
+router.post("/", authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) =>
 {
     const newProduct = new Product(req.body);
     try
@@ -19,7 +19,7 @@ router.post("/", authenticate.verifyAdmin, async (req, res) =>
 });
 
 // UPDATE PRODUCT
-router.put("/:id", authenticate.verifyAdmin, async(req, res) =>
+router.put("/:id", authenticate.verifyUser, authenticate.verifyAdmin, async(req, res) =>
 {
     try
     {
@@ -39,7 +39,7 @@ router.put("/:id", authenticate.verifyAdmin, async(req, res) =>
 });
 
 // DELETE
-router.delete("/:id", authenticate.verifyAdmin, async (req, res) =>
+router.delete("/:id", authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) =>
 {
     try
     {

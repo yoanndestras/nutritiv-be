@@ -74,7 +74,7 @@ router.post("/login", cors.corsWithOptions, async(req, res, next)=>
                 .cookie("refreshToken", refreshToken, 
                     {
                         httpOnly: true,
-                        secure: process.env.REF_JWT_SEC_COOKIE === "prod",
+                        secure: process.env.REF_JWT_SEC_COOKIE === "prod"
                         //sameSite: "Lax"
                     })
                 .status(200).json(

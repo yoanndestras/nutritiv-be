@@ -104,11 +104,21 @@ exports.verifyRefresh = (req, res, next) =>
                         success: false, 
                         status: 'No refreshToken', 
                         err: 'No refreshToken',
-                        info: info.message
                     });
             }
-            const accessToken = authenticate.GenerateAccessToken({_id: user._id});            
-            res.header('Authorization', 'Bearer '+ accessToken);
+            
+            const accessToken = authenticate.GenerateAccessToken({_id: user._id});
+            const refreshToken = authenticate.GenerateRefreshToken({_id: user._id});
+            
+            console.log(refreshToken);
+            res
+                .header('Authorization', 'Bearer '+ accessToken)
+                .cookie("refreshToken", refreshToken, 
+                    {
+                        httpOnly: true,
+                        secure: process.env.REF_JWT_SEC_COOKIE === "prod"
+                        //sameSite: "Lax"
+                    });
             
             req.user = user;
             next();

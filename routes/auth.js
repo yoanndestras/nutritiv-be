@@ -1,17 +1,17 @@
 const router = require("express").Router();
 const User = require("../models/User");
-const cors = require('../middleware/cors');
-
 const passport = require("passport");
-const authenticate = require("../middleware/authenticate");
 
+// MIDDLEWARES
+const cors = require('../middleware/cors');
+const authenticate = require("../middleware/authenticate");
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
 //REGISTER
 router.post("/register", (req, res) =>
-{   
+{
     User.register(new User({username: req.body.username, email: req.body.email}), req.body.password, async(err, user) =>
     {
         try
@@ -27,7 +27,7 @@ router.post("/register", (req, res) =>
         }
         catch(error)
         {
-            res.status(500).json(
+            res.status(400).json(
                 {
                     success: false, 
                     status: 'Registration Unsuccessful!', 
@@ -74,6 +74,7 @@ router.post("/login", cors.corsWithOptions, async(req, res, next)=>
                     {
                         httpOnly: true,
                         secure: process.env.REF_JWT_SEC_COOKIE === "prod",
+                        //SameSite: Lax
                     })
                 .status(200).json(
                     {

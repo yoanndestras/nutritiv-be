@@ -1,10 +1,11 @@
 const User = require("../models/User");
 const router = require("express").Router();
+
+// MIDDLEWARES
 const authenticate = require('../middleware/authenticate');
 
-
 // UPDATE USER
-router.put("/:id", authenticate.verifyUser, authenticate.verifyAuthorization, async(req, res) =>
+router.put("/:id", authenticate.verifyUser, authenticate.verifyRefresh, authenticate.verifyAuthorization, async(req, res) =>
 {
     try
     {
@@ -23,7 +24,7 @@ router.put("/:id", authenticate.verifyUser, authenticate.verifyAuthorization, as
 })
 
 // DELETE
-router.delete("/:id", authenticate.verifyAuthorization, async (req, res) =>
+router.delete("/:id", authenticate.verifyUser, authenticate.verifyAuthorization, async (req, res) =>
 {
     try
     {
@@ -75,6 +76,7 @@ router.get("/", authenticate.verifyAdmin, async (req, res) =>
     }
 
 })
+
 // GET USER STATS
 // For admin Dashboard
 router.get("/stats", authenticate.verifyAdmin, async (req, res) =>

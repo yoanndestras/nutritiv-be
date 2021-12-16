@@ -1,6 +1,8 @@
 const Product = require("../models/Product");
-const authenticate = require('../middleware/authenticate');
 const router = require("express").Router();
+
+// MIDDLEWARES
+const authenticate = require('../middleware/authenticate');
 
 // CREATE PRODUCT
 router.post("/", authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) =>

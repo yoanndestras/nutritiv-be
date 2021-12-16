@@ -1,11 +1,11 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const dotenv = require("dotenv");
 
+const path = require('path');
+const dotenv = require("dotenv");
 const passport = require('passport');
 const cookieParser = require("cookie-parser");
 const cors = require('cors');
-const path = require('path');
 
 // router based on url
 const userRoute = require("./routes/user");

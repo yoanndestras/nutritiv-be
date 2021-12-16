@@ -23,7 +23,7 @@ const opts = {}; //json web token and key
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
 opts.secretOrKey = process.env.JWT_SEC;
 
-exports.jwtPassport = passport.use(new JwtStrategy(opts, (jwtPayload, done) =>
+exports.jwtPassport = passport.use("jwt", new JwtStrategy(opts, (jwtPayload, done) =>
 {
     User.findOne({_id: jwtPayload._id}, (err, user) =>
         {                
@@ -77,23 +77,48 @@ exports.RFJwtPassport = passport.use("jwt_rt", new JwtStrategy(opts_ref, (jwtPay
 exports.verifyUser = (req, res, next) => 
 {
     passport.authenticate('jwt', { session: false }, (err, user, info) => 
-    {        
+    {
         if (err || !user) 
         {   
-            return res.status(500).json(
-                {
-                    success: false, 
-                    status: 'No token', 
-                    err: 'No user connected',
-                    info: info.message
-                });
+            req.user = "error";
+            return next();
         }
         
         req.user = user;
-        return next(); 
-        
+        return next();
+    
     })(req, res, next); 
 };
+
+// VERIFY REFRESH TOKEN 
+exports.verifyRefresh = (req, res, next) => 
+{
+    if(req.user == "error")
+    {
+        passport.authenticate('jwt_rt', { session: false }, (err, user, info) => 
+        {        
+            if (err || !user) 
+            {   
+                return res.status(500).json(
+                    {
+                        success: false, 
+                        status: 'No refreshToken', 
+                        err: 'No refreshToken',
+                        info: info.message
+                    });
+            }
+            const newAccessToken = authenticate.GenerateAccessToken({_id: user._id});            
+            res.header('Authorization', 'Bearer '+ newAccessToken);
+            
+            req.user = user;
+            next();
+        })(req, res, next);  
+    }
+    else
+    {
+        next();
+    }
+}
 
 // VERIFY ADMIN
 exports.verifyAdmin = function(req, res, next)
@@ -112,10 +137,10 @@ exports.verifyAdmin = function(req, res, next)
 
 exports.verifyAuthorization = (req, res, next) =>
 {
-    authenticate.verifyUser(req, res, () =>
+    try
     {
         var userId = JSON.stringify(req.user._id).replace(/\"/g, "");
-
+    
         if( userId === req.params.id || req.user.isAdmin == true)
         {
             next();
@@ -124,7 +149,17 @@ exports.verifyAuthorization = (req, res, next) =>
         {
             res.status(403).json("You are not allowed to do that !");
         }
-    });
+    }
+    catch(err)
+    {
+        res.status(500).json(
+            {
+                status: false,
+                err: err.message,
+            });
+    }
+    
+
 };
 
 // GENERATE TOKENS

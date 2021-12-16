@@ -1,7 +1,8 @@
 const router = require("express").Router();
-
-const authenticate = require('../middleware/authenticate');
 const multer = require('multer');
+
+// MIDDLEWARES
+const authenticate = require('../middleware/authenticate');
 const cors = require('../middleware/cors');
 
 const storage = multer.diskStorage(

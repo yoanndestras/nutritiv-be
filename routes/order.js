@@ -1,6 +1,8 @@
 const Order = require("../models/Order");
-const authenticate = require('../middleware/authenticate');
 const router = require("express").Router();
+
+// MIDDLEWARES
+const authenticate = require('../middleware/authenticate');
 
 // CREATE ORDER
 router.post("/", authenticate.verifyUser, async (req, res) =>
@@ -19,7 +21,7 @@ router.post("/", authenticate.verifyUser, async (req, res) =>
 });
 
 // UPDATE ORDER
-router.put("/:id", authenticate.verifyAdmin, async(req, res) =>
+router.put("/:id", authenticate.verifyUser, authenticate.verifyAdmin, async(req, res) =>
 {
     try
     {
@@ -39,7 +41,7 @@ router.put("/:id", authenticate.verifyAdmin, async(req, res) =>
 });
 
 // DELETE ORDER
-router.delete("/:id", authenticate.verifyAdmin, async (req, res) =>
+router.delete("/:id", authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) =>
 {
     try
     {
@@ -54,7 +56,7 @@ router.delete("/:id", authenticate.verifyAdmin, async (req, res) =>
 });
 
 // GET USER ORDERS
-router.get("/find/:userId", authenticate.verifyAuthorization, async (req, res) =>
+router.get("/find/:userId", authenticate.verifyUser, authenticate.verifyAuthorization, async (req, res) =>
 {
     try
     {
@@ -69,7 +71,7 @@ router.get("/find/:userId", authenticate.verifyAuthorization, async (req, res) =
 });
 
 // GET ALL ORDERS
-router.get("/", authenticate.verifyAdmin, async (req, res) =>
+router.get("/", authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) =>
 {
     try
     {
@@ -86,7 +88,7 @@ router.get("/", authenticate.verifyAdmin, async (req, res) =>
 });
 
 // GET MONTHLY INCOME
-router.get("/income", authenticate.verifyAdmin, async (req, res) =>
+router.get("/income", authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) =>
 {
     const date = new Date();
     // 1 month ago

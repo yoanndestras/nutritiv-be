@@ -1,5 +1,7 @@
 const Cart = require("../models/Cart");
 const router = require("express").Router();
+
+// MIDDLEWARES
 const authenticate = require('../middleware/authenticate');
 
 // CREATE CART
@@ -18,7 +20,7 @@ router.post("/", authenticate.verifyUser, async (req, res) =>
     }
 })
 // UPDATE CART
-router.put("/:id", authenticate.verifyAuthorization, async(req, res) =>
+router.put("/:id", authenticate.verifyUser, authenticate.verifyAuthorization, async(req, res) =>
 {
     try
     {
@@ -38,7 +40,7 @@ router.put("/:id", authenticate.verifyAuthorization, async(req, res) =>
 })
 
 // DELETE CART
-router.delete("/:id", authenticate.verifyAuthorization, async (req, res) =>
+router.delete("/:id", authenticate.verifyUser, authenticate.verifyAuthorization, async (req, res) =>
 {
     try
     {
@@ -53,7 +55,7 @@ router.delete("/:id", authenticate.verifyAuthorization, async (req, res) =>
 })
 
 // GET USER CART
-router.get("/find/:userId", authenticate.verifyAuthorization, async (req, res) =>
+router.get("/find/:userId", authenticate.verifyUser, authenticate.verifyAuthorization, async (req, res) =>
 {
     try
     {
@@ -64,10 +66,10 @@ router.get("/find/:userId", authenticate.verifyAuthorization, async (req, res) =
     {
         res.status(500).json(err);
     }
- })
+})
 
 // GET ALL 
-router.get("/", authenticate.verifyAdmin, async (req, res) =>
+router.get("/", authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) =>
 {
     try
     {
@@ -78,6 +80,6 @@ router.get("/", authenticate.verifyAdmin, async (req, res) =>
     {
         res.status(500).json(err);
     }
- })
+})
 
 module.exports = router;

@@ -2,10 +2,14 @@ const Product = require("../models/Product");
 const router = require("express").Router();
 
 // MIDDLEWARES
+const cors = require('../middleware/cors');
 const authenticate = require('../middleware/authenticate');
 
+//OPTIONS FOR CORS CHECK
+router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+
 // CREATE PRODUCT
-router.post("/", authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) =>
+router.post("/", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, authenticate.verifyAdmin, async (req, res) =>
 {
     const newProduct = new Product(req.body);
     try
@@ -21,7 +25,7 @@ router.post("/", authenticate.verifyUser, authenticate.verifyAdmin, async (req, 
 });
 
 // UPDATE PRODUCT
-router.put("/:id", authenticate.verifyUser, authenticate.verifyAdmin, async(req, res) =>
+router.put("/:id", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, authenticate.verifyAdmin, async(req, res) =>
 {
     try
     {
@@ -41,7 +45,7 @@ router.put("/:id", authenticate.verifyUser, authenticate.verifyAdmin, async(req,
 });
 
 // DELETE
-router.delete("/:id", authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) =>
+router.delete("/:id", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, authenticate.verifyAdmin, async (req, res) =>
 {
     try
     {
@@ -71,7 +75,7 @@ router.get("/find/:id", async (req, res) =>
 });
 
 // GET ALL PRODUCTS
-router.get("/", async (req, res) =>
+router.get("/", cors.cors, async (req, res) =>
 {
     //method to get only new products with "?new=true" in request
     const queryNew = req.query.new;

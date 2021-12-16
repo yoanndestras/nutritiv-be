@@ -70,11 +70,12 @@ router.post("/login", cors.corsWithOptions, async(req, res, next)=>
                 const refreshToken = authenticate.GenerateRefreshToken({_id: req.user._id});
                 
                 res
+                .header('Authorization', 'Bearer '+ accessToken)
                 .cookie("refreshToken", refreshToken, 
                     {
                         httpOnly: true,
                         secure: process.env.REF_JWT_SEC_COOKIE === "prod",
-                        //SameSite: Lax
+                        //sameSite: "Lax"
                     })
                 .status(200).json(
                     {
@@ -89,7 +90,7 @@ router.post("/login", cors.corsWithOptions, async(req, res, next)=>
 });
 
 // REFRESH TOKEN
-router.post("/token", cors.corsWithOptions, authenticate.verifyUser, async(req, res) =>
+router.post("/token", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, async(req, res) =>
 {   
     try
     {
@@ -114,7 +115,7 @@ router.post("/token", cors.corsWithOptions, authenticate.verifyUser, async(req, 
 });
 
 // CLEAR COOKIE TOKEN // LOGOUT
-router.get("/logout", cors.corsWithOptions, authenticate.verifyUser, async(req, res) =>
+router.get("/logout", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh,async(req, res) =>
 {   
     try
     {

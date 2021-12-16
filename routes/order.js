@@ -2,10 +2,14 @@ const Order = require("../models/Order");
 const router = require("express").Router();
 
 // MIDDLEWARES
+const cors = require('../middleware/cors');
 const authenticate = require('../middleware/authenticate');
 
+//OPTIONS FOR CORS CHECK
+router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+
 // CREATE ORDER
-router.post("/", authenticate.verifyUser, async (req, res) =>
+router.post("/", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, async (req, res) =>
 {
     const newOrder = new Order(req.body);
     try
@@ -21,7 +25,7 @@ router.post("/", authenticate.verifyUser, async (req, res) =>
 });
 
 // UPDATE ORDER
-router.put("/:id", authenticate.verifyUser, authenticate.verifyAdmin, async(req, res) =>
+router.put("/:id", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, authenticate.verifyAdmin, async(req, res) =>
 {
     try
     {
@@ -41,7 +45,7 @@ router.put("/:id", authenticate.verifyUser, authenticate.verifyAdmin, async(req,
 });
 
 // DELETE ORDER
-router.delete("/:id", authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) =>
+router.delete("/:id", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, authenticate.verifyAdmin, async (req, res) =>
 {
     try
     {
@@ -56,7 +60,7 @@ router.delete("/:id", authenticate.verifyUser, authenticate.verifyAdmin, async (
 });
 
 // GET USER ORDERS
-router.get("/find/:userId", authenticate.verifyUser, authenticate.verifyAuthorization, async (req, res) =>
+router.get("/find/:userId", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, authenticate.verifyAuthorization, async (req, res) =>
 {
     try
     {
@@ -71,7 +75,7 @@ router.get("/find/:userId", authenticate.verifyUser, authenticate.verifyAuthoriz
 });
 
 // GET ALL ORDERS
-router.get("/", authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) =>
+router.get("/", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, authenticate.verifyAdmin, async (req, res) =>
 {
     try
     {
@@ -88,7 +92,7 @@ router.get("/", authenticate.verifyUser, authenticate.verifyAdmin, async (req, r
 });
 
 // GET MONTHLY INCOME
-router.get("/income", authenticate.verifyUser, authenticate.verifyAdmin, async (req, res) =>
+router.get("/income", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, authenticate.verifyAdmin, async (req, res) =>
 {
     const date = new Date();
     // 1 month ago

@@ -98,7 +98,7 @@ exports.verifyRefresh = (req, res, next) =>
         passport.authenticate('jwt_rt', { session: false }, (err, user, info) => 
         {        
             if (err || !user) 
-            {   
+            {
                 return res.status(500).json(
                     {
                         success: false, 
@@ -107,8 +107,8 @@ exports.verifyRefresh = (req, res, next) =>
                         info: info.message
                     });
             }
-            const newAccessToken = authenticate.GenerateAccessToken({_id: user._id});            
-            res.header('Authorization', 'Bearer '+ newAccessToken);
+            const accessToken = authenticate.GenerateAccessToken({_id: user._id});            
+            res.header('Authorization', 'Bearer '+ accessToken);
             
             req.user = user;
             next();

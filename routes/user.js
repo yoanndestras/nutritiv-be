@@ -2,10 +2,14 @@ const User = require("../models/User");
 const router = require("express").Router();
 
 // MIDDLEWARES
+const cors = require('../middleware/cors');
 const authenticate = require('../middleware/authenticate');
 
+//OPTIONS FOR CORS CHECK
+router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+
 // UPDATE USER
-router.put("/:id", authenticate.verifyUser, authenticate.verifyRefresh, authenticate.verifyAuthorization, async(req, res) =>
+router.put("/:id", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, authenticate.verifyAuthorization, async(req, res) =>
 {
     try
     {
@@ -24,7 +28,7 @@ router.put("/:id", authenticate.verifyUser, authenticate.verifyRefresh, authenti
 })
 
 // DELETE
-router.delete("/:id", authenticate.verifyUser, authenticate.verifyAuthorization, async (req, res) =>
+router.delete("/:id", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, authenticate.verifyAuthorization, async (req, res) =>
 {
     try
     {
@@ -39,7 +43,7 @@ router.delete("/:id", authenticate.verifyUser, authenticate.verifyAuthorization,
 })
 
 // GET USER
-router.get("/find/:id", authenticate.verifyAuthorization, async (req, res) =>
+router.get("/find/:id", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, authenticate.verifyAuthorization, async (req, res) =>
 {
     try
     {
@@ -57,13 +61,13 @@ router.get("/find/:id", authenticate.verifyAuthorization, async (req, res) =>
 })
 
 // GET ALL USERS
-router.get("/", authenticate.verifyAdmin, async (req, res) =>
+router.get("/", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, authenticate.verifyAdmin, async (req, res) =>
 {
-    //method to get only new users with "?new=true" in request
-    const query = req.query.new;
-    
     try
     {
+        //method to get only new users with "?new=true" in request
+        const query = req.query.new;
+        
         //limit value = the number of last users in res
         const users = query 
             ? await User.find().sort({_id:-1}).limit(5) 
@@ -79,13 +83,13 @@ router.get("/", authenticate.verifyAdmin, async (req, res) =>
 
 // GET USER STATS
 // For admin Dashboard
-router.get("/stats", authenticate.verifyAdmin, async (req, res) =>
-{
-    const date = new Date();
-    const lastYear = new Date(date.setFullYear(date.getFullYear() -1));
-    
+router.get("/stats", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, authenticate.verifyAdmin, async (req, res) =>
+{   
     try
     {
+        const date = new Date();
+        const lastYear = new Date(date.setFullYear(date.getFullYear() -1));
+        
         const data = await User.aggregate(
             [
                 {

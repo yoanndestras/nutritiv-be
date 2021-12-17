@@ -110,7 +110,6 @@ exports.verifyRefresh = (req, res, next) =>
             const accessToken = authenticate.GenerateAccessToken({_id: user._id});
             const refreshToken = authenticate.GenerateRefreshToken({_id: user._id});
             
-            console.log(refreshToken);
             res
                 .header('Authorization', 'Bearer '+ accessToken)
                 .cookie("refreshToken", refreshToken, 

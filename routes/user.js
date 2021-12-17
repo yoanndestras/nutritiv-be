@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const router = require("express").Router();
+const email_validator = require("email-validator");
 
 // MIDDLEWARES
 const cors = require('../middleware/cors');
@@ -12,18 +13,31 @@ router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); }
 router.put("/:id", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, authenticate.verifyAuthorization, async(req, res) =>
 {
     try
-    {
-        const updatedUser = await User.findByIdAndUpdate(req.params.id, 
-            {
-                $set: req.body
-            },
-            {new: true});
-
+    {        
+        if(req.body.email)
+        {
+            const valid_email = email_validator.validate(req.body.email);
+            if(valid_email == true){}
+            else{req.body.email = undefined;}
+        }
+        
+        const updatedUser = await User.findByIdAndUpdate
+        (req.params.id, {$set: {"username": req.body.username, "email": req.body.email,}},{new: true});
+        
+        if(req.body.password)
+        {
+            if(req.body.password.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/)){}
+            else{return res.status(400).json({success: false, status: 'Update User Unsuccessful!', err: "Wrong password syntax"});}
+            
+            await updatedUser.setPassword(req.body.password);}
+        else{};
+        
+        await updatedUser.save();
         res.status(200).json(updatedUser);
     }
     catch(err)
     {
-        res.status(500).json(err);
+        res.status(500).json({success: false, err: err.message});
     }
 })
 
@@ -37,7 +51,7 @@ router.delete("/:id", cors.corsWithOptions, authenticate.verifyUser, authenticat
     }
     catch(err)
     {
-        res.status(500).json(err);
+        res.status(500).json({success: false, err: err.message});
     }
 
 })
@@ -55,9 +69,8 @@ router.get("/find/:id", cors.corsWithOptions, authenticate.verifyUser, authentic
     }
     catch(err)
     {
-        res.status(500).json(err);
+        res.status(500).json({success: false, err: err.message});
     }
-
 })
 
 // GET ALL USERS
@@ -76,9 +89,8 @@ router.get("/", cors.corsWithOptions, authenticate.verifyUser, authenticate.veri
     }
     catch(err)
     {
-        res.status(500).json(err);
+        res.status(500).json({success: false, err: err.message});
     }
-
 })
 
 // GET USER STATS
@@ -117,9 +129,8 @@ router.get("/stats", cors.corsWithOptions, authenticate.verifyUser, authenticate
     }
     catch(err)
     {
-        res.status(500).json(err);
+        res.status(500).json({success: false, err: err.message});
     }
-
 })
 
 module.exports = router;

@@ -79,14 +79,14 @@ router.get("/", cors.cors, async (req, res) =>
 {
     //method to get only new products with "?new=true" in request
     const queryNew = req.query.new;
-
+    
     //method to get only products with the appropriate tag with "?tags=endurance" for example in request
     const queryTags = req.query.tags;
     
     try
     {
         let products;
-
+        
         if(queryNew)
         {
             // the last products
@@ -108,7 +108,7 @@ router.get("/", cors.cors, async (req, res) =>
             products = await Product.find();
         }
         
-        res.status(200).json(products);
+        res.status(200).json({data: products});
     }
     catch(err)
     {

@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/yoanndestras/nutritiv-be#readme",
   "dependencies": {
+    "@sendgrid/mail": "^7.6.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",
@@ -27,6 +28,8 @@
     "mongoose": "^6.0.14",
     "mongoose-currency": "^0.2.0",
     "multer": "^1.4.4",
+    "nodemailer": "^6.7.2",
+    "nodemailer-sendgrid": "^1.0.3",
     "nodemon": "^2.0.15",
     "passport": "^0.5.0",
     "passport-jwt": "^4.0.0",

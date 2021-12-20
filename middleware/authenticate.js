@@ -83,6 +83,12 @@ exports.verifyUser = (req, res, next) =>
             req.user = "error";
             return next();
         }
+        else if (user.isVerified == false)
+        {
+            var err = new Error('You account has not been verified. Please check your email to verify your account');
+            err.status = 403;
+            return next(err);
+        }
         
         req.user = user;
         return next();
@@ -102,8 +108,8 @@ exports.verifyRefresh = (req, res, next) =>
                 return res.status(500).json(
                     {
                         success: false, 
-                        status: 'No refreshToken', 
-                        err: 'No refreshToken',
+                        status: "You are not connected", 
+                        err: "No refreshToken cookie found or its not valid",
                     });
             }
             

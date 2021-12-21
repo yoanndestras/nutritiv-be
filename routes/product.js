@@ -1,9 +1,15 @@
 const Product = require("../models/Product");
-const authenticate = require('../authenticate');
 const router = require("express").Router();
 
+// MIDDLEWARES
+const cors = require('../middleware/cors');
+const authenticate = require('../middleware/authenticate');
+
+//OPTIONS FOR CORS CHECK
+router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+
 // CREATE PRODUCT
-router.post("/", authenticate.verifyTokenAndAdmin, async (req, res) =>
+router.post("/", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, authenticate.verifyAdmin, async (req, res) =>
 {
     const newProduct = new Product(req.body);
     try
@@ -19,7 +25,7 @@ router.post("/", authenticate.verifyTokenAndAdmin, async (req, res) =>
 });
 
 // UPDATE PRODUCT
-router.put("/:id", authenticate.verifyTokenAndAdmin, async(req, res) =>
+router.put("/:id", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, authenticate.verifyAdmin, async(req, res) =>
 {
     try
     {
@@ -39,7 +45,7 @@ router.put("/:id", authenticate.verifyTokenAndAdmin, async(req, res) =>
 });
 
 // DELETE
-router.delete("/:id", authenticate.verifyTokenAndAdmin, async (req, res) =>
+router.delete("/:id", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, authenticate.verifyAdmin, async (req, res) =>
 {
     try
     {
@@ -69,18 +75,18 @@ router.get("/find/:id", async (req, res) =>
 });
 
 // GET ALL PRODUCTS
-router.get("/", async (req, res) =>
+router.get("/", cors.cors, async (req, res) =>
 {
     //method to get only new products with "?new=true" in request
     const queryNew = req.query.new;
-
+    
     //method to get only products with the appropriate tag with "?tags=endurance" for example in request
     const queryTags = req.query.tags;
     
     try
     {
         let products;
-
+        
         if(queryNew)
         {
             // the last products
@@ -102,7 +108,7 @@ router.get("/", async (req, res) =>
             products = await Product.find();
         }
         
-        res.status(200).json(products);
+        res.status(200).json({data: products});
     }
     catch(err)
     {

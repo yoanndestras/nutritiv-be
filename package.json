@@ -2,9 +2,9 @@
   "name": "nutritiv-be",
   "version": "1.0.0",
   "description": "Back-end of Nutritiv project",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "nodemon app.js"
   },
   "repository": {
     "type": "git",
@@ -18,13 +18,18 @@
   },
   "homepage": "https://github.com/yoanndestras/nutritiv-be#readme",
   "dependencies": {
+    "@sendgrid/mail": "^7.6.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",
+    "email-validator": "^2.0.4",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.0.14",
     "mongoose-currency": "^0.2.0",
+    "multer": "^1.4.4",
+    "nodemailer": "^6.7.2",
+    "nodemailer-sendgrid": "^1.0.3",
     "nodemon": "^2.0.15",
     "passport": "^0.5.0",
     "passport-jwt": "^4.0.0",

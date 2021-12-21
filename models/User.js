@@ -2,7 +2,6 @@ const mongoose = require("mongoose")
 const Schema = mongoose.Schema;
 const passportLocalMongoose = require('passport-local-mongoose');
 
-
 const UserSchema = new Schema
 ({
     username: 
@@ -26,6 +25,15 @@ const UserSchema = new Schema
         type: Boolean,
         default: false,
         required: true
+    },
+    emailToken:
+    {
+        type: String
+    },
+    isVerified:
+    {
+        type: Boolean,
+        default: false
     }
 },
 {

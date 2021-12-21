@@ -1,32 +1,39 @@
 # nutritiv-be
 Back-end of Nutritiv project
 
-- Payment with Stripe
+- Technologies used :
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.0.14",
+    "mongoose-currency": "^0.2.0",
+    "multer": "^1.4.4",
+    "nodemon": "^2.0.15",
+    "passport": "^0.5.0",
+    "passport-jwt": "^4.0.0",
+    "passport-local": "^1.0.0",
+    "passport-local-mongoose": "^6.1.0"
 
 ## Creating project
 
 - npm init -y
-- yarn add express mongoose dotenv nodemon
-- In package.json, change this 
-     <!-- "test": "echo \"Error: no test specified\" && exit 1"  -->
-    to 
-    <!--"start":"nodemon index.js" -->
-- Update index.js file
-- Create .env file to prevent SecretKey and Port
-- Test Routes (Postman)
-- Create models (Cart, Order, Product, User) and routes (auth, cart, order, product, user) 
-- create DELETE and GET(one user, all USER, USER stats) request
-- implement passport with JWT Token
-- implement cors
-- update product route to do create product request
-- req.body -> req.body.formData to connect with reactjs form
+
+- In package.json, add
+    <!--"start":"nodemon app.js" -->
+
+- Create .env file for SecretKeys
+
+- Create models (Cart, Order, Product, User)
+- Create routes (auth, cart, order, product, user) 
+- Create DELETE and GET(one user, all USER, USER stats)
 
 ## Work order notes
 
 - Mongoose Schema models
 
 
-### More
+### Front-end implementation
 
-- node index.js
-- db name : NutritivShop
+- req.body -> req.body.formData 

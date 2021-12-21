@@ -1,37 +1,48 @@
 const User = require("../models/User");
 const router = require("express").Router();
-const authenticate = require('../authenticate');
+const email_validator = require("email-validator");
 
+// MIDDLEWARES
+const cors = require('../middleware/cors');
+const authenticate = require('../middleware/authenticate');
+
+//OPTIONS FOR CORS CHECK
+router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
 // UPDATE USER
-router.put("/:id", authenticate.verifyUser, authenticate.verifyAuthorization, async(req, res) =>
+router.put("/:id", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, authenticate.verifyAuthorization, async(req, res) =>
 {
-    if(req.body.password)
-    {
-        req.body.password = CryptoJS.AES.encrypt
-        (
-            req.body.password, 
-            process.env.PASS_SEC
-        ).toString();
-    }
     try
-    {
-        const updatedUser = await User.findByIdAndUpdate(req.params.id, 
-            {
-                $set: req.body
-            },
-            {new: true});
-
+    {        
+        if(req.body.email)
+        {
+            const valid_email = email_validator.validate(req.body.email);
+            if(valid_email == true){}
+            else{req.body.email = undefined;}
+        }
+        
+        const updatedUser = await User.findByIdAndUpdate
+        (req.params.id, {$set: {"username": req.body.username, "email": req.body.email,}},{new: true});
+        
+        if(req.body.password)
+        {
+            if(req.body.password.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/)){}
+            else{return res.status(400).json({success: false, status: 'Update User Unsuccessful!', err: "Wrong password syntax"});}
+            
+            await updatedUser.setPassword(req.body.password);}
+        else{};
+        
+        await updatedUser.save();
         res.status(200).json(updatedUser);
     }
     catch(err)
     {
-        res.status(500).json(err);
+        res.status(500).json({success: false, err: err.message});
     }
 })
 
 // DELETE
-router.delete("/:id", authenticate.verifyAuthorization, async (req, res) =>
+router.delete("/:id", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, authenticate.verifyAuthorization, async (req, res) =>
 {
     try
     {
@@ -40,13 +51,13 @@ router.delete("/:id", authenticate.verifyAuthorization, async (req, res) =>
     }
     catch(err)
     {
-        res.status(500).json(err);
+        res.status(500).json({success: false, err: err.message});
     }
 
 })
 
 // GET USER
-router.get("/find/:id", authenticate.verifyAuthorization, async (req, res) =>
+router.get("/find/:id", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, authenticate.verifyAuthorization, async (req, res) =>
 {
     try
     {
@@ -58,19 +69,18 @@ router.get("/find/:id", authenticate.verifyAuthorization, async (req, res) =>
     }
     catch(err)
     {
-        res.status(500).json(err);
+        res.status(500).json({success: false, err: err.message});
     }
-
 })
 
 // GET ALL USERS
-router.get("/", authenticate.verifyTokenAndAdmin, async (req, res) =>
+router.get("/", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, authenticate.verifyAdmin, async (req, res) =>
 {
-    //method to get only new users with "?new=true" in request
-    const query = req.query.new;
-    
     try
     {
+        //method to get only new users with "?new=true" in request
+        const query = req.query.new;
+        
         //limit value = the number of last users in res
         const users = query 
             ? await User.find().sort({_id:-1}).limit(5) 
@@ -79,19 +89,19 @@ router.get("/", authenticate.verifyTokenAndAdmin, async (req, res) =>
     }
     catch(err)
     {
-        res.status(500).json(err);
+        res.status(500).json({success: false, err: err.message});
     }
-
 })
+
 // GET USER STATS
 // For admin Dashboard
-router.get("/stats", authenticate.verifyTokenAndAdmin, async (req, res) =>
-{
-    const date = new Date();
-    const lastYear = new Date(date.setFullYear(date.getFullYear() -1));
-    
+router.get("/stats", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, authenticate.verifyAdmin, async (req, res) =>
+{   
     try
     {
+        const date = new Date();
+        const lastYear = new Date(date.setFullYear(date.getFullYear() -1));
+        
         const data = await User.aggregate(
             [
                 {
@@ -119,9 +129,8 @@ router.get("/stats", authenticate.verifyTokenAndAdmin, async (req, res) =>
     }
     catch(err)
     {
-        res.status(500).json(err);
+        res.status(500).json({success: false, err: err.message});
     }
-
 })
 
 module.exports = router;

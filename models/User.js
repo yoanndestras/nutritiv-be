@@ -26,10 +26,6 @@ const UserSchema = new Schema
         default: false,
         required: true
     },
-    emailToken:
-    {
-        type: String
-    },
     isVerified:
     {
         type: Boolean,

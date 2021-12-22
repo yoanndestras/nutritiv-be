@@ -2,8 +2,8 @@ const Product = require("../models/Product");
 const router = require("express").Router();
 
 // MIDDLEWARES
-const cors = require('../middleware/cors');
-const authenticate = require('../middleware/authenticate');
+const cors = require('../controllers/cors');
+const authenticate = require('../controllers/authenticate');
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
@@ -75,13 +75,15 @@ router.get("/find/:id", async (req, res) =>
 });
 
 // GET ALL PRODUCTS
-router.get("/", cors.cors, async (req, res) =>
+router.get("/", cors.corsWithOptions, async (req, res) =>
 {
     //method to get only new products with "?new=true" in request
     const queryNew = req.query.new;
     
     //method to get only products with the appropriate tag with "?tags=endurance" for example in request
     const queryTags = req.query.tags;
+    
+    //const products = queryTags ? find.tags : [product.find()].sort(( queryNew ? {id} : '')).limit(queryNew ? 1 : '')
     
     try
     {
@@ -108,7 +110,7 @@ router.get("/", cors.cors, async (req, res) =>
             products = await Product.find();
         }
         
-        res.status(200).json({data: products});
+        res.status(200).json({products});
     }
     catch(err)
     {

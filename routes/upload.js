@@ -2,8 +2,8 @@ const router = require("express").Router();
 const multer = require('multer');
 
 // MIDDLEWARES
-const authenticate = require('../middleware/authenticate');
-const cors = require('../middleware/cors');
+const authenticate = require('../controllers/authenticate');
+const cors = require('../controllers/cors');
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })

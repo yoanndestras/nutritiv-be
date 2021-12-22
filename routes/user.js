@@ -3,8 +3,8 @@ const router = require("express").Router();
 const email_validator = require("email-validator");
 
 // MIDDLEWARES
-const cors = require('../middleware/cors');
-const authenticate = require('../middleware/authenticate');
+const cors = require('../controllers/cors');
+const authenticate = require('../controllers/authenticate');
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })

@@ -2,8 +2,8 @@ const Cart = require("../models/Cart");
 const router = require("express").Router();
 
 // MIDDLEWARES
-const cors = require('../middleware/cors');
-const authenticate = require('../middleware/authenticate');
+const cors = require('../controllers/cors');
+const authenticate = require('../controllers/authenticate');
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })

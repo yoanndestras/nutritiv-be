@@ -1,174 +1,159 @@
 const router = require("express").Router();
 const User = require("../models/User");
 const passport = require("passport");
-const email_validator = require("email-validator");
-const sgMail = require("@sendgrid/mail");
-const crypto = require("crypto");
 
 // MIDDLEWARES
-const cors = require('../middleware/cors');
-const authenticate = require("../middleware/authenticate");
+const cors = require('../controllers/cors');
+const auth = require("../controllers/authenticate");
+const mailer = require("../controllers/mailer");
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
 //REGISTER
-router.post("/register", (req, res) =>
-{
-    if(req.body.email)
-    {
-        const valid_email = email_validator.validate(req.body.email);
-
-        if(valid_email == true)
-        {}
-        else
-        {
-            return res.status(400).json(
-                {success: false, status: 'Registration Unsuccessful!', err: "Wrong email syntax"});
-        }
-    }
-
-    if(req.body.password.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/))
-    {}
-
-    else
-    {
-        return res.status(400).json(
-            {success: false, status: 'Registration Unsuccessful!', err: "Wrong password syntax"});
-    }
-    
-    User.register(new User(
-        {username: req.body.username, email: req.body.email, emailToken: crypto.randomBytes(64).toString("hex")}), 
-        req.body.password, async(err, user) =>
-    {
-        try
-        {
-            sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-            
-            const msg = 
-            {
-                to: user.email,
-                from:"nutritivshop@gmail.com",
-                subject:"Nutritiv - Account email verification",
-                html : `
-                <h1>Hello, </h1>
-                <p>Thanks for registering on our website.</p>
-                <p>Please click on the link below to verify your account</p>
-                <a  href="http://${req.headers.Host}/verify-email?token${user.emailToken}">Verify your account</a>`
-            }
-            console.log(req.headers.Host);
-            
-            await sgMail.send(msg);
-            
-            await user.save(() => 
-            {
-                res.status(201).json(
-                    {success: true, status: 'Registration Successful! Check your emails'});
-            })
-        }
-        catch(error)
-        {
-            res.status(400).json(
-                {success: false, status: 'Registration Unsuccessful!', err: error, err: err});
-        }
-    });
-});
-
-//FORGOT PASSWORD
-router.get("/verify-email", cors.cors, async(req, res, next) =>
+router.post("/register", auth.verifyUsername, auth.verifyEmail, auth.verifyEmailSyntax, 
+auth.verifyPasswordSyntax, mailer.sendVerifyAccountMail, async(req, res) =>
 {
     try
     {
-        res.redirect('/api/auth/login');
-        const user = await User.findOne({ emailToken: req.body.token}); //req.query.token 
-        if(!user)
+        User.register(new User({username: req.body.username, email: req.body.email}), req.body.password, async(err, user) =>
         {
-            res.status(400).json(
-                {success: false, status: 'Token is invalid, Please contact us for assistance. ', err: err.message});
-        }
-        user.emailToken = null;
-        user.isVerified = true;
-
-        await user.save();
-        
-        res.status(200).json(
+                await user.save(() => 
+                {
+                    console.log("User registered");
+                    res.status(201).json(
+                        {
+                            success: true, 
+                            status: 'Registration Successfull! Check your emails!'
+                        });
+                })
+        });
+    }
+    catch(err)
+    {
+        console.log("User not registered ");
+        res.status(400).json(
             {
-                success: true, 
-                status: 'Account validation successfull!, pls connect to your account'
+                success: false, 
+                status: 'Registration Failed, please try again later!', 
+                err: err
             });
-        }
+    }
+});
+
+//FORGOT PASSWORD
+router.get("/verify-email", cors.cors, auth.verifyEmailToken, async(req, res, next) =>
+{
+    const user = req.user;
+    try
+    {
+        user.isVerified = true;
+        await user.save(() => 
+                {
+                    console.log("User Verified");
+                    res.status(201).json(
+                        {
+                            success: true, 
+                            status: 'User Verification Successfull!'
+                        });
+                })
+    }
     catch(err)
         {
             res.status(400).json(
-                {success: false, status: 'Unsuccessfull request', err: err.message});
+            {
+                success: false, 
+                status: 'Unsuccessfull request!', 
+                err: err
+            });
+        }
+});
+
+//GENERATE NEW EMAIL TOKEN
+router.get("/new_email_token", cors.cors, auth.verifyNewEmailToken, mailer.sendVerifyAccountMail, async(req, res, next) =>
+{
+    try
+    {
+        console.log("New email link sent");
+        res.status(201).json(
+            {
+                success: true, 
+                status: 'Check your emails!'
+            });
+    }
+    catch(err)
+        {
+            res.status(400).json(
+                {
+                    success: false, 
+                    status: 'Unsuccessfull request!', 
+                    err: err
+                });
         }
     
 });
+
 
 //LOGIN
 router.post("/login", cors.corsWithOptions, async(req, res, next)=>
 {
     passport.authenticate('local', { session: false }, (err, user, info) => 
     {
-        if(err || !user)
+        if(err || !user || user.isVerified === false) 
         {
-            return res.status(401).json(
+            res.status(401).json(
                 {
                     success: false, 
                     status: 'Login Unsuccessful!', 
-                    info: info.message
+                    err: err,
+                    info: info
                 });
         }
-        else
+        
+        req.login(user, { session: false }, async(err) => 
         {
-            req.login(user, { session: false }, async(err) => 
+            if(err) 
             {
-                if (err) 
-                {
-                    return res.status(401).json(
-                        {
-                            success: false, 
-                            status: 'Login Unsuccessful!', 
-                            err: err.message
-                        });
-                }
-                
-                const accessToken = authenticate.GenerateAccessToken({_id: req.user._id});
-                const refreshToken = authenticate.GenerateRefreshToken({_id: req.user._id});
-                
-                res
-                .header('Authorization', 'Bearer '+ accessToken)
+                res.status(401).json(
+                    {
+                        success: false, 
+                        status: 'Login Unsuccessful!', 
+                        err: err
+                    });
+            }
+            
+            const accessToken = auth.GenerateAccessToken({_id: req.user._id});
+            const refreshToken = auth.GenerateRefreshToken({_id: req.user._id});
+            
+            res.header('Authorization', 'Bearer '+ accessToken)
                 .cookie("refreshToken", refreshToken, 
                     {
                         httpOnly: true,
-                        secure: process.env.REF_JWT_SEC_COOKIE === "prod"
-                        //sameSite: "Lax"
+                        secure: process.env.REF_JWT_SEC_COOKIE === "production"
                     })
                 .status(200).json(
                     {
                         success: true, 
-                        status: 'Login Successful!',
-                        accessToken: accessToken,
-                        // refreshToken: refreshToken
+                        status: 'Login Successful!'
                     });
-            });
-        }
+        });
+        
     })(req, res, next);
 });
 
+
 // CLEAR COOKIE TOKEN // LOGOUT
-router.get("/logout", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, async(req, res) =>
+router.get("/logout", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async(req, res) =>
 {   
     try
     {
-        return  res
-                .clearCookie("refreshToken")
-                .status(200)
-                .json(
-                    {
-                        success: true, 
-                        status: "Successfully logged out!"
-                    });
+        return  res.clearCookie("refreshToken")
+                    .status(200)
+                    .json(
+                        {
+                            success: true, 
+                            status: "Successfully logged out!"
+                        });
     }
     catch(err)
     {
@@ -176,35 +161,10 @@ router.get("/logout", cors.corsWithOptions, authenticate.verifyUser, authenticat
             {
                 success: false, 
                 status: 'Logout Unsuccessfull!', 
-                err: err.message
+                err: err
             });
     }
 });
 
 
 module.exports = router;
-
-// REFRESH TOKEN
-// router.post("/token", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, async(req, res) =>
-// {   
-//     try
-//     {
-//         // Generate new accessToken
-//         const accessToken = authenticate.GenerateAccessToken({_id: req.user._id});
-        
-//         res.status(200).json(
-//             {
-//                 success: true, 
-//                 accessToken: accessToken
-//             });
-//     }
-//     catch(err)
-//     {
-//         res.status(500).json(
-//             {
-//                 success: false, 
-//                 status: 'Access Token Generation Unsuccessful!', 
-//                 err: err.message,
-//             });
-//     }
-// });

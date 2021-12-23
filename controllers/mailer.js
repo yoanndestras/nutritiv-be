@@ -13,9 +13,9 @@ exports.sendVerifyAccountMail = async(req, res, next) =>
     try
     {
         console.log("Im here accountmail 1");
-    
+        
         const Email_Token = auth.GenerateEmailToken({email: req.body.email});
-    
+        
         sgMail.setApiKey(process.env.SENDGRID_API_KEY);
         
         const msg = 

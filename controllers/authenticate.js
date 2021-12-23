@@ -122,18 +122,20 @@ exports.verifyAdmin = function(req, res, next)
         }
 };
 
-exports.verifyAuthorization = (req, res, next) =>
+exports.verifyAuthorization = async(req, res, next) =>
 {
     try
     {
+
         var userId = JSON.stringify(req.user._id).replace(/\"/g, "");
-    
+
         if( userId === req.params.id || req.user.isAdmin == true)
         {
             next();
         }
         else
         {
+            console.log("AAAA");
             res.status(403).json("You are not allowed to do that !");
         }
     }
@@ -295,8 +297,6 @@ exports.verifyUsername = (req, res, next) =>
         })
 }
 
-
-// VERIFY EMAIL SENDING
 exports.verifyEmail = (req, res, next) =>
 {
     User.findOne({email: req.body.email}, (err, user) =>
@@ -315,13 +315,54 @@ exports.verifyEmail = (req, res, next) =>
         })
 }
 
+exports.verifyPasswordEquality = (req, res, next) =>
+{
+    var password1 = req.body.password1;
+    var password2 = req.body.password2;
+    
+    if(password1 != password2)
+    {
+        var err = new Error('Passwords do not match');
+        err.status = 400;
+        return next(err);
+    }
+    else
+    {
+        next();
+    }
+}
+
+exports.verifyPasswordsSyntax = (req, res, next) =>
+{
+    var newPass = req.body.newPass
+    var confirmNewPass = req.body.confirmNewPass
+    
+    // 1 lower case, 1 upper case, 1 number, minimum 8 length
+    var regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/;
+
+    if(newPass.match(regex) && confirmNewPass.match(regex))
+    {
+        console.log("Im here password syntax");
+        next();
+    }
+    else
+    {
+        var err = new Error('You password syntax is wrong!');
+        err.status = 400;
+        return next(err);
+    }
+}
+
+
+// VERIFY EMAIL SENDING
+
 exports.verifyEmailToken = (req, res, next) => 
 {
     passport.authenticate('email_jwt', { session: false }, (err, user, info) => 
     {
         if (err || !user) 
         {   
-            var err = new Error('TOKEN EXPIRED');
+            var err = new Error('TOKEN EXPIRED OR CORRUPTED');
             err.status = 403;
             return next(err);
         }

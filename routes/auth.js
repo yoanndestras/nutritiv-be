@@ -90,7 +90,6 @@ router.get("/new_email_token", cors.cors, auth.verifyNewEmailToken, mailer.sendV
                     err: err
                 });
         }
-    
 });
 
 

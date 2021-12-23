@@ -3,13 +3,13 @@ const router = require("express").Router();
 
 // MIDDLEWARES
 const cors = require('../controllers/cors');
-const authenticate = require('../controllers/authenticate');
+const auth = require('../controllers/authenticate');
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
 // CREATE PRODUCT
-router.post("/", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, authenticate.verifyAdmin, async (req, res) =>
+router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, async (req, res) =>
 {
     const newProduct = new Product(req.body);
     try
@@ -25,7 +25,7 @@ router.post("/", cors.corsWithOptions, authenticate.verifyUser, authenticate.ver
 });
 
 // UPDATE PRODUCT
-router.put("/:id", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, authenticate.verifyAdmin, async(req, res) =>
+router.put("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, async(req, res) =>
 {
     try
     {
@@ -45,7 +45,7 @@ router.put("/:id", cors.corsWithOptions, authenticate.verifyUser, authenticate.v
 });
 
 // DELETE
-router.delete("/:id", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, authenticate.verifyAdmin, async (req, res) =>
+router.delete("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, async (req, res) =>
 {
     try
     {

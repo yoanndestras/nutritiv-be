@@ -3,46 +3,58 @@ const router = require("express").Router();
 const email_validator = require("email-validator");
 
 // MIDDLEWARES
-const cors = require('../middleware/cors');
-const authenticate = require('../middleware/authenticate');
+const cors = require('../controllers/cors');
+const auth = require('../controllers/authenticate');
+const mailer = require("../controllers/mailer");
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
-// UPDATE USER
-router.put("/:id", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, authenticate.verifyAuthorization, async(req, res) =>
+
+//RESET PASSWORD
+router.put("/reset_password", cors.cors, auth.verifyUser, auth.verifyRefresh, 
+auth.verifyPasswordsSyntax, auth.verifyPasswordEquality, async(req, res, next) =>
 {
     try
-    {        
-        if(req.body.email)
-        {
-            const valid_email = email_validator.validate(req.body.email);
-            if(valid_email == true){}
-            else{req.body.email = undefined;}
-        }
+    {
+        var oldPass = req.body.oldPass;
+        var newPass = req.body.confirmNewPass;
+        var user = req.user;
         
-        const updatedUser = await User.findByIdAndUpdate
-        (req.params.id, {$set: {"username": req.body.username, "email": req.body.email,}},{new: true});
-        
-        if(req.body.password)
-        {
-            if(req.body.password.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/)){}
-            else{return res.status(400).json({success: false, status: 'Update User Unsuccessful!', err: "Wrong password syntax"});}
-            
-            await updatedUser.setPassword(req.body.password);}
-        else{};
-        
-        await updatedUser.save();
-        res.status(200).json(updatedUser);
+        user.changePassword(oldPass, newPass, (err, user) => 
+            {                
+                if(err)
+                {
+                    res.status(400).json(
+                        {
+                            success: false, 
+                            err: 'OldPassword is incorrect'
+                        }); 
+                }
+                else
+                {
+                    res.status(200).json(
+                        {
+                            success: true, 
+                            status: 'Password has been modified!', 
+                            user: user.user
+                        });
+                }
+            });
     }
     catch(err)
-    {
-        res.status(500).json({success: false, err: err.message});
-    }
-})
+        {
+            res.status(400).json(
+                {
+                    success: false, 
+                    status: 'Unsuccessfull request!', 
+                    err: err
+                });
+        }
+});
 
 // DELETE
-router.delete("/:id", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, authenticate.verifyAuthorization, async (req, res) =>
+router.delete("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAuthorization, async (req, res) =>
 {
     try
     {
@@ -57,7 +69,7 @@ router.delete("/:id", cors.corsWithOptions, authenticate.verifyUser, authenticat
 })
 
 // GET USER
-router.get("/find/:id", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, authenticate.verifyAuthorization, async (req, res) =>
+router.get("/find/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAuthorization, async (req, res) =>
 {
     try
     {
@@ -74,7 +86,7 @@ router.get("/find/:id", cors.corsWithOptions, authenticate.verifyUser, authentic
 })
 
 // GET ALL USERS
-router.get("/", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, authenticate.verifyAdmin, async (req, res) =>
+router.get("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, async (req, res) =>
 {
     try
     {
@@ -95,7 +107,7 @@ router.get("/", cors.corsWithOptions, authenticate.verifyUser, authenticate.veri
 
 // GET USER STATS
 // For admin Dashboard
-router.get("/stats", cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyRefresh, authenticate.verifyAdmin, async (req, res) =>
+router.get("/stats", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, async (req, res) =>
 {   
     try
     {
@@ -132,5 +144,29 @@ router.get("/stats", cors.corsWithOptions, authenticate.verifyUser, authenticate
         res.status(500).json({success: false, err: err.message});
     }
 })
+
+// UPDATE USER
+// router.put("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyAuthorization, auth.verifyRefresh, async(req, res) =>
+// {
+//     try
+//     {        
+//         if(req.body.email)
+//         {
+//             const valid_email = email_validator.validate(req.body.email);
+//             if(valid_email == true){}
+//             else{req.body.email = undefined;}
+//         }
+        
+//         const updatedUser = await User.findByIdAndUpdate
+//         (req.params.id, {$set: {"username": req.body.username, "email": req.body.email,}},{new: true});
+        
+//         await updatedUser.save();
+//         res.status(200).json(updatedUser);
+//     }
+//     catch(err)
+//     {
+//         res.status(500).json({success: false, err: err.message});
+//     }
+// })
 
 module.exports = router;

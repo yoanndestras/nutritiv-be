@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const limitter = require('express-rate-limit');
 
 const path = require('path');
 const dotenv = require("dotenv");
@@ -35,6 +36,18 @@ app.use(cookieParser());
 
 app.use(cors()); // apply simple cors on all routes
 // app.options('*', cors());
+
+app.use( 
+    limitter(
+        {
+            windowMs: 5000,
+            max: 5,
+            message: { 
+                code: 429,
+                message: "Too many requests"
+            }
+        })
+    )
 
 app.use(express.static(path.join(__dirname, 'public')));
 // http://localhost:3001/images/Multivitamines.png

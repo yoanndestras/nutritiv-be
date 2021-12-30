@@ -44,7 +44,7 @@ exports.sendVerifyAccountMail = async(req, res, next) =>
     
 } 
 
-exports.sendForgetPassword= async(req, res, next) =>
+exports.sendForgetPassword = async(req, res, next) =>
 {
     try
     {
@@ -58,16 +58,16 @@ exports.sendForgetPassword= async(req, res, next) =>
         {
             to: req.body.email,
             from:"nutritivshop@gmail.com",
-            subject:"Nutritiv - Account email verification",
+            subject:"Nutritiv - Reset password",
             html : `
             <h1>Hello, ${Email_Token}</h1>
             <p>Please click on the link below to reset your password.</p>
-            <a  href="http://${req.headers.host}/api/auth/verify-email?token=${Email_Token}">Verify your account</a>`
+            <a  href="http://${req.headers.host}/api/auth/forget_password?token=${Email_Token}">Reset Password</a>`
         }       //  ${req.headers.Host}
         
         await sgMail.send(msg);
         
-        console.log("Im here accountmail 2");
+        console.log("Im here forget password 2");
         next();
     }
     catch(err)

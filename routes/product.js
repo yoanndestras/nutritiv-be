@@ -110,7 +110,7 @@ router.get("/", cors.corsWithOptions, async (req, res) =>
             products = await Product.find();
         }
         
-        res.status(200).json({products});
+        res.status(200).json({data : products});
     }
     catch(err)
     {

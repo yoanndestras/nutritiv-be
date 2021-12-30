@@ -1,5 +1,4 @@
 const authenticate = require("./authenticate");
-const limitter = require('express-rate-limit');
 
 const express = require('express');
 const passport = require('passport');
@@ -246,6 +245,16 @@ exports.GenerateEmailToken = function(user)
     );
 };
 
+exports.GeneratePasswordToken = function(user) 
+{
+    return jwt.sign
+    (
+        user, 
+        process.env.JWT_PASSWORD,
+        {expiresIn: "1d"} // expires in 1 days
+    );
+};
+
 
 // VERIFY REGISTER FORM
 exports.verifyEmailSyntax = (req, res, next) =>
@@ -387,50 +396,51 @@ exports.verifyNewEmail = (req, res, next) =>
             }
             else
             {
-                var err = new Error('Wrong email or already verified account');
+                var err = new Error('Wrong email or already verified user');
                 err.status = 400;
                 return next(err);
             }
         })
 }
 
-exports.verifyResetAttempts = (req, res, next) =>
+exports.verifyEmailExist = (req, res, next) =>
 {
-    console.log(options.limitAttempts);
-    // User.findOne({email: req.body.email}, (err, user) =>
-    //     {
-    //         if(user !== null)
-    //         {
-    //             console.log("User found");
-    //             next();
-    //         }
-    //         else
-    //         {
-    //             var err = new Error('Wrong email');
-    //             err.status = 400;
-    //             return next(err);
-    //         }
-    //     })
+    User.findOne({email: req.body.email}, (err, user) =>
+        {
+            if(user !== null)
+            {
+                console.log("User found");
+                next();
+            }
+            else
+            {
+                var err = new Error('Wrong email');
+                err.status = 400;
+                return next(err);
+            }
+        })
 }
 
-exports.registerLimitter = async(req, res, next) =>
-{
-    try
-    {
-        limitter({
-            windowMs: 5 * 60 * 1000, // 5 minutes in ms
-            max: 2,
-        })
-        next();
-    }
-    catch(err)
-    {
-        res.status(500).json(
-            {
-                status: false,
-                err: err.message,
-            });
-    }
-    
-    
-}
+
+
+
+// exports.registerLimitter = async(req, res, next) =>
+// {
+//     try
+//     {
+//         console.log("test");
+//         limitter({
+//             windowMs: 5 * 60 * 1000, // 5 minutes in ms
+//             max: 2,
+//         })
+//         next();
+//     }
+//     catch(err)
+//     {
+//         res.status(500).json(
+//             {
+//                 status: false,
+//                 err: err.message,
+//             });
+//     }
+//}

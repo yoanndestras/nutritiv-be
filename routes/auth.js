@@ -11,7 +11,7 @@ const mailer = require("../controllers/mailer");
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
 //REGISTER
-router.post("/register", auth.registerLimitter, auth.verifyUsername, auth.verifyEmail, auth.verifyEmailSyntax, 
+router.post("/register", auth.verifyUsername, auth.verifyEmail, auth.verifyEmailSyntax, 
 auth.verifyPasswordSyntax, mailer.sendVerifyAccountMail, async(req, res) =>
 {
     try
@@ -105,17 +105,16 @@ router.get("/new_email_token", cors.cors, auth.verifyNewEmail, mailer.sendVerify
         }
 });
 
-//SEND RESET ATTEMPTS EMAIL 
-router.post("/reset_attempts_email", cors.cors, auth.verifyResetAttempts, mailer.sendForgetPassword, async(req, res, next) =>
+
+//FORGET PASSWORD EMAIL
+router.get("/password_email", cors.cors, auth.verifyEmailExist, mailer.sendForgetPassword, async(req, res, next) =>
 {
     try
-    {
-        console.log("New reset attempts email link sent");
-        
+    {   
         res.status(201).json(
             {
                 success: true, 
-                status: 'Check your emails!'
+                status: 'Check your emails!!'
             });
     }
     catch(err)
@@ -129,18 +128,15 @@ router.post("/reset_attempts_email", cors.cors, auth.verifyResetAttempts, mailer
         }
 });
 
-//UNLOCK ACCOUNT 
-router.post("/reset_attempts", cors.cors, async(req, res, next) =>
+//VERIFY FORGET PASSWORD EMAIL
+router.get("/verify_password_email", cors.cors, auth.verifyEmailToken, async(req, res, next) =>
 {
     try
     {
-        var user = await User.findOne({username: req.body.username});
-        user.resetAttempts();
-        
         res.status(201).json(
             {
                 success: true, 
-                status: 'resetAttempts successfull!'
+                status: 'Email verification successfull!'
             });
     }
     catch(err)
@@ -153,6 +149,34 @@ router.post("/reset_attempts", cors.cors, async(req, res, next) =>
                 });
         }
 });
+
+router.post("/verify_password_email", cors.cors, auth.verifyNewEmail, async(req, res, next) =>
+{
+    var user = await User.findOne({username: req.body.username});
+    user.resetAttempts();
+    
+    try
+    {
+        res.status(201).json(
+            {
+                success: true, 
+                status: 'Reset password successfull!'
+            });
+    }
+    catch(err)
+        {
+            res.status(400).json(
+                {
+                    success: false, 
+                    status: 'Unsuccessfull request!', 
+                    err: err.message
+                });
+        }
+});
+
+
+
+
 
 //LOGIN
 router.post("/login", cors.corsWithOptions, async(req, res, next)=>

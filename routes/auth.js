@@ -11,13 +11,25 @@ const mailer = require("../controllers/mailer");
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
 //REGISTER
-router.post("/register", auth.verifyUsername, auth.verifyEmail, auth.verifyEmailSyntax, 
+router.post("/register", auth.registerLimitter, auth.verifyUsername, auth.verifyEmail, auth.verifyEmailSyntax, 
 auth.verifyPasswordSyntax, mailer.sendVerifyAccountMail, async(req, res) =>
 {
     try
     {
         User.register(new User({username: req.body.username, email: req.body.email}), req.body.password, async(err, user) =>
         {
+            if(err) 
+            {
+                console.log(err);
+                return res.status(400).json(
+                    {
+                        success: false, 
+                        status: 'Registration Failed! Please try again later!', 
+                        err: err
+                    });
+            } 
+            else 
+            {
                 await user.save(() => 
                 {
                     console.log("User registered");
@@ -27,6 +39,7 @@ auth.verifyPasswordSyntax, mailer.sendVerifyAccountMail, async(req, res) =>
                             status: 'Registration Successfull! Check your emails!'
                         });
                 })
+            }
         });
     }
     catch(err)
@@ -35,7 +48,7 @@ auth.verifyPasswordSyntax, mailer.sendVerifyAccountMail, async(req, res) =>
         res.status(400).json(
             {
                 success: false, 
-                status: 'Registration Failed, please try again later!', 
+                status: 'Registration Failed! Please try again later!', 
                 err: err
             });
     }
@@ -70,7 +83,7 @@ router.get("/verify-email", cors.cors, auth.verifyEmailToken, async(req, res, ne
 });
 
 //GENERATE NEW EMAIL TOKEN
-router.get("/new_email_token", cors.cors, auth.verifyNewEmailToken, mailer.sendVerifyAccountMail, async(req, res, next) =>
+router.get("/new_email_token", cors.cors, auth.verifyNewEmail, mailer.sendVerifyAccountMail, async(req, res, next) =>
 {
     try
     {
@@ -92,10 +105,59 @@ router.get("/new_email_token", cors.cors, auth.verifyNewEmailToken, mailer.sendV
         }
 });
 
+//SEND RESET ATTEMPTS EMAIL 
+router.post("/reset_attempts_email", cors.cors, auth.verifyResetAttempts, mailer.sendForgetPassword, async(req, res, next) =>
+{
+    try
+    {
+        console.log("New reset attempts email link sent");
+        
+        res.status(201).json(
+            {
+                success: true, 
+                status: 'Check your emails!'
+            });
+    }
+    catch(err)
+        {
+            res.status(400).json(
+                {
+                    success: false, 
+                    status: 'Unsuccessfull request!', 
+                    err: err.message
+                });
+        }
+});
+
+//UNLOCK ACCOUNT 
+router.post("/reset_attempts", cors.cors, async(req, res, next) =>
+{
+    try
+    {
+        var user = await User.findOne({username: req.body.username});
+        user.resetAttempts();
+        
+        res.status(201).json(
+            {
+                success: true, 
+                status: 'resetAttempts successfull!'
+            });
+    }
+    catch(err)
+        {
+            res.status(400).json(
+                {
+                    success: false, 
+                    status: 'Unsuccessfull request!', 
+                    err: err.message
+                });
+        }
+});
 
 //LOGIN
 router.post("/login", cors.corsWithOptions, async(req, res, next)=>
 {
+    //passport.authenticate('local', { successRedirect: '/',failureRedirect: '/login' }));
     passport.authenticate('local', { session: false }, (err, user, info) => 
     {
         if(err || !user || user.isVerified === false) 
@@ -108,35 +170,38 @@ router.post("/login", cors.corsWithOptions, async(req, res, next)=>
                     info: info
                 });
         }
-        
-        req.login(user, { session: false }, async(err) => 
+        else
         {
-            if(err) 
+            req.login(user, { session: false }, async(err) => 
             {
-                res.status(401).json(
-                    {
-                        success: false, 
-                        status: 'Login Unsuccessful!', 
-                        err: err
-                    });
-            }
-            
-            const accessToken = auth.GenerateAccessToken({_id: req.user._id});
-            const refreshToken = auth.GenerateRefreshToken({_id: req.user._id});
-            
-            res.header('Authorization', 'Bearer '+ accessToken)
-                .cookie("refreshToken", refreshToken, 
-                    {
-                        httpOnly: true,
-                        secure: process.env.REF_JWT_SEC_COOKIE === "production"
-                    })
-                .status(200).json(
-                    {
-                        success: true, 
-                        status: 'Login Successful!'
-                    });
-        });
-        
+                if(err)
+                {
+                    res.status(401).json(
+                        {
+                            success: false, 
+                            status: 'Login Unsuccessful!', 
+                            err: err
+                        });
+                }
+                else
+                {
+                    const accessToken = auth.GenerateAccessToken({_id: req.user._id});
+                    const refreshToken = auth.GenerateRefreshToken({_id: req.user._id});
+                    
+                    res.header('Authorization', 'Bearer '+ accessToken)
+                        .cookie("refreshToken", refreshToken, 
+                            {
+                                httpOnly: true,
+                                secure: process.env.REF_JWT_SEC_COOKIE === "production"
+                            })
+                        .status(200).json(
+                            {
+                                success: true, 
+                                status: 'Login Successful!'
+                            });
+                }
+            })
+        };
     })(req, res, next);
 });
 
@@ -163,6 +228,28 @@ router.get("/logout", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
                 err: err
             });
     }
+});
+
+//TEST FRONT
+router.post("/data", cors.cors, async(req, res, next) =>
+{
+    try
+    {
+        res.status(200).json(
+            {
+                success: true, 
+                data: req.body
+            });
+    }
+    catch(err)
+        {
+            res.status(400).json(
+                {
+                    success: false, 
+                    status: 'Unsuccessfull request!', 
+                    err: err.message
+                });
+        }
 });
 
 

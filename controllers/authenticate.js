@@ -1,4 +1,5 @@
 const authenticate = require("./authenticate");
+const limitter = require('express-rate-limit');
 
 const express = require('express');
 const passport = require('passport');
@@ -18,6 +19,7 @@ const app = express();
 app.use(express.json()); // to read JSON    
 app.use(express.urlencoded({extended: true}));
 
+passport.use(User.createStrategy()); // used to configure main options of passportlocalMongoose authentification
 exports.local = passport.use(new LocalStrategy(User.authenticate()));
 
 const opts = {}; //json web token and key
@@ -263,7 +265,7 @@ exports.verifyEmailSyntax = (req, res, next) =>
     }
 
 }
-    
+
 exports.verifyPasswordSyntax = (req, res, next) =>
 {
     if(req.body.password.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/))
@@ -353,7 +355,6 @@ exports.verifyPasswordsSyntax = (req, res, next) =>
     }
 }
 
-
 // VERIFY EMAIL SENDING
 
 exports.verifyEmailToken = (req, res, next) => 
@@ -373,9 +374,9 @@ exports.verifyEmailToken = (req, res, next) =>
         }
 
     })(req, res, next); 
-};
+}
 
-exports.verifyNewEmailToken = (req, res, next) =>
+exports.verifyNewEmail = (req, res, next) =>
 {
     User.findOne({email: req.body.email}, (err, user) =>
         {
@@ -391,4 +392,45 @@ exports.verifyNewEmailToken = (req, res, next) =>
                 return next(err);
             }
         })
+}
+
+exports.verifyResetAttempts = (req, res, next) =>
+{
+    console.log(options.limitAttempts);
+    // User.findOne({email: req.body.email}, (err, user) =>
+    //     {
+    //         if(user !== null)
+    //         {
+    //             console.log("User found");
+    //             next();
+    //         }
+    //         else
+    //         {
+    //             var err = new Error('Wrong email');
+    //             err.status = 400;
+    //             return next(err);
+    //         }
+    //     })
+}
+
+exports.registerLimitter = async(req, res, next) =>
+{
+    try
+    {
+        limitter({
+            windowMs: 5 * 60 * 1000, // 5 minutes in ms
+            max: 2,
+        })
+        next();
+    }
+    catch(err)
+    {
+        res.status(500).json(
+            {
+                status: false,
+                err: err.message,
+            });
+    }
+    
+    
 }

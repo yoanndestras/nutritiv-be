@@ -24,6 +24,7 @@
     "dotenv": "^10.0.0",
     "email-validator": "^2.0.4",
     "express": "^4.17.1",
+    "express-rate-limit": "^6.0.2",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.0.14",
     "mongoose-currency": "^0.2.0",

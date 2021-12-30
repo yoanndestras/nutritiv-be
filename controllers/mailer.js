@@ -43,3 +43,39 @@ exports.sendVerifyAccountMail = async(req, res, next) =>
     }
     
 } 
+
+exports.sendForgetPassword= async(req, res, next) =>
+{
+    try
+    {
+        console.log("Im here forget password 1");
+        
+        const Email_Token = auth.GenerateEmailToken({email: req.body.email});
+        
+        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+        
+        const msg = 
+        {
+            to: req.body.email,
+            from:"nutritivshop@gmail.com",
+            subject:"Nutritiv - Account email verification",
+            html : `
+            <h1>Hello, ${Email_Token}</h1>
+            <p>Please click on the link below to reset your password.</p>
+            <a  href="http://${req.headers.host}/api/auth/verify-email?token=${Email_Token}">Verify your account</a>`
+        }       //  ${req.headers.Host}
+        
+        await sgMail.send(msg);
+        
+        console.log("Im here accountmail 2");
+        next();
+    }
+    catch(err)
+    {
+        var err = new Error('Email sending Error!');
+        err.status = 400;
+        return next(err);
+    }
+    
+} 
+

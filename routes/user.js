@@ -11,7 +11,7 @@ const mailer = require("../controllers/mailer");
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
 
-//GENERATE NEW EMAIL TOKEN
+//RESET PASSWORD
 router.put("/reset_password", cors.cors, auth.verifyUser, auth.verifyRefresh, 
 auth.verifyPasswordsSyntax, auth.verifyPasswordEquality, async(req, res, next) =>
 {
@@ -19,8 +19,9 @@ auth.verifyPasswordsSyntax, auth.verifyPasswordEquality, async(req, res, next) =
     {
         var oldPass = req.body.oldPass;
         var newPass = req.body.confirmNewPass;
+        var user = req.user;
         
-        req.user.changePassword(oldPass, newPass, (err, user) => 
+        user.changePassword(oldPass, newPass, (err, user) => 
             {                
                 if(err)
                 {

@@ -13,7 +13,7 @@ router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); }
 
 //RESET PASSWORD
 router.put("/reset_password", cors.cors, auth.verifyUser, auth.verifyRefresh, 
-auth.verifyPasswordsSyntax, auth.verifyPasswordEquality, async(req, res, next) =>
+auth.verifyNewPasswordSyntax, auth.verifyNewPasswordEquality, async(req, res, next) =>
 {
     try
     {

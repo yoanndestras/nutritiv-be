@@ -210,7 +210,29 @@ exports.verifyRefresh = (req, res, next) =>
     {
         next();
     }
-}
+};
+
+exports.verifyNoRefresh = (req, res, next) => 
+{
+    passport.authenticate('jwt_rt', { session: false }, (err, user, info) => 
+    {        
+        if (err || !user) 
+        {
+            next();
+        }
+        else
+        {
+            req.user = user;
+
+            return res.status(500).json(
+                {
+                    success: false, 
+                    status: "You are already connected as "+ user.username +", disconnect your account to login", 
+                    err: "RefreshToken cookie exist, a user is connected",
+                });
+        }
+    })(req, res, next);  
+};
 
 
 // GENERATE JWT TOKENS
@@ -273,7 +295,7 @@ exports.verifyEmailSyntax = (req, res, next) =>
         return next(err);
     }
 
-}
+};
 
 exports.verifyPasswordSyntax = (req, res, next) =>
 {
@@ -288,7 +310,7 @@ exports.verifyPasswordSyntax = (req, res, next) =>
         err.status = 400;
         return next(err);
     }
-}
+};
 
 exports.verifyUsername = (req, res, next) =>
 {
@@ -306,7 +328,7 @@ exports.verifyUsername = (req, res, next) =>
                 next();
             }
         })
-}
+};
 
 exports.verifyEmail = (req, res, next) =>
 {
@@ -324,12 +346,12 @@ exports.verifyEmail = (req, res, next) =>
                 next();
             }
         })
-}
+};
 
-exports.verifyPasswordEquality = (req, res, next) =>
+exports.verifyNewPasswordEquality = (req, res, next) =>
 {
-    var password1 = req.body.password1;
-    var password2 = req.body.password2;
+    var password1 = req.body.newPass;
+    var password2 = req.body.confirmNewPass;
     
     if(password1 != password2)
     {
@@ -339,18 +361,19 @@ exports.verifyPasswordEquality = (req, res, next) =>
     }
     else
     {
+        console.log("Im here password syntax");
         next();
     }
-}
+};
 
-exports.verifyPasswordsSyntax = (req, res, next) =>
+exports.verifyNewPasswordSyntax = (req, res, next) =>
 {
     var newPass = req.body.newPass
     var confirmNewPass = req.body.confirmNewPass
     
     // 1 lower case, 1 upper case, 1 number, minimum 8 length
     var regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/;
-
+    
     if(newPass.match(regex) && confirmNewPass.match(regex))
     {
         console.log("Im here password syntax");
@@ -362,7 +385,7 @@ exports.verifyPasswordsSyntax = (req, res, next) =>
         err.status = 400;
         return next(err);
     }
-}
+};
 
 // VERIFY EMAIL SENDING
 
@@ -381,9 +404,9 @@ exports.verifyEmailToken = (req, res, next) =>
             req.user = user;
             return next();
         }
-
+    
     })(req, res, next); 
-}
+};
 
 exports.verifyNewEmail = (req, res, next) =>
 {
@@ -401,7 +424,7 @@ exports.verifyNewEmail = (req, res, next) =>
                 return next(err);
             }
         })
-}
+};
 
 exports.verifyEmailExist = (req, res, next) =>
 {
@@ -410,6 +433,7 @@ exports.verifyEmailExist = (req, res, next) =>
             if(user !== null)
             {
                 console.log("User found");
+                req.user = user;
                 next();
             }
             else
@@ -419,7 +443,8 @@ exports.verifyEmailExist = (req, res, next) =>
                 return next(err);
             }
         })
-}
+};
+
 
 
 

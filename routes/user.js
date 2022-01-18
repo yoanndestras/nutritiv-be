@@ -1,6 +1,5 @@
 const User = require("../models/User");
 const router = require("express").Router();
-const email_validator = require("email-validator");
 
 // MIDDLEWARES
 const cors = require('../controllers/cors');
@@ -12,7 +11,7 @@ router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); }
 
 
 //RESET PASSWORD
-router.put("/reset_password", cors.cors, auth.verifyUser, auth.verifyRefresh, 
+router.put("/reset_password", auth.verifyUser, auth.verifyRefresh, 
 auth.verifyNewPasswordSyntax, auth.verifyNewPasswordEquality, async(req, res, next) =>
 {
     try

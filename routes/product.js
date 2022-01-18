@@ -9,18 +9,29 @@ const auth = require('../controllers/authenticate');
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
 // CREATE PRODUCT
-router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, async (req, res) =>
+router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, async(req, res) =>
 {
-    const newProduct = new Product(req.body);
+    
     try
     {
-        const savedProduct = await newProduct.save();
+        const newProduct = new Product(req.body);
         
-        res.status(200).json(savedProduct);
+        const savedProduct = await newProduct.save();
+        res.status(200).json(
+            {
+                success: true,
+                status: "Product Successfull added",
+                New_product: savedProduct
+            });
     }
     catch(err)
     {
-        res.status(500).json(err);
+        res.status(500).json(
+            {
+                success: false,
+                status: "Unsuccessfull request!",
+                err: err
+            });
     }
 });
 
@@ -35,8 +46,9 @@ router.put("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, au
                 $set: req.body
             },
             {new: true});
-
+        
         res.status(200).json(updatedProduct);
+        
     }
     catch(err)
     {
@@ -45,8 +57,8 @@ router.put("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, au
 });
 
 // DELETE
-router.delete("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, async (req, res) =>
-{
+router.delete("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, async(req, res) =>
+{   
     try
     {
         await Product.findByIdAndDelete(req.params.id)
@@ -59,8 +71,8 @@ router.delete("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
 
 })
 
-// GET PRODUCT
-router.get("/find/:id", async (req, res) =>
+// GET PRODUCT BY ID
+router.get("/find/:id", async(req, res) =>
 {
     try
     {
@@ -75,7 +87,7 @@ router.get("/find/:id", async (req, res) =>
 });
 
 // GET ALL PRODUCTS
-router.get("/", cors.corsWithOptions, async (req, res) =>
+router.get("/", cors.corsWithOptions, async(req, res) =>
 {
     //method to get only new products with "?new=true" in request
     const queryNew = req.query.new;
@@ -97,12 +109,7 @@ router.get("/", cors.corsWithOptions, async (req, res) =>
         else if(queryTags)
         {
             // the product with the queryTags
-            products = await Product.find({
-                tags:
-                {
-                    $in: [queryTags],
-                },
-            });
+            products = await Product.find({tags:{$in: [queryTags]}});
         }
         else
         {

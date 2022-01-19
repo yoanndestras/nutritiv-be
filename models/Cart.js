@@ -19,30 +19,30 @@ const CartSchema = new Schema
             type: String,
             required: true
         },
-        quantity:
-        {
-            type: Number,
-            default: 1,
-            required: true
-        },
         load: 
-        [
+        {
+            type: Array,
+            required: true,
+            val:
             {
+                type: Number,
+                required: true
+            },
+            price:
+            {
+                type: Currency,
                 required: true,
-                val:
-                {
-                    type: Number,
-                    required: true
-                },
-                price:
-                {
-                    type: Currency,
-                    required: true,
-                    min: 0
-                },
-            }
-        ],
+                min: 0
+            },
+            quantity:
+            {
+                type: Number,
+                default: 1,
+                required: true
+            },
+        }
     },
+    
 },
 {
     timestamps: true,   //mongoose automatically do UpdateAt and CreatedAt

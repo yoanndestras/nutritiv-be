@@ -6,48 +6,96 @@ const mongoose = require('mongoose');
 // MIDDLEWARES
 const cors = require('../controllers/cors');
 const auth = require('../controllers/authenticate');
+const check = require('../controllers/product');
+const {upload} = require('./upload');
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
 // CREATE CART
-router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async (req, res) =>
+router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, upload.any('imageFile'), check.verifyProduct, async (req, res) =>
 {
     try
     {
         let updatedCart;
+        let load;
         const userId = req.user._id;
-        const newProductId = req.body.product.productId;
-        const newProductQuantity = req.body.product.quantity;
-        const load = req.body.product.load;
+        const newProductId = req.body.productId;
+        const newProductQuantity = parseFloat(req.body.quantity);
+        const newProductVal = parseFloat(req.body.val);
+        const newProductPrice = parseFloat(req.body.price);
         
-        let verifyProductId = new mongoose.Types.ObjectId.createFromHexString(newProductId); 
-        const existingProductId = await Product.findById(verifyProductId);
-        
+        const existingProductId = await Product.findById(newProductId);
         const existingCart = await Cart.findOne({userId : userId});
+        
         const newProductArray = existingCart ? existingCart.products : null;
         const newProductIndex = newProductArray ? newProductArray.findIndex(el => el.productId === newProductId) : null;
-        console.log(await Object.keys(newProductArray.load));
-        let keys =  newProductArray ? Object.keys(newProductArray.load) : null, values = newProductArray ? Object.values(newProductArray.load) : null;
-        const existingLoad = newProductArray ?  newProductArray.findIndex(el => Object.keys(el.load) === keys && Object.values(el.load) === values) : null;
+        
+        const newProductLoadArray = newProductIndex !== null && newProductIndex !== -1? newProductArray[newProductIndex].load : null        
+        const newProductLoadIndex = newProductLoadArray ? newProductLoadArray.findIndex(el => el.val === newProductVal) : null;
+
+        let newProductLoad = newProductLoadIndex !== null ? newProductLoadArray[newProductLoadIndex] : null;
         
         if(existingProductId)
         {
-            if(newProductIndex !== null && newProductIndex !== -1 && existingLoad !== null && existingLoad !== -1)
+            if(newProductLoad)
             {
-                let currentProductQuantity = newProductArray[newProductIndex].quantity;
-                currentProductQuantity = currentProductQuantity + newProductQuantity;
+                let currentProductQuantity = newProductLoad.quantity + newProductQuantity;
+                let currentProductPrice = newProductLoad.price + newProductPrice;
+                let currentProductVal = newProductLoad.val;
                 
-                updatedCart = await Cart.findOneAndUpdate({userId : userId, "products.productId": newProductId}, { $set : {"products.$.quantity": currentProductQuantity}})
+                updatedCart = await Cart.findOneAndUpdate(
+                    {"userId": userId},
+                    {
+                        $set: {
+                            "products.$[outer].load.$[inner].quantity": currentProductQuantity,
+                            "products.$[outer].load.$[inner].price": currentProductPrice,
+                        }
+                    },
+                    {
+                        arrayFilters: [
+                        {
+                            'outer.productId': newProductId
+                        },
+                        {
+                            'inner.val': currentProductVal
+                        }],
+                        new: true
+                    },
+                )
             }
             else if(existingCart)
             {
-                updatedCart = await Cart.findOneAndUpdate({userId : userId}, {$push : {products : req.body.product}}) 
+                
+                updatedCart = await Cart.findOneAndUpdate(
+                    {"userId" : userId}, 
+                    {
+                        $push : 
+                        {
+                            products : 
+                            {
+                                productId : newProductId,
+                                load: [
+                                    {
+                                        val: newProductVal,
+                                        price: newProductPrice,
+                                        quantity: newProductQuantity
+                                    }
+                                ]
+                            }
+                        }
+                    }) 
             }
             else
             {
-                
-                let newProduct = {productId : newProductId, quantity : newProductQuantity, load: load};
+                load =  [
+                            {
+                                val : parseFloat(newProductVal), 
+                                price : parseFloat(newProductPrice),
+                                quantity : parseFloat(newProductQuantity)
+                            }
+                        ]
+                let newProduct = {productId : newProductId, load: load};
                 const newCart = new Cart(
                     {
                         userId: userId,
@@ -63,7 +111,7 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                     });
             }
             
-            if(updatedCart !== null && updatedCart !== undefined)
+            if(updatedCart)
             {
                 await updatedCart.save()
                 res.status(200).json(

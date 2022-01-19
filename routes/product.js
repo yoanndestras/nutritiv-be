@@ -5,8 +5,8 @@ const _ = require("lodash")
 // MIDDLEWARES
 const cors = require('../controllers/cors');
 const auth = require('../controllers/authenticate');
-const {upload} = require('./upload');
 const check = require('../controllers/product');
+const {upload} = require('./upload');
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })

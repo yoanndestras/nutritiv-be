@@ -9,7 +9,8 @@ const ProductSchema = new Schema
     title: 
     {
         type: String,
-        required: true
+        required: true,
+        unique: false
     },
     desc: 
     {
@@ -24,7 +25,8 @@ const ProductSchema = new Schema
     shape: 
     {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     imgs: 
     {

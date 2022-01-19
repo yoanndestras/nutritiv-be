@@ -1,20 +1,74 @@
 const Product = require("../models/Product");
 const router = require("express").Router();
+const _ = require("lodash")
 
 // MIDDLEWARES
 const cors = require('../controllers/cors');
 const auth = require('../controllers/authenticate');
+const {upload} = require('./upload');
+const check = require('../controllers/product');
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
 // CREATE PRODUCT
-router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, async(req, res) =>
+router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, upload.any('imageFile'), async(req, res) =>
 {
     
     try
     {
-        const newProduct = new Product(req.body);
+        let shape = req.body.shape;
+        const files = req.files
+        const req_tags = Array.isArray(req.body.tags) ? req.body.tags : req.body.tags !== undefined ? [req.body.tags] : null;
+        const val = Array.isArray(req.body.val) ? req.body.val : req.body.val !== undefined ? [req.body.val] : null;
+        let imgs = files.map((el, i) => {return el.path}), tags = req_tags.map((el, i) => {return el});    
+        let load;
+        
+        const PPCapsule = req.body.pricePerCapsule;
+        const PPKg = req.body.pricePerKilograms;
+        
+        if(shape === "capsules" && PPCapsule)
+        {
+            let milestones = {30: 0.1, 60: 0.2, 120: 0.4, 210: 0.5};
+            let keys = Object.keys(milestones), values = Object.values(milestones);
+            
+            load = val.map((el, i) => {
+                price = el * PPCapsule;
+                let discountValues = check.discount(values, price, el, keys);
+                return {val : discountValues.qty, price :discountValues.price}
+            })
+        }
+        else if(shape === "powder" && PPKg)
+        {
+            let milestones = { 60: 0, 150: 0.2, 350: 0.4, 1000: 0.5};
+            let keys = Object.keys(milestones), values = Object.values(milestones);
+            
+            load = val.map((el, i) => {
+                price = el * (parseFloat(PPKg)/1000);
+                let discountValues = check.discount(values, price, el, keys);
+                return {val : discountValues.qty, price :discountValues.price}
+            })
+        }
+        else
+        {
+            res.status(500).json(
+                {
+                    success: false,
+                    status: "Unsuccessfull request!",
+                });
+        }
+        
+        const newProduct = await new Product(
+            {
+                title: req.body.title,
+                desc: req.body.desc,
+                shape: req.body.shape,
+                tags : tags,
+                imgs: imgs,
+                load: load,
+                countInStock: req.body.countInStock
+            }
+        );
         
         const savedProduct = await newProduct.save();
         res.status(200).json(
@@ -30,7 +84,7 @@ router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth
             {
                 success: false,
                 status: "Unsuccessfull request!",
-                err: err
+                err: err.message
             });
     }
 });
@@ -47,12 +101,22 @@ router.put("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, au
             },
             {new: true});
         
-        res.status(200).json(updatedProduct);
+        res.status(200).json(
+            {
+                success: true,
+                status: "Product Successfull updated",
+                Updated_product: updatedProduct
+            });
         
     }
     catch(err)
     {
-        res.status(500).json(err);
+        res.status(500).json(
+            {
+                success: false,
+                status: "Unsuccessfull request!",
+                err: err
+            });
     }
 });
 
@@ -62,11 +126,20 @@ router.delete("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
     try
     {
         await Product.findByIdAndDelete(req.params.id)
-        res.status(200).json("Product has been deleted...")
+        res.status(200).json(
+            {
+                success: true,
+                status: "Product has been deleted"
+            });
     }
     catch(err)
     {
-        res.status(500).json(err);
+        res.status(500).json(
+            {
+                success: false,
+                status: "Unsuccessfull request!",
+                err: err
+            });
     }
 
 })
@@ -77,11 +150,21 @@ router.get("/find/:id", async(req, res) =>
     try
     {
         const product = await Product.findById(req.params.id)
-        res.status(200).json(product);
+        res.status(200).json(
+            {
+                success: true,
+                status: "Product found",
+                Product: product
+            });
     }
     catch(err)
     {
-        res.status(500).json(err);
+        res.status(500).json(
+            {
+                success: false,
+                status: "Unsuccessfull request!",
+                err: err
+            });
     }
 
 });
@@ -117,11 +200,21 @@ router.get("/", cors.corsWithOptions, async(req, res) =>
             products = await Product.find();
         }
         
-        res.status(200).json({data : products});
+        res.status(200).json(
+            {
+                success: true,
+                status: "Products found",
+                Product: products
+            });
     }
     catch(err)
     {
-        res.status(500).json(err);
+        res.status(500).json(
+            {
+                success: false,
+                status: "Unsuccessfull request!",
+                err: err
+            });
     }
     
 });

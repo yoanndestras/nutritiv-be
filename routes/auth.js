@@ -156,10 +156,10 @@ router.post("/new_password", auth.verifyNewPasswordSyntax, auth.verifyNewPasswor
 {
     try
     {
-        //var user = req.user.username;
-        var user = await User.findOne({username: "yoann"});
+        //const user = req.user.username;
+        const user = await User.findOne({username: "yoann"});
 
-        var newPass = req.body.confirmNewPass;
+        const newPass = req.body.confirmNewPass;
         console.log(newPass);
         
         if(user && newPass)

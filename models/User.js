@@ -36,7 +36,7 @@ const UserSchema = new Schema
     timestamps: true,   //mongoose automatically do UpdateAt and CreatedAt
 });
 
-var options = {
+const options = {
     errorMessages: {
         MissingPasswordError: 'No password was given',
         AttemptTooSoonError: 'Account is currently locked. Try again later',

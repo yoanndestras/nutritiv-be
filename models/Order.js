@@ -1,5 +1,6 @@
 const mongoose = require("mongoose")
 const Schema = mongoose.Schema;
+const Currency = mongoose.Types.Currency;
 
 
 const OrderSchema = new Schema
@@ -25,13 +26,15 @@ const OrderSchema = new Schema
     ],
     amount:
     {
-        type: Number,
-        required: true
+        type: Currency,
+        required: true,
+        min: 0
     },
     address:
     {
-        type: Object,
-        required: true
+        type: Currency,
+        required: true,
+        min: 0
     },
     status:
     {

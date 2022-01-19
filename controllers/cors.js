@@ -2,9 +2,9 @@ const cors = require('cors');
 
 const whitelist = ['http://localhost:9000', 'http://localhost:3001', 'https://localhost:3001']; //'https://DESKTOP-DBB3L91:3001'
 
-var corsOptionsDelegate = (req, callback) => 
+const corsOptionsDelegate = (req, callback) => 
 {
-    var corsOptions;
+    let corsOptions;
     
     if(whitelist.indexOf(req.header('Origin')) !== -1) 
         {

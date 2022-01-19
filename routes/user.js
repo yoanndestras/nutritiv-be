@@ -16,9 +16,9 @@ auth.verifyNewPasswordSyntax, auth.verifyNewPasswordEquality, async(req, res, ne
 {
     try
     {
-        var oldPass = req.body.oldPass;
-        var newPass = req.body.confirmNewPass;
-        var user = req.user;
+        const oldPass = req.body.oldPass;
+        const newPass = req.body.confirmNewPass;
+        const user = req.user;
         
         user.changePassword(oldPass, newPass, (err, user) => 
             {                

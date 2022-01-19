@@ -1,6 +1,7 @@
 const mongoose = require("mongoose")
 const Schema = mongoose.Schema;
-
+require('mongoose-currency').loadType(mongoose);
+const Currency = mongoose.Types.Currency;
 
 const CartSchema = new Schema
 ({
@@ -9,20 +10,39 @@ const CartSchema = new Schema
         type: String,
         required: true,
     },
-    products: 
-    [
+    products:
+    {
+        type: Array,
+        required: true,
+        productId:
         {
-            productId:
-            {
-                type: String
-            },
-            quantity:
-            {
-                type: Number,
-                default: 1,
-            },
+            type: String,
+            required: true
         },
-    ],
+        quantity:
+        {
+            type: Number,
+            default: 1,
+            required: true
+        },
+        load: 
+        [
+            {
+                required: true,
+                val:
+                {
+                    type: Number,
+                    required: true
+                },
+                price:
+                {
+                    type: Currency,
+                    required: true,
+                    min: 0
+                },
+            }
+        ],
+    },
 },
 {
     timestamps: true,   //mongoose automatically do UpdateAt and CreatedAt

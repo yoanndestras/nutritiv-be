@@ -46,7 +46,7 @@ exports.jwtPassport = passport.use("jwt", new JwtStrategy(opts, (jwtPayload, don
 
 const cookieExtractor = function(req) 
 {
-    var token = null;
+    let token = null;
     if (req && req.cookies) token = req.cookies['refreshToken'];
     return token;
 };
@@ -78,7 +78,7 @@ exports.RFJwtPassport = passport.use("jwt_rt", new JwtStrategy(opts_ref, (jwtPay
 const Email_token = function(req) 
 
 {
-    var token = null;
+    let token = null;
     if (req && req.query) token = req.query.token;
     return token;
 };
@@ -117,7 +117,7 @@ exports.verifyAdmin = function(req, res, next)
         }
         else
         {
-            var err = new Error('You are not authorized to perform this operation!');
+            let err = new Error('You are not authorized to perform this operation!');
             err.status = 403;
             return next(err);
         }
@@ -128,7 +128,7 @@ exports.verifyAuthorization = async(req, res, next) =>
     try
     {
 
-        var userId = JSON.stringify(req.user._id).replace(/\"/g, "");
+        let userId = JSON.stringify(req.user._id).replace(/\"/g, "");
 
         if( userId === req.params.id || req.user.isAdmin == true)
         {
@@ -163,7 +163,7 @@ exports.verifyUser = (req, res, next) =>
         }
         else if (user.isVerified === false)
         {
-            var err = new Error('You account has not been verified. Please check your email to verify your account');
+            let err = new Error('You account has not been verified. Please check your email to verify your account');
             err.status = 403;
             return next(err);
         }
@@ -210,7 +210,29 @@ exports.verifyRefresh = (req, res, next) =>
     {
         next();
     }
-}
+};
+
+exports.verifyNoRefresh = (req, res, next) => 
+{
+    passport.authenticate('jwt_rt', { session: false }, (err, user, info) => 
+    {        
+        if (err || !user) 
+        {
+            next();
+        }
+        else
+        {
+            req.user = user;
+
+            return res.status(500).json(
+                {
+                    success: false, 
+                    status: "You are already connected as "+ user.username +", disconnect your account to login", 
+                    err: "RefreshToken cookie exist, a user is connected",
+                });
+        }
+    })(req, res, next);  
+};
 
 
 // GENERATE JWT TOKENS
@@ -268,12 +290,12 @@ exports.verifyEmailSyntax = (req, res, next) =>
     }
     else
     {
-        var err = new Error('You Email syntax is wrong!');
+        let err = new Error('You Email syntax is wrong!');
         err.status = 400;
         return next(err);
     }
 
-}
+};
 
 exports.verifyPasswordSyntax = (req, res, next) =>
 {
@@ -284,11 +306,11 @@ exports.verifyPasswordSyntax = (req, res, next) =>
     }
     else
     {
-        var err = new Error('You password syntax is wrong!');
+        let err = new Error('You password syntax is wrong!');
         err.status = 400;
         return next(err);
     }
-}
+};
 
 exports.verifyUsername = (req, res, next) =>
 {
@@ -296,7 +318,7 @@ exports.verifyUsername = (req, res, next) =>
         {
             if(user !== null)
             {
-                var err = new Error('An account with your username already exists!');
+                let err = new Error('An account with your username already exists!');
                 err.status = 400;
                 return next(err);
             }
@@ -306,7 +328,7 @@ exports.verifyUsername = (req, res, next) =>
                 next();
             }
         })
-}
+};
 
 exports.verifyEmail = (req, res, next) =>
 {
@@ -314,7 +336,7 @@ exports.verifyEmail = (req, res, next) =>
         {
             if(user !== null)
             {
-                var err = new Error('An account with your email already exists!');
+                let err = new Error('An account with your email already exists!');
                 err.status = 400;
                 return next(err);
             }
@@ -324,33 +346,34 @@ exports.verifyEmail = (req, res, next) =>
                 next();
             }
         })
-}
+};
 
-exports.verifyPasswordEquality = (req, res, next) =>
+exports.verifyNewPasswordEquality = (req, res, next) =>
 {
-    var password1 = req.body.password1;
-    var password2 = req.body.password2;
+    let password1 = req.body.newPass;
+    let password2 = req.body.confirmNewPass;
     
     if(password1 != password2)
     {
-        var err = new Error('Passwords do not match');
+        let err = new Error('Passwords do not match');
         err.status = 400;
         return next(err);
     }
     else
     {
+        console.log("Im here password syntax");
         next();
     }
-}
+};
 
-exports.verifyPasswordsSyntax = (req, res, next) =>
+exports.verifyNewPasswordSyntax = (req, res, next) =>
 {
-    var newPass = req.body.newPass
-    var confirmNewPass = req.body.confirmNewPass
+    let newPass = req.body.newPass
+    let confirmNewPass = req.body.confirmNewPass
     
     // 1 lower case, 1 upper case, 1 number, minimum 8 length
-    var regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/;
-
+    let regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/;
+    
     if(newPass.match(regex) && confirmNewPass.match(regex))
     {
         console.log("Im here password syntax");
@@ -358,11 +381,11 @@ exports.verifyPasswordsSyntax = (req, res, next) =>
     }
     else
     {
-        var err = new Error('You password syntax is wrong!');
+        let err = new Error('You password syntax is wrong!');
         err.status = 400;
         return next(err);
     }
-}
+};
 
 // VERIFY EMAIL SENDING
 
@@ -372,7 +395,7 @@ exports.verifyEmailToken = (req, res, next) =>
     {
         if (err || !user) 
         {   
-            var err = new Error('TOKEN EXPIRED OR CORRUPTED');
+            let err = new Error('TOKEN EXPIRED OR CORRUPTED');
             err.status = 403;
             return next(err);
         }
@@ -381,9 +404,9 @@ exports.verifyEmailToken = (req, res, next) =>
             req.user = user;
             return next();
         }
-
+    
     })(req, res, next); 
-}
+};
 
 exports.verifyNewEmail = (req, res, next) =>
 {
@@ -396,12 +419,12 @@ exports.verifyNewEmail = (req, res, next) =>
             }
             else
             {
-                var err = new Error('Wrong email or already verified user');
+                let err = new Error('Wrong email or already verified user');
                 err.status = 400;
                 return next(err);
             }
         })
-}
+};
 
 exports.verifyEmailExist = (req, res, next) =>
 {
@@ -410,16 +433,18 @@ exports.verifyEmailExist = (req, res, next) =>
             if(user !== null)
             {
                 console.log("User found");
+                req.user = user;
                 next();
             }
             else
             {
-                var err = new Error('Wrong email');
+                let err = new Error('Wrong email');
                 err.status = 400;
                 return next(err);
             }
         })
-}
+};
+
 
 
 

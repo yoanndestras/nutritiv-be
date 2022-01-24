@@ -10,14 +10,9 @@ const ProductSchema = new Schema
     {
         type: String,
         required: true,
-        unique: true
+        unique: false
     },
     desc: 
-    {
-        type: String,
-        required: true
-    },
-    img: 
     {
         type: String,
         required: true
@@ -29,20 +24,37 @@ const ProductSchema = new Schema
     },
     shape: 
     {
+        type: String,
+        required: true,
+        unique: true
+    },
+    imgs: 
+    {
+        type: String,
         type: Array,
         required: true
     },
     load: 
     {
         type: Array,
-        required: true
-    },
-    price:
-    {
-        type: Array, Currency,
         required: true,
-        min: 0
+        val:
+        {
+            type: Number,
+            required: true
+        },
+        price:
+        {
+            type: Currency,
+            required: true,
+            min: 0
+        },
     },
+    countInStock:
+    {
+        type: Number,
+        required: true
+    }
 },
 {
     timestamps: true,   //mongoose automatically do UpdateAt and CreatedAt

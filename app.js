@@ -14,7 +14,7 @@ const authRoute = require("./routes/auth");
 const productRoute = require("./routes/product");
 const cartRoute = require("./routes/cart");
 const orderRoute = require("./routes/order");
-const uploadRoute = require('./routes/upload');
+const {uploadRouter} = require('./routes/upload');
 
 dotenv.config();
 
@@ -57,7 +57,7 @@ app.use("/api/auth", authRoute);
 app.use("/api/products", productRoute);
 app.use("/api/carts", cartRoute);
 app.use("/api/orders", orderRoute);
-app.use('/api/imageUpload', uploadRoute);
+app.use('/api/imageUpload', uploadRouter);
 
 // process.env.PORT = value PORT in .env file
 app.listen(process.env.PORT, () =>

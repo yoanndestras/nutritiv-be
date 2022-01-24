@@ -1,4 +1,4 @@
-const router = require("express").Router();
+const uploadRouter = require("express").Router();
 const multer = require('multer');
 
 // MIDDLEWARES
@@ -6,7 +6,7 @@ const auth = require('../controllers/authenticate');
 const cors = require('../controllers/cors');
 
 //OPTIONS FOR CORS CHECK
-router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+uploadRouter.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
 const storage = multer.diskStorage(
 {
@@ -22,19 +22,20 @@ const storage = multer.diskStorage(
 });
 
 const imageFileFilter = (req, file, cb) => 
-{
-    var LowerCase_filename = file.originalname.toLowerCase();
-    
-    if(!LowerCase_filename.match(/\.(jpg|jpeg|png|gif)$/)) 
+{    
+    if(file.mimetype.startsWith('image')) 
+    {
+        cb(null, true);
+    }
+    else
     {
         return cb(new Error('You can upload only image files!'), false);
     }
-    cb(null, true);
 };
 
 const upload = multer({ storage: storage, fileFilter: imageFileFilter});
 
-router.route('/')
+uploadRouter.route('/')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 .get(cors.cors, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, (req, res, next) => 
 {
@@ -66,4 +67,4 @@ router.route('/')
         });
 });
 
-module.exports = router;
+module.exports = {uploadRouter, upload};

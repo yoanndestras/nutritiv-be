@@ -36,11 +36,11 @@ const UserSchema = new Schema
     timestamps: true,   //mongoose automatically do UpdateAt and CreatedAt
 });
 
-var options = {
+const options = {
     errorMessages: {
         MissingPasswordError: 'No password was given',
         AttemptTooSoonError: 'Account is currently locked. Try again later',
-        TooManyAttemptsError: 'Account locked due to too many failed login attempts',
+        TooManyAttemptsError: 'Account locked due to too many failed login attempts, Click "Forget Password" to change your password and unlock your account',
         NoSaltValueStoredError: 'Authentication not possible. No salt value stored',
         IncorrectPasswordError: 'Password or username are incorrect',
         IncorrectUsernameError: 'Password or username are incorrect',

@@ -53,16 +53,17 @@ exports.sendForgetPassword = async(req, res, next) =>
         const Email_Token = auth.GenerateEmailToken({email: req.body.email});
         
         sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-        
+
+        const user = req.user;
         const msg = 
         {
             to: req.body.email,
             from:"nutritivshop@gmail.com",
             subject:"Nutritiv - Reset password",
             html : `
-            <h1>Hello, ${Email_Token}</h1>
+            <h1>Hello, ${user.username}</h1>
             <p>Please click on the link below to reset your password.</p>
-            <a  href="http://${req.headers.host}/api/auth/forget_password?token=${Email_Token}">Reset Password</a>`
+            <a  href="http://${req.headers.host}/api/auth/verify_forget_pwd?token=${Email_Token}">Reset Password</a>`
         }       //  ${req.headers.Host}
         
         await sgMail.send(msg);

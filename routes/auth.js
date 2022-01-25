@@ -237,13 +237,13 @@ router.post("/login", cors.corsWithOptions, auth.loginData, auth.verifyNoRefresh
                                 httpOnly: true,
                                 secure: process.env.REF_JWT_SEC_COOKIE === "production"
                             })
-                        .status(200).json(
-                            {
-                                success: true, 
-                                status: 'Login Successful!',
-                                accessToken: accessToken,
-                                refreshToken: refreshToken
-                            });
+                            .status(200).json(
+                                {
+                                    success: true, 
+                                    status: 'Login Successful!',
+                                    accessToken: accessToken,
+                                    refreshToken: refreshToken
+                                });
                 }
             })
         };

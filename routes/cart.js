@@ -20,105 +20,124 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
         const userId = req.user._id;
         const Id = req.body.productId;
         const Quantity = parseFloat(req.body.quantity);
-        const Load = parseFloat(req.body.val);
+        const Load = parseFloat(req.body.load);
         const Price = parseFloat(req.body.price);
         
         const existingCart = await Cart.findOne({userId : userId});
-        
         const productsArray = existingCart ? existingCart.products : null;
         const productIndex = productsArray ? productsArray.findIndex(el => el.productId === Id) : null;
-        const newProduct = productIndex ? productsArray.filter(el => el.productId === Id && el.productItems.some(el => el.load === Load)) : null;
-        console.log(newProduct);
+        const newProduct = productIndex !== null ? productsArray.filter(el => el.productId === Id && el.productItems.some(el => el.load === Load)) : null;
         
-            if(newProduct)
-            {
-                let currentProductQuantity = newProductLoad.quantity + newProductQuantity;
-                let currentProductPrice = newProductLoad.price + newProductPrice;
-                let currentProductVal = newProductLoad.val;
+        if(newProduct && newProduct.length > 0) 
+        {
+            let incPrice = Price * Quantity;
+            
+            updatedCart = await Cart.findOneAndUpdate(
+                {"userId": userId},
+                {
+                    $inc: {
+                        "products.$[outer].productItems.$[inner].quantity": Quantity,
+                        "products.$[outer].productItems.$[inner].price": incPrice,
+                    }
+                },
+                {
+                    arrayFilters: [
+                    {
+                        'outer.productId': Id
+                    },
+                    {
+                        'inner.load': Load
+                    }],
+                    new: true
+                },
+            )
+            res.status(200).json(
+                {
+                    success: true,
+                    status: "Cart succesfully updated, product successfully added",
+                    updatedCart: await Cart.findOne({userId : userId})
+                });             
+            }
+        else if( productIndex !== null)
+        {
+            let productItems =  
+                {
+                    id: mongoose.Types.ObjectId(),
+                    load : Load, 
+                    price : Price * Quantity,
+                    quantity : Quantity
+                }
+            
+            updatedCart = await Cart.findOneAndUpdate(
+                {"userId" : userId, "productId": Id}, 
+                {
+                    $push: {
+                        "products.$[].productItems": productItems,
+                    }
+                }
                 
-                updatedCart = await Cart.findOneAndUpdate(
-                    {"userId": userId},
-                    {
-                        $set: {
-                            "products.$[outer].load.$[inner].quantity": currentProductQuantity,
-                            "products.$[outer].load.$[inner].price": currentProductPrice,
+            )
+            res.status(200).json(
+                {
+                    success: true,
+                    status: "Cart succesfully updated, product successfully added",
+                    updatedCart: await Cart.findOne({userId : userId})
+                }); 
+        }
+        else if(existingCart)
+        {
+            let productItems =  [
+                        {
+                            id: mongoose.Types.ObjectId(),
+                            load : Load, 
+                            price : Price * Quantity,
+                            quantity : Quantity
                         }
-                    },
-                    {
-                        arrayFilters: [
-                        {
-                            'outer.productId': newProductId
-                        },
-                        {
-                            'inner.val': currentProductVal
-                        }],
-                        new: true
-                    },
-                )
+                    ]
 
-                res.status(400).json(
-                    {
-                        success: false,
-                        status: "Unsuccessfull request!",
-                    });
-            }
-            else if(existingCart)
-            {
-                
-                updatedCart = await Cart.findOneAndUpdate(
-                    {"userId" : userId}, 
-                    {
-                        $push : 
-                        {
-                            products : 
-                            {
-                                productId : newProductId,
-                                load: [
-                                    {
-                                        val: newProductVal,
-                                        price: newProductPrice,
-                                        quantity: newProductQuantity
-                                    }
-                                ]
-                            }
-                        }
-                    }) 
-            }
-            else
-            {
-                load =  [
-                            {
-                                val : parseFloat(newProductVal), 
-                                price : parseFloat(newProductPrice),
-                                quantity : parseFloat(newProductQuantity)
-                            }
-                        ]
-                let newProduct = {productId : newProductId, load: load};
-                const newCart = new Cart(
-                    {
-                        userId: userId,
+            let newProduct = {productId : Id, productItems: productItems};
+            
+            updatedCart = await Cart.findOneAndUpdate(
+                {"userId" : userId}, 
+                {
+                    $push: {
                         products: newProduct
                     }
-                );
-                await newCart.save();
-                res.status(200).json(
-                    {
-                        success: true,
-                        status: "Cart successfully added",
-                        newCart: newCart
-                    });
-            }
-            
-            if(updatedCart)
-            {
-                await updatedCart.save()
-                res.status(200).json(
-                    {
-                        success: true,
-                        status: "Cart succesfully updated, product successfully added",
-                        updatedCart: await Cart.findOne({userId : userId})
-                    }); 
-            }    
+                }
+            )
+            res.status(200).json(
+                {
+                    success: true,
+                    status: "Cart succesfully updated, product successfully added",
+                    updatedCart: await Cart.findOne({userId : userId})
+                }); 
+        }
+        else
+        {
+            let productItems =  [
+                {
+                    id: mongoose.Types.ObjectId(),
+                    load : Load, 
+                    price : Price * Quantity,
+                    quantity : Quantity
+                }
+            ]
+
+            let newProduct = {productId : Id, productItems: productItems};
+            const newCart = new Cart(
+                {
+                    userId: userId,
+                    products: newProduct
+                }
+            );
+            await newCart.save();
+            res.status(200).json(
+                {
+                    success: true,
+                    status: "Cart successfully added",
+                    newCart: newCart
+                });
+        }
     }
     catch(err)
     {

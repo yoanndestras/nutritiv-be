@@ -17,25 +17,20 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
 {
     try
     {
-        let updatedCart;
-        let load;
         const userId = req.user._id;
-        const newProductId = req.body.productId;
-        const newProductQuantity = parseFloat(req.body.quantity);
-        const newProductVal = parseFloat(req.body.val);
-        const newProductPrice = parseFloat(req.body.price);
+        const Id = req.body.productId;
+        const Quantity = parseFloat(req.body.quantity);
+        const Load = parseFloat(req.body.val);
+        const Price = parseFloat(req.body.price);
         
         const existingCart = await Cart.findOne({userId : userId});
         
-        const newProductArray = existingCart ? existingCart.products : null;
-        const newProductIndex = newProductArray ? newProductArray.findIndex(el => el.productId === newProductId) : null;
+        const productsArray = existingCart ? existingCart.products : null;
+        const productIndex = productsArray ? productsArray.findIndex(el => el.productId === Id) : null;
+        const newProduct = productIndex ? productsArray.filter(el => el.productId === Id && el.productItems.some(el => el.load === Load)) : null;
+        console.log(newProduct);
         
-        const newProductLoadArray = newProductIndex !== null && newProductIndex !== -1? newProductArray[newProductIndex].load : null        
-        const newProductLoadIndex = newProductLoadArray ? newProductLoadArray.findIndex(el => el.val === newProductVal) : null;
-        
-        let newProductLoad = newProductLoadIndex !== null ? newProductLoadArray[newProductLoadIndex] : null;
-        
-            if(newProductLoad)
+            if(newProduct)
             {
                 let currentProductQuantity = newProductLoad.quantity + newProductQuantity;
                 let currentProductPrice = newProductLoad.price + newProductPrice;

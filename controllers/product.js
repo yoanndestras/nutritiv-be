@@ -16,21 +16,20 @@ exports.discount = (values, price, el, keys) => {
 exports.verifyProduct = async(req, res, next) => {
     
     const newProductId = req.body.productId;
-    const newProductVal = parseFloat(req.body.val);
+    const newProductVal = parseFloat(req.body.load);
     const newProductPrice = parseFloat(req.body.price);
     
     const existingProductId = await Product.findById(newProductId);
-
-    let productId = existingProductId._id;
-    let productValAndPrice = (existingProductId.load).map((el, i) => {if(el.val === newProductVal && el.price === newProductPrice) {return el.val}});
-    let productQuantityInStock = existingProductId.countInStock >= newProductVal ? true : false
-    productValAndPrice = productValAndPrice.filter(el => el !== undefined)
-
-    console.log(productValAndPrice);
+    let productId = existingProductId ? existingProductId._id : null;
+    let productLoadAndPrice = productId ? (existingProductId.product).map((el, i) => {if(el.load === newProductVal && el.price === newProductPrice) {return el.load}}) : null;
+    let productQuantityInStock = existingProductId ? existingProductId.countInStock >= newProductVal ? true : false : null;
+    productLoadAndPrice = productLoadAndPrice ? productLoadAndPrice.filter(el => el !== undefined) : null;
+    
+    console.log(productLoadAndPrice);
     console.log(productQuantityInStock);
     console.log(productId);
     
-    if(productValAndPrice[0] && productId && productQuantityInStock)
+    if(Array.isArray(productLoadAndPrice) && productLoadAndPrice[0] && productId && productQuantityInStock)
     {
         next();
     }
@@ -42,7 +41,7 @@ exports.verifyProduct = async(req, res, next) => {
     }
     else
     {
-        let err = new Error('Val : ' + newProductVal + " Price : " + newProductPrice + " doesnt exist");
+        let err = new Error('Id : ' + newProductId + ' Val : ' + newProductVal + " Price : " + newProductPrice + " doesnt exist");
         err.status = 403;
         return next(err);
     }

@@ -24,7 +24,19 @@ exports.local = passport.use(new LocalStrategy(User.authenticate()));
 const opts = {}; //json web token and key
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
 opts.secretOrKey = process.env.JWT_SEC;
-
+exports.loginData = (req, res, next) => {
+    const loginData = req.body.loginData;
+    if(loginData)
+        {
+            req.body.username = loginData.username;
+            req.body.password = loginData.password;
+            next();
+        }
+    else
+    {
+        console.log(req.body);
+    }
+}
 exports.jwtPassport = passport.use("jwt", new JwtStrategy(opts, (jwtPayload, done) =>
 {
     User.findOne({_id: jwtPayload._id}, (err, user) =>

@@ -19,12 +19,15 @@ exports.verifyProduct = async(req, res, next) => {
     const newProductVal = parseFloat(req.body.load);
     const newProductPrice = parseFloat(req.body.price);
     
-    const existingProductId = await Product.findById(newProductId);
-    let productId = existingProductId ? existingProductId._id : null;
-    let productLoadAndPrice = productId ? (existingProductId.product).map((el, i) => {if(el.load === newProductVal && el.price === newProductPrice) {return el.load}}) : null;
-    let productQuantityInStock = existingProductId ? existingProductId.countInStock >= newProductVal ? true : false : null;
+    const existingProduct = await Product.findById(newProductId);
+    let productId = existingProduct ? existingProduct._id : null;
+    let productArray = productId ? existingProduct.product : null;
+    
+    let productLoadAndPrice = productArray ? (existingProduct.product).map((el, i) => {if(el.load === newProductVal && el.price === newProductPrice) {return el.load}}) : null;
+    let productQuantityInStock = existingProduct ? existingProduct.countInStock >= newProductVal ? true : false : null;
     productLoadAndPrice = productLoadAndPrice ? productLoadAndPrice.filter(el => el !== undefined) : null;
     
+    console.log(productArray);
     console.log(productLoadAndPrice);
     console.log(productQuantityInStock);
     console.log(productId);

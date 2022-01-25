@@ -34,11 +34,11 @@ const ProductSchema = new Schema
         type: Array,
         required: true
     },
-    load: 
+    product: 
     {
         type: Array,
         required: true,
-        val:
+        load:
         {
             type: Number,
             required: true

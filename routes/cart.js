@@ -25,19 +25,17 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
         const newProductVal = parseFloat(req.body.val);
         const newProductPrice = parseFloat(req.body.price);
         
-        const existingProductId = await Product.findById(newProductId);
         const existingCart = await Cart.findOne({userId : userId});
         
         const newProductArray = existingCart ? existingCart.products : null;
         const newProductIndex = newProductArray ? newProductArray.findIndex(el => el.productId === newProductId) : null;
         
+        // const newProduct = newProductArray ? newProductArray
         const newProductLoadArray = newProductIndex !== null && newProductIndex !== -1? newProductArray[newProductIndex].load : null        
         const newProductLoadIndex = newProductLoadArray ? newProductLoadArray.findIndex(el => el.val === newProductVal) : null;
 
         let newProductLoad = newProductLoadIndex !== null ? newProductLoadArray[newProductLoadIndex] : null;
         
-        if(existingProductId)
-        {
             if(newProductLoad)
             {
                 let currentProductQuantity = newProductLoad.quantity + newProductQuantity;
@@ -63,6 +61,12 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                         new: true
                     },
                 )
+
+                res.status(400).json(
+                    {
+                        success: false,
+                        status: "Unsuccessfull request!",
+                    });
             }
             else if(existingCart)
             {
@@ -121,16 +125,6 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                         updatedCart: await Cart.findOne({userId : userId})
                     }); 
             }    
-        }
-        else
-        {
-            res.status(400).json(
-                {
-                    success: false,
-                    status: "Unsuccessfull request!",
-                });
-            
-        }
     }
     catch(err)
     {

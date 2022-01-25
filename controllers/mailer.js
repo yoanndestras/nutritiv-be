@@ -14,13 +14,13 @@ exports.sendVerifyAccountMail = async(req, res, next) =>
     {
         console.log("Im here accountmail 1");
         
-        const Email_Token = auth.GenerateEmailToken({email: req.body.email});
+        const Email_Token = auth.GenerateEmailToken({email: req.body.formData.email});
         
         sgMail.setApiKey(process.env.SENDGRID_API_KEY);
         
         const msg = 
         {
-            to: req.body.email,
+            to: req.body.formData.email,
             from:"nutritivshop@gmail.com",
             subject:"Nutritiv - Account email verification",
             html : `

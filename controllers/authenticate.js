@@ -281,7 +281,8 @@ exports.GeneratePasswordToken = function(user)
 // VERIFY REGISTER FORM
 exports.verifyEmailSyntax = (req, res, next) =>
 {
-    const valid_email = req.body.email && email_validator.validate(req.body.email);
+    console.log(req.body.formData);
+    const valid_email = req.body.formData.email && email_validator.validate(req.body.formData.email);
     
     if(valid_email === true)
     {
@@ -299,7 +300,7 @@ exports.verifyEmailSyntax = (req, res, next) =>
 
 exports.verifyPasswordSyntax = (req, res, next) =>
 {
-    if(req.body.password.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/))
+    if(req.body.formData.password.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/)) // password 8 characters, 1 low 1 upper 1 number
     {
         console.log("Im here password syntax");
         next();
@@ -314,7 +315,7 @@ exports.verifyPasswordSyntax = (req, res, next) =>
 
 exports.verifyUsername = (req, res, next) =>
 {
-    User.findOne({username: req.body.username}, (err, user) =>
+    User.findOne({username: req.body.formData.username}, (err, user) =>
         {
             if(user !== null)
             {
@@ -332,7 +333,7 @@ exports.verifyUsername = (req, res, next) =>
 
 exports.verifyEmail = (req, res, next) =>
 {
-    User.findOne({email: req.body.email}, (err, user) =>
+    User.findOne({email: req.body.formData.email}, (err, user) =>
         {
             if(user !== null)
             {

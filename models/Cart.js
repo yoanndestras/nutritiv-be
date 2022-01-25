@@ -19,11 +19,16 @@ const CartSchema = new Schema
             type: String,
             required: true
         },
-        load: 
+        productItems: 
         {
             type: Array,
             required: true,
-            val:
+            id:
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                required: true
+            },
+            load:
             {
                 type: Number,
                 required: true

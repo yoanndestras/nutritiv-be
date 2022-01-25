@@ -231,8 +231,8 @@ router.post("/login", cors.corsWithOptions, auth.loginData, auth.verifyNoRefresh
                     const accessToken = auth.GenerateAccessToken({_id: req.user._id});
                     const refreshToken = auth.GenerateRefreshToken({_id: req.user._id});
                     
-                    res.header('Authorization', 'Bearer '+ accessToken)
-                        .cookie("refreshToken", refreshToken, 
+                    
+                        res.cookie("refreshToken", refreshToken, 
                             {
                                 httpOnly: true,
                                 secure: process.env.REF_JWT_SEC_COOKIE === "production"
@@ -241,7 +241,8 @@ router.post("/login", cors.corsWithOptions, auth.loginData, auth.verifyNoRefresh
                             {
                                 success: true, 
                                 status: 'Login Successful!',
-                                accessToken: accessToken
+                                accessToken: accessToken,
+                                refreshToken: refreshToken
                             });
                 }
             })

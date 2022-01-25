@@ -30,10 +30,9 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
         const newProductArray = existingCart ? existingCart.products : null;
         const newProductIndex = newProductArray ? newProductArray.findIndex(el => el.productId === newProductId) : null;
         
-        // const newProduct = newProductArray ? newProductArray
         const newProductLoadArray = newProductIndex !== null && newProductIndex !== -1? newProductArray[newProductIndex].load : null        
         const newProductLoadIndex = newProductLoadArray ? newProductLoadArray.findIndex(el => el.val === newProductVal) : null;
-
+        
         let newProductLoad = newProductLoadIndex !== null ? newProductLoadArray[newProductLoadIndex] : null;
         
             if(newProductLoad)

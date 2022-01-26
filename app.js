@@ -34,9 +34,9 @@ app.use(express.urlencoded({extended: true}));
 app.use(passport.initialize());
 app.use(cookieParser());
 
- // apply simple cors on all routes
+// app.use(cors()); // apply simple cors on all routes
 // app.options('*', cors());
-app.use(cors({origin:true,credentials: true}));
+
 app.use( 
     limitter(
         {

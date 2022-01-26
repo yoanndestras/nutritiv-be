@@ -8,7 +8,7 @@ const auth = require("../controllers/authenticate");
 const mailer = require("../controllers/mailer");
 
 //OPTIONS FOR CORS CHECK
-router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+// router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
 //REGISTER
 router.post("/register", auth.verifyUsername, auth.verifyEmail, auth.verifyEmailSyntax, 

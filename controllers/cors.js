@@ -6,17 +6,17 @@ const corsOptionsDelegate = (req, callback) =>
 {
     let corsOptions;
     
-    if(whitelist.indexOf(req.header('Origin')) !== -1) 
-        {
+    // if(whitelist.indexOf(req.header('Origin')) !== -1) 
+    //     {
             corsOptions = { origin: true, credentials: true};
             console.log(corsOptions);
-        }
-    else 
-        {
-            corsOptions = { origin: false };
-            console.log(corsOptions);
-        }
-    callback(null, corsOptions);
+    //     }
+    // else 
+    //     {
+    //         corsOptions = { origin: false };
+    //         console.log(corsOptions);
+    //     }
+    // callback(null, corsOptions);
 };
 
 

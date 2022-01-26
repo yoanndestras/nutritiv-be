@@ -8,7 +8,7 @@ const corsOptionsDelegate = (req, callback) =>
     
     if(whitelist.indexOf(req.header('Origin')) !== -1) 
         {
-            corsOptions = { origin: whitelist, credentials: true, allowedHeaders: true};
+            corsOptions = { origin: true, credentials: false, allowedHeaders: true, exposedHeaders: ["set-cookie"]};
             console.log(corsOptions);
         }
     else 

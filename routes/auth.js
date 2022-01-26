@@ -198,7 +198,7 @@ router.post("/new_password", auth.verifyNewPasswordSyntax, auth.verifyNewPasswor
 
 
 //LOGIN
-router.post("/login", auth.loginData, auth.verifyNoRefresh, async(req, res, next)=>
+router.post("/login", cors.corsWithOptions, auth.loginData, auth.verifyNoRefresh, async(req, res, next)=>
 {
     //passport.authenticate('local', { successRedirect: '/',failureRedirect: '/login' }));
     passport.authenticate('local', { session: false }, (err, user, info) => 
@@ -235,6 +235,7 @@ router.post("/login", auth.loginData, auth.verifyNoRefresh, async(req, res, next
                         res.cookie("refreshToken", refreshToken, 
                             {
                                 httpOnly: true,
+                                SameSite: none,
                                 secure: process.env.REF_JWT_SEC_COOKIE === "production"
                             })
                             .status(200).json(

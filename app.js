@@ -36,7 +36,7 @@ app.use(cookieParser());
 
 app.use(cors()); // apply simple cors on all routes
 // app.options('*', cors());
-
+app.use(cors({origin:true,credentials: true}));
 app.use( 
     limitter(
         {

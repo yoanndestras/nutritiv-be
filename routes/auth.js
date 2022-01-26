@@ -235,7 +235,6 @@ router.post("/login", cors.corsWithOptions, auth.loginData, auth.verifyNoRefresh
                         res.cookie("refreshToken", refreshToken, 
                             {
                                 httpOnly: true,
-                                SameSite: none,
                                 secure: process.env.REF_JWT_SEC_COOKIE === "production"
                             })
                             .status(200).json(

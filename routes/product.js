@@ -20,9 +20,9 @@ router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth
         let shape = req.body.shape;
         const files = req.files
         const req_tags = Array.isArray(req.body.tags) ? req.body.tags : req.body.tags !== undefined ? [req.body.tags] : null;
-        const val = Array.isArray(req.body.val) ? req.body.val : req.body.val !== undefined ? [req.body.val] : null;
+        const load = Array.isArray(req.body.load) ? req.body.load : req.body.load !== undefined ? [req.body.load] : null;
         let imgs = files.map((el, i) => {return el.path}), tags = req_tags.map((el, i) => {return el});    
-        let load;
+        let product;
         
         const PPCapsule = req.body.pricePerCapsule;
         const PPKg = req.body.pricePerKilograms;
@@ -32,10 +32,10 @@ router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth
             let milestones = {30: 0.1, 60: 0.2, 120: 0.4, 210: 0.5};
             let keys = Object.keys(milestones), values = Object.values(milestones);
             
-            load = val.map((el, i) => {
+            product = load.map((el, i) => {
                 price = el * PPCapsule;
                 let discountValues = check.discount(values, price, el, keys);
-                return {val : discountValues.qty, price :discountValues.price}
+                return {load : discountValues.qty, price :discountValues.price}
             })
         }
         else if(shape === "powder" && PPKg)
@@ -43,10 +43,10 @@ router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth
             let milestones = { 60: 0, 150: 0.2, 350: 0.4, 1000: 0.5};
             let keys = Object.keys(milestones), values = Object.values(milestones);
             
-            load = val.map((el, i) => {
+            product = load.map((el, i) => {
                 price = el * (parseFloat(PPKg)/1000);
                 let discountValues = check.discount(values, price, el, keys);
-                return {val : discountValues.qty, price :discountValues.price}
+                return {load : discountValues.qty, price :discountValues.price}
             })
         }
         else
@@ -65,7 +65,7 @@ router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth
                 shape: req.body.shape,
                 tags : tags,
                 imgs: imgs,
-                load: load,
+                product: product,
                 countInStock: req.body.countInStock
             }
         );

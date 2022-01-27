@@ -3,3 +3,5 @@ node_modules
 #dotenv environement variables
 .env
 
+serverless.yml
+.serverless

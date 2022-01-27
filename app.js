@@ -7,6 +7,7 @@ const dotenv = require("dotenv");
 const passport = require('passport');
 const cookieParser = require("cookie-parser");
 const cors = require('cors');
+const http = require('http');
 
 // router based on url
 const userRoute = require("./routes/user");
@@ -26,7 +27,7 @@ mongoose
         console.log(err);
     });
 
-const app = express();
+let app = express();
 
 app.use(express.json()); // to read JSON    
 app.use(express.urlencoded({extended: true}));

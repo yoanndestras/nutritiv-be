@@ -26,7 +26,7 @@ Back-end of Nutritiv project
 - Create .env file for SecretKeys
 
 - Create models (Cart, Order, Product, User)
-- Create routes (auth, cart, order, product, user) 
+- Create routes (auth, cart, order, product, upload, user) 
 - Create DELETE and GET(one user, all USER, USER stats)
 
 ## Work order notes

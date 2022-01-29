@@ -411,6 +411,7 @@ exports.verifyEmailToken = (req, res, next) =>
 
 exports.verifyNewEmail = (req, res, next) =>
 {
+    console.log(req.body.email);
     User.findOne({email: req.body.email}, (err, user) =>
         {
             if(user !== null && user.isVerified !== true)

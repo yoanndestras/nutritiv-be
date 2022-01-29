@@ -21,11 +21,12 @@ dotenv.config();
 
 mongoose
     .connect(process.env.MONGO_URL)
-    .then(()=>console.log("DB Connection Successfull"))
+    .then(() => mongoose)
     .catch((err)=>
     {
         console.log(err);
     });
+
 
 let app = express();
 
@@ -65,5 +66,7 @@ app.listen(process.env.PORT, () =>
 {
     console.log("Backend server is running on port " + process.env.PORT);
 })
+console.log("yes");
+
 
 module.exports = app;

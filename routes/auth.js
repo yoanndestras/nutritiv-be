@@ -198,13 +198,13 @@ router.post("/new_password", auth.verifyNewPasswordSyntax, auth.verifyNewPasswor
 
 
 //LOGIN
-router.post("/login", cors.corsWithOptions, auth.loginData, async(req, res, next)=>
+router.post("/login", cors.corsWithOptions, auth.loginData, auth.verifyNoRefresh, async(req, res, next)=>
 {
     //passport.authenticate('local', { successRedirect: '/',failureRedirect: '/login' }));
     passport.authenticate('local', { session: false }, (err, user, info) => 
     {
         console.log(req.body.loginData);
-
+        
         if(err || !user || user.isVerified === false) 
         {
             res.status(401).json(

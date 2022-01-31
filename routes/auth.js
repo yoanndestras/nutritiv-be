@@ -232,8 +232,8 @@ router.post("/login", cors.corsWithOptions, auth.loginData, auth.verifyNoRefresh
                     const accessToken = auth.GenerateAccessToken({_id: req.user._id});
                     const refreshToken = auth.GenerateRefreshToken({_id: req.user._id});
                     
-                    res.header('Access-Token', accessToken)
-                        .header('Refresh-Token', refreshToken)
+                    res.header('accessToken', accessToken)
+                        .header('refreshToken', refreshToken)
                         .cookie("refreshToken", refreshToken, 
                         {
                             httpOnly: true,

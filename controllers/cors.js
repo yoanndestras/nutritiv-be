@@ -8,7 +8,7 @@ const corsOptionsDelegate = (req, callback) =>
     
     if(whitelist.indexOf(req.header('Origin')) !== -1) 
         {
-            corsOptions = { origin: true, credentials: true, allowedHeaders: ['X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept']};
+            corsOptions = { origin: true, credentials: true, allowedHeaders: ['X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept, Access-Token, Refresh-Token']};
             console.log(corsOptions);
         }
     else 

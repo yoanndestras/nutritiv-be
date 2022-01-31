@@ -232,7 +232,9 @@ router.post("/login", cors.corsWithOptions, auth.loginData, auth.verifyNoRefresh
                     const accessToken = auth.GenerateAccessToken({_id: req.user._id});
                     const refreshToken = auth.GenerateRefreshToken({_id: req.user._id});
                     
-                    res.cookie("refreshToken", refreshToken, 
+                    res.header('Access-Token', accessToken)
+                        .header('Refresh-Token', refreshToken)
+                        .cookie("refreshToken", refreshToken, 
                         {
                             httpOnly: true,
                             secure: process.env.REF_JWT_SEC_COOKIE === "production"

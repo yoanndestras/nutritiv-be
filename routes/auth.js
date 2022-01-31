@@ -203,7 +203,6 @@ router.post("/login", cors.corsWithOptions, auth.loginData, auth.verifyNoRefresh
     //passport.authenticate('local', { successRedirect: '/',failureRedirect: '/login' }));
     passport.authenticate('local', { session: false }, (err, user, info) => 
     {
-        console.log(req.body.loginData);
         
         if(err || !user || user.isVerified === false) 
         {
@@ -233,18 +232,20 @@ router.post("/login", cors.corsWithOptions, auth.loginData, auth.verifyNoRefresh
                     const accessToken = auth.GenerateAccessToken({_id: req.user._id});
                     const refreshToken = auth.GenerateRefreshToken({_id: req.user._id});
                     
-                        res.cookie("refreshToken", refreshToken, 
+                    res.header('Access-Token', accessToken)
+                        .header('Refresh-Token', refreshToken)
+                        .cookie("refreshToken", refreshToken, 
+                        {
+                            httpOnly: true,
+                            secure: process.env.REF_JWT_SEC_COOKIE === "production"
+                        })
+                        .status(200).json(
                             {
-                                httpOnly: true,
-                                secure: process.env.REF_JWT_SEC_COOKIE === "production"
-                            })
-                            .status(200).json(
-                                {
-                                    success: true, 
-                                    status: 'Login Successful!',
-                                    accessToken: accessToken,
-                                    refreshToken: refreshToken
-                                });
+                                success: true, 
+                                status: 'Login Successful!',
+                                accessToken: accessToken,
+                                refreshToken: refreshToken
+                            });
                 }
             })
         };

@@ -62,7 +62,7 @@ app.use("/api/orders", orderRoute);
 app.use('/api/imageUpload', uploadRouter);
 
 // process.env.PORT = value PORT in .env file
-app.listen(process.env.PORT, () =>
+app.listen(process.env.PORT || 5000, () =>
 {
     console.log("Backend server is running on port " + process.env.PORT);
 })

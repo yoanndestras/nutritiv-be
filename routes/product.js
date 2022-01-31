@@ -14,7 +14,6 @@ router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); }
 // CREATE PRODUCT
 router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, upload.any('imageFile'), async(req, res) =>
 {
-    
     try
     {
         let shape = req.body.shape;

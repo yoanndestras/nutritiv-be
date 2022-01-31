@@ -7,6 +7,7 @@ const dotenv = require("dotenv");
 const passport = require('passport');
 const cookieParser = require("cookie-parser");
 const cors = require('cors');
+const http = require('http');
 
 // router based on url
 const userRoute = require("./routes/user");
@@ -20,13 +21,14 @@ dotenv.config();
 
 mongoose
     .connect(process.env.MONGO_URL)
-    .then(()=>console.log("DB Connection Successfull"))
+    .then(() => mongoose)
     .catch((err)=>
     {
         console.log(err);
     });
 
-const app = express();
+
+let app = express();
 
 app.use(express.json()); // to read JSON    
 app.use(express.urlencoded({extended: true}));
@@ -64,5 +66,7 @@ app.listen(process.env.PORT, () =>
 {
     console.log("Backend server is running on port " + process.env.PORT);
 })
+console.log("yes");
+
 
 module.exports = app;

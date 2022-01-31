@@ -26,7 +26,8 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
         const existingCart = await Cart.findOne({userId : userId});
         const productsArray = existingCart ? existingCart.products : null;
         const productIndex = productsArray ? productsArray.findIndex(el => el.productId === Id) : null;
-        const newProduct = productIndex !== null ? productsArray.filter(el => el.productId === Id && el.productItems.some(el => el.load === Load)) : null;
+        
+        const newProduct = productIndex !== null && productIndex !== -1 ? productsArray.filter(el => el.productId === Id && el.productItems.some(el => el.load === Load)) : null;
         
         if(newProduct && newProduct.length > 0) 
         {

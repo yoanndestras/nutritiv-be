@@ -231,7 +231,6 @@ router.post("/login", cors.corsWithOptions, auth.loginData, auth.verifyNoRefresh
                     const accessToken = auth.GenerateAccessToken({_id: req.user._id});
                     const refreshToken = auth.GenerateRefreshToken({_id: req.user._id});
                     
-                    
                         res.cookie("refreshToken", refreshToken, 
                             {
                                 httpOnly: true,
@@ -278,22 +277,16 @@ router.delete("/logout", cors.corsWithOptions, auth.verifyUser, auth.verifyRefre
 //TEST FRONT
 router.post("/data", async(req, res, next) =>
 {
-    try
-    {
-        res.status(200).json(
-            {
-                success: true, 
-                data: req.body
-            });
-    }
-    catch(err)
-        {
-            res.status(400).json(
-                {
-                    success: false, 
-                    status: 'Unsuccessfull request!', 
-                    err: err.message
-                });
+    try {
+        console.log("test");
+        const data = await User.find()
+        console.log(data);
+        console.log(JSON.stringify(data))
+        
+        res.json({ data })
+        
+        } catch (err){
+        res.status(500).json({ success: false, err })
         }
 });
 

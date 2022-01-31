@@ -7,8 +7,14 @@ const corsOptionsDelegate = (req, callback) =>
     let corsOptions;
     
     
-            corsOptions = { origin: true, credentials: true, allowedHeaders: ['X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept, Access-Token, Refresh-Token']};
+            corsOptions = { 
+                origin: true, 
+                credentials: true, 
+                exposedHeaders: ['Access-Token', 'Refresh-Token'], 
+                allowedHeaders: ['X-Requested-With', 'X-HTTP-Method-Override', 'Content-Type, Accept', 'Access-Token', 'Refresh-Token']};
             console.log(corsOptions);
+    
+            
     callback(null, corsOptions);
 };
 

@@ -66,7 +66,6 @@ app.listen(process.env.PORT, () =>
 {
     console.log("Backend server is running on port " + process.env.PORT);
 })
-console.log("yes");
 
 
 module.exports = app;

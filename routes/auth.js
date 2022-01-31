@@ -223,7 +223,7 @@ router.post("/login", cors.corsWithOptions, auth.loginData, auth.verifyNoRefresh
                         {
                             success: false, 
                             status: 'Login Unsuccessful!', 
-                            err: err
+                            err: err.message
                         });
                 }
                 else

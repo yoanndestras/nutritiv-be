@@ -242,9 +242,7 @@ router.post("/login", cors.corsWithOptions, auth.loginData, auth.verifyNoRefresh
                         .status(200).json(
                             {
                                 success: true, 
-                                status: 'Login Successful!',
-                                accessToken: accessToken,
-                                refreshToken: refreshToken
+                                status: 'Login Successful!'
                             });
                 }
             })

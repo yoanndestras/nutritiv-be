@@ -183,7 +183,6 @@ exports.verifyUser = (req, res, next) =>
             err.status = 403;
             return next(err);
         }
-        
         req.user = user;
         return next();
     
@@ -205,21 +204,27 @@ exports.verifyRefresh = (req, res, next) =>
                         err: "No refreshToken cookie found or its not valid",
                     });
             }
+            else
+            {
+                const accessToken = authenticate.GenerateAccessToken({_id: user._id});
+                const refreshToken = authenticate.GenerateRefreshToken({_id: user._id});
+                
+                res
+                    .header('accessToken', accessToken)
+                    .header('refreshToken', refreshToken)
+                    .cookie("refreshToken", refreshToken, 
+                        {
+                            httpOnly: true,
+                            secure: process.env.REF_JWT_SEC_COOKIE === "prod"
+                            //sameSite: "Lax"
+                        })
+                    .
+                
+                req.user = user;
+                next();
+            }
             
-            const accessToken = authenticate.GenerateAccessToken({_id: user._id});
-            const refreshToken = authenticate.GenerateRefreshToken({_id: user._id});
             
-            res
-                .header('Authorization', 'Bearer '+ accessToken)
-                .cookie("refreshToken", refreshToken, 
-                    {
-                        httpOnly: true,
-                        secure: process.env.REF_JWT_SEC_COOKIE === "prod"
-                        //sameSite: "Lax"
-                    });
-            
-            req.user = user;
-            next();
         })(req, res, next);  
     }
     else

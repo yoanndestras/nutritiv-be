@@ -4,8 +4,7 @@
   "description": "Back-end of Nutritiv project",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon app.js",
-    "deploy": "serverless deploy"
+    "start": "nodemon app.js"
   },
   "repository": {
     "type": "git",

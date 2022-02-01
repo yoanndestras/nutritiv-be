@@ -136,7 +136,6 @@ exports.verifyAuthorization = async(req, res, next) =>
         }
         else
         {
-            console.log("AAAA");
             res.status(403).json("You are not allowed to do that !");
         }
     }
@@ -150,6 +149,23 @@ exports.verifyAuthorization = async(req, res, next) =>
     }
     
 
+};
+
+exports.verifyToken = async(req, res, next) =>
+{
+    passport.authenticate('jwt', { session: false }, (err, user, info) => 
+    {
+        if (err || !user) 
+        {   
+            req.user = false;
+            return next();
+        }
+        else
+        {
+            req.user = true;
+            return next();
+        }    
+    })(req, res, next); 
 };
 
 exports.verifyUser = (req, res, next) => 
@@ -459,7 +475,7 @@ exports.loginData = (req, res, next) => {
     {
         console.log(req.body);
     }
-}
+};
 
 
 // exports.registerLimitter = async(req, res, next) =>

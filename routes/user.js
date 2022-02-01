@@ -67,7 +67,7 @@ router.delete("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
 
 })
 
-// GET USER
+// GET USER // verify user exist in BDD & is connected. Return User info except PWD
 router.get("/find/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAuthorization, async (req, res) =>
 {
     try
@@ -76,7 +76,7 @@ router.get("/find/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefres
         
         const {password, ...public} = user._doc;
         
-        res.status(200).json({public});
+        res.status(200).json({success: true, user: public});
     }
     catch(err)
     {

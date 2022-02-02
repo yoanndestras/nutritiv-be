@@ -14,16 +14,16 @@ Back-end of Nutritiv project
 - Routes explanation (user, auth, cart, order, product, upload)
 - user = the person doing the request
 
-# USER (/api/users)
+# USER (/users)
 - GET "/" : return 5 last users created | cors & verify user exist & connected & is Admin
 - GET "/stats" : return the number of users created by month (total) with the number of the month (_id) | cors & verify user exist & connected & is Admin
 - GET "/find/:id" : return USER info except password | cors & verify user exist & connected
+- GET "/checkJWT" : return loggedIn and isAdmin boolean
 
 - PUT "/reset_password" : modify password of user | verify user exist & connected & new password syntax
-- PUT "/checkJWT" : return loggedIn and isAdmin boolean
 
 - DELETE "/:id" : delete user | cors & verify user exist & connected & user id = USER id
-# AUTH (/api/auth)
+# AUTH (/auth)
 
 - GET "/verify-email" : return user.isVerified = true | verify email token validity
 - GET "/new_register_email" : send a new email to verify the account | verify user email exist & user.isVerified = false
@@ -35,7 +35,7 @@ Back-end of Nutritiv project
 - POST "/login" : connect the user, generate accessToken & refreshToken and send in res header, set refreshToken cookie | cors & verify user is not connected
 
 - DELETE "/logout" : disconnect the user by clearing the cookie | cors & verify user exist & is not connected 
-# PRODUCT (/api/products)
+# PRODUCT (/products)
 
 - GET "/" : return all products | cors
 - GET "/?new=true" : return only the last product created | cors
@@ -48,7 +48,7 @@ Back-end of Nutritiv project
 
 - DELETE "/:id" : delete appropriate product | cors & verify user exist & connected & is Admin
 
-# CART (/api/carts)
+# CART (/carts)
 - GET "/" : return all carts | cors & verify user exist & connected & is Admin
 - GET "/find/:userId" : return the cart of the user | cors & verify user exist & connected & user.id = userId
 
@@ -58,7 +58,7 @@ Back-end of Nutritiv project
 
 - DELETE "/:id" : delete appropriate cart | cors & verify user exist & connected & user.id = :id (user.id = cart.userId)
 
-# ORDER (/api/orders)
+# ORDER (/orders)
 
 - GET "/" : return all orders | cors & verify user exist & connected & is Admin
 - GET "/income" : return only orders 2 months old by month(_id) and total | cors & verify user exist & connected & is Admin
@@ -70,7 +70,7 @@ Back-end of Nutritiv project
 
 - DELETE "/:id" : delete appropriate order | cors & verify user exist & connected & is Admin
 
-# UPLOAD (/api/imageUpload)
+# UPLOAD (/imageUpload)
 
 - GET "/" : GET operation not supported on /imageUpload |**
 

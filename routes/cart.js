@@ -23,6 +23,8 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
         const Load = parseFloat(req.body.load);
         const Price = parseFloat(req.body.price);
         
+        let price = parseFloat((Price * Quantity).toFixed(2))
+
         const existingCart = await Cart.findOne({userId : userId});
         const productsArray = existingCart ? existingCart.products : null;
         const productIndex = productsArray ? productsArray.findIndex(el => el.productId === Id) : null;
@@ -31,14 +33,13 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
         
         if(newProduct && newProduct.length > 0) 
         {
-            let incPrice = (Price * Quantity).toFixed(2);
-            
             updatedCart = await Cart.findOneAndUpdate(
                 {"userId": userId},
                 {
                     $inc: {
                         "products.$[outer].productItems.$[inner].quantity": Quantity,
-                        "products.$[outer].productItems.$[inner].price": incPrice,
+                        "products.$[outer].productItems.$[inner].price.value": price,
+                        "amount.value": price
                     }
                 },
                 {
@@ -65,7 +66,7 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                 {
                     id: mongoose.Types.ObjectId(),
                     load : Load, 
-                    price : (Price * Quantity.toFixed(2)),
+                    "price.value" : price,
                     quantity : Quantity
                 }
             
@@ -74,6 +75,9 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                 {
                     $push: {
                         "products.$[].productItems": productItems,
+                    },
+                    $inc: {
+                        "amount.value": price
                     }
                 }
                 
@@ -91,11 +95,11 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                         {
                             id: mongoose.Types.ObjectId(),
                             load : Load, 
-                            price : (Price * Quantity).toFixed(2),
+                            "price.value" : price,
                             quantity : Quantity
                         }
                     ]
-
+            
             let newProduct = {productId : Id, productItems: productItems};
             
             updatedCart = await Cart.findOneAndUpdate(
@@ -103,6 +107,9 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                 {
                     $push: {
                         products: newProduct
+                    },
+                    $inc: {
+                        "amount.value": price
                     }
                 }
             )
@@ -115,23 +122,31 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
         }
         else
         {
-            let productItems =  [
-                {
-                    id: mongoose.Types.ObjectId(),
-                    load : Load, 
-                    price : Price * Quantity,
-                    quantity : Quantity
-                }
-            ]
-
-            let newProduct = {productId : Id, productItems: productItems};
             const newCart = new Cart(
                 {
                     userId: userId,
-                    products: newProduct
+                    products: 
+                    {
+                        productId : Id, 
+                        productItems: 
+                        [
+                            {
+                                id: mongoose.Types.ObjectId(),
+                                load : Load,
+                                quantity : Quantity,
+                                price : 
+                                {
+                                    value : price,
+                                    currency : "EUR"
+                                }
+                            }
+                        ]
+                    },
+                    "amount.value" : price
                 }
             );
             await newCart.save();
+            
             res.status(200).json(
                 {
                     success: true,
@@ -152,17 +167,35 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
 
 })
 
-// UPDATE CART
-router.put("/updateCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAuthorization, async(req, res) =>
+// ADD QUANTITY PRODUCT CART
+router.put("/addQuantity/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async(req, res) =>
 {
     try
     {
+        const userId = req.user._id;
+        const Id = req.body.productId;
+
+        const existingProduct = await Product.findById(req.params.id);
+
         const updatedCart = await Cart.findOne({
             userId : userId}, 
             {
-                $set: req.body
+                $inc: {
+                    "products.$[outer].productItems.$[inner].quantity": 1,
+                    "products.$[outer].productItems.$[inner].price": incPrice,
+                }
             },
-            {new: true});
+            {
+                arrayFilters: [
+                {
+                    'outer.productId': Id
+                },
+                {
+                    'inner.load': Load
+                }],
+                new: true
+            },
+        )
         
         res.status(200).json(
             {
@@ -187,7 +220,13 @@ router.delete("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
 {
     try
     {
-        await Cart.findByIdAndDelete(req.params.id)
+        const updatedCart = await Cart.findOne({
+            userId : userId}, 
+            {
+                $set: req.body
+            },
+            {new: true});
+
         res.status(200).json(
             {
                 success: true,

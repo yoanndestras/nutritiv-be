@@ -1,7 +1,5 @@
 const mongoose = require("mongoose")
 const Schema = mongoose.Schema;
-require('mongoose-currency').loadType(mongoose);
-const Currency = mongoose.Types.Currency;
 
 const CartSchema = new Schema
 ({
@@ -35,9 +33,16 @@ const CartSchema = new Schema
             },
             price:
             {
-                type: Currency,
-                required: true,
-                min: 0
+                value :
+                { 
+                    type: Number,
+                    required: true
+                },
+                currency:
+                {
+                    type: String,
+                    default: 'EUR'
+                }
             },
             quantity:
             {
@@ -47,6 +52,19 @@ const CartSchema = new Schema
             },
         }
     },
+    amount: 
+    {
+        value :
+                { 
+                    type: Number,
+                    required: true
+                },
+                currency:
+                {
+                    type: String,
+                    default: 'EUR'
+                }
+    }
     
 },
 {

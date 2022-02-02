@@ -18,9 +18,9 @@ Back-end of Nutritiv project
 - GET "/" : return 5 last users created | cors & verify user exist & connected & is Admin
 - GET "/stats" : return the number of users created by month (total) with the number of the month (_id) | cors & verify user exist & connected & is Admin
 - GET "/find/:id" : return USER info except password | cors & verify user exist & connected
+- GET "/checkJWT" : return loggedIn and isAdmin boolean
 
 - PUT "/reset_password" : modify password of user | verify user exist & connected & new password syntax
-- PUT "/checkJWT" : return loggedIn and isAdmin boolean
 
 - DELETE "/:id" : delete user | cors & verify user exist & connected & user id = USER id
 # AUTH (/api/auth)

@@ -22,7 +22,7 @@ passport.use(User.createStrategy()); // used to configure main options of passpo
 exports.local = passport.use(new LocalStrategy(User.authenticate()));
 
 const opts = {}; //json web token and key
-opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
+opts.jwtFromRequest = ExtractJwt.fromHeader("access_token");
 opts.secretOrKey = process.env.JWT_SEC;
 
 exports.jwtPassport = passport.use("jwt", new JwtStrategy(opts, (jwtPayload, done) =>
@@ -52,7 +52,8 @@ const cookieExtractor = function(req)
 };
 
 const opts_ref = {}; //json web token and key
-opts_ref.jwtFromRequest = cookieExtractor;
+//opts_ref.jwtFromRequest = cookieExtractor;
+opts_ref.jwtFromRequest = ExtractJwt.fromHeader("refresh_token");
 opts_ref.secretOrKey = process.env.REF_JWT_SEC;
 
 // named "jwt_rt" to check only the refreshtoken in cookies
@@ -136,7 +137,6 @@ exports.verifyAuthorization = async(req, res, next) =>
         }
         else
         {
-            console.log("AAAA");
             res.status(403).json("You are not allowed to do that !");
         }
     }
@@ -150,6 +150,23 @@ exports.verifyAuthorization = async(req, res, next) =>
     }
     
 
+};
+
+exports.verifyToken = async(req, res, next) =>
+{
+    passport.authenticate('jwt', { session: false }, (err, user, info) => 
+    {
+        if (err || !user) 
+        {   
+            req.user = false;
+            return next();
+        }
+        else
+        {
+            req.user = true;
+            return next();
+        }    
+    })(req, res, next); 
 };
 
 exports.verifyUser = (req, res, next) => 
@@ -167,7 +184,6 @@ exports.verifyUser = (req, res, next) =>
             err.status = 403;
             return next(err);
         }
-        
         req.user = user;
         return next();
     
@@ -189,21 +205,27 @@ exports.verifyRefresh = (req, res, next) =>
                         err: "No refreshToken cookie found or its not valid",
                     });
             }
+            else
+            {
+                const accessToken = authenticate.GenerateAccessToken({_id: user._id});
+                const refreshToken = authenticate.GenerateRefreshToken({_id: user._id});
+                
+                res
+                    .header('accessToken', accessToken)
+                    .header('refreshToken', refreshToken)
+                    .cookie("refreshToken", refreshToken, 
+                        {
+                            httpOnly: true,
+                            secure: process.env.REF_JWT_SEC_COOKIE === "prod"
+                            //sameSite: "Lax"
+                        })
+                    .
+                
+                req.user = user;
+                next();
+            }
             
-            const accessToken = authenticate.GenerateAccessToken({_id: user._id});
-            const refreshToken = authenticate.GenerateRefreshToken({_id: user._id});
             
-            res
-                .header('Authorization', 'Bearer '+ accessToken)
-                .cookie("refreshToken", refreshToken, 
-                    {
-                        httpOnly: true,
-                        secure: process.env.REF_JWT_SEC_COOKIE === "prod"
-                        //sameSite: "Lax"
-                    });
-            
-            req.user = user;
-            next();
         })(req, res, next);  
     }
     else
@@ -459,7 +481,7 @@ exports.loginData = (req, res, next) => {
     {
         console.log(req.body);
     }
-}
+};
 
 
 // exports.registerLimitter = async(req, res, next) =>

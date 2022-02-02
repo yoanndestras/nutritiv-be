@@ -67,7 +67,7 @@ router.delete("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
 
 })
 
-// GET USER
+// GET USER // verify user exist in BDD & is connected. Return User info except PWD
 router.get("/find/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAuthorization, async (req, res) =>
 {
     try
@@ -76,7 +76,7 @@ router.get("/find/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefres
         
         const {password, ...public} = user._doc;
         
-        res.status(200).json({public});
+        res.status(200).json({success: true, user: public});
     }
     catch(err)
     {
@@ -144,28 +144,20 @@ router.get("/stats", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
     }
 })
 
-// UPDATE USER
-// router.put("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyAuthorization, auth.verifyRefresh, async(req, res) =>
-// {
-//     try
-//     {        
-//         if(req.body.email)
-//         {
-//             const valid_email = email_validator.validate(req.body.email);
-//             if(valid_email == true){}
-//             else{req.body.email = undefined;}
-//         }
-        
-//         const updatedUser = await User.findByIdAndUpdate
-//         (req.params.id, {$set: {"username": req.body.username, "email": req.body.email,}},{new: true});
-        
-//         await updatedUser.save();
-//         res.status(200).json(updatedUser);
-//     }
-//     catch(err)
-//     {
-//         res.status(500).json({success: false, err: err.message});
-//     }
-// })
+// CHECK JWT TOKEN
+router.put("/checkJWT", auth.verifyToken, async(req, res) =>
+{
+    try
+    {
+        res.status(200).json(
+            {
+                accessTokenValidity : req.user
+            });
+    }
+    catch(err)
+    {
+        res.status(500).json({success: false, err: err.message});
+    }
+})
 
 module.exports = router;

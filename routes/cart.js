@@ -206,6 +206,30 @@ router.delete("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
 
 })
 
+// DELETE CART
+router.delete("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAuthorization, async (req, res) =>
+{
+    try
+    {
+        await Cart.findByIdAndDelete(req.params.id)
+        res.status(200).json(
+            {
+                success: true,
+                status: "Cart has been deleted...",
+            });
+    }
+    catch(err)
+    {
+        res.status(500).json(
+            {
+                success: false,
+                status: "Unsuccessfull request!",
+                err: err
+            });
+    }
+
+})
+
 // GET USER CART
 router.get("/find/:userId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAuthorization, async (req, res) =>
 {

@@ -22,7 +22,7 @@ passport.use(User.createStrategy()); // used to configure main options of passpo
 exports.local = passport.use(new LocalStrategy(User.authenticate()));
 
 const opts = {}; //json web token and key
-opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
+opts.jwtFromRequest = ExtractJwt.fromHeader("access_token");
 opts.secretOrKey = process.env.JWT_SEC;
 
 exports.jwtPassport = passport.use("jwt", new JwtStrategy(opts, (jwtPayload, done) =>
@@ -52,7 +52,8 @@ const cookieExtractor = function(req)
 };
 
 const opts_ref = {}; //json web token and key
-opts_ref.jwtFromRequest = cookieExtractor;
+//opts_ref.jwtFromRequest = cookieExtractor;
+opts_ref.jwtFromRequest = ExtractJwt.fromHeader("refresh_token");
 opts_ref.secretOrKey = process.env.REF_JWT_SEC;
 
 // named "jwt_rt" to check only the refreshtoken in cookies

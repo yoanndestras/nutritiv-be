@@ -20,6 +20,7 @@ Back-end of Nutritiv project
 - GET "/find/:id" : return USER info except password | cors & verify user exist & connected
 
 - PUT "/reset_password" : modify password of user | verify user exist & connected & new password syntax
+- PUT "/checkJWT" : return loggedIn and isAdmin boolean
 
 - DELETE "/:id" : delete user | cors & verify user exist & connected & user id = USER id
 # AUTH (/api/auth)
@@ -53,7 +54,7 @@ Back-end of Nutritiv project
 
 - POST "/addToCart" : create a new cart or if carte exist modify the cart by adding a new product of by modifying a product quantity and total price | cors & verify user exist & connected
 
-- PUT "/:id" : modify appropriate cart | cors & verify user exist & connected & user.id = :id (user.id = cart.userId)
+- PUT "/updateCart" : modify appropriate cart | cors & verify user exist & connected & user.id = :id (user.id = cart.userId)
 
 - DELETE "/:id" : delete appropriate cart | cors & verify user exist & connected & user.id = :id (user.id = cart.userId)
 

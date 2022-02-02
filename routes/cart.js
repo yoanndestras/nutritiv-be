@@ -31,7 +31,7 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
         
         if(newProduct && newProduct.length > 0) 
         {
-            let incPrice = Price * Quantity;
+            let incPrice = (Price * Quantity).toFixed(2);
             
             updatedCart = await Cart.findOneAndUpdate(
                 {"userId": userId},
@@ -65,7 +65,7 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                 {
                     id: mongoose.Types.ObjectId(),
                     load : Load, 
-                    price : Price * Quantity,
+                    price : (Price * Quantity.toFixed(2)),
                     quantity : Quantity
                 }
             
@@ -91,7 +91,7 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                         {
                             id: mongoose.Types.ObjectId(),
                             load : Load, 
-                            price : Price * Quantity,
+                            price : (Price * Quantity).toFixed(2),
                             quantity : Quantity
                         }
                     ]
@@ -153,12 +153,12 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
 })
 
 // UPDATE CART
-router.put("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAuthorization, async(req, res) =>
+router.put("/updateCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAuthorization, async(req, res) =>
 {
     try
     {
-        const updatedCart = await Cart.findByIdAndUpdate(
-            req.params.id, 
+        const updatedCart = await Cart.findOne({
+            userId : userId}, 
             {
                 $set: req.body
             },

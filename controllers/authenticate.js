@@ -246,7 +246,7 @@ exports.verifyNoRefresh = (req, res, next) =>
         {
             req.user = user;
 
-            return res.status(200).json(
+            return res.status(500).json(
                 {
                     success: false, 
                     status: "You are already connected as "+ user.username +", disconnect your account to login", 

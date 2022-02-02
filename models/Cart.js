@@ -18,52 +18,52 @@ const CartSchema = new Schema
             required: true
         },
         productItems: 
-        {
-            type: Array,
-            required: true,
-            id:
+        [
             {
-                type: mongoose.Schema.Types.ObjectId,
-                required: true
-            },
-            load:
-            {
-                type: Number,
-                required: true
-            },
-            price:
-            {
-                value :
-                { 
+                id:
+                {
+                    type: mongoose.Schema.Types.ObjectId,
+                    required: true
+                },
+                load:
+                {
                     type: Number,
                     required: true
                 },
-                currency:
+                price:
                 {
-                    type: String,
-                    default: 'EUR'
-                }
-            },
-            quantity:
-            {
-                type: Number,
-                default: 1,
-                required: true
-            },
-        }
+                    value:
+                    { 
+                        type: Number,
+                        required: true
+                    },
+                    currency:
+                    {
+                        type: String,
+                        default: 'EUR'
+                    }
+                },
+                quantity:
+                {
+                    type: Number,
+                    default: 1,
+                    required: true
+                },
+            }
+        ]
     },
     amount: 
     {
         value :
-                { 
-                    type: Number,
-                    required: true
-                },
-                currency:
-                {
-                    type: String,
-                    default: 'EUR'
-                }
+        { 
+            type: Number,
+            required: true
+        },
+        currency:
+        {
+            type: String,
+            default: 'EUR'
+        }
     }
     
 },

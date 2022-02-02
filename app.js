@@ -54,12 +54,12 @@ app.use(
 app.use(express.static(path.join(__dirname, 'public')));
 // http://localhost:3001/images/Multivitamines.png
 
-app.use("/api/users", userRoute);
-app.use("/api/auth", authRoute);
-app.use("/api/products", productRoute);
-app.use("/api/carts", cartRoute);
-app.use("/api/orders", orderRoute);
-app.use('/api/imageUpload', uploadRouter);
+app.use("/users", userRoute);
+app.use("/auth", authRoute);
+app.use("/products", productRoute);
+app.use("/carts", cartRoute);
+app.use("/orders", orderRoute);
+app.use('/imageUpload', uploadRouter);
 
 // process.env.PORT = value PORT in .env file
 app.listen(process.env.PORT || 5000, () =>

@@ -23,6 +23,8 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
         const Load = parseFloat(req.body.load);
         const Price = parseFloat(req.body.price);
         
+        let price = parseFloat((Price * Quantity).toFixed(2))
+
         const existingCart = await Cart.findOne({userId : userId});
         const productsArray = existingCart ? existingCart.products : null;
         const productIndex = productsArray ? productsArray.findIndex(el => el.productId === Id) : null;
@@ -31,14 +33,13 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
         
         if(newProduct && newProduct.length > 0) 
         {
-            let price = parseFloat((Price * Quantity).toFixed(2))
             updatedCart = await Cart.findOneAndUpdate(
                 {"userId": userId},
                 {
                     $inc: {
                         "products.$[outer].productItems.$[inner].quantity": Quantity,
-                        "products.$[outer].productItems.$[inner].price": price,
-                        "amount": price
+                        "products.$[outer].productItems.$[inner].price.value": price,
+                        "amount.value": price
                     }
                 },
                 {
@@ -61,12 +62,11 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
             }
         else if( productIndex !== null)
         {
-            let price = parseFloat((Price * Quantity).toFixed(2))
             let productItems =  
                 {
                     id: mongoose.Types.ObjectId(),
                     load : Load, 
-                    price : price,
+                    "price.value" : price,
                     quantity : Quantity
                 }
             
@@ -77,7 +77,7 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                         "products.$[].productItems": productItems,
                     },
                     $inc: {
-                        "amount": price
+                        "amount.value": price
                     }
                 }
                 
@@ -91,12 +91,11 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
         }
         else if(existingCart)
         {
-            let price = parseFloat((Price * Quantity).toFixed(2))
             let productItems =  [
                         {
                             id: mongoose.Types.ObjectId(),
                             load : Load, 
-                            price : price,
+                            "price.value" : price,
                             quantity : Quantity
                         }
                     ]
@@ -110,7 +109,7 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                         products: newProduct
                     },
                     $inc: {
-                        "amount": price
+                        "amount.value": price
                     }
                 }
             )
@@ -123,27 +122,31 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
         }
         else
         {
-            let price = parseFloat((Price * Quantity).toFixed(2))
-            console.log(price);
-            let productItems =  [
-                {
-                    id: mongoose.Types.ObjectId(),
-                    load : Load, 
-                    price : price,
-                    quantity : Quantity
-                }
-            ]
-            
-            let newProduct = {productId : Id, productItems: productItems};
-            console.log(price);
             const newCart = new Cart(
                 {
                     userId: userId,
-                    products: newProduct,
-                    amount : price
+                    products: 
+                    {
+                        productId : Id, 
+                        productItems: 
+                        [
+                            {
+                                id: mongoose.Types.ObjectId(),
+                                load : Load,
+                                quantity : Quantity,
+                                price : 
+                                {
+                                    value : price,
+                                    currency : "EUR"
+                                }
+                            }
+                        ]
+                    },
+                    "amount.value" : price
                 }
             );
             await newCart.save();
+            
             res.status(200).json(
                 {
                     success: true,

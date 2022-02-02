@@ -246,11 +246,11 @@ exports.verifyNoRefresh = (req, res, next) =>
         {
             req.user = user;
 
-            return res.status(500).json(
+            return res.status(200).json(
                 {
                     success: false, 
                     status: "You are already connected as "+ user.username +", disconnect your account to login", 
-                    err: "RefreshToken cookie exist, a user is connected",
+                    err: "refresh_token header exist, a user is connected",
                 });
         }
     })(req, res, next);  

@@ -28,7 +28,7 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
         const existingCart = await Cart.findOne({userId : userId});
         const productsArray = existingCart ? existingCart.products : null;
         const productIndex = productsArray ? productsArray.findIndex(el => el.productId === Id) : null;
-        
+
         const newProduct = productIndex !== null && productIndex !== -1 ? productsArray.filter(el => el.productId === Id && el.productItems.some(el => el.load === Load)) : null;
         
         if(newProduct && newProduct.length > 0) 
@@ -39,7 +39,7 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                     $inc: {
                         "products.$[outer].productItems.$[inner].quantity": Quantity,
                         "products.$[outer].productItems.$[inner].price.value": price,
-                        "amount.value": price
+                        "amount.value": price.toFixed(2)
                     }
                 },
                 {
@@ -60,7 +60,7 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                     updatedCart: await Cart.findOne({userId : userId})
                 });             
             }
-        else if( productIndex !== null)
+        else if( productIndex !== null && productIndex !== -1)
         {
             let productItems =  
                 {
@@ -81,7 +81,7 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                         "products.$[].productItems": productItems,
                     },
                     $inc: {
-                        "amount.value": price
+                        "amount.value": price.toFixed(2)
                     }
                 }
                 
@@ -117,7 +117,7 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                         products: newProduct
                     },
                     $inc: {
-                        "amount.value": price
+                        "amount.value": price.toFixed(2)
                     }
                 }
             )
@@ -150,7 +150,7 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                             }
                         ]
                     },
-                    "amount.value" : price
+                    "amount.value" : price.toFixed(2)
                 }
             );
             await newCart.save();

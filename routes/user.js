@@ -145,13 +145,15 @@ router.get("/stats", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
 })
 
 // CHECK JWT TOKEN
-router.put("/checkJWT", auth.verifyToken, async(req, res) =>
+router.put("/checkJWT", auth.verifyUser, auth.verifyAuth, async(req, res) =>
 {
     try
     {
         res.status(200).json(
             {
-                accessTokenValidity : req.user
+                loggedIn: true,
+                isAdmin: req.user.isAdmin,
+                status: "User connected"
             });
     }
     catch(err)

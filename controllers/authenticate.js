@@ -152,23 +152,6 @@ exports.verifyAuthorization = async(req, res, next) =>
 
 };
 
-exports.verifyToken = async(req, res, next) =>
-{
-    passport.authenticate('jwt', { session: false }, (err, user, info) => 
-    {
-        if (err || !user) 
-        {   
-            req.user = false;
-            return next();
-        }
-        else
-        {
-            req.user = true;
-            return next();
-        }    
-    })(req, res, next); 
-};
-
 exports.verifyUser = (req, res, next) => 
 {
     passport.authenticate('jwt', { session: false }, (err, user, info) => 
@@ -198,11 +181,54 @@ exports.verifyRefresh = (req, res, next) =>
         {        
             if (err || !user) 
             {
-                return res.status(500).json(
+                return res.status(401).json(
                     {
                         success: false, 
                         status: "You are not connected", 
                         err: "No refreshToken cookie found or its not valid",
+                    });
+            }
+            else
+            {
+                const accessToken = authenticate.GenerateAccessToken({_id: user._id});
+                const refreshToken = authenticate.GenerateRefreshToken({_id: user._id});
+                
+                res
+                    .header('accessToken', accessToken)
+                    .header('refreshToken', refreshToken)
+                    .cookie("refreshToken", refreshToken, 
+                        {
+                            httpOnly: true,
+                            secure: process.env.REF_JWT_SEC_COOKIE === "prod"
+                            //sameSite: "Lax"
+                        })
+                    .
+                
+                req.user = user;
+                next();
+            }
+            
+            
+        })(req, res, next);  
+    }
+    else
+    {
+        next();
+    }
+};
+
+exports.verifyAuth = (req, res, next) => 
+{
+    if(req.user == "error")
+    {
+        passport.authenticate('jwt_rt', { session: false }, (err, user, info) => 
+        {        
+            if (err || !user) 
+            {
+                return res.status(200).json(
+                    {
+                        loggedIn: false,
+                        status: "User not connected"
                     });
             }
             else

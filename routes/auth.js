@@ -241,7 +241,9 @@ router.post("/login", cors.corsWithOptions, auth.loginData, auth.verifyNoRefresh
                         })
                         .status(200).json(
                             {
-                                success: true, 
+                                success: true,
+                                loggedIn: true,
+                                isAdmin: req.user.isAdmin,
                                 status: 'Login Successful!'
                             });
                 }

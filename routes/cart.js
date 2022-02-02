@@ -66,8 +66,12 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                 {
                     id: mongoose.Types.ObjectId(),
                     load : Load, 
-                    "price.value" : price,
-                    quantity : Quantity
+                    quantity : Quantity,
+                    price : 
+                    {
+                        value : price,
+                        currency : "EUR"
+                    },
                 }
             
             updatedCart = await Cart.findOneAndUpdate(
@@ -95,8 +99,12 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                         {
                             id: mongoose.Types.ObjectId(),
                             load : Load, 
-                            "price.value" : price,
-                            quantity : Quantity
+                            quantity : Quantity,
+                            price : 
+                                {
+                                    value : price,
+                                    currency : "EUR"
+                                }
                         }
                     ]
             

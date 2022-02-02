@@ -27,7 +27,7 @@ exports.sendVerifyAccountMail = async(req, res, next) =>
             <h1>Hello, </h1>
             <p style="color: red;">Thanks for registering on our website.</p>
             <p>Please click on the link below to verify your account.</p>
-            <a  href="http://${req.headers.host}/api/auth/verify-email?token=${Email_Token}">Verify your account</a>`
+            <a  href="http://${req.headers.host}/auth/verify-email?token=${Email_Token}">Verify your account</a>`
         }       //  ${req.headers.Host}
         
         await sgMail.send(msg);
@@ -63,7 +63,7 @@ exports.sendForgetPassword = async(req, res, next) =>
             html : `
             <h1>Hello, ${user.username}</h1>
             <p>Please click on the link below to reset your password.</p>
-            <a  href="http://${req.headers.host}/api/auth/verify_forget_pwd?token=${Email_Token}">Reset Password</a>`
+            <a  href="http://${req.headers.host}/auth/verify_forget_pwd?token=${Email_Token}">Reset Password</a>`
         }       //  ${req.headers.Host}
         
         await sgMail.send(msg);

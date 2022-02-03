@@ -258,7 +258,8 @@ router.delete("/logout", cors.corsWithOptions, auth.verifyUser, auth.verifyRefre
 {   
     try
     {
-        return  res.clearCookie("refreshToken")
+        localStorage.removeItem('refresh_token');
+        return  res.clearCookie("refresh_token")
                     .status(200)
                     .json(
                         {

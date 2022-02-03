@@ -34,7 +34,7 @@ router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth
             product = load.map((el, i) => {
                 price = el * PPCapsule;
                 let discountValues = check.discount(values, price, el, keys);
-                return {load : discountValues.qty, price :discountValues.price}
+                return {load : discountValues.qty, price :{ value : discountValues.price, currency : "EUR"}}
             })
         }
         else if(shape === "powder" && PPKg)
@@ -45,7 +45,7 @@ router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth
             product = load.map((el, i) => {
                 price = el * (parseFloat(PPKg)/1000);
                 let discountValues = check.discount(values, price, el, keys);
-                return {load : discountValues.qty, price :discountValues.price}
+                return {load : discountValues.qty, price :{ value : discountValues.price, currency : "EUR"}}
             })
         }
         else

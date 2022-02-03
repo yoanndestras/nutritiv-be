@@ -24,11 +24,11 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
         const Price = parseFloat(req.body.price);
         
         let price = parseFloat((Price * Quantity).toFixed(2))
-
+        
         const existingCart = await Cart.findOne({userId : userId});
         const productsArray = existingCart ? existingCart.products : null;
         const productIndex = productsArray ? productsArray.findIndex(el => el.productId === Id) : null;
-
+        
         const newProduct = productIndex !== null && productIndex !== -1 ? productsArray.filter(el => el.productId === Id && el.productItems.some(el => el.load === Load)) : null;
         
         if(newProduct && newProduct.length > 0) 
@@ -175,22 +175,24 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
 
 })
 
-// ADD QUANTITY PRODUCT CART
-router.put("/addQuantity/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async(req, res) =>
+// ADD QUANTITY PRODUCT CART 
+router.put("/updateQuantity/:id/:load/:operation", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, check.verifyPricePerProduct, async(req, res) =>
 {
     try
     {
-        const userId = req.user._id;
-        const Id = req.body.productId;
-
-        const existingProduct = await Product.findById(req.params.id);
-
-        const updatedCart = await Cart.findOne({
-            userId : userId}, 
+        const userId = (req.user._id).toString();
+        const Id = req.params.id;
+        const Load = parseFloat(req.params.load);
+        const Price = parseFloat(req.price);
+        const value = req.params.operation === "inc" ? 1 : req.params.operation === "dec" ? -1 : null;
+        
+        const updatedCart = value ? await Cart.findOneAndUpdate(
+            {userId : userId}, 
             {
                 $inc: {
-                    "products.$[outer].productItems.$[inner].quantity": 1,
-                    "products.$[outer].productItems.$[inner].price": incPrice,
+                    "products.$[outer].productItems.$[inner].quantity": value,
+                    "products.$[outer].productItems.$[inner].price.value": Price,
+                    "amount.value": Price
                 }
             },
             {
@@ -203,7 +205,7 @@ router.put("/addQuantity/:id", cors.corsWithOptions, auth.verifyUser, auth.verif
                 }],
                 new: true
             },
-        )
+        ) : null;
         
         res.status(200).json(
             {
@@ -218,7 +220,7 @@ router.put("/addQuantity/:id", cors.corsWithOptions, auth.verifyUser, auth.verif
             {
                 success: false,
                 status: "Unsuccessfull request!",
-                err: err
+                err: err.message
             });
     }
 })
@@ -228,12 +230,8 @@ router.delete("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
 {
     try
     {
-        const updatedCart = await Cart.findOne({
-            userId : userId}, 
-            {
-                $set: req.body
-            },
-            {new: true});
+        const cartId = req.params.id;
+        await Cart.findOneAndDelete({_id : cartId});
 
         res.status(200).json(
             {
@@ -247,7 +245,7 @@ router.delete("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
             {
                 success: false,
                 status: "Unsuccessfull request!",
-                err: err
+                err: err.message
             });
     }
 

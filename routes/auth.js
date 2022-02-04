@@ -2,6 +2,9 @@ const router = require("express").Router();
 const User = require("../models/User");
 const passport = require("passport");
 
+const LocalStorage = require('node-localstorage').LocalStorage,
+localStorage = new LocalStorage('./scratch');
+
 // MIDDLEWARES
 const cors = require('../controllers/cors');
 const auth = require("../controllers/authenticate");

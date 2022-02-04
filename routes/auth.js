@@ -264,6 +264,7 @@ router.delete("/logout", cors.corsWithOptions, auth.verifyUser, auth.verifyRefre
                     .json(
                         {
                             success: true, 
+                            loggedIn: false,
                             status: "Successfully logged out!"
                         });
     }

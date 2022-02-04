@@ -186,35 +186,51 @@ router.put("/updateQuantity/:id/:load/:operation", cors.corsWithOptions, auth.ve
         const Id = req.params.id;
         const Load = parseFloat(req.params.load);
         const Price = parseFloat(req.price);
-        const value = req.params.operation === "inc" ? 1 : req.params.operation === "dec" ? -1 : null;
+
+        const quantity = req.params.operation === "inc" ? 1 : req.params.operation === "dec" ? -1 : null;
+        const value = req.params.operation === "inc" ? Price : req.params.operation === "dec" ? - Price : null;
         
-        const updatedCart = value ? await Cart.findOneAndUpdate(
-            {userId : userId}, 
-            {
-                $inc: {
-                    "products.$[outer].productItems.$[inner].quantity": value,
-                    "products.$[outer].productItems.$[inner].price.value": Price,
-                    "amount.value": Price
-                }
-            },
-            {
-                arrayFilters: [
+        if(quantity && value)
+        {
+                await Cart.findOneAndUpdate(
+                {userId : userId}, 
                 {
-                    'outer.productId': mongoose.Types.ObjectId(Id)
+                    $inc: {
+                        "products.$[outer].productItems.$[inner].quantity": quantity,
+                        "products.$[outer].productItems.$[inner].price.value": value,
+                        "amount.value": value
+                    }
                 },
                 {
-                    'inner.load': Load
-                }],
-                new: true
-            },
-        ) : null;
+                    arrayFilters: [
+                    {
+                        'outer.productId': mongoose.Types.ObjectId(Id)
+                    },
+                    {
+                        'inner.load': Load
+                    }],
+                    new: true
+                },
+            );
+        }
+        else
+        {
+            res.status(500).json(
+                {
+                    success: false,
+                    status: "This operation do not exist!"
+                });
+        }
+
+        const updatedCart = await Cart.findOne({userId : userId});
+        let total = updatedCart ? await updatedCart.amount.value <=  0 : null;
+        if(total){await Cart.deleteOne({userId : userId})}
         
-        await updatedCart.save();
         res.status(200).json(
             {
                 success: true,
                 status: "Cart succesfully updated",
-                updatedCart: updatedCart
+                updatedCart: await Cart.findOne({userId : userId})
             });
     }
     catch(err)
@@ -274,7 +290,6 @@ router.delete("/:userId/:productId/:load", cors.corsWithOptions, auth.verifyUser
             );
 
             const updatedCart = await Cart.findOne({userId : userId});
-            
             let total = updatedCart ? await updatedCart.amount.value ===  0 : null;
             if(total){await Cart.deleteOne({userId : userId})}
             

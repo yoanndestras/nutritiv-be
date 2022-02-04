@@ -35,7 +35,8 @@ const CartSchema = new Schema
                     value:
                     { 
                         type: Number,
-                        required: true
+                        required: true,
+                        min: 0
                     },
                     currency:
                     {
@@ -47,6 +48,7 @@ const CartSchema = new Schema
                 {
                     type: Number,
                     default: 1,
+                    min: 0,
                     required: true
                 },
             }

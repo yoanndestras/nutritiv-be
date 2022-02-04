@@ -54,9 +54,10 @@ Back-end of Nutritiv project
 
 - POST "/addToCart" : create a new cart or if carte exist modify the cart by adding a new product of by modifying a product quantity and total price | cors & verify user exist & connected
 
-- PUT "/updateCart" : modify appropriate cart | cors & verify user exist & connected & user.id = :id (user.id = cart.userId)
+- PUT "/updateQuantity/:id/:load/:operation" : add or remove 1 element for the appropriate product in cart, if cart become empty after the operation it is deleted | cors & verify user exist & connected & product.id = :id & product.load = :load & :operation = inc(+) or dec(-)
 
-- DELETE "/:id" : delete appropriate cart | cors & verify user exist & connected & user.id = :id (user.id = cart.userId)
+- DELETE "/:userId/:productId/:load" : delete appropriate product of the user connected, an Admin can perform this operation too on any user cart, if cart become empty after the operation it is deleted | cors & verify user exist & connected & cart._id = :id or user is Admin
+- DELETE "/:id" : delete appropriate cart | cors & verify user exist & connected & cart._id = :id or user is Admin
 
 # ORDER (/orders)
 

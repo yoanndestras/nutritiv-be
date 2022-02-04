@@ -45,9 +45,17 @@ const ProductSchema = new Schema
         },
         price:
         {
-            type: Currency,
-            required: true,
-            min: 0
+            value:
+            { 
+                type: Number,
+                required: true,
+                min: 0
+            },
+            currency:
+            {
+                type: String,
+                default: 'EUR'
+            }
         },
     },
     countInStock:

@@ -24,13 +24,13 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
         const Price = parseFloat(req.body.price);
         
         let price = parseFloat((Price * Quantity).toFixed(2))
-
+        
         const existingCart = await Cart.findOne({userId : userId});
         const productsArray = existingCart ? existingCart.products : null;
-        const productIndex = productsArray ? productsArray.findIndex(el => el.productId === Id) : null;
-
-        const newProduct = productIndex !== null && productIndex !== -1 ? productsArray.filter(el => el.productId === Id && el.productItems.some(el => el.load === Load)) : null;
+        const productIndex = productsArray ? productsArray.findIndex(el => el.productId.toString() === Id) : null;
         
+        const newProduct = productIndex !== null && productIndex !== -1 ? productsArray.filter(el => el.productId.toString() === Id && el.productItems.some(el => el.load === Load)) : null;
+
         if(newProduct && newProduct.length > 0) 
         {
             updatedCart = await Cart.findOneAndUpdate(
@@ -45,7 +45,7 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                 {
                     arrayFilters: [
                     {
-                        'outer.productId': Id
+                        'outer.productId': mongoose.Types.ObjectId(Id)
                     },
                     {
                         'inner.load': Load
@@ -75,7 +75,7 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                 }
             
             updatedCart = await Cart.findOneAndUpdate(
-                {"userId" : userId, "productId": Id}, 
+                {"userId" : userId, "productId": mongoose.Types.ObjectId(Id)}, 
                 {
                     $push: {
                         "products.$[].productItems": productItems,
@@ -108,15 +108,17 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                         }
                     ]
             
-            let newProduct = {productId : Id, productItems: productItems};
+            let newProduct = {productId : mongoose.Types.ObjectId(Id), productItems: productItems};
             
             updatedCart = await Cart.findOneAndUpdate(
                 {"userId" : userId}, 
                 {
-                    $push: {
+                    $push: 
+                    {
                         products: newProduct
                     },
-                    $inc: {
+                    $inc: 
+                    {
                         "amount.value": price.toFixed(2)
                     }
                 }
@@ -135,7 +137,7 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                     userId: userId,
                     products: 
                     {
-                        productId : Id, 
+                        productId : mongoose.Types.ObjectId(Id), 
                         productItems: 
                         [
                             {
@@ -175,41 +177,60 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
 
 })
 
-// ADD QUANTITY PRODUCT CART
-router.put("/addQuantity/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async(req, res) =>
+// ADD QUANTITY PRODUCT CART 
+router.put("/updateQuantity/:id/:load/:operation", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, check.verifyPricePerProduct, async(req, res) =>
 {
     try
     {
         const userId = req.user._id;
-        const Id = req.body.productId;
+        const Id = req.params.id;
+        const Load = parseFloat(req.params.load);
+        const Price = parseFloat(req.price);
 
-        const existingProduct = await Product.findById(req.params.id);
-
-        const updatedCart = await Cart.findOne({
-            userId : userId}, 
-            {
-                $inc: {
-                    "products.$[outer].productItems.$[inner].quantity": 1,
-                    "products.$[outer].productItems.$[inner].price": incPrice,
-                }
-            },
-            {
-                arrayFilters: [
+        const quantity = req.params.operation === "inc" ? 1 : req.params.operation === "dec" ? -1 : null;
+        const value = req.params.operation === "inc" ? Price : req.params.operation === "dec" ? - Price : null;
+        
+        if(quantity && value)
+        {
+                await Cart.findOneAndUpdate(
+                {userId : userId}, 
                 {
-                    'outer.productId': Id
+                    $inc: {
+                        "products.$[outer].productItems.$[inner].quantity": quantity,
+                        "products.$[outer].productItems.$[inner].price.value": value,
+                        "amount.value": value
+                    }
                 },
                 {
-                    'inner.load': Load
-                }],
-                new: true
-            },
-        )
+                    arrayFilters: [
+                    {
+                        'outer.productId': mongoose.Types.ObjectId(Id)
+                    },
+                    {
+                        'inner.load': Load
+                    }],
+                    new: true
+                },
+            );
+        }
+        else
+        {
+            res.status(500).json(
+                {
+                    success: false,
+                    status: "This operation do not exist!"
+                });
+        }
+
+        const updatedCart = await Cart.findOne({userId : userId});
+        let total = updatedCart ? await updatedCart.amount.value <=  0 : null;
+        if(total){await Cart.deleteOne({userId : userId})}
         
         res.status(200).json(
             {
                 success: true,
                 status: "Cart succesfully updated",
-                updatedCart: updatedCart
+                updatedCart: await Cart.findOne({userId : userId})
             });
     }
     catch(err)
@@ -218,28 +239,76 @@ router.put("/addQuantity/:id", cors.corsWithOptions, auth.verifyUser, auth.verif
             {
                 success: false,
                 status: "Unsuccessfull request!",
-                err: err
+                err: err.message
             });
     }
 })
 
-// DELETE CART
-router.delete("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAuthorization, async (req, res) =>
+// DELETE PRODUCT IN CART
+router.delete("/:userId/:productId/:load", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAuthorization, async (req, res) =>
 {
     try
     {
-        const updatedCart = await Cart.findOne({
-            userId : userId}, 
-            {
-                $set: req.body
-            },
-            {new: true});
+        const userId = req.params.userId;
+        const productId = req.params.productId;
+        const Load = parseFloat(req.params.load);
+        
+        const existingCart = await Cart.findOne({userId : userId});
+        const productsArray = existingCart ? existingCart.products : null;
+        const productIndex =  productsArray ? productsArray.findIndex(el => el.productId.toString() === productId) : null;
+        const product = productIndex !== null && productIndex !== -1 ? productsArray.filter(el => el.productId.toString() === productId && el.productItems.find(el => el.load === Load)) : null;
+        
+        const amount = product && product.length > 0 ? product[0].productItems[0].price.value : null;
 
-        res.status(200).json(
-            {
-                success: true,
-                status: "Cart has been deleted...",
-            });
+        if(amount)
+        {
+            await Cart.findOneAndUpdate(
+                {userId : userId},
+                {
+                    $pull: 
+                        {
+                            "products.$[outer].productItems" : {load : Load} 
+                        },
+                },
+                {
+                    arrayFilters: [
+                    {
+                        'outer.productId': mongoose.Types.ObjectId(productId)
+                    }
+                    ]
+                },
+            );
+
+            await Cart.findOneAndUpdate(
+                {userId : userId},
+                {
+                    $inc: 
+                    {
+                        "amount.value": - amount
+                    }
+                }
+            );
+
+            const updatedCart = await Cart.findOne({userId : userId});
+            let total = updatedCart ? await updatedCart.amount.value ===  0 : null;
+            if(total){await Cart.deleteOne({userId : userId})}
+            
+            res.status(200).json(
+                {
+                    success: true,
+                    status: "Cart succesfully updated",
+                    updatedCart: await Cart.findOne({userId : userId})
+                });
+        }
+        else
+        {
+            res.status(500).json(
+                {
+                    success: false,
+                    status: "Unsuccessfull request!",
+                    err: "Product not found"
+                });
+        }
     }
     catch(err)
     {
@@ -247,7 +316,7 @@ router.delete("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
             {
                 success: false,
                 status: "Unsuccessfull request!",
-                err: err
+                err: err.message
             });
     }
 

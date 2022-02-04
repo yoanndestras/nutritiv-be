@@ -34,7 +34,7 @@ router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth
             product = load.map((el, i) => {
                 price = el * PPCapsule;
                 let discountValues = check.discount(values, price, el, keys);
-                return {load : discountValues.qty, price :discountValues.price}
+                return {load : discountValues.qty, price :{ value : discountValues.price, currency : "EUR"}}
             })
         }
         else if(shape === "powder" && PPKg)
@@ -45,7 +45,7 @@ router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth
             product = load.map((el, i) => {
                 price = el * (parseFloat(PPKg)/1000);
                 let discountValues = check.discount(values, price, el, keys);
-                return {load : discountValues.qty, price :discountValues.price}
+                return {load : discountValues.qty, price :{ value : discountValues.price, currency : "EUR"}}
             })
         }
         else
@@ -88,7 +88,7 @@ router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth
     }
 });
 
-// UPDATE PRODUCT
+// UPDATE PRODUCT //TODO:  form adaptability 
 router.put("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, async(req, res) =>
 {
     try
@@ -178,6 +178,9 @@ router.get("/", cors.corsWithOptions, async(req, res) =>
     const queryTags = req.query.tags;
     
     //const products = queryTags ? find.tags : [product.find()].sort(( queryNew ? {id} : '')).limit(queryNew ? 1 : '')
+
+    //method to get only new products with "?limit=15" in request
+    const queryLimit = req.query.limit;
     
     try
     {
@@ -190,8 +193,13 @@ router.get("/", cors.corsWithOptions, async(req, res) =>
         }
         else if(queryTags)
         {
-            // the product with the queryTags
+            // the products with the queryTags
             products = await Product.find({tags:{$in: [queryTags]}});
+        }
+        else if(queryLimit)
+        {
+            // the products with the quertNumber
+            products = await Product.find().sort({_id:-1}).limit(queryLimit);
         }
         else
         {

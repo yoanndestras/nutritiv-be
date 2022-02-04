@@ -12,7 +12,6 @@ router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); }
 router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async (req, res) =>
 {
     //TODO: add CountInStock 
-    
     const newOrder = new Order(req.body);
     try
     {

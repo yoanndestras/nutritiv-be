@@ -226,6 +226,12 @@ router.put("/updateQuantity/:id/:load/:operation", cors.corsWithOptions, auth.ve
         let total = updatedCart ? await updatedCart.amount.value <=  0 : null;
         if(total){await Cart.deleteOne({userId : userId})}
         
+
+        const productsArray = updatedCart ? updatedCart.products : null;
+        const productIndex =  productsArray ? productsArray.findIndex(el => el.productId.toString() === Id) : null;
+        const product = productIndex !== null && productIndex !== -1 ? productsArray.filter(el => el.productId.toString() === Id && el.productItems.some(el => el.load === Load)) : null;
+        
+        
         res.status(200).json(
             {
                 success: true,

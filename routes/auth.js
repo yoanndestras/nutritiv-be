@@ -274,7 +274,7 @@ router.delete("/logout", cors.corsWithOptions, auth.verifyUser, auth.verifyRefre
             {
                 success: false, 
                 status: 'Logout Unsuccessfull!', 
-                err: err
+                err: err.message
             });
     }
 });

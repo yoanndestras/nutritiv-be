@@ -185,7 +185,7 @@ exports.verifyRefresh = (req, res, next) =>
                     {
                         success: false, 
                         status: "You are not connected", 
-                        err: "No refreshToken cookie found or its not valid",
+                        err: "No refreshToken found or its not valid",
                     });
             }
             else

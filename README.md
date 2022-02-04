@@ -56,6 +56,7 @@ Back-end of Nutritiv project
 
 - PUT "/updateQuantity/:id/:load/:operation" : add or remove 1 element for the appropriate product in cart | cors & verify user exist & connected & product.id = :id & product.load = :load & :operation = inc(+) or dec(-)
 
+- DELETE "/:userId/:productId/:load" : delete appropriate product of the user connected, an Admin can perform this operation too on any user cart, if cart become empty after the operation it is deleted | cors & verify user exist & connected & cart._id = :id or user is Admin
 - DELETE "/:id" : delete appropriate cart | cors & verify user exist & connected & cart._id = :id or user is Admin
 
 # ORDER (/orders)

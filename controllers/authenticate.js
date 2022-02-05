@@ -228,7 +228,8 @@ exports.verifyAuth = (req, res, next) =>
                 return res.status(200).json(
                     {
                         loggedIn: false,
-                        status: "User not connected"
+                        status: "User not connected",
+                        err: err.message
                     });
             }
             else

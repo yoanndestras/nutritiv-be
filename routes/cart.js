@@ -224,14 +224,21 @@ router.put("/updateQuantity/:id/:load/:operation", cors.corsWithOptions, auth.ve
 
         const updatedCart = await Cart.findOne({userId : userId});
         let total = updatedCart ? await updatedCart.amount.value <=  0 : null;
-        if(total){await Cart.deleteOne({userId : userId})}
-        
-
-        const productsArray = updatedCart ? updatedCart.products : null;
+        if(total)
+        {
+            await Cart.deleteOne({userId : userId})
+        } // si amount = 0 delete la panier
+        // use $trunc
+        // sinon si le produit a une quantité = 0
+        const productsArray = updatedCart ? updatedCart.products : null; 
         const productIndex =  productsArray ? productsArray.findIndex(el => el.productId.toString() === Id) : null;
-        const product = productIndex !== null && productIndex !== -1 ? productsArray.filter(el => el.productId.toString() === Id && el.productItems.some(el => el.load === Load)) : null;
+        const product = productIndex !== null && productIndex !== -1 ? productsArray.filter(el => el.productId.toString() === Id) : null;
+        console.log(product.length);
         
-        
+        if(product.length === 1)
+        {
+            
+        }
         res.status(200).json(
             {
                 success: true,

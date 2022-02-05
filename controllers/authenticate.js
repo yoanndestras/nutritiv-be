@@ -229,7 +229,7 @@ exports.verifyAuth = (req, res, next) =>
                     {
                         loggedIn: false,
                         status: "User not connected",
-                        err: err.message
+                        err: err
                     });
             }
             else

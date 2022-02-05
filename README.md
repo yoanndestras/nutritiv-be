@@ -34,7 +34,7 @@ Back-end of Nutritiv project
 - POST "/new_password" : change user password, reset login attempts | verify new password syntax & equality of both input
 - POST "/login" : connect the user, generate accessToken & refreshToken and send in res header, set refreshToken cookie | cors & verify user is not connected
 
-- DELETE "/logout" : disconnect the user by clearing the cookie and the header| cors & verify user exist & is not connected 
+- DELETE "/logout" : disconnect the user by clearing the cookie | cors & verify user exist & is not connected 
 # PRODUCT (/products)
 
 - GET "/" : return all products | cors

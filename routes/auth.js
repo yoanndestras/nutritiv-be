@@ -2,9 +2,6 @@ const router = require("express").Router();
 const User = require("../models/User");
 const passport = require("passport");
 
-const LocalStorage = require('node-localstorage').LocalStorage;
-localStorage = new LocalStorage('./scratch');
-
 // MIDDLEWARES
 const cors = require('../controllers/cors');
 const auth = require("../controllers/authenticate");
@@ -21,7 +18,7 @@ auth.verifyPasswordSyntax, mailer.sendVerifyAccountMail, async(req, res) =>
     {
         User.register(new User({username: req.body.formData.username, email: req.body.formData.email}), req.body.formData.password, async(err, user) =>
         {
-            if(err) 
+            if(err)
             {
                 console.log(err);
                 return res.status(400).json(
@@ -261,7 +258,6 @@ router.delete("/logout", cors.corsWithOptions, auth.verifyUser, auth.verifyRefre
 {   
     try
     {
-        localStorage.removeItem('refresh_token');
         return  res.clearCookie("refresh_token")
                     .status(200)
                     .json(

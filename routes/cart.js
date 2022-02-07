@@ -23,7 +23,7 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
         const Load = parseFloat(req.body.load);
         const Price = parseFloat(req.body.price);
         
-        let price = parseFloat((Price * Quantity))
+        let price = parseFloat((Price * Quantity).toFixed(2))
         
         const existingCart = await Cart.findOne({userId : userId});
         const productsArray = existingCart ? existingCart.products : null;
@@ -53,13 +53,28 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                     multi: true
                 },
             )
-            await Cart.aggregate([
+            
+            let cart = await Cart.aggregate([
+                { $match : {"userId" : userId.toString()} },
                 {
-                    $set: {
-                        "amount.value":  {$trunc : ["$amount.value", 2]}
+                    $project : {
+                        roundedValue:  
+                        {
+                            $round : ["$amount.value", 2]
+                        }
                     }
                 }
             ])
+
+            updatedCart = await Cart.findOneAndUpdate(
+                {"userId": userId},
+                {
+                    $set: {
+                        "amount.value": cart[0].roundedValue
+                    }
+                }
+            )
+            
             
             res.status(200).json(
                 {
@@ -68,6 +83,7 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                     updatedCart: await Cart.findOne({userId : userId})
                 });             
             }
+
         else if( productIndex !== null && productIndex !== -1)
         {
             let productItems =  
@@ -89,11 +105,32 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                         "products.$[].productItems": productItems,
                     },
                     $inc: {
-                        "amount.value":price
+                        "amount.value": price
                     }
-                }
+                })
+
+                let cart = await Cart.aggregate([
+                    { $match : {"userId" : userId.toString()} },
+                    {
+                        $project : {
+                            roundedValue:  
+                            {
+                                $round : ["$amount.value", 2]
+                            }
+                        }
+                    }
+                ])
+    
+                updatedCart = await Cart.findOneAndUpdate(
+                    {"userId": userId},
+                    {
+                        $set: {
+                            "amount.value": cart[0].roundedValue
+                        }
+                    }
+                )
                 
-            )
+            
             res.status(200).json(
                 {
                     success: true,
@@ -131,6 +168,28 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                     }
                 }
             )
+
+            let cart = await Cart.aggregate([
+                { $match : {"userId" : userId.toString()} },
+                {
+                    $project : {
+                        roundedValue:  
+                        {
+                            $round : ["$amount.value", 2]
+                        }
+                    }
+                }
+            ])
+
+            updatedCart = await Cart.findOneAndUpdate(
+                {"userId": userId},
+                {
+                    $set: {
+                        "amount.value": cart[0].roundedValue
+                    }
+                }
+            )
+
             res.status(200).json(
                 {
                     success: true,
@@ -160,7 +219,8 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                             }
                         ]
                     },
-                    "amount.value" : price.toFixed(2)
+                    "amount.value" : price,
+                    "amount.roundedValue": price
                 }
             );
             await newCart.save();
@@ -220,6 +280,27 @@ router.put("/updateQuantity/:id/:load/:operation", cors.corsWithOptions, auth.ve
                     new: true
                 },
             );
+
+            let cart = await Cart.aggregate([
+                { $match : {"userId" : userId.toString()} },
+                {
+                    $project : {
+                        roundedValue:  
+                        {
+                            $round : ["$amount.value", 2]
+                        }
+                    }
+                }
+            ])
+
+            await Cart.findOneAndUpdate(
+                {"userId": userId},
+                {
+                    $set: {
+                        "amount.value": cart[0].roundedValue
+                    }
+                }
+            )
         }
         else
         {
@@ -230,23 +311,47 @@ router.put("/updateQuantity/:id/:load/:operation", cors.corsWithOptions, auth.ve
                 });
         }
 
-        const updatedCart = await Cart.findOne({userId : userId});
+        let updatedCart = await Cart.findOne({userId : userId});
         let total = updatedCart ? await updatedCart.amount.value <=  0 : null;
         if(total)
         {
             await Cart.deleteOne({userId : userId})
-        } // si amount = 0 delete la panier
-        // use $trunc
-        // sinon si le produit a une quantité = 0
+        } 
+        
         const productsArray = updatedCart ? updatedCart.products : null; 
         const productIndex =  productsArray ? productsArray.findIndex(el => el.productId.toString() === Id) : null;
-        const product = productIndex !== null && productIndex !== -1 ? productsArray.filter(el => el.productId.toString() === Id) : null;
-        console.log(product.length);
+        let product = productIndex !== null && productIndex !== -1 ? productsArray.filter(el => el.productId.toString() === Id) : null;
+        product = product && product.length === 1 ? product[0].productItems.map(el => el.quantity === 0) : null
         
-        if(product.length === 1)
-        {
-            
-        }
+        updatedCart = product[0] === true ? await Cart.findOneAndUpdate(
+            {userId : userId}, 
+            {
+                $pull: 
+                {
+                    "products.$[outer].productItems": {load : Load} ,
+                }
+            },
+            {
+                arrayFilters: [
+                {
+                    'outer.productId': mongoose.Types.ObjectId(Id)
+                }],
+                new: true
+            },
+        ): null;
+        
+        product = productIndex !== null && productIndex !== -1 ? productsArray.filter(el => el.productId.toString() === Id) : null;
+        
+        updatedCart = product[0].productItems && product[0].productItems[0].quantity === 0 ? await Cart.findOneAndUpdate(
+            {userId : userId}, 
+            {
+                $pull: 
+                {
+                    "products": {productId : mongoose.Types.ObjectId(Id)}
+                }
+            }
+        ): null;
+
         res.status(200).json(
             {
                 success: true,

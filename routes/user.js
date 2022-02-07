@@ -74,7 +74,7 @@ router.get("/find/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefres
     {
         const user = await User.findById(req.params.id)
         
-        const {password, ...public} = user._doc;
+        const {email, ...public} = user._doc;
         
         res.status(200).json({success: true, user: public});
     }

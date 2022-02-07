@@ -145,7 +145,7 @@ router.get("/stats", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
 })
 
 // CHECK JWT TOKEN
-router.get("/JWTinfo", auth.verifyUser, auth.verifyAuth, async(req, res) =>
+router.get("/self", auth.verifyUser, auth.verifyAuth, async(req, res) =>
 {
     try
     {

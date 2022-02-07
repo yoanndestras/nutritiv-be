@@ -152,8 +152,9 @@ router.get("/checkJWT", auth.verifyUser, auth.verifyAuth, async(req, res) =>
         res.status(200).json(
             {
                 loggedIn: true,
-                isAdmin: req.user.isAdmin,
-                status: "User connected"
+                user: req.user,
+                status: "User connected",
+                
             });
     }
     catch(err)

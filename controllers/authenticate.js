@@ -128,7 +128,7 @@ exports.verifyAuthorization = async(req, res, next) =>
 {
     try
     {
-
+        
         let userId = JSON.stringify(req.user._id).replace(/\"/g, "");
 
         if( userId === req.params.id || req.user.isAdmin == true)
@@ -224,12 +224,12 @@ exports.verifyAuth = (req, res, next) =>
         passport.authenticate('jwt_rt', { session: false }, (err, user, info) => 
         {        
             if (err || !user) 
-            {
+            {                
                 return res.status(200).json(
                     {
                         loggedIn: false,
                         status: "User not connected",
-                        err: err
+                        err: user
                     });
             }
             else

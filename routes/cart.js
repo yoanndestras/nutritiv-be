@@ -23,7 +23,7 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
         const Load = parseFloat(req.body.load);
         const Price = parseFloat(req.body.price);
         
-        let price = parseFloat((Price * Quantity).toFixed(2))
+        let price = parseFloat((Price * Quantity))
         
         const existingCart = await Cart.findOne({userId : userId});
         const productsArray = existingCart ? existingCart.products : null;
@@ -39,7 +39,7 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                     $inc: {
                         "products.$[outer].productItems.$[inner].quantity": Quantity,
                         "products.$[outer].productItems.$[inner].price.value": price,
-                        "amount.value": price.toFixed(2)
+                        "amount.value": price
                     }
                 },
                 {
@@ -50,9 +50,17 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                     {
                         'inner.load': Load
                     }],
-                    new: true
+                    multi: true
                 },
             )
+            await Cart.aggregate([
+                {
+                    $set: {
+                        "amount.value":  {$trunc : ["$amount.value", 2]}
+                    }
+                }
+            ])
+            
             res.status(200).json(
                 {
                     success: true,
@@ -81,7 +89,7 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                         "products.$[].productItems": productItems,
                     },
                     $inc: {
-                        "amount.value": price.toFixed(2)
+                        "amount.value":price
                     }
                 }
                 
@@ -119,7 +127,7 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                     },
                     $inc: 
                     {
-                        "amount.value": price.toFixed(2)
+                        "amount.value": price
                     }
                 }
             )

@@ -202,7 +202,6 @@ exports.verifyRefresh = (req, res, next) =>
                             secure: process.env.REF_JWT_SEC_COOKIE === "prod"
                             //sameSite: "Lax"
                         })
-                    .
                 
                 req.user = user;
                 next();
@@ -228,8 +227,7 @@ exports.verifyAuth = (req, res, next) =>
                 return res.status(200).json(
                     {
                         loggedIn: false,
-                        status: "User not connected",
-                        err: user
+                        status: "User not connected"
                     });
             }
             else
@@ -246,7 +244,6 @@ exports.verifyAuth = (req, res, next) =>
                             secure: process.env.REF_JWT_SEC_COOKIE === "prod"
                             //sameSite: "Lax"
                         })
-                    .
                 
                 req.user = user;
                 next();

@@ -145,31 +145,18 @@ router.get("/stats", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
 })
 
 // CHECK JWT TOKEN
-router.get("/checkJWT", auth.verifyUser, auth.verifyAuth, async(req, res) =>
+router.get("/JWTinfo", auth.verifyUser, auth.verifyAuth, async(req, res) =>
 {
     try
     {
         res.status(200).json(
             {
                 loggedIn: true,
-                status: "User connected",
-                
-            });
-    }
-    catch(err)
-    {
-        res.status(500).json({success: false, err: err.message});
-    }
-})
-
-// CHECK JWT TOKEN
-router.get("/self", auth.verifyUser, auth.verifyAuth, async(req, res) =>
-{
-    try
-    {
-        res.status(200).json(
-            {
-                user: req.user
+                username: req.user.username,
+                email: req.user.email,
+                isAdmin: req.user.isAdmin,
+                isVerified: req.user.isVerified,
+                status: "User connected"
             });
     }
     catch(err)

@@ -17,6 +17,9 @@ router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, asyn
     
     try
     {
+        let Cart = await Cart.findOne({userId : userId});
+        
+
         const newOrder = new Order(
             {
                 userId: userId,
@@ -24,7 +27,7 @@ router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, asyn
         );
         const savedOrder = await newOrder.save();
         
-        savedOrder.populate(C)
+        savedOrder.populate("")
         res.status(200).json(savedOrder);
     }
     catch(err)

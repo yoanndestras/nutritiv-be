@@ -40,7 +40,7 @@ Back-end of Nutritiv project
 - GET "/" : return all products | cors
 - GET "/?new=true" : return only the last product created | cors
 - GET "/?tags=endurance" : return only products with the appropriate tag | cors
-- GET "/?limit=x" : return only the last x products | cors
+- GET "/?limit=x" : return only the last x products from the last created to the oldest| cors
 - GET "/find/:id" : return the appropriate product
 
 - POST "/" : create a new product, calculate the price | cors & verify title and shape(Compound Indexes) do not exist & verify user exist & connected & is Admin & upload images (upload.any('imageFile'))

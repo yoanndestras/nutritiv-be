@@ -1,39 +1,29 @@
 const mongoose = require("mongoose")
 const Schema = mongoose.Schema;
-const Currency = mongoose.Types.Currency;
 
 
 const OrderSchema = new Schema
 ({
     userId: 
     {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
         required: true,
     },
     products: 
-    [
-        {
-            productId:
-            {
-                type: String
-            },
-            quantity:
-            {
-                type: Number,
-                default: 1,
-            },
-        },
-    ],
-    amount:
     {
-        type: Currency,
-        required: true,
-        min: 0
+        type: Array,
+        ref: "Cart",
+        required: true
+    },
+    amount: 
+    {
+        type: Object,
+        ref: "Cart",
+        required: true
     },
     address:
     {
-        type: Currency,
-        required: true,
+        type: String,
         min: 0
     },
     status:

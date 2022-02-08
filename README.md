@@ -18,7 +18,7 @@ Back-end of Nutritiv project
 - GET "/" : return 5 last users created | cors & verify user exist & connected & is Admin
 - GET "/stats" : return the number of users created by month (total) with the number of the month (_id) | cors & verify user exist & connected & is Admin
 - GET "/find/:id" : return USER info except password | cors & verify user exist & connected
-- GET "/checkJWT" : return loggedIn and isAdmin boolean
+- GET "/self" : return user infos and loggedIn boolean
 
 - PUT "/reset_password" : modify password of user | verify user exist & connected & new password syntax
 
@@ -40,6 +40,7 @@ Back-end of Nutritiv project
 - GET "/" : return all products | cors
 - GET "/?new=true" : return only the last product created | cors
 - GET "/?tags=endurance" : return only products with the appropriate tag | cors
+- GET "/?limit=x" : return only the last x products from the last created to the oldest| cors
 - GET "/find/:id" : return the appropriate product
 
 - POST "/" : create a new product, calculate the price | cors & verify title and shape(Compound Indexes) do not exist & verify user exist & connected & is Admin & upload images (upload.any('imageFile'))
@@ -82,3 +83,42 @@ Back-end of Nutritiv project
 - DELETE "/" : DELETE operation not supported on /imageUpload |**
 
 **cors & verify user exist & connected & is Admin
+
+
+## KEYBOARD Shortcuts
+
+ctrl+` : terminal
+
+code nameOfProject (in terminal) : open project 
+
+### Tab shortcuts
+- Alt+1 : Open first tab
+- Alt+2 : Open second tab
+etc
+- Ctrl+p : Search files
+- Ctrl+w : Close active tab
+- Ctrl+k+w : Close all tabs
+
+### Instead create folder folder file 
+- use Create File: folder1/folder2/file.js 
+
+- Ctrl+b : Hide/open sideBar
+- Ctrl and + : Zoom in
+- Ctrl and - : Zoom out
+
+### Appearance shortcuts
+- Ctrl+\ : Split screen
+- Ctrl+1 : Screen 1
+- Ctrl+2 : Screen 2
+
+### Terminal shortcuts
+- Arrow up/down : previous commands
+- clear : clear terminal
+
+### Code faster shortcuts
+- Ctrl+arrows : skip blocks
+- Ctrl+Shift+arrows : Select blocks of text
+- Ctrl+x : cut line (select line not element, 
+same for copy)
+- Ctrl+/ : comment line
+- Alt+shift+arrow(up/down) : duplicate line

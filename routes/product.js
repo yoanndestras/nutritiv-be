@@ -209,9 +209,9 @@ router.get("/", cors.corsWithOptions, async(req, res) =>
         
         res.status(200).json(
             {
-                success: true,
-                status: "Products found",
-                Product: products
+                // success: true,
+                // status: "Products found",
+                products
             });
     }
     catch(err)

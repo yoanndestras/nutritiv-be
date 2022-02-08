@@ -254,7 +254,7 @@ router.put("/updateQuantity/:id/:load/:operation", cors.corsWithOptions, auth.ve
         const Id = req.params.id;
         const Load = parseFloat(req.params.load);
         const Price = parseFloat(req.price);
-
+        
         const quantity = req.params.operation === "inc" ? 1 : req.params.operation === "dec" ? -1 : null;
         const value = req.params.operation === "inc" ? Price : req.params.operation === "dec" ? - Price : null;
         

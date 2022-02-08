@@ -1,5 +1,4 @@
 const Cart = require("../models/Cart");
-const Product = require("../models/Product")
 const router = require("express").Router();
 const mongoose = require('mongoose');
 
@@ -55,7 +54,7 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
             )
             
             let cart = await Cart.aggregate([
-                { $match : {"userId" : userId.toString()} },
+                { $match : {"userId" : userId} },
                 {
                     $project : {
                         roundedValue:  
@@ -110,7 +109,7 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                 })
 
                 let cart = await Cart.aggregate([
-                    { $match : {"userId" : userId.toString()} },
+                    { $match : {"userId" : userId} },
                     {
                         $project : {
                             roundedValue:  
@@ -170,7 +169,7 @@ router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
             )
 
             let cart = await Cart.aggregate([
-                { $match : {"userId" : userId.toString()} },
+                { $match : {"userId" : userId} },
                 {
                     $project : {
                         roundedValue:  
@@ -282,7 +281,7 @@ router.put("/updateQuantity/:id/:load/:operation", cors.corsWithOptions, auth.ve
             );
 
             let cart = await Cart.aggregate([
-                { $match : {"userId" : userId.toString()} },
+                { $match : {"userId" : userId} },
                 {
                     $project : {
                         roundedValue:  

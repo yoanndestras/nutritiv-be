@@ -1,4 +1,5 @@
 const Order = require("../models/Order");
+const Cart = require("../models/Cart");
 const router = require("express").Router();
 
 // MIDDLEWARES
@@ -15,7 +16,6 @@ router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, asyn
     const newOrder = new Order(req.body);
     try
     {
-        
         const savedOrder = await newOrder.save();
         
         res.status(200).json(savedOrder);

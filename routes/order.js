@@ -1,6 +1,7 @@
 const Order = require("../models/Order");
 const Cart = require("../models/Cart");
 const router = require("express").Router();
+const mongoose = require('mongoose');
 
 // MIDDLEWARES
 const cors = require('../controllers/cors');
@@ -13,11 +14,17 @@ router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); }
 router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async (req, res) =>
 {
     //TODO: add CountInStock 
-    const newOrder = new Order(req.body);
+    
     try
     {
+        const newOrder = new Order(
+            {
+                userId: userId,
+            }
+        );
         const savedOrder = await newOrder.save();
         
+        savedOrder.populate(C)
         res.status(200).json(savedOrder);
     }
     catch(err)

@@ -180,8 +180,7 @@ router.get("/", cors.corsWithOptions, async(req, res) =>
     //const products = queryTags ? find.tags : [product.find()].sort(( queryNew ? {id} : '')).limit(queryNew ? 1 : '')
 
     //method to get only new products with "?limit=15" in request
-    const queryLimit = req.query.limit;
-    
+    const queryLimit = parseFloat(req.query.limit);
     try
     {
         let products;

@@ -17,22 +17,47 @@ router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, asyn
     
     try
     {
-        let Cart = await Cart.findOne({userId : userId});
+        const userId = req.user.id;
+        const cart = await Cart.findOne({userId : userId});
         
-
+        let products =  cart.products;
+        let amount =  cart.amount;
+        
+        let orderDetails = 
+            {
+                address: req.body.address,
+                zip: req.body.zip,
+                city: req.body.city,
+                country: req.body.country,
+                phoneNumber: req.body.phoneNumber
+            }
+        
         const newOrder = new Order(
             {
-                userId: userId,
-            }
-        );
+                userId: mongoose.Types.ObjectId(userId),
+                products: products,
+                amount: amount,
+                orderDetails: orderDetails,
+            });
+        
         const savedOrder = await newOrder.save();
         
-        savedOrder.populate("")
-        res.status(200).json(savedOrder);
+        res.status(200).json(
+            {
+                success: true,
+                status: "Order valid!",
+                NewOrder: savedOrder
+            });
     }
     catch(err)
     {
-        res.status(500).json(err);
+        res.status(500).json(
+            {
+                success: false,
+                status: "Unsuccessfull request!",
+                err : err.message
+            }
+            );
     }
 });
 

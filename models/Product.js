@@ -34,7 +34,7 @@ const ProductSchema = new Schema
         type: Array,
         required: true
     },
-    product: 
+    productItems: 
     {
         type: Array,
         required: true,

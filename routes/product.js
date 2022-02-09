@@ -64,7 +64,7 @@ router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth
                 shape: req.body.shape,
                 tags : tags,
                 imgs: imgs,
-                product: product,
+                productItems: product,
                 countInStock: req.body.countInStock
             }
         );

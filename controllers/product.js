@@ -1,5 +1,11 @@
-
+const express = require('express');
 const Product = require("../models/Product");
+
+
+const app = express();
+
+app.use(express.json()); // to read JSON    
+app.use(express.urlencoded({extended: true}));
 
 exports.discount = (values, price, el, keys) => {
     
@@ -20,14 +26,14 @@ exports.verifyProduct = async(req, res, next) => {
     const newProductPrice = parseFloat(req.body.price);
 
     const existingProduct = await Product.findById(newProductId);
+
     let productId = existingProduct ? existingProduct._id : null;
-    let productArray = productId ? existingProduct.product : null;
+    let productArray = productId ? existingProduct.productItems : null;
     
-    let productLoadAndPrice = productArray ? (existingProduct.product).map((el, i) => {if(el.load === newProductLoad && el.price.value === newProductPrice) {return el.load}}) : null;
+    let productLoadAndPrice = productArray ? productArray.map((el, i) => {if(el.load === newProductLoad && el.price.value === newProductPrice) {return el.load}}) : null;
     let productQuantityInStock = existingProduct ? existingProduct.countInStock >= newProductLoad ? true : false : null;
     productLoadAndPrice = productLoadAndPrice ? productLoadAndPrice.filter(el => el !== undefined) : null;
-    
-    
+        
     if(Array.isArray(productLoadAndPrice) && productLoadAndPrice[0] && productId && productQuantityInStock)
     {
         next();
@@ -40,7 +46,6 @@ exports.verifyProduct = async(req, res, next) => {
     }
     else
     {
-        console.log("object");
         let err = new Error('Id : ' + newProductId + ', Val : ' + newProductLoad + ", Price : " + newProductPrice + " doesnt exist");
         err.status = 403;
         return next(err);

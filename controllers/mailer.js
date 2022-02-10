@@ -1,11 +1,5 @@
-const express = require('express');
 const sgMail = require("@sendgrid/mail");
 const auth = require("./authenticate");
-
-const app = express();
-
-app.use(express.json()); // to read JSON    
-app.use(express.urlencoded({extended: true}));
 
 
 exports.sendVerifyAccountMail = async(req, res, next) =>

@@ -1,5 +1,6 @@
 const uploadRouter = require("express").Router();
 const multer = require('multer');
+const { nanoid } = require('nanoid');
 
 // MIDDLEWARES
 const auth = require('../controllers/authenticate');
@@ -7,6 +8,7 @@ const cors = require('../controllers/cors');
 
 //OPTIONS FOR CORS CHECK
 uploadRouter.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+
 
 const storage = multer.diskStorage(
 {
@@ -17,7 +19,7 @@ const storage = multer.diskStorage(
     
     filename: (req, file, cb) => 
     {      
-        cb(null, file.originalname)
+        cb(null, (nanoid(4) + file.originalname ).split(' ').join('_'))
     }
 });
 
@@ -33,7 +35,11 @@ const imageFileFilter = (req, file, cb) =>
     }
 };
 
-const upload = multer({ storage: storage, fileFilter: imageFileFilter});
+const upload = multer(
+    { 
+        storage: storage, 
+        fileFilter: imageFileFilter
+    });
 
 uploadRouter.route('/')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })

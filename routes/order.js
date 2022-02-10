@@ -6,48 +6,23 @@ const mongoose = require('mongoose');
 // MIDDLEWARES
 const cors = require('../controllers/cors');
 const auth = require('../controllers/authenticate');
+const order = require('../controllers/order')
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
 // CREATE ORDER
-router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async (req, res) =>
-{
-    //TODO: add CountInStock 
-    
+router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, order.verifyPhoneNumber, order.newOrder, async (req, res) =>
+{    
     try
     {
-        const userId = req.user.id;
-        const cart = await Cart.findOne({userId : userId});
-        
-        let products =  cart.products;
-        let amount =  cart.amount;
-        
-        let orderDetails = 
-            {
-                address: req.body.address,
-                zip: req.body.zip,
-                city: req.body.city,
-                country: req.body.country,
-                phoneNumber: req.body.phoneNumber
-            }
-        
-        const newOrder = new Order(
-            {
-                userId: mongoose.Types.ObjectId(userId),
-                products: products,
-                amount: amount,
-                orderDetails: orderDetails,
-            });
-        
-        const savedOrder = await newOrder.save();
-        
         res.status(200).json(
             {
                 success: true,
-                status: "Order valid!",
-                NewOrder: savedOrder
-            });
+                status: req.user.username + ", thank you for your order",
+                NewOrder: req.order
+            }
+        );
     }
     catch(err)
     {
@@ -57,7 +32,7 @@ router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, asyn
                 status: "Unsuccessfull request!",
                 err : err.message
             }
-            );
+        );
     }
 });
 
@@ -71,7 +46,8 @@ router.put("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, au
             {
                 $set: req.body
             },
-            {new: true});
+            {new: true}
+        );
 
         res.status(200).json(updatedOrder);
     }
@@ -97,18 +73,17 @@ router.delete("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
 });
 
 // GET USER ORDERS
-router.get("/find/:userId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAuthorization, async (req, res) =>
+router.get("/find/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAuthorization, async (req, res) =>
 {
     try
     {
-        const orders = await Order.find({userId: req.params.userId})
+        const orders = await Order.find({userId: req.params.id})
         res.status(200).json(orders);
     }
     catch(err)
     {
         res.status(500).json(err);
     }
-
 });
 
 // GET ALL ORDERS

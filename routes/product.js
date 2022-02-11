@@ -25,14 +25,13 @@ router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth
         
         const PPCapsule = req.body.pricePerCapsule;
         const PPKg = req.body.pricePerKilograms;
-        
         if(shape === "capsules" && PPCapsule)
         {
             let milestones = {30: 0.1, 60: 0.2, 120: 0.4, 210: 0.5};
             let keys = Object.keys(milestones), values = Object.values(milestones);
             
             product = load.map((el, i) => {
-                price = el * PPCapsule;
+                price = el * parseFloat(PPCapsule);
                 let discountValues = check.discount(values, price, el, keys);
                 return {load : discountValues.qty, price :{ value : discountValues.price, currency : "EUR"}}
             })

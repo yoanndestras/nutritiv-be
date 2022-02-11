@@ -130,14 +130,18 @@ exports.verifyAuthorization = async(req, res, next) =>
     {
         
         let userId = JSON.stringify(req.user._id).replace(/\"/g, "");
-
         if( userId === req.params.id || req.user.isAdmin == true)
         {
             next();
         }
         else
         {
-            res.status(403).json("You are not allowed to do that !");
+            res.status(403).json(
+                {
+                    success: false,
+                    status: "You are not allowed to perform this operation!"
+                }    
+            );
         }
     }
     catch(err)

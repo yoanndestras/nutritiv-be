@@ -25,8 +25,7 @@ const ProductSchema = new Schema
     shape: 
     {
         type: String,
-        required: true,
-        unique: true
+        required: true
     },
     imgs: 
     {

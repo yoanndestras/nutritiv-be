@@ -53,6 +53,7 @@ app.use(
 
 app.use(express.static(path.join(__dirname, 'public')));
 // http://localhost:3001/images/Multivitamines.png
+// http://localhost:3001/images/Sans_titre.png
 
 app.use("/users", userRoute);
 app.use("/auth", authRoute);

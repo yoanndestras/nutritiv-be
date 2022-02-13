@@ -5,69 +5,30 @@ const _ = require("lodash")
 // MIDDLEWARES
 const cors = require('../controllers/cors');
 const auth = require('../controllers/authenticate');
-const check = require('../controllers/product');
+const product = require('../controllers/product');
 const {upload} = require('./upload');
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
 // CREATE PRODUCT
-router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, upload.any('imageFile'), async(req, res) =>
+router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, 
+upload.any('imageFile'), product.newProduct, async(req, res) =>
 {
     try
     {
-        let shape = req.body.shape;
-        const files = req.files
-        const req_tags = Array.isArray(req.body.tags) ? req.body.tags : req.body.tags !== undefined ? [req.body.tags] : null;
-        const load = Array.isArray(req.body.load) ? req.body.load : req.body.load !== undefined ? [req.body.load] : null;
-        let imgs = files.map((el, i) => {return el.path}), tags = req_tags.map((el, i) => {return el});    
-        let product;
-        
-        const PPCapsule = req.body.pricePerCapsule;
-        const PPKg = req.body.pricePerKilograms;
-        if(shape === "capsules" && PPCapsule)
-        {
-            let milestones = {30: 0.1, 60: 0.2, 120: 0.4, 210: 0.5};
-            let keys = Object.keys(milestones), values = Object.values(milestones);
-            
-            product = load.map((el, i) => {
-                price = el * parseFloat(PPCapsule);
-                let discountValues = check.discount(values, price, el, keys);
-                return {load : discountValues.qty, price :{ value : discountValues.price, currency : "EUR"}}
-            })
-        }
-        else if(shape === "powder" && PPKg)
-        {
-            let milestones = { 60: 0, 150: 0.2, 350: 0.4, 1000: 0.5};
-            let keys = Object.keys(milestones), values = Object.values(milestones);
-            
-            product = load.map((el, i) => {
-                price = el * (parseFloat(PPKg)/1000);
-                let discountValues = check.discount(values, price, el, keys);
-                return {load : discountValues.qty, price :{ value : discountValues.price, currency : "EUR"}}
-            })
-        }
-        else
-        {
-            res.status(500).json(
-                {
-                    success: false,
-                    status: "Unsuccessfull request!",
-                });
-        }
-        
         const newProduct = await new Product(
             {
                 title: req.body.title,
                 desc: req.body.desc,
                 shape: req.body.shape,
-                tags : tags,
-                imgs: imgs,
-                productItems: product,
+                tags : req.tags,
+                imgs: req.imgs,
+                productItems: req.product,
                 countInStock: req.body.countInStock
             }
         );
-        
+
         const savedProduct = await newProduct.save();
         res.status(200).json(
             {

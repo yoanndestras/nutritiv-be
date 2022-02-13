@@ -16,13 +16,26 @@ router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, orde
 {    
     try
     {
-        res.status(200).json(
-            {
-                success: true,
-                status: req.user.username + ", thank you for your order",
-                NewOrder: req.order
-            }
-        );
+        if(req.cart === true)
+        {
+            res.status(200).json(
+                {
+                    success: true,
+                    status: req.user.username + ", thank you for your order",
+                    NewOrder: req.order
+                }
+            );
+        }
+        else
+        {
+            res.status(500).json(
+                {
+                    success: false,
+                    status: "Cart do not exist!"
+                }
+            );
+        }
+        
     }
     catch(err)
     {

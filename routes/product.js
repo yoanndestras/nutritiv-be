@@ -1,6 +1,7 @@
 const Product = require("../models/Product");
 const router = require("express").Router();
 const _ = require("lodash")
+const fs = require('fs');
 
 // MIDDLEWARES
 const cors = require('../controllers/cors');
@@ -48,17 +49,27 @@ upload.any('imageFile'), product.newProduct, async(req, res) =>
     }
 });
 
-// UPDATE PRODUCT //TODO:  form adaptability 
+// UPDATE PRODUCT //TODO:  form adaptability // ?myfield=
 router.put("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, async(req, res) =>
 {
     try
     {
+        const queryFields = req.query.myfield;
+        if(queryFields)
+        {
+            console.log(queryFields);
+            console.log(req.query);
+        }
         const updatedProduct = await Product.findByIdAndUpdate(
             req.params.id, 
             {
-                $set: req.body
+                $set: 
+                {
+                    
+                }    
             },
-            {new: true});
+            {new: true}
+        );
         
         res.status(200).json(
             {
@@ -84,7 +95,19 @@ router.delete("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
 {   
     try
     {
+        const removeFile= function (err) {
+            if (err) {
+                console.log("unlink failed", err);
+            } else {
+                console.log("file deleted");
+            }
+        }
+        const product = await Product.findOne({_id : req.params.id})
+        let productImg = product.imgs;
+        let unlickImg = productImg ? productImg.map(img => fs.unlink(img, removeFile)) : null;
+        
         await Product.findByIdAndDelete(req.params.id)
+        
         res.status(200).json(
             {
                 success: true,

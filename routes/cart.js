@@ -56,7 +56,7 @@ product.verifyProduct, cart.cart, async(req, res) =>
 
 // ADD QUANTITY PRODUCT IN CART 
 router.put("/updateQuantity/:id/:load/:operation", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
-product.verifyPricePerProduct, cart.updateQuantity,async(req, res) =>
+product.verifyPricePerProduct, cart.updateQuantity, async(req, res) =>
 {
     try
     {

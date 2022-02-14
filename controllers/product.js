@@ -1,5 +1,6 @@
 const express = require('express');
 const Product = require("../models/Product");
+const check = require('./product');
 
 
 const app = express();
@@ -7,6 +8,55 @@ const app = express();
 app.use(express.json()); // to read JSON    
 app.use(express.urlencoded({extended: true}));
 
+
+exports.newProduct = async(req, res, next) =>
+{
+    let product;
+    let shape = req.body.shape;
+    const files = req.files
+    const req_tags = Array.isArray(req.body.tags) ? req.body.tags : req.body.tags !== undefined ? [req.body.tags] : null;
+    const load = Array.isArray(req.body.load) ? req.body.load : req.body.load !== undefined ? [req.body.load] : null;
+    let imgs = files.map((el, i) => {return el.path}), tags = req_tags.map((el, i) => {return el});    
+    const PPCapsule = req.body.pricePerCapsule;
+    const PPKg = req.body.pricePerKilograms;
+
+    if(shape === "capsules" && PPCapsule)
+    {
+        let milestones = {30: 0.1, 60: 0.2, 120: 0.4, 210: 0.5};
+        let keys = Object.keys(milestones), values = Object.values(milestones);
+        
+        product = load.map((el, i) => {
+            price = el * parseFloat(PPCapsule);
+            let discountValues = check.discount(values, price, el, keys);
+            return {load : discountValues.qty, price :{ value : discountValues.price, currency : "EUR"}}
+        })
+    }
+    else if(shape === "powder" && PPKg)
+    {
+        let milestones = { 60: 0, 150: 0.2, 350: 0.4, 1000: 0.5};
+        let keys = Object.keys(milestones), values = Object.values(milestones);
+        
+        product = load.map((el, i) => {
+            price = el * (parseFloat(PPKg)/1000);
+            let discountValues = check.discount(values, price, el, keys);
+            return {load : discountValues.qty, price :{ value : discountValues.price, currency : "EUR"}}
+        })
+    }
+    else
+    {
+        res.status(500).json(
+            {
+                success: false,
+                status: "Unsuccessfull request!",
+            });
+    }
+
+    req.product = product;
+    req.tags = tags;
+    req.imgs = imgs;
+
+    next();
+}
 exports.discount = (values, price, el, keys) => {
     
     const output = keys.reduce((prev, curr) => Math.abs(curr - el) < Math.abs(prev - el) ? curr : prev);
@@ -59,9 +109,9 @@ exports.verifyPricePerProduct = async(req, res, next) => {
     
     const existingProduct = await Product.findById(newProductId);
     let productId = existingProduct ? existingProduct._id : null;
-    let productArray = productId ? existingProduct.product : null;
+    let productArray = productId ? existingProduct.productItems : null;
 
-    let productPrice = productArray ? (existingProduct.product).map((el, i) => {if(el.load === newProductLoad) {return el.price.value}}) : null;
+    let productPrice = productArray ? productArray.map((el, i) => {if(el.load === newProductLoad) {return el.price.value}}) : null;
     let productQuantityInStock = existingProduct ? existingProduct.countInStock >= newProductLoad ? true : false : null;
     productPrice = productPrice ? productPrice.filter(el => el !== undefined) : null;
     

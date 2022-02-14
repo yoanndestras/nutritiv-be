@@ -1,73 +1,72 @@
 const mongoose = require("mongoose")
 const Schema = mongoose.Schema;
 
-const CartSchema = new Schema
-({
-userId: 
+const CartSchema = new Schema (
 {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
-},
-products:
-{
-    type: Array,
-    required: true,
-    productId:
+    userId: 
     {
-        type: String,
-        required: true
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
     },
-    productItems: 
-    [
+    products:
+    {
+        type: Array,
+        required: true,
+        productId:
         {
-            id:
+            type: mongoose.Schema.Types.ObjectId,
+            required: true
+        },
+        productItems: 
+        [
             {
-                type: mongoose.Schema.Types.ObjectId,
-                required: true
-            },
-            load:
-            {
-                type: Number,
-                required: true
-            },
-            price:
-            {
-                value:
-                { 
-                    type: Number,
-                    required: true,
-                    min: 0
-                },
-                currency:
+                id:
                 {
-                    type: String,
-                    default: 'EUR'
-                }
-            },
-            quantity:
-            {
-                type: Number,
-                default: 1,
-                min: 0,
-                required: true
-            },
-        }
-    ]
-},
-amount: 
-{
-    value :
-    { 
-        type: Number,
-        required: true
+                    type: mongoose.Schema.Types.ObjectId,
+                    required: true
+                },
+                load:
+                {
+                    type: Number,
+                    required: true
+                },
+                price:
+                {
+                    value:
+                    { 
+                        type: Number,
+                        required: true,
+                        min: 0
+                    },
+                    currency:
+                    {
+                        type: String,
+                        default: 'EUR'
+                    }
+                },
+                quantity:
+                {
+                    type: Number,
+                    default: 1,
+                    min: 0,
+                    required: true
+                },
+            }
+        ]
     },
-    currency:
+    amount: 
     {
-        type: String,
-        default: 'EUR'
+        value :
+        { 
+            type: Number,
+            required: true
+        },
+        currency:
+        {
+            type: String,
+            default: 'EUR'
+        }
     }
-}
-
 },
 {
 timestamps: true,   //mongoose automatically do UpdateAt and CreatedAt

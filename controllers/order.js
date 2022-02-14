@@ -37,31 +37,55 @@ exports.newOrder = async(req, res, next) =>
   {
     const userId = req.user.id;
     const cart = await Cart.findOne({userId : userId});
+    console.log(cart.products[0].productItems);
+
+    let stock = cart.products.map(product => product.productItems.map(productItems => productItems));
     
-    let products =  cart.products;
-    let amount =  cart.amount;
+    console.log(stock);
+    // if(cart)
+    // {
+    //   let products =  cart.products;
+    //   let amount =  cart.amount;
+      
+    //   let orderDetails =  
+    //     {
+    //         address: req.body.address,
+    //         zip: req.body.zip,
+    //         city: req.body.city,
+    //         country: req.body.country,
+    //         phoneNumber: req.body.phoneNumber
+    //     }
+      
+    //   const newOrder = new Order(
+    //     {
+    //         userId: mongoose.Types.ObjectId(userId),
+    //         products: products,
+    //         amount: amount,
+    //         orderDetails: orderDetails,
+    //     });
+      
+    //   const savedOrder = await newOrder.save();
+      
+    //   if(savedOrder)
+    //   {
+    //     await Cart.findOneAndDelete({userId: userId});
+    //     req.order = savedOrder;
+    //     req.cart = true;
+    //     next();
+    //   }
+    //   else
+    //   {
+    //     req.cart = false;
+    //     next();
+    //   }
+      
+    // }
+    // else
+    // {
+    //   req.cart = false;
+    //   next();
+    // }
     
-    let orderDetails = 
-        {
-            address: req.body.address,
-            zip: req.body.zip,
-            city: req.body.city,
-            country: req.body.country,
-            phoneNumber: req.body.phoneNumber
-        }
-    
-    const newOrder = new Order(
-        {
-            userId: mongoose.Types.ObjectId(userId),
-            products: products,
-            amount: amount,
-            orderDetails: orderDetails,
-        }
-    );
-    
-    const savedOrder = await newOrder.save();
-    req.order = savedOrder;
-    next();
   }
   catch(err)
   {

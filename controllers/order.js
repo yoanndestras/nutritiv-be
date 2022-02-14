@@ -1,7 +1,9 @@
 const express = require('express');
 const Cart = require("../models/Cart");
+const Product = require("../models/Product");
 const Order = require("../models/Order");
 const mongoose = require('mongoose');
+const order = require('./order');
 
 const addressValidator = require('address-validator');
 const validatePhoneNumber = require('validate-phone-number-node-js');
@@ -37,11 +39,10 @@ exports.newOrder = async(req, res, next) =>
   {
     const userId = req.user.id;
     const cart = await Cart.findOne({userId : userId});
-    console.log(cart.products[0].productItems);
-
-    let stock = cart.products.map(product => product.productItems.map(productItems => productItems));
     
-    console.log(stock);
+    let countInStock = order.countInStock(userId);
+    
+    console.log(countInStock);
     // if(cart)
     // {
     //   let products =  cart.products;
@@ -97,4 +98,41 @@ exports.newOrder = async(req, res, next) =>
       }
   );
   }
+}
+
+exports.countInStock = async(userId) =>
+{
+  const cart = await Cart.findOne({userId : userId});
+
+  let load = cart.products.map(product => product.productItems.map(productItems => Object.values(productItems)[1])); // 1 = load
+  let qty = cart.products.map(product => product.productItems.map(productItems => Object.values(productItems)[2])); // 2 = quantity
+  let productId = cart.products.map(product => product.productId);
+  
+  let sumWithInitial;
+  let result;
+
+  for (let i = 0; i < load.length; i++) 
+  {
+    let emptyTable = []
+    let initialValue = 0;
+
+    for (let j = 0; j < load[i].length; j++) 
+    {
+        emptyTable.push(load[i][j] * qty[i][j])
+        sumWithInitial = emptyTable.reduce(
+          (previousValue, currentValue) => previousValue + currentValue,
+          initialValue
+        );
+    }      
+    result = await Product.findOneAndUpdate(
+      {_id: productId[i]},
+      {
+        $inc :
+        {
+          "countInStock" : - sumWithInitial
+        }
+      }
+      )
+  }
+  
 }

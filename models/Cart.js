@@ -30,6 +30,13 @@ const CartSchema = new Schema (
                     type: Number,
                     required: true
                 },
+                quantity:
+                {
+                    type: Number,
+                    default: 1,
+                    min: 0,
+                    required: true
+                },
                 price:
                 {
                     value:
@@ -43,13 +50,6 @@ const CartSchema = new Schema (
                         type: String,
                         default: 'EUR'
                     }
-                },
-                quantity:
-                {
-                    type: Number,
-                    default: 1,
-                    min: 0,
-                    required: true
                 },
             }
         ]

@@ -81,27 +81,20 @@ exports.productAndLoadExist = async(userId, Quantity, price, Load, Id) =>
     },
     )
     
-    let cart = await Cart.aggregate([
-        { $match : {"userId" : userId} },
+    let cart = updatedCart ? await Cart.findOne({userId : userId}) : null;
+    let currentAmount = cart ? cart.amount.value : null;
+    let roundedValue = currentAmount ? currentAmount.toFixed(2) : null;
+    
+    let setRoundedValue = roundedValue ? await Cart.findOneAndUpdate(
+        {userId : userId}, 
         {
-            $project : {
-                roundedValue:  
-                {
-                    $round : ["$amount.value", 2]
-                }
+            $set:
+            {
+                "amount.value" : roundedValue
             }
-        }
-    ])
-
-    updatedCart = await Cart.findOneAndUpdate(
-        {"userId": userId},
-        {
-            $set: {
-                "amount.value": cart[0].roundedValue
-            }
-        }
-    )
-    return {updatedCart: updatedCart}
+        }) : null;
+    
+    return {updatedCart: setRoundedValue}
 }
 
 exports.productExist = async(userId, Quantity, price, Load, Id) =>
@@ -122,34 +115,35 @@ exports.productExist = async(userId, Quantity, price, Load, Id) =>
     {"userId" : userId, "productId": mongoose.Types.ObjectId(Id)}, 
     {
         $push: {
-            "products.$[].productItems": productItems,
+            "products.$[outer].productItems": productItems,
         },
         $inc: {
             "amount.value": price
-        }
-    })
-
-    let cart = await Cart.aggregate([
-        { $match : {"userId" : userId} },
+        },
+    },
+    {
+        arrayFilters: [
         {
-            $project : {
-                roundedValue:  
-                {
-                    $round : ["$amount.value", 2]
-                }
-            }
-        }
-    ])
-    
-    updatedCart = await Cart.findOneAndUpdate(
-        {"userId": userId},
-        {
-            $set: {
-                "amount.value": cart[0].roundedValue
-            }
-        }
+            'outer.productId': mongoose.Types.ObjectId(Id)
+        }],
+        new: true
+    },
     )
-    return {updatedCart: updatedCart}
+
+    let cart = updatedCart ? await Cart.findOne({userId : userId}) : null;
+    let currentAmount = cart ? cart.amount.value : null;
+    let roundedValue = currentAmount ? currentAmount.toFixed(2) : null;
+    
+    let setRoundedValue = roundedValue ? await Cart.findOneAndUpdate(
+        {userId : userId}, 
+        {
+            $set:
+            {
+                "amount.value" : roundedValue
+            }
+        }) : null;
+
+    return {updatedCart: setRoundedValue}
 }
 
 exports.cartExist = async(userId, Quantity, price, Load, Id) =>
@@ -182,29 +176,21 @@ exports.cartExist = async(userId, Quantity, price, Load, Id) =>
             }
         }
     )
-
-    let cart = await Cart.aggregate([
-        { $match : {"userId" : userId} },
+    
+    let cart = updatedCart ? await Cart.findOne({userId : userId}) : null;
+    let currentAmount = cart ? cart.amount.value : null;
+    let roundedValue = currentAmount ? currentAmount.toFixed(2) : null;
+    
+    let setRoundedValue = roundedValue ? await Cart.findOneAndUpdate(
+        {userId : userId}, 
         {
-            $project : {
-                roundedValue:  
-                {
-                    $round : ["$amount.value", 2]
-                }
+            $set:
+            {
+                "amount.value" : roundedValue
             }
-        }
-    ])
+        }) : null;
 
-    updatedCart = await Cart.findOneAndUpdate(
-        {"userId": userId},
-        {
-            $set: {
-                "amount.value": cart[0].roundedValue
-            }
-        }
-    )
-
-    return {updatedCart: updatedCart}
+    return {updatedCart: setRoundedValue}
 }
 
 exports.newCart = async(userId, Quantity, price, Load, Id) =>

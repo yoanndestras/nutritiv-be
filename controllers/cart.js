@@ -1,7 +1,8 @@
 const express = require('express');
 const cart = require('../controllers/cart');
-const Cart = require("../models/Cart");
 const mongoose = require('mongoose');
+const Cart = require("../models/Cart");
+const Product = require("../models/Product");
 
 
 
@@ -16,6 +17,9 @@ try
     const Load = parseFloat(req.body.load);
     const Price = parseFloat(req.body.price);
     
+    let countInStock = await Product.findOne({_id: Id})
+    console.log(countInStock.countInStock);
+    
     let price = parseFloat((Price * Quantity).toFixed(2))
     
     const existingCart = await Cart.findOne({userId : userId});
@@ -24,37 +28,41 @@ try
     
     const newProduct = productIndex !== null && productIndex !== -1 ? productsArray.filter(el => el.productId.toString() === Id && el.productItems.some(el => el.load === Load)) : null;
     
-    if (newProduct && newProduct.length > 0) 
+    if(existingCart)
     {
-        const productAndLoadExist = cart.productAndLoadExist(userId, Quantity, price, Load, Id);
-        next();
+        
     }
-    else if(productIndex !== null && productIndex !== -1)
+
+    // if (newProduct && newProduct.length > 0) 
+    // {
+    //     cart.productAndLoadExist(userId, Quantity, price, Load, Id);
+    // }
+    // else if(productIndex !== null && productIndex !== -1)
+    // {
+    //     cart.productExist(userId, Quantity, price, Load, Id);
+    // }
+    // else if (existingCart)
+    // {
+    //     cart.cartExist(userId, Quantity, price, Load, Id);
+    // }
+    // else
+    // {
+    //     await cart.newCart(userId, Quantity, price, Load, Id);
+    //     req.new = true;
+    // }
+    
+    // next();
+
+}
+catch(err)
+{
+res.status(500).json(
     {
-        const productExist = cart.productExist(userId, Quantity, price, Load, Id);
-        next();
-    }
-    else if (existingCart)
-    {
-        const cartExist = cart.cartExist(userId, Quantity, price, Load, Id);
-        next();
-    }
-    else
-    {
-        await cart.newCart(userId, Quantity, price, Load, Id);
-        req.new = true;
-        next();
-    }
-    }
-    catch(err)
-    {
-    res.status(500).json(
-        {
-            success: false,
-            status: "Unsuccessfull request!",
-            err: err.message
-        });
-    }
+        success: false,
+        status: "Unsuccessfull request!",
+        err: err.message
+    });
+}
 
 }
 

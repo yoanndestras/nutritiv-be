@@ -16,6 +16,7 @@ const productRoute = require("./routes/product");
 const cartRoute = require("./routes/cart");
 const orderRoute = require("./routes/order");
 const {uploadRouter} = require('./routes/upload');
+const stripeRoute = require("./routes/stripe");
 
 dotenv.config();
 
@@ -61,6 +62,7 @@ app.use("/products", productRoute);
 app.use("/carts", cartRoute);
 app.use("/orders", orderRoute);
 app.use('/imageUpload', uploadRouter);
+app.use('/stripe', stripeRoute);
 
 // process.env.PORT = value PORT in .env file
 app.listen(process.env.PORT || 5000, () =>

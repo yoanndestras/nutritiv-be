@@ -18,15 +18,17 @@ upload.any('imageFile'), product.newProduct, async(req, res) =>
 {
     try
     {
+        const { title, desc, shape, countInStock } = req.body;
+
         const newProduct = await new Product(
             {
-                title: req.body.title,
-                desc: req.body.desc,
-                shape: req.body.shape,
+                title,
+                desc,
+                shape,
                 tags : req.tags,
                 imgs: req.imgs,
                 productItems: req.product,
-                countInStock: req.body.countInStock
+                countInStock
             }
         );
 

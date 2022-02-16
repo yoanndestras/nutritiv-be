@@ -42,50 +42,53 @@ exports.newOrder = async(req, res, next) =>
     
     let countInStock = order.countInStock(userId);
     
-    console.log(countInStock);
-    // if(cart)
-    // {
-    //   let products =  cart.products;
-    //   let amount =  cart.amount;
+    let err = (await countInStock).err;
+    if(err){return next(err);}
+
+    if(cart)
+    {
+      let products =  cart.products;
+      let amount =  cart.amount;
       
-    //   let orderDetails =  
-    //     {
-    //         address: req.body.address,
-    //         zip: req.body.zip,
-    //         city: req.body.city,
-    //         country: req.body.country,
-    //         phoneNumber: req.body.phoneNumber
-    //     }
+      const {address, zip, city, country, phoneNumber} = req.body;
+      let orderDetails =  
+        {
+            address,
+            zip,
+            city,
+            country,
+            phoneNumber
+        }
       
-    //   const newOrder = new Order(
-    //     {
-    //         userId: mongoose.Types.ObjectId(userId),
-    //         products: products,
-    //         amount: amount,
-    //         orderDetails: orderDetails,
-    //     });
+      const newOrder = new Order(
+        {
+            userId: mongoose.Types.ObjectId(userId),
+            products: products,
+            amount: amount,
+            orderDetails: orderDetails,
+        });
       
-    //   const savedOrder = await newOrder.save();
+      const savedOrder = await newOrder.save();
       
-    //   if(savedOrder)
-    //   {
-    //     await Cart.findOneAndDelete({userId: userId});
-    //     req.order = savedOrder;
-    //     req.cart = true;
-    //     next();
-    //   }
-    //   else
-    //   {
-    //     req.cart = false;
-    //     next();
-    //   }
+      if(savedOrder)
+      {
+        await Cart.findOneAndDelete({userId: userId});
+        req.order = savedOrder;
+        req.cart = true;
+        next();
+      }
+      else
+      {
+        req.cart = false;
+        next();
+      }
       
-    // }
-    // else
-    // {
-    //   req.cart = false;
-    //   next();
-    // }
+    }
+    else
+    {
+      req.cart = false;
+      next();
+    }
     
   }
   catch(err)
@@ -110,6 +113,7 @@ exports.countInStock = async(userId) =>
   
   let sumWithInitial;
   let result;
+  let err;
 
   for (let i = 0; i < load.length; i++) 
   {
@@ -123,16 +127,39 @@ exports.countInStock = async(userId) =>
           (previousValue, currentValue) => previousValue + currentValue,
           initialValue
         );
-    }      
-    result = await Product.findOneAndUpdate(
-      {_id: productId[i]},
-      {
-        $inc :
-        {
-          "countInStock" : - sumWithInitial
-        }
-      }
-      )
+    }
+    
+    let cartProduct = await Product.findOne({_id: productId[i]});
+    const stockAvailable = cartProduct.countInStock;
+    if(stockAvailable - sumWithInitial <= 0)
+    {
+      err = new Error('The stock for this product is not available : ' + cartProduct.title);
+      err.status = 400;
+      
+    }
+    
   }
+  
+  if(err)
+  {
+    return {err};
+  
+  }
+  else
+  {
+    for (let i = 0; i < load.length; i++) 
+    {
+      result = await Product.findOneAndUpdate(
+        {_id: productId[i]},
+        {
+          $inc :
+          {
+            "countInStock" : - sumWithInitial
+          }
+        }
+      )
+    }
+  }
+    
   
 }

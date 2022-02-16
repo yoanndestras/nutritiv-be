@@ -32,7 +32,7 @@ try
     {
         
     }
-
+    
     // if (newProduct && newProduct.length > 0) 
     // {
     //     cart.productAndLoadExist(userId, Quantity, price, Load, Id);

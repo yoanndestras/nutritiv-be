@@ -37,7 +37,7 @@ router.post("/create-checkout-session", auth.verifyUser, auth.verifyRefresh, asy
       cancel_url: 'http://localhost:3000/cancel',
     });
   
-    res.redirect(303, session.url);
+    res.status(200).json(session.url);
   }
   catch(err)
   {

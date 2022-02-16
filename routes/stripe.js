@@ -33,8 +33,8 @@ router.post("/create-checkout-session", auth.verifyUser, auth.verifyRefresh, asy
         },
       ],
       mode: 'payment',
-      success_url: 'http://localhost:3000/success',
-      cancel_url: 'http://localhost:3000/cancel',
+      success_url: 'http://192.168.1.23:3000/success',
+      cancel_url: 'http://192.168.1.23:3000/cancel',
     });
   
     res.status(200).json(session.url);

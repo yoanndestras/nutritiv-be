@@ -129,6 +129,7 @@ exports.countInStock = async(userId) =>
     }
     array.push(sumWithInitial);
     console.log(array);
+
     let cartProduct = await Product.findOne({_id: productArray[i]});
     let stockAvailable = cartProduct.countInStock;
     
@@ -142,6 +143,9 @@ exports.countInStock = async(userId) =>
   
   for (let i = 0; i < load.length; i++) 
   {
+    console.log(productArray[i]);
+    console.log(array[i]);
+
     result = await Product.findOneAndUpdate(
       {_id: productArray[i]},
       {

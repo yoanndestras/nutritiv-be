@@ -7,7 +7,7 @@ const cors = require('../controllers/cors');
 const auth = require('../controllers/authenticate');
 
 
-router.get("/secret", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async(req, res)  => 
+router.post("/create-checkout-session", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async(req, res)  => 
 {
   try
   {
@@ -15,22 +15,29 @@ router.get("/secret", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
     
     const cart = await Cart.findOne({userId : userId});
     let amount =  Math.round(await cart.amount.value * 100);
-    let currency = await cart.amount.currency;
 
-    const paymentIntent = await stripe.paymentIntents.create(
-    {
-      amount: amount,
-      currency: currency,
-      automatic_payment_methods: 
-        {
-          enabled: true,
-        },
-    });
+    let currency = await cart.amount.currency;
     
-    res.send(
-      {
-        clientSecret: paymentIntent.client_secret,
-      });
+    const session = await stripe.checkout.sessions.create({
+      line_items: [
+        {
+          price_data: 
+          {
+            currency: currency,
+            product_data: {
+              name: 'T-shirt',
+            },
+            unit_amount: amount,
+          },
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      success_url: 'http://localhost:3000/success',
+      cancel_url: 'http://localhost:3000/cancel',
+    });
+  
+    res.redirect(303, session.url);
   }
   catch(err)
   {

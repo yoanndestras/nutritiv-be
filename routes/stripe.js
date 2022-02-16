@@ -13,21 +13,21 @@ router.post("/create-checkout-session", cors.corsWithOptions, auth.verifyUser, a
   {
     const userId = req.user._id;
     
-    const cart = await Cart.findOne({userId : userId});
-    let amount =  Math.round(await cart.amount.value * 100);
+    // const cart = await Cart.findOne({userId : userId});
+    // let amount =  Math.round(await cart.amount.value * 100);
 
-    let currency = await cart.amount.currency;
+    // let currency = await cart.amount.currency;
     
     const session = await stripe.checkout.sessions.create({
       line_items: [
         {
           price_data: 
           {
-            currency: currency,
+            currency: "EUR",
             product_data: {
               name: 'T-shirt',
             },
-            unit_amount: amount,
+            unit_amount: "12000",
           },
           quantity: 1,
         },

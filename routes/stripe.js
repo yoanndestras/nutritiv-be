@@ -7,7 +7,7 @@ const cors = require('../controllers/cors');
 const auth = require('../controllers/authenticate');
 
 
-router.post("/create-checkout-session", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async(req, res)  => 
+router.post("/create-checkout-session", auth.verifyUser, auth.verifyRefresh, async(req, res)  => 
 {
   try
   {
@@ -37,7 +37,7 @@ router.post("/create-checkout-session", cors.corsWithOptions, auth.verifyUser, a
       cancel_url: 'http://localhost:3000/cancel',
     });
   
-    res.redirect(303, session.url);
+    res.status(200).json(session.url);
   }
   catch(err)
   {

@@ -83,11 +83,18 @@ exports.verifyProduct = async(req, res, next) => {
     let productArray = productId ? existingProduct.productItems : null;
     
     let productLoadAndPrice = productArray ? productArray.map((el, i) => {if(el.load === newProductLoad && el.price.value === newProductPrice) {return el.load}}) : null;
+    let productQuantityInStock = existingProduct ? existingProduct.countInStock >= newProductLoad ? true : false : null;
     productLoadAndPrice = productLoadAndPrice ? productLoadAndPrice.filter(el => el !== undefined) : null;
         
-    if(Array.isArray(productLoadAndPrice) && productLoadAndPrice[0] && productId)
+    if(Array.isArray(productLoadAndPrice) && productLoadAndPrice[0] && productId && productQuantityInStock)
     {
         next();
+    }
+    else if(productQuantityInStock === false)
+    {
+        let err = new Error("Not enough quantity in stock for this new product");
+        err.status = 403;
+        return next(err);
     }
     else
     {
@@ -107,21 +114,21 @@ exports.verifyPricePerProduct = async(req, res, next) => {
     let productArray = productId ? existingProduct.productItems : null;
 
     let productPrice = productArray ? productArray.map((el, i) => {if(el.load === newProductLoad) {return el.price.value}}) : null;
-    // let productQuantityInStock = existingProduct ? existingProduct.countInStock >= newProductLoad ? true : false : null;
+    let productQuantityInStock = existingProduct ? existingProduct.countInStock >= newProductLoad ? true : false : null;
     productPrice = productPrice ? productPrice.filter(el => el !== undefined) : null;
     
     
-    if(Array.isArray(productPrice) && productPrice[0] && productId) //  && productQuantityInStock
+    if(Array.isArray(productPrice) && productPrice[0] && productId && productQuantityInStock) 
     {
         req.price = productPrice
         next();
     }
-    // else if(productQuantityInStock === false)
-    // {
-    //     let err = new Error("Not enough quantity in stock for this new product");
-    //     err.status = 403;
-    //     return next(err);
-    // }
+    else if(productQuantityInStock === false)
+    {
+        let err = new Error("Not enough quantity in stock for this new product");
+        err.status = 403;
+        return next(err);
+    }
     else
     {
         let err = new Error('Id : ' + newProductId + ' Val : ' + newProductLoad + " doesnt exist");
@@ -138,10 +145,10 @@ exports.verifyStock = async(req, res, next) => {
     const userId = req.user.id;
     
     const cart = await Cart.findOne({userId : userId});
-    
-    if(cart)
+    let findProductId = cart ? cart.products.find(el => el.productId.toString() === productId) : null;
+
+    if(findProductId)
     {
-        let findProductId = cart.products.find(el => el.productId.toString() === productId);     
         let load = findProductId.productItems.map(productItems => Object.values(productItems)[1]); // 1 = load
         let qty = findProductId.productItems.map(productItems => Object.values(productItems)[2]); // 2 = quantity
         

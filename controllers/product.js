@@ -1,6 +1,8 @@
 const express = require('express');
 const Product = require("../models/Product");
 const check = require('./product');
+const Cart = require("../models/Cart");
+const mongoose = require('mongoose');
 
 
 const app = express();
@@ -74,25 +76,18 @@ exports.verifyProduct = async(req, res, next) => {
     const newProductId = req.body.productId;
     const newProductLoad = parseFloat(req.body.load);
     const newProductPrice = parseFloat(req.body.price);
-
+    
     const existingProduct = await Product.findById(newProductId);
 
     let productId = existingProduct ? existingProduct._id : null;
     let productArray = productId ? existingProduct.productItems : null;
     
     let productLoadAndPrice = productArray ? productArray.map((el, i) => {if(el.load === newProductLoad && el.price.value === newProductPrice) {return el.load}}) : null;
-    let productQuantityInStock = existingProduct ? existingProduct.countInStock >= newProductLoad ? true : false : null;
     productLoadAndPrice = productLoadAndPrice ? productLoadAndPrice.filter(el => el !== undefined) : null;
         
-    if(Array.isArray(productLoadAndPrice) && productLoadAndPrice[0] && productId && productQuantityInStock)
+    if(Array.isArray(productLoadAndPrice) && productLoadAndPrice[0] && productId)
     {
         next();
-    }
-    else if(productQuantityInStock === false)
-    {
-        let err = new Error("Not enough quantity of the product");
-        err.status = 403;
-        return next(err);
     }
     else
     {
@@ -112,25 +107,81 @@ exports.verifyPricePerProduct = async(req, res, next) => {
     let productArray = productId ? existingProduct.productItems : null;
 
     let productPrice = productArray ? productArray.map((el, i) => {if(el.load === newProductLoad) {return el.price.value}}) : null;
-    let productQuantityInStock = existingProduct ? existingProduct.countInStock >= newProductLoad ? true : false : null;
+    // let productQuantityInStock = existingProduct ? existingProduct.countInStock >= newProductLoad ? true : false : null;
     productPrice = productPrice ? productPrice.filter(el => el !== undefined) : null;
     
     
-    if(Array.isArray(productPrice) && productPrice[0] && productId && productQuantityInStock)
+    if(Array.isArray(productPrice) && productPrice[0] && productId) //  && productQuantityInStock
     {
         req.price = productPrice
         next();
     }
-    else if(productQuantityInStock === false)
-    {
-        let err = new Error("Not enough quantity in stock for this new product");
-        err.status = 403;
-        return next(err);
-    }
+    // else if(productQuantityInStock === false)
+    // {
+    //     let err = new Error("Not enough quantity in stock for this new product");
+    //     err.status = 403;
+    //     return next(err);
+    // }
     else
     {
         let err = new Error('Id : ' + newProductId + ' Val : ' + newProductLoad + " doesnt exist");
         err.status = 403;
         return next(err);
+    }
+}
+
+exports.verifyStock = async(req, res, next) => {
+
+    const productLoad = parseFloat(req.body.load);
+    const productQuantity = parseInt(req.body.quantity)
+    const productId = req.body.productId;
+    const userId = req.user.id;
+    
+    const cart = await Cart.findOne({userId : userId});
+    
+    if(cart)
+    {
+        let findProductId = cart.products.find(el => el.productId.toString() === productId);     
+        let load = findProductId.productItems.map(productItems => Object.values(productItems)[1]); // 1 = load
+        let qty = findProductId.productItems.map(productItems => Object.values(productItems)[2]); // 2 = quantity
+        
+
+        let sumWithInitial;
+        let err;
+        let emptyTable = []
+        
+        for (let i = 0; i < load.length; i++) 
+        {
+            let initialValue = 0;
+            console.log(emptyTable);
+            
+            emptyTable.push(load[i] * qty[i])
+            sumWithInitial = emptyTable.reduce(
+            (previousValue, currentValue) => previousValue + currentValue,
+            initialValue
+            );            
+            
+            let cartProduct = await Product.findOne({_id: productId});
+            let stockAvailable = cartProduct.countInStock;
+
+            if(stockAvailable - (sumWithInitial + productLoad * productQuantity) <= 0)
+            {
+                err = new Error('The stock for this product is not available : ' + cartProduct.title);
+                err.status = 400;
+            }
+        }
+        if(err)
+        {
+            next(err);
+        }
+        else
+        {
+            next();
+        }
+    
+    }
+    else
+    {
+        next();
     }
 }

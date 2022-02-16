@@ -18,15 +18,23 @@ upload.any('imageFile'), product.newProduct, async(req, res) =>
 {
     try
     {
+        const { title, desc, shape, countInStock } = req.body;
+        
+        let imgs = req.imgs.map(img => img.replaceAll("\\", "/"))
+        let replace = imgs.map(img => img.replace("public/", ""))
+
+        console.log(imgs);
+        console.log(replace);
+
         const newProduct = await new Product(
             {
-                title: req.body.title,
-                desc: req.body.desc,
-                shape: req.body.shape,
+                title,
+                desc,
+                shape,
                 tags : req.tags,
-                imgs: req.imgs,
+                imgs: replace,
                 productItems: req.product,
-                countInStock: req.body.countInStock
+                countInStock
             }
         );
 

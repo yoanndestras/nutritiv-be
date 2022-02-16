@@ -16,7 +16,6 @@ const storage = multer.diskStorage(
     {   
         cb(null, 'public/images');
     },
-    
     filename: (req, file, cb) => 
     {      
         cb(null, (nanoid(4) + file.originalname ).split(' ').join('_'))
@@ -38,7 +37,8 @@ const imageFileFilter = (req, file, cb) =>
 const upload = multer(
     { 
         storage: storage, 
-        fileFilter: imageFileFilter
+        fileFilter: imageFileFilter,
+
     });
 
 uploadRouter.route('/')

@@ -26,7 +26,7 @@ router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, orde
                 }
             );
         }
-        else
+        else if (req.cart === false)
         {
             res.status(500).json(
                 {

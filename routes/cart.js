@@ -12,9 +12,9 @@ const {upload} = require('./upload');
 //OPTIONS FOR CORS
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
-// CREATE CART
+// CREATE CART // cart.cart,
 router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, upload.any('imageFile'), 
-product.verifyProduct, cart.cart, async(req, res) =>
+product.verifyStock, product.verifyProduct, cart.cart, async(req, res) =>
 {
     try
     {

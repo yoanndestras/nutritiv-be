@@ -13,8 +13,6 @@ const app = express();
 app.use(express.json()); // to read JSON    
 app.use(express.urlencoded({extended: true}));
 
-
-
 exports.verifyPhoneNumber = (req, res, next) =>
 {
   let phoneNumber = req.body.phoneNumber;
@@ -42,50 +40,53 @@ exports.newOrder = async(req, res, next) =>
     
     let countInStock = order.countInStock(userId);
     
-    console.log(countInStock);
-    // if(cart)
-    // {
-    //   let products =  cart.products;
-    //   let amount =  cart.amount;
+    let err = await countInStock && (await countInStock).err ? (await countInStock).err : null;
+    if(err){return next(err);}
+    
+    if(cart)
+    {
+      let products =  cart.products;
+      let amount =  cart.amount;
       
-    //   let orderDetails =  
-    //     {
-    //         address: req.body.address,
-    //         zip: req.body.zip,
-    //         city: req.body.city,
-    //         country: req.body.country,
-    //         phoneNumber: req.body.phoneNumber
-    //     }
+      const {address, zip, city, country, phoneNumber} = req.body;
+      let orderDetails =  
+        {
+            address,
+            zip,
+            city,
+            country,
+            phoneNumber
+        }
       
-    //   const newOrder = new Order(
-    //     {
-    //         userId: mongoose.Types.ObjectId(userId),
-    //         products: products,
-    //         amount: amount,
-    //         orderDetails: orderDetails,
-    //     });
+      const newOrder = new Order(
+        {
+            userId: mongoose.Types.ObjectId(userId),
+            products: products,
+            amount: amount,
+            orderDetails: orderDetails,
+        });
       
-    //   const savedOrder = await newOrder.save();
+      const savedOrder = await newOrder.save();
       
-    //   if(savedOrder)
-    //   {
-    //     await Cart.findOneAndDelete({userId: userId});
-    //     req.order = savedOrder;
-    //     req.cart = true;
-    //     next();
-    //   }
-    //   else
-    //   {
-    //     req.cart = false;
-    //     next();
-    //   }
+      if(savedOrder)
+      {
+        await Cart.findOneAndDelete({userId: userId});
+        req.order = savedOrder;
+        req.cart = true;
+        next();
+      }
+      else
+      {
+        req.cart = false;
+        next();
+      }
       
-    // }
-    // else
-    // {
-    //   req.cart = false;
-    //   next();
-    // }
+    }
+    else
+    {
+      req.cart = false;
+      next();
+    }
     
   }
   catch(err)
@@ -106,16 +107,18 @@ exports.countInStock = async(userId) =>
 
   let load = cart.products.map(product => product.productItems.map(productItems => Object.values(productItems)[1])); // 1 = load
   let qty = cart.products.map(product => product.productItems.map(productItems => Object.values(productItems)[2])); // 2 = quantity
-  let productId = cart.products.map(product => product.productId);
+  let productArray = cart.products.map(product => product.productId);
   
   let sumWithInitial;
   let result;
+  let err;
+  let array = [];
 
   for (let i = 0; i < load.length; i++) 
   {
-    let emptyTable = []
+    let emptyTable = [];
     let initialValue = 0;
-
+    
     for (let j = 0; j < load[i].length; j++) 
     {
         emptyTable.push(load[i][j] * qty[i][j])
@@ -123,16 +126,33 @@ exports.countInStock = async(userId) =>
           (previousValue, currentValue) => previousValue + currentValue,
           initialValue
         );
-    }      
+    }
+    array.push(sumWithInitial);
+    console.log(array);
+    let cartProduct = await Product.findOne({_id: productArray[i]});
+    let stockAvailable = cartProduct.countInStock;
+    
+    if(stockAvailable - sumWithInitial <= 0)
+    {
+      err = new Error('The stock for this product is not available : ' + cartProduct.title);
+      err.status = 400;
+      return {err};
+    }
+  }
+  
+  for (let i = 0; i < load.length; i++) 
+  {
     result = await Product.findOneAndUpdate(
-      {_id: productId[i]},
+      {_id: productArray[i]},
       {
         $inc :
         {
-          "countInStock" : - sumWithInitial
+          "countInStock" : - array[i]
         }
       }
-      )
+    )
   }
+  
+    
   
 }

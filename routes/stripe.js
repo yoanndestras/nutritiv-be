@@ -1,33 +1,47 @@
 const router = require("express").Router();
 const stripe = require("stripe")(process.env.STRIPE_KEY);
-
+const Cart = require("../models/Cart");
 
 // MIDDLEWARES
 const cors = require('../controllers/cors');
+const auth = require('../controllers/authenticate');
 
-const calculateOrderAmount = (items) => {
-  // Replace this constant with a calculation of the order's amount
-  // Calculate the order total on the server to prevent
-  // people from directly manipulating the amount on the client
-  return 1400;
-};
 
-router.post("/payment", cors.corsWithOptions, async(req, res)  => 
+router.get("/secret", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async(req, res)  => 
 {
-  const { items } = req.body;
-  
-  // Create a PaymentIntent with the order amount and currency
-  const paymentIntent = await stripe.paymentIntents.create(
+  try
+  {
+    const userId = req.user._id;
+    
+    const cart = await Cart.findOne({userId : userId});
+    let amount =  Math.round(await cart.amount.value * 100);
+    let currency = await cart.amount.currency;
+
+    const paymentIntent = await stripe.paymentIntents.create(
     {
-      amount: calculateOrderAmount(items),
-      currency: "eur",
+      amount: amount,
+      currency: currency,
       automatic_payment_methods: 
         {
           enabled: true,
         },
     });
+    
+    res.send(
+      {
+        clientSecret: paymentIntent.client_secret,
+      });
+  }
+  catch(err)
+  {
+    res.status(500).json(
+      {
+          success: false,
+          status: "Unsuccessfull request!",
+          err: err.message
+      });
+  }
   
-  res.send({clientSecret: paymentIntent.client_secret,});
 });
 
 module.exports = router;

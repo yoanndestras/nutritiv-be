@@ -7,7 +7,7 @@ const cors = require('../controllers/cors');
 const auth = require('../controllers/authenticate');
 
 
-router.post("/create-checkout-session", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async(req, res)  => 
+router.post("/create-checkout-session", auth.verifyUser, auth.verifyRefresh, async(req, res)  => 
 {
   try
   {

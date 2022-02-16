@@ -27,31 +27,26 @@ try
     const productIndex = productsArray ? productsArray.findIndex(el => el.productId.toString() === Id) : null;
     
     const newProduct = productIndex !== null && productIndex !== -1 ? productsArray.filter(el => el.productId.toString() === Id && el.productItems.some(el => el.load === Load)) : null;
-    
-    if(existingCart)
+
+    if (newProduct !== null && newProduct.length > 0) 
     {
-        
+        cart.productAndLoadExist(userId, Quantity, price, Load, Id);
+    }
+    else if(productIndex !== null && productIndex !== -1)
+    {
+        cart.productExist(userId, Quantity, price, Load, Id);
+    }
+    else if (existingCart)
+    {
+        cart.cartExist(userId, Quantity, price, Load, Id);
+    }
+    else
+    {
+        await cart.newCart(userId, Quantity, price, Load, Id);
+        req.new = true;
     }
     
-    // if (newProduct && newProduct.length > 0) 
-    // {
-    //     cart.productAndLoadExist(userId, Quantity, price, Load, Id);
-    // }
-    // else if(productIndex !== null && productIndex !== -1)
-    // {
-    //     cart.productExist(userId, Quantity, price, Load, Id);
-    // }
-    // else if (existingCart)
-    // {
-    //     cart.cartExist(userId, Quantity, price, Load, Id);
-    // }
-    // else
-    // {
-    //     await cart.newCart(userId, Quantity, price, Load, Id);
-    //     req.new = true;
-    // }
-    
-    // next();
+    next();
 
 }
 catch(err)

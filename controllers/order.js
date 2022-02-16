@@ -13,8 +13,6 @@ const app = express();
 app.use(express.json()); // to read JSON    
 app.use(express.urlencoded({extended: true}));
 
-
-
 exports.verifyPhoneNumber = (req, res, next) =>
 {
   let phoneNumber = req.body.phoneNumber;
@@ -42,9 +40,9 @@ exports.newOrder = async(req, res, next) =>
     
     let countInStock = order.countInStock(userId);
     
-    let err = (await countInStock).err;
+    let err = await countInStock && (await countInStock).err ? (await countInStock).err : null;
     if(err){return next(err);}
-
+    
     if(cart)
     {
       let products =  cart.products;
@@ -109,17 +107,18 @@ exports.countInStock = async(userId) =>
 
   let load = cart.products.map(product => product.productItems.map(productItems => Object.values(productItems)[1])); // 1 = load
   let qty = cart.products.map(product => product.productItems.map(productItems => Object.values(productItems)[2])); // 2 = quantity
-  let productId = cart.products.map(product => product.productId);
+  let productArray = cart.products.map(product => product.productId);
   
   let sumWithInitial;
   let result;
   let err;
+  let array = [];
 
   for (let i = 0; i < load.length; i++) 
   {
-    let emptyTable = []
+    let emptyTable = [];
     let initialValue = 0;
-
+    
     for (let j = 0; j < load[i].length; j++) 
     {
         emptyTable.push(load[i][j] * qty[i][j])
@@ -128,38 +127,32 @@ exports.countInStock = async(userId) =>
           initialValue
         );
     }
+    array.push(sumWithInitial);
+    console.log(array);
+    let cartProduct = await Product.findOne({_id: productArray[i]});
+    let stockAvailable = cartProduct.countInStock;
     
-    let cartProduct = await Product.findOne({_id: productId[i]});
-    const stockAvailable = cartProduct.countInStock;
     if(stockAvailable - sumWithInitial <= 0)
     {
       err = new Error('The stock for this product is not available : ' + cartProduct.title);
       err.status = 400;
-      
+      return {err};
     }
-    
   }
   
-  if(err)
+  for (let i = 0; i < load.length; i++) 
   {
-    return {err};
-  
-  }
-  else
-  {
-    for (let i = 0; i < load.length; i++) 
-    {
-      result = await Product.findOneAndUpdate(
-        {_id: productId[i]},
+    result = await Product.findOneAndUpdate(
+      {_id: productArray[i]},
+      {
+        $inc :
         {
-          $inc :
-          {
-            "countInStock" : - sumWithInitial
-          }
+          "countInStock" : - array[i]
         }
-      )
-    }
+      }
+    )
   }
+  
     
   
 }

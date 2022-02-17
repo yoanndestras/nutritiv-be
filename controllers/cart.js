@@ -9,55 +9,54 @@ const Product = require("../models/Product");
 // ADD TO CART
 exports.cart = async(req, res, next) => 
 {
-try
-{
-    const userId = req.user._id;
-    const Id = req.body.productId;
-    const Quantity = parseFloat(req.body.quantity);
-    const Load = parseFloat(req.body.load);
-    const Price = parseFloat(req.body.price);
-    
-    let countInStock = await Product.findOne({_id: Id})
-    
-    let price = parseFloat((Price * Quantity).toFixed(2))
-    
-    const existingCart = await Cart.findOne({userId : userId});
-    const productsArray = existingCart ? existingCart.products : null;
-    const productIndex = productsArray ? productsArray.findIndex(el => el.productId.toString() === Id) : null;
-    
-    const newProduct = productIndex !== null && productIndex !== -1 ? productsArray.filter(el => el.productId.toString() === Id && el.productItems.some(el => el.load === Load)) : null;
+    try
+    {
+        const userId = req.user._id;
+        const Id = req.body.productId;
+        const Quantity = parseFloat(req.body.quantity);
+        const Load = parseFloat(req.body.load);
+        const Price = parseFloat(req.body.price);
+        
+        let countInStock = await Product.findOne({_id: Id})
+        
+        let price = parseFloat((Price * Quantity).toFixed(2))
+        
+        const existingCart = await Cart.findOne({userId : userId});
+        const productsArray = existingCart ? existingCart.products : null;
+        const productIndex = productsArray ? productsArray.findIndex(el => el.productId.toString() === Id) : null;
+        
+        const newProduct = productIndex !== null && productIndex !== -1 ? productsArray.filter(el => el.productId.toString() === Id && el.productItems.some(el => el.load === Load)) : null;
 
-    if (newProduct !== null && newProduct.length > 0) 
-    {
-        cart.productAndLoadExist(userId, Quantity, price, Load, Id);
-    }
-    else if(productIndex !== null && productIndex !== -1)
-    {
-        cart.productExist(userId, Quantity, price, Load, Id);
-    }
-    else if (existingCart)
-    {
-        cart.cartExist(userId, Quantity, price, Load, Id);
-    }
-    else
-    {
-        await cart.newCart(userId, Quantity, price, Load, Id);
-        req.new = true;
-    }
-    
-    next();
+        if (newProduct !== null && newProduct.length > 0) 
+        {
+            cart.productAndLoadExist(userId, Quantity, price, Load, Id);
+        }
+        else if(productIndex !== null && productIndex !== -1)
+        {
+            cart.productExist(userId, Quantity, price, Load, Id);
+        }
+        else if (existingCart)
+        {
+            cart.cartExist(userId, Quantity, price, Load, Id);
+        }
+        else
+        {
+            await cart.newCart(userId, Quantity, price, Load, Id);
+            req.new = true;
+        }
+        
+        next();
 
-}
-catch(err)
-{
-res.status(500).json(
+    }
+    catch(err)
     {
-        success: false,
-        status: "Unsuccessfull request!",
-        err: err.message
-    });
-}
-
+        res.status(500).json(
+            {
+                success: false,
+                status: "Unsuccessfull request!",
+                err: err.message
+            });
+    }
 }
 
 exports.productAndLoadExist = async(userId, Quantity, price, Load, Id) =>

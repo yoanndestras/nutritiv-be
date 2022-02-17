@@ -143,8 +143,6 @@ exports.countInStock = async(userId) =>
   
   for (let i = 0; i < load.length; i++) 
   {
-    console.log(productArray[i]);
-    console.log(array[i]);
 
     result = await Product.findOneAndUpdate(
       {_id: productArray[i]},

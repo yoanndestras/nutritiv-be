@@ -23,9 +23,6 @@ upload.any('imageFile'), product.newProduct, async(req, res) =>
         let imgs = req.imgs.map(img => img.replaceAll("\\", "/"))
         let replace = imgs.map(img => img.replace("public/", ""))
 
-        console.log(imgs);
-        console.log(replace);
-
         const newProduct = await new Product(
             {
                 title,

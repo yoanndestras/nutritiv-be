@@ -59,6 +59,7 @@ exports.newProduct = async(req, res, next) =>
 
     next();
 }
+
 exports.discount = (values, price, el, keys) => {
     
     const output = keys.reduce((prev, curr) => Math.abs(curr - el) < Math.abs(prev - el) ? curr : prev);
@@ -160,7 +161,6 @@ exports.verifyStock = async(req, res, next) => {
         for (let i = 0; i < load.length; i++) 
         {
             let initialValue = 0;
-            console.log(emptyTable);
             
             emptyTable.push(load[i] * qty[i])
             sumWithInitial = emptyTable.reduce(

@@ -8,6 +8,7 @@ const cors = require('../controllers/cors');
 const auth = require('../controllers/authenticate');
 const product = require('../controllers/product');
 const {upload} = require('./upload');
+const { countInStock } = require("../controllers/order");
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
@@ -54,28 +55,36 @@ upload.any('imageFile'), product.newProduct, async(req, res) =>
     }
 });
 
-// UPDATE PRODUCT //TODO:  form adaptability // ?myfield=
-router.put("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, async(req, res) =>
+// UPDATE PRODUCT //TODO:  form adaptability 
+router.put("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, 
+product.verifyProductId, upload.any('imageFile'), product.newProduct, product.removeImgs, async(req, res) =>
 {
     try
     {
-        const queryFields = req.query.myfield;
-        if(queryFields)
-        {
-            console.log(queryFields);
-            console.log(req.query);
-        }
-        const updatedProduct = await Product.findByIdAndUpdate(
+        const { title, desc, shape, countInStock} = req.body;
+        
+        let imgs = req.imgs.map(img => img.replaceAll("\\", "/"))
+        let replace = imgs.map(img => img.replace("public/", ""))
+        
+        let updatedProduct = await Product.findByIdAndUpdate(
             req.params.id, 
             {
                 $set: 
                 {
-                    
-                }    
+                    title,
+                    desc,
+                    shape,
+                    tags : req.tags,
+                    imgs: replace,
+                    productItems: req.product,
+                    countInStock
+                }
             },
             {new: true}
         );
         
+        updatedProduct = await updatedProduct.save();
+
         res.status(200).json(
             {
                 success: true,
@@ -90,13 +99,14 @@ router.put("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, au
             {
                 success: false,
                 status: "Unsuccessfull request!",
-                err: err
+                err: err.message
             });
     }
 });
 
 // DELETE
-router.delete("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, async(req, res) =>
+router.delete("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+auth.verifyAdmin, async(req, res) =>
 {   
     try
     {
@@ -176,24 +186,29 @@ router.get("/", cors.corsWithOptions, async(req, res) =>
         if(queryNew)
         {
             // the last products
-            products = await Product.find().sort({_id:-1}).limit(1);
+            products = await Product.find().sort({_id:-1}).limit(1).select(['-countInStock']);
         }
         else if(queryTags)
         {
             // the products with the queryTags
-            products = await Product.find({tags:{$in: [queryTags]}});
+            products = await Product.find({tags:{$in: [queryTags]}}).select(['-countInStock']);
         }
         else if(queryLimit)
         {
             // the products with the quertNumber
-            products = await Product.find().sort({_id:-1}).limit(queryLimit);
+            products = await Product.find().sort({_id:-1}).limit(queryLimit).select(['-countInStock']);
         }
         else
         {
             // all products
-            products = await Product.find();
+            products = await Product.find().select(['-countInStock']);
         }
-        
+                
+        // const result = products.map(product => (
+        //     Object.assign(product, {...product, countInStock : null})
+        // ))
+        // const result = products.map(product => delete product.countInStock)
+
         res.status(200).json(
             {
                 // success: true,

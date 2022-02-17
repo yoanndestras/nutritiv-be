@@ -18,7 +18,6 @@ try
     const Price = parseFloat(req.body.price);
     
     let countInStock = await Product.findOne({_id: Id})
-    console.log(countInStock.countInStock);
     
     let price = parseFloat((Price * Quantity).toFixed(2))
     
@@ -229,30 +228,35 @@ exports.updateQuantity = async(req, res, next) =>
 {
     try
     {
-    const userId = req.user._id;
-    const Id = req.params.id;
-    const Load = parseFloat(req.params.load);
-    const Price = parseFloat(req.price);
+        const userId = req.user._id;
+        const Id = req.params.id;
+        const Load = parseFloat(req.params.load);
+        const Price = parseFloat(req.price);
 
-    const quantity = req.params.operation === "inc" ? 1 : req.params.operation === "dec" ? -1 : null;
-    const value = req.params.operation === "inc" ? Price : req.params.operation === "dec" ? - Price : null;
-    
-    if(quantity && value)
-    {
-        const operation = cart.operation(userId, quantity, value, Load, Id);
-        const emptyCart = (await operation).setRoundedValue ? cart.emptyCart(userId, (await operation).setRoundedValue) : null;
-        const productQuantityIsZero = (await emptyCart).total === false ? cart.productQuantityIsZero(userId, Load, Id, (await emptyCart).total) : null;
-        next();
-    }
-    else
-    {
-        res.status(500).json(
+        const quantity = req.params.operation === "inc" ? 1 : req.params.operation === "dec" ? -1 : null;
+        const value = req.params.operation === "inc" ? Price : req.params.operation === "dec" ? - Price : null;
+        
+        if(quantity === 1)
         {
-            success: false,
-            status: "This operation do not exist!"
-        });
-    }
-    
+            const verifyStock = cart.verifyStock(userId, Id, Load);
+            const error = (await verifyStock).err ? next((await verifyStock).err) : null;
+        }
+        
+        if(quantity && value)
+        {
+            const operation = cart.operation(userId, quantity, value, Load, Id);
+            const emptyCart = (await operation).setRoundedValue ? cart.emptyCart(userId, (await operation).setRoundedValue) : null;
+            const productQuantityIsZero = (await emptyCart).total === false ? cart.productQuantityIsZero(userId, Load, Id, (await emptyCart).total) : null;
+            next();
+        }
+        else
+        {
+            res.status(500).json(
+            {
+                success: false,
+                status: "This operation do not exist!"
+            });
+        }
     }
     catch(err)
     {
@@ -330,7 +334,6 @@ exports.productQuantityIsZero = async(userId, Load, Id, emptyCart) =>
         const currentProduct = productIndex !== null && productIndex !== -1 ? productsArray[productIndex].productItems : null;
         let findProduct = currentProduct ? currentProduct.findIndex(el => el.quantity <= 0) : null;
         
-        console.log("findProduct : " + findProduct);
         
         let pullProduct = findProduct !== null && findProduct !== -1 ? await Cart.findOneAndUpdate(
         {userId : userId}, 
@@ -349,9 +352,7 @@ exports.productQuantityIsZero = async(userId, Load, Id, emptyCart) =>
         },
         ): null;
         if(pullProduct){await pullProduct.save();}
-        
-        console.log("pullProduct : " + JSON.stringify(pullProduct));
-        
+                
         let productExist = pullProduct ? (pullProduct.products[productIndex].productItems).length > 0 : null;
         
         pullProduct = productExist === false ? await Cart.findOneAndUpdate(
@@ -364,8 +365,6 @@ exports.productQuantityIsZero = async(userId, Load, Id, emptyCart) =>
             }
         ): null;
         
-        console.log("pullProduct : " + pullProduct);
-
         if(pullProduct){await pullProduct.save();}
     }
 }
@@ -452,4 +451,57 @@ exports.deleteOperation = async(userId, Load, productId, amount) =>
         }
     );
     return {updatedCart}
+}
+
+exports.verifyStock = async(userId, productId, productLoad) => 
+{
+    
+    const cart = await Cart.findOne({userId : userId});
+    let findProductId = cart ? cart.products.find(el => el.productId.toString() === productId) : null;
+
+    if(findProductId)
+    {
+        let load = findProductId.productItems.map(productItems => Object.values(productItems)[1]); // 1 = load
+        let qty = findProductId.productItems.map(productItems => Object.values(productItems)[2]); // 2 = quantity
+        
+
+        let sumWithInitial;
+        let err;
+        let emptyTable = []
+        
+        for (let i = 0; i < load.length; i++) 
+        {
+            let initialValue = 0;
+            
+            emptyTable.push(load[i] * qty[i])
+            sumWithInitial = emptyTable.reduce(
+            (previousValue, currentValue) => previousValue + currentValue,
+            initialValue
+            );            
+            
+            let cartProduct = await Product.findOne({_id: productId});
+            let stockAvailable = cartProduct.countInStock;
+            
+            if(stockAvailable - (sumWithInitial + productLoad) <= 0)
+            {
+                err = new Error('The stock for this product is not available : ' + cartProduct.title);
+                err.status = 400;
+            }
+        }
+        if(err)
+        {
+            return {err}
+        }
+        else
+        {
+            return
+        }
+    
+    }
+    else
+    {
+        err = new Error('Product not found');
+        err.status = 400;
+        return {err}
+    }
 }

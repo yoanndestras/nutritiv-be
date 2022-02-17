@@ -28,7 +28,6 @@ mongoose
         console.log(err);
     });
 
-
 let app = express();
 
 app.use(express.json()); // to read JSON    
@@ -44,7 +43,7 @@ app.use(
     limitter(
         {
             windowMs: 5000,
-            max: 5,
+            max: 50,
             message: { 
                 code: 429,
                 message: "Too many requests"

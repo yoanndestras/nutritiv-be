@@ -244,3 +244,45 @@ exports.removeImgs = async(req, res, next) =>
     
     next();
 }
+
+exports.countInStock = async(req, res, next) =>
+{
+    const userId = req.user._id;
+    const productId = req.params.id;
+    const cart = await Cart.findOne({userId : userId});
+    let findProductId = cart ? cart.products.find(el => el.productId.toString() === productId) : null;
+
+    if(findProductId)
+    {
+        let load = findProductId.productItems.map(productItems => Object.values(productItems)[1]); // 1 = load
+        let qty = findProductId.productItems.map(productItems => Object.values(productItems)[2]); // 2 = quantity
+
+        let sumWithInitial;
+        let emptyTable = []
+        
+        for (let i = 0; i < load.length; i++) 
+        {
+            let initialValue = 0;
+            
+            emptyTable.push(load[i] * qty[i])
+            sumWithInitial = emptyTable.reduce(
+            (previousValue, currentValue) => previousValue + currentValue,
+            initialValue
+            );            
+            
+            let cartProduct = await Product.findOne({_id: productId});
+            let stockAvailable = cartProduct.countInStock;
+            const stockCalculated = stockAvailable - sumWithInitial;
+            req.stock = stockCalculated;
+        }
+        
+        next();
+    }
+    else
+    {
+        err = new Error('Product not found');
+        err.status = 400;
+        next(err);
+    }
+    
+}

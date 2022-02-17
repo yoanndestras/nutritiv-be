@@ -106,21 +106,10 @@ product.verifyProductId, upload.any('imageFile'), product.newProduct, product.re
 
 // DELETE
 router.delete("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
-auth.verifyAdmin, async(req, res) =>
+auth.verifyAdmin, product.removeImgs, async(req, res) =>
 {   
     try
     {
-        const removeFile= function (err) {
-            if (err) {
-                console.log("unlink failed", err);
-            } else {
-                console.log("file deleted");
-            }
-        }
-        const product = await Product.findOne({_id : req.params.id})
-        let productImg = product.imgs;
-        let unlickImg = productImg ? productImg.map(img => fs.unlink(img, removeFile)) : null;
-        
         await Product.findByIdAndDelete(req.params.id)
         
         res.status(200).json(
@@ -138,8 +127,7 @@ auth.verifyAdmin, async(req, res) =>
                 err: err
             });
     }
-
-})
+});
 
 // GET PRODUCT BY ID
 router.get("/find/:id", async(req, res) =>
@@ -163,7 +151,6 @@ router.get("/find/:id", async(req, res) =>
                 err: err
             });
     }
-
 });
 
 // GET ALL PRODUCTS
@@ -203,12 +190,7 @@ router.get("/", cors.corsWithOptions, async(req, res) =>
             // all products
             products = await Product.find().select(['-countInStock']);
         }
-                
-        // const result = products.map(product => (
-        //     Object.assign(product, {...product, countInStock : null})
-        // ))
-        // const result = products.map(product => delete product.countInStock)
-
+        
         res.status(200).json(
             {
                 // success: true,
@@ -225,7 +207,29 @@ router.get("/", cors.corsWithOptions, async(req, res) =>
                 err: err
             });
     }
-    
 });
 
+// GET COUNTINSTOCK // 
+router.get('/countInStock/:id', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+product.verifyProductId, product.countInStock, async (req, res) =>
+{
+    try
+    {
+        const countInStock = req.stock;
+
+        res.status(200).json(
+            {
+                countInStock
+            });
+    }
+    catch(err)
+    {
+        res.status(500).json(
+            {
+                success: false,
+                status: "Unsuccessfull request!",
+                err: err
+            });
+    }
+});
 module.exports = router;

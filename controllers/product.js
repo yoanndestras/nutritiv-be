@@ -3,6 +3,8 @@ const Product = require("../models/Product");
 const check = require('./product');
 const Cart = require("../models/Cart");
 const mongoose = require('mongoose');
+const ObjectId = require('mongoose').Types.ObjectId;
+const fs = require('fs');
 
 
 const app = express();
@@ -191,4 +193,54 @@ exports.verifyStock = async(req, res, next) => {
     {
         next();
     }
+}
+
+exports.verifyProductId = async(req, res, next) =>
+{
+    const productId = req.params.id;
+
+    if(ObjectId.isValid(productId))
+    {
+        const product = await Product.findOne({_id :productId});
+        if(product)
+        {
+            next()
+        }
+        else
+        {
+            let err = new Error('This product do not exist : ' + productId);
+            err.status = 400;
+            next(err);
+        }
+    }
+    else
+    {
+        let err = new Error('The productId is not an ObjectId : ' + productId);
+        err.status = 400;
+        next(err);
+    }
+    
+    
+}
+
+exports.removeImgs = async(req, res, next) =>
+{
+    const removeFile= function (err) 
+    {
+        if (err) 
+        {
+            console.log("unlink failed", err);
+            next(err)
+        } 
+        else 
+        {
+            console.log("file deleted");
+        }
+    }
+    
+    const product = await Product.findOne({_id : req.params.id})
+    let productImg = product.imgs;
+    let unlickImg = productImg ? productImg.map(img => fs.unlink('public/' + img, removeFile)) : null;
+    
+    next();
 }

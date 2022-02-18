@@ -166,9 +166,26 @@ router.get("/self", auth.verifyUser, auth.verifyAuth, async(req, res) =>
 })
 
 //UPDATE USER
-router.put('/:id', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async (req, res) =>
+router.put('/updateUser', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async (req, res) =>
 {
-    
+    try
+    {
+        const user = await User.findOne({_id: req.user._id});
+        
+        res.status(200).json(
+            {
+                success: true, 
+                status: user
+            });
+    }
+    catch(err)
+    {
+        res.status(500).json(
+            {
+                success: false, 
+                err: err.message
+            });
+    }
 })
 
 module.exports = router;

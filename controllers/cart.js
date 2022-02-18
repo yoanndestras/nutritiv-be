@@ -17,8 +17,6 @@ exports.cart = async(req, res, next) =>
         const Load = parseFloat(req.body.load);
         const Price = parseFloat(req.body.price);
         
-        let countInStock = await Product.findOne({_id: Id})
-        
         let price = parseFloat((Price * Quantity).toFixed(2))
         
         const existingCart = await Cart.findOne({userId : userId});
@@ -368,6 +366,59 @@ exports.productQuantityIsZero = async(userId, Load, Id, emptyCart) =>
     }
 }
 
+exports.verifyStock = async(userId, productId, productLoad) => 
+{
+    
+    const cart = await Cart.findOne({userId : userId});
+    let findProductId = cart ? cart.products.find(el => el.productId.toString() === productId) : null;
+
+    if(findProductId)
+    {
+        let load = findProductId.productItems.map(productItems => Object.values(productItems)[1]); // 1 = load
+        let qty = findProductId.productItems.map(productItems => Object.values(productItems)[2]); // 2 = quantity
+        
+
+        let sumWithInitial;
+        let err;
+        let emptyTable = []
+        
+        for (let i = 0; i < load.length; i++) 
+        {
+            let initialValue = 0;
+            
+            emptyTable.push(load[i] * qty[i])
+            sumWithInitial = emptyTable.reduce(
+            (previousValue, currentValue) => previousValue + currentValue,
+            initialValue
+            );            
+            
+            let cartProduct = await Product.findOne({_id: productId});
+            let stockAvailable = cartProduct.countInStock;
+            
+            if(stockAvailable - (sumWithInitial + productLoad) <= 0)
+            {
+                err = new Error('The stock for this product is not available : ' + cartProduct.title);
+                err.status = 400;
+            }
+        }
+        if(err)
+        {
+            return {err}
+        }
+        else
+        {
+            return
+        }
+    
+    }
+    else
+    {
+        err = new Error('Product not found');
+        err.status = 400;
+        return {err}
+    }
+}
+
 // DELETE PRODUCT IN CART
 
 exports.deleteProductInCart = async(req, res, next) => 
@@ -450,57 +501,4 @@ exports.deleteOperation = async(userId, Load, productId, amount) =>
         }
     );
     return {updatedCart}
-}
-
-exports.verifyStock = async(userId, productId, productLoad) => 
-{
-    
-    const cart = await Cart.findOne({userId : userId});
-    let findProductId = cart ? cart.products.find(el => el.productId.toString() === productId) : null;
-
-    if(findProductId)
-    {
-        let load = findProductId.productItems.map(productItems => Object.values(productItems)[1]); // 1 = load
-        let qty = findProductId.productItems.map(productItems => Object.values(productItems)[2]); // 2 = quantity
-        
-
-        let sumWithInitial;
-        let err;
-        let emptyTable = []
-        
-        for (let i = 0; i < load.length; i++) 
-        {
-            let initialValue = 0;
-            
-            emptyTable.push(load[i] * qty[i])
-            sumWithInitial = emptyTable.reduce(
-            (previousValue, currentValue) => previousValue + currentValue,
-            initialValue
-            );            
-            
-            let cartProduct = await Product.findOne({_id: productId});
-            let stockAvailable = cartProduct.countInStock;
-            
-            if(stockAvailable - (sumWithInitial + productLoad) <= 0)
-            {
-                err = new Error('The stock for this product is not available : ' + cartProduct.title);
-                err.status = 400;
-            }
-        }
-        if(err)
-        {
-            return {err}
-        }
-        else
-        {
-            return
-        }
-    
-    }
-    else
-    {
-        err = new Error('Product not found');
-        err.status = 400;
-        return {err}
-    }
 }

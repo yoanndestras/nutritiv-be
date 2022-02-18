@@ -38,7 +38,6 @@ const upload = multer(
     { 
         storage: storage, 
         fileFilter: imageFileFilter,
-
     });
 
 uploadRouter.route('/')

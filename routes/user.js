@@ -165,4 +165,10 @@ router.get("/self", auth.verifyUser, auth.verifyAuth, async(req, res) =>
     }
 })
 
+//UPDATE USER
+router.put('/:id', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async (req, res) =>
+{
+    
+})
+
 module.exports = router;

@@ -15,7 +15,7 @@ router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); }
 
 // CREATE PRODUCT
 router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, 
-upload.any('imageFile'), product.newProduct, async(req, res) =>
+upload.any('imageFile'), product.resizeImage, product.newProduct, async(req, res) =>
 {
     try
     {
@@ -23,7 +23,7 @@ upload.any('imageFile'), product.newProduct, async(req, res) =>
         
         let imgs = req.imgs.map(img => img.replaceAll("\\", "/"))
         let replace = imgs.map(img => img.replace("public/", ""))
-
+        
         const newProduct = await new Product(
             {
                 title,
@@ -56,8 +56,8 @@ upload.any('imageFile'), product.newProduct, async(req, res) =>
 });
 
 // UPDATE PRODUCT //TODO:  form adaptability 
-router.put("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, 
-product.verifyProductId, upload.any('imageFile'), product.newProduct, product.removeImgs, async(req, res) =>
+router.put("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, product.verifyProductId,
+ upload.any('imageFile'), product.newProduct, product.removeImgs, product.resizeImage, async(req, res) =>
 {
     try
     {
@@ -130,7 +130,7 @@ auth.verifyAdmin, product.removeImgs, async(req, res) =>
 });
 
 // GET PRODUCT BY ID
-router.get("/find/:id", async(req, res) =>
+router.get("/findById/:id", async(req, res) =>
 {
     try
     {
@@ -139,6 +139,32 @@ router.get("/find/:id", async(req, res) =>
             {
                 success: true,
                 status: "Product found",
+                Product: product
+            });
+    }
+    catch(err)
+    {
+        res.status(500).json(
+            {
+                success: false,
+                status: "Unsuccessfull request!",
+                err: err
+            });
+    }
+});
+
+// GET PRODUCT BY TITLE
+router.get("/findByTitle/:title", async(req, res) =>
+{
+    try
+    {
+        const title = req.params.title;
+        const product = await Product.find({title : title})
+
+        res.status(200).json(
+            {
+                success: true,
+                status: "Product(s) found",
                 Product: product
             });
     }

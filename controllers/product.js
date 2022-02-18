@@ -2,10 +2,12 @@ const express = require('express');
 const Product = require("../models/Product");
 const check = require('./product');
 const Cart = require("../models/Cart");
+
 const mongoose = require('mongoose');
 const ObjectId = require('mongoose').Types.ObjectId;
 const fs = require('fs');
-
+const sharp = require('sharp');
+const path = require('path');
 
 const app = express();
 
@@ -17,10 +19,12 @@ exports.newProduct = async(req, res, next) =>
 {
     let product;
     let shape = req.body.shape;
-    const files = req.files
+    const files = req.files;
+    
     const req_tags = Array.isArray(req.body.tags) ? req.body.tags : req.body.tags !== undefined ? [req.body.tags] : null;
     const load = Array.isArray(req.body.load) ? req.body.load : req.body.load !== undefined ? [req.body.load] : null;
-    let imgs = files.map((el, i) => {return el.path}), tags = req_tags.map((el, i) => {return el});    
+    let imgs = files.map((el, i) => {return path.join(el.destination,'resized', el.filename)}), tags = req_tags.map((el, i) => {return el});    
+
     const PPCapsule = req.body.pricePerCapsule;
     const PPKg = req.body.pricePerKilograms;
 
@@ -286,3 +290,24 @@ exports.countInStock = async(req, res, next) =>
     }
     
 }
+
+// RESIZE IMG
+exports.resizeImage = async(req, res, next) => 
+{
+    if (!req.files) return next();
+    await Promise.all
+    (
+        req.files.map(async file => 
+            {
+            await sharp(file.path)
+                .resize(200, 200)
+                .toFile(
+                    path.resolve(file.destination,'resized', file.filename)
+                )
+                fs.unlinkSync(file.path) 
+            })
+    );
+    
+    next();
+
+};

@@ -286,7 +286,8 @@ exports.operation = async(userId, quantity, value, Load, Id) =>
             {
                 "products.$[outer].productItems.$[inner].quantity": quantity,
                 "products.$[outer].productItems.$[inner].price.value": value,
-                "amount.value" : value
+                "amount.value" : value,
+                "totalQuantity" : quantity
             }
         },
         {

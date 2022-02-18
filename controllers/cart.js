@@ -9,7 +9,6 @@ const Product = require("../models/Product");
 // ADD TO CART
 exports.cart = async(req, res, next) => 
 {
-    // Commentaire test
     try
     {
         const userId = req.user._id;

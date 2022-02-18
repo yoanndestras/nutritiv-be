@@ -65,7 +65,8 @@ exports.productAndLoadExist = async(userId, Quantity, price, Load, Id) =>
         $inc: {
             "products.$[outer].productItems.$[inner].quantity": Quantity,
             "products.$[outer].productItems.$[inner].price.value": price,
-            "amount.value": price
+            "amount.value": price,
+            "totalQuantity" :Quantity
         }
     },
     {
@@ -117,7 +118,8 @@ exports.productExist = async(userId, Quantity, price, Load, Id) =>
             "products.$[outer].productItems": productItems,
         },
         $inc: {
-            "amount.value": price
+            "amount.value": price,
+            totalQuantity :Quantity
         },
     },
     {
@@ -171,7 +173,8 @@ exports.cartExist = async(userId, Quantity, price, Load, Id) =>
             },
             $inc: 
             {
-                "amount.value": price
+                "amount.value": price,
+                totalQuantity :Quantity
             }
         }
     )
@@ -214,6 +217,7 @@ exports.newCart = async(userId, Quantity, price, Load, Id) =>
                 }
             ]
         }],
+        totalQuantity: Quantity,
         "amount.value" : price
     })
     await newCart.save();

@@ -160,13 +160,24 @@ router.get("/findByTitle/:title", async(req, res) =>
     {
         const title = req.params.title;
         const product = await Product.find({title : title})
-
-        res.status(200).json(
-            {
-                success: true,
-                status: "Product(s) found",
-                Product: product
-            });
+        
+        if(product)
+        {
+            res.status(200).json(
+                {
+                    success: true,
+                    status: "Product(s) found",
+                    Product: product
+                });
+        }
+        else if(!product)
+        {
+            res.status(200).json(
+                {
+                    success: false,
+                    status: "Product(s) "+ title +" not found"
+                });
+        }
     }
     catch(err)
     {

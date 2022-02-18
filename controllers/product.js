@@ -282,11 +282,12 @@ exports.countInStock = async(req, res, next) =>
         
         next();
     }
-    else
+    else if(productId)
     {
-        err = new Error('Product not found');
-        err.status = 400;
-        next(err);
+        const product = await Product.findOne({_id: productId});
+        const stockAvailable = product.countInStock;
+        req.stock = stockAvailable;
+        next();
     }
     
 }

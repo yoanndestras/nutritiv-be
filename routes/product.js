@@ -134,7 +134,7 @@ router.get("/findById/:id", async(req, res) =>
 {
     try
     {
-        const product = await Product.findById(req.params.id)
+        const product = await Product.findById(req.params.id).select(['-countInStock'])
         res.status(200).json(
             {
                 success: true,
@@ -159,7 +159,7 @@ router.get("/findByTitle/:title", async(req, res) =>
     try
     {
         const title = req.params.title;
-        const product = await Product.find({title : title})
+        const product = await Product.find({title : title}).select(['-countInStock'])
 
         if(product.length > 0)
         {

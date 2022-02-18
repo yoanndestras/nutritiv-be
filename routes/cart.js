@@ -134,11 +134,11 @@ router.delete("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
 })
 
 // GET USER CART
-router.get("/find/:userId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAuthorization, async (req, res) =>
+router.get("/self", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async (req, res) =>
 {
     try
     {
-        const cart = await Cart.findOne({userId: req.params.userId})
+        const cart = await Cart.findOne({userId: req.user._id})
         res.status(200).json(
             {
                 success: true,

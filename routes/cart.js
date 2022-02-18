@@ -139,12 +139,24 @@ router.get("/self", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, a
     try
     {
         const cart = await Cart.findOne({userId: req.user._id})
-        res.status(200).json(
-            {
-                success: true,
-                status: "User cart found",
-                cart: cart
-            });
+        if(cart)
+        {
+            res.status(200).json(
+                {
+                    success: true,
+                    status: "User cart found",
+                    cart: cart
+                });
+        }
+        else if(!cart)
+        {
+            res.status(500).json(
+                {
+                    success: false,
+                    status: "Cart not found!"
+                });
+        }
+        
     }
     catch(err)
     {

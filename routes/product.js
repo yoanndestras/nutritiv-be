@@ -160,8 +160,8 @@ router.get("/findByTitle/:title", async(req, res) =>
     {
         const title = req.params.title;
         const product = await Product.find({title : title})
-        
-        if(product)
+
+        if(product.length > 0)
         {
             res.status(200).json(
                 {
@@ -170,7 +170,7 @@ router.get("/findByTitle/:title", async(req, res) =>
                     Product: product
                 });
         }
-        else if(!product)
+        else if(product.length === 0)
         {
             res.status(200).json(
                 {

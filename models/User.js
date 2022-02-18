@@ -30,7 +30,32 @@ const UserSchema = new Schema
     {
         type: Boolean,
         default: false
-    }
+    },
+    adressDetails:
+    [
+        {
+            address:
+            {
+                type: String,
+            },
+            zip:
+            {
+                type: Number,
+            },
+            city:
+            {
+                type: String,
+            },
+            country:
+            {
+                type: String,
+            },
+            phoneNumber:
+            {
+                type: Number,
+            }
+        }
+    ],
 },
 {
     timestamps: true,   //mongoose automatically do UpdateAt and CreatedAt

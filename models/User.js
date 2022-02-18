@@ -31,6 +31,10 @@ const UserSchema = new Schema
         type: Boolean,
         default: false
     },
+    icon:
+    {
+        type: String
+    },
     adressDetails:
     [
         {

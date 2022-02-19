@@ -13,12 +13,19 @@ exports.cart = async(req, res, next) =>
     {
         const userId = req.user._id;
         const Id = req.body.productId;
+        
         const Quantity = parseFloat(req.body.quantity);
         const Load = parseFloat(req.body.load);
         const Price = parseFloat(req.body.price);
-        
+
         let price = parseFloat((Price * Quantity).toFixed(2))
         
+        const product = await Product.findOne({_id : Id})
+        
+        const Title = product.title;
+        const Shape = product.shape;
+        const Imgs = product.imgs;
+
         const existingCart = await Cart.findOne({userId : userId});
         const productsArray = existingCart ? existingCart.products : null;
         const productIndex = productsArray ? productsArray.findIndex(el => el.productId.toString() === Id) : null;
@@ -35,11 +42,11 @@ exports.cart = async(req, res, next) =>
         }
         else if (existingCart)
         {
-            cart.cartExist(userId, Quantity, price, Load, Id);
+            cart.cartExist(userId, Title, Shape, Imgs, Quantity, price, Load, Id);
         }
         else
         {
-            await cart.newCart(userId, Quantity, price, Load, Id);
+            await cart.newCart(userId, Title, Shape, Imgs, Quantity, price, Load, Id);
             req.new = true;
         }
         
@@ -147,7 +154,7 @@ exports.productExist = async(userId, Quantity, price, Load, Id) =>
     return {updatedCart: setRoundedValue}
 }
 
-exports.cartExist = async(userId, Quantity, price, Load, Id) =>
+exports.cartExist = async(userId, Title, Shape, Imgs, Quantity, price, Load, Id) =>
 {
     let productItems =  [
                 {
@@ -162,7 +169,12 @@ exports.cartExist = async(userId, Quantity, price, Load, Id) =>
                 }
             ]
 
-    let newProduct = {productId : mongoose.Types.ObjectId(Id), productItems: productItems};
+    let newProduct = {
+        productId : mongoose.Types.ObjectId(Id), 
+        productTitle: Title,
+        productImgs : Imgs,
+        productShape: Shape,
+        productItems: productItems};
 
     updatedCart = await Cart.findOneAndUpdate(
         {"userId" : userId}, 
@@ -195,14 +207,17 @@ exports.cartExist = async(userId, Quantity, price, Load, Id) =>
     return {updatedCart: setRoundedValue}
 }
 
-exports.newCart = async(userId, Quantity, price, Load, Id) =>
+exports.newCart = async(userId, Title, Shape, Imgs, Quantity, price, Load, Id) =>
 {
     const newCart = await new Cart(
     {
         userId: userId,
         products: 
         [{
-            productId : mongoose.Types.ObjectId(Id), 
+            productId : mongoose.Types.ObjectId(Id),
+            productTitle: Title,
+            productImgs : Imgs,
+            productShape: Shape,
             productItems: 
             [
                 {

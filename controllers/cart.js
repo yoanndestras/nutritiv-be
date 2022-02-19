@@ -117,7 +117,7 @@ exports.productExist = async(userId, Quantity, price, Load, Id) =>
             currency : "EUR"
         },
     }
-
+    
     let updatedCart = await Cart.findOneAndUpdate(
     {"userId" : userId, "productId": mongoose.Types.ObjectId(Id)}, 
     {

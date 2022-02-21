@@ -22,9 +22,9 @@ exports.cart = async(req, res, next) =>
         const prodIndex = cartProducts ? cartProducts.findIndex(el => el.productId.toString() === newProdId) : null;
         const newProduct = prodIndex !== null && prodIndex !== -1 ? cartProducts[prodIndex].productItems.some(el => el.load === newProdLoad) : null;
         
-        if(newProduct){cart.productAndLoadExist(userId, newProdQty, calculatedPrice, newProdLoad, newProdId);}
-        else if(prodIndex !== null && prodIndex !== -1){cart.productExist(userId, newProdQty, calculatedPrice, newProdLoad, newProdId);}
-        else if(existingCart){cart.cartExist(userId, title, shape, imgs, newProdQty, calculatedPrice, newProdLoad, newProdId);}
+        if(newProduct){(await cart.productAndLoadExist(userId, newProdQty, calculatedPrice, newProdLoad, newProdId));}
+        else if(prodIndex !== null && prodIndex !== -1){(await cart.productExist(userId, newProdQty, calculatedPrice, newProdLoad, newProdId));}
+        else if(existingCart){await (cart.cartExist(userId, title, shape, imgs, newProdQty, calculatedPrice, newProdLoad, newProdId));}
         else{await (cart.newCart(userId, title, shape, imgs, newProdQty, calculatedPrice, newProdLoad, newProdId));req.new = true;}
         
         next();
@@ -187,22 +187,22 @@ exports.updateQuantity = async(req, res, next) =>
     try
     {
         const userId = req.user._id, newProdId = req.params.id, newProdLoad = parseFloat(req.params.load), newProdPrice = parseFloat(req.price);
-
+        
         const qty = req.params.operation === "inc" ? 1 : req.params.operation === "dec" ? -1 : null;
         const val = req.params.operation === "inc" ? newProdPrice : req.params.operation === "dec" ? - newProdPrice : null;
         
         if(!qty){res.status(500).json({success: false,status: "This operation do not exist, please enter inc or dec!"});}
         else if(qty === 1)
         {
-            const verifyStock = cart.verifyStock(userId, newProdId, newProdLoad);
-            const error = (await verifyStock).err ? next((await verifyStock).err) : null;
+            const verifyStock = (await cart.verifyStock(userId, newProdId, newProdLoad));
+            if(verifyStock.err){next(verifyStock.err)};
         }
         
         if(qty)
         {
-            const operation = cart.operation(userId, qty, val, newProdLoad, newProdId);
-            const emptyCart = (await operation).setRoundedValue ? cart.emptyCart(userId, (await operation).setRoundedValue) : null;
-            const productQuantityIsZero = (await emptyCart).total === false ? cart.productQuantityIsZero(userId, newProdLoad, newProdId, (await emptyCart).total) : null;
+            const operation = (await cart.operation(userId, qty, val, newProdLoad, newProdId));
+            const emptyCart = operation.setRoundedValue ? (await cart.emptyCart(userId, operation.setRoundedValue)) : null;
+            const productQuantityIsZero = emptyCart.total === false ? cart.productQuantityIsZero(userId, newProdLoad, newProdId, emptyCart.total) : null;
             next();
         }
     }
@@ -215,7 +215,6 @@ exports.updateQuantity = async(req, res, next) =>
                 err: err.message
             });
     }
-        
 }
 
 exports.operation = async(userId, qty, val, newProdLoad, newProdId) =>
@@ -349,66 +348,69 @@ exports.verifyStock = async(userId, productId, productLoad) =>
 // DELETE PRODUCT IN CART
 exports.deleteProductInCart = async(req, res, next) => 
 {
-try
-{
-    const userId = req.params.userId;
-    const productId = req.params.productId;
-    const newProdLoad = parseFloat(req.params.load);
-    let qty;
-    let amount;
+    try
+    {
+        const userId = req.params.userId;
+        const productId = req.params.productId;
+        const newProdLoad = parseFloat(req.params.load);
+        let qty;
+        let amount;
 
-    const existingCart = await Cart.findOne({userId : userId});
-    const cartProducts = existingCart?.products;
-    const prodExist =  cartProducts ? await cartProducts.some(el => el.productId.toString() === productId) : null;
-    
-    let product = prodExist ? await cartProducts.filter((el) => 
-    {
-        if(el.productId.toString() === productId) 
-        {
-            let productItems = el.productItems.map((product) => 
-            {
-                if(product.load === newProdLoad)
-                {
-                    qty = product.quantity;
-                    amount = product.price.value;
-                    return qty
-                }
-            })
-            return productItems 
-        }
-    }) : null;
-    product = product.flat();
-    if(amount)
-    {
-        const deleteOperation = cart.deleteOperation(userId, newProdLoad, qty, productId, amount);
-        let total = (await deleteOperation).setRoundedValue ? (await deleteOperation).setRoundedValue.amount.value ===  0 : null;
+        const existingCart = await Cart.findOne({userId : userId});
+        const cartProducts = existingCart?.products;
+        const prodExist =  cartProducts ? await cartProducts.some(el => el.productId.toString() === productId) : null;
         
-        if(total){await Cart.deleteOne({userId : userId}); next();}
+        let product = prodExist ? await cartProducts.filter((el) => 
+        {
+            if(el.productId.toString() === productId) 
+            {
+                let productItems = el.productItems.map((product) => 
+                {
+                    if(product.load === newProdLoad)
+                    {
+                        qty = product.quantity;
+                        amount = product.price.value;
+                        return qty
+                    }
+                })
+                return productItems 
+            }
+        }) : null;
+        product = product.flat();
+        console.log(product);
+
+        if(amount)
+        {
+            const deleteOperation = (await cart.deleteOperation(userId, newProdLoad, qty, productId, amount));
+            let total = deleteOperation.setRoundedValue ? deleteOperation.setRoundedValue.amount.value <=  0 : null;
+            console.log(total);
+            
+            if(total){await Cart.deleteOne({userId : userId}); next();}
+            else
+            {
+                let productExist = deleteOperation.setRoundedValue ? (deleteOperation.setRoundedValue.products[prodIndex].productItems).length > 0 : null;
+                pullProduct = productExist === false ? await Cart.findOneAndUpdate(
+                    {userId : userId}, 
+                    {
+                        $pull: 
+                        {
+                            "products": {productId : mongoose.Types.ObjectId(productId)}
+                        }
+                    }
+                ): null;
+                if(pullProduct) {await pullProduct.save()}
+                next();
+            }
+        }
         else
         {
-            let productExist = (await deleteOperation).setRoundedValue ? ((await deleteOperation).setRoundedValue.products[prodIndex].productItems).length > 0 : null;
-            pullProduct = productExist === false ? await Cart.findOneAndUpdate(
-                {userId : userId}, 
-                {
-                    $pull: 
-                    {
-                        "products": {productId : mongoose.Types.ObjectId(productId)}
-                    }
-                }
-            ): null;
-            if(pullProduct) {await pullProduct.save()}
-            next();
+            res.status(500).json(
+            {
+                success: false,
+                status: "Unsuccessfull request!",
+                err: "Product not found"
+            });
         }
-    }
-    else
-    {
-        res.status(500).json(
-        {
-            success: false,
-            status: "Unsuccessfull request!",
-            err: "Product not found"
-        });
-    }
     }
     catch(err) 
     {
@@ -419,7 +421,6 @@ try
             err: err.message
         });
     }
-    
 }
 
 exports.deleteOperation = async(userId, newProdLoad, qty, productId, amount) =>
@@ -452,18 +453,8 @@ exports.deleteOperation = async(userId, newProdLoad, qty, productId, amount) =>
     );
     if(updatedCart){await updatedCart.save();}
     
-    let cart = updatedCart ? await Cart.findOne({userId : userId}) : null;
-    let currentAmount = cart ? cart.amount.value : null;
-    let roundedValue = currentAmount ||  currentAmount === 0 ? currentAmount.toFixed(2) : null;
-    
-    let setRoundedValue = roundedValue ? await Cart.findOneAndUpdate(
-        {userId : userId}, 
-        {
-            $set:
-            {
-                "amount.value" : roundedValue
-            }
-        }) : null;
+    let roundedAmount = updatedCart?.amount?.value?.toFixed(2); 
+    let setRoundedValue = roundedAmount ? await Cart.findOneAndUpdate({userId : userId}, {$set:{"amount.value" : roundedAmount}}) : null;
     
     return {setRoundedValue}
 }

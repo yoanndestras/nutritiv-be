@@ -228,7 +228,7 @@ exports.operation = async(userId, qty, val, newProdLoad, newProdId) =>
     const currentProduct = prodIndex !== null && prodIndex !== -1 ? cartProducts[prodIndex].productItems : null;
     let findProduct = currentProduct ? currentProduct.findIndex(el => el.load === newProdLoad) : null;
     
-    let incCart = findProduct !== null && findProduct !== -1 ? await Cart.findOneAndUpdate(
+    let cartOperation = findProduct !== null && findProduct !== -1 ? await Cart.findOneAndUpdate(
         {userId : userId}, 
         {
             $inc: 
@@ -251,18 +251,10 @@ exports.operation = async(userId, qty, val, newProdLoad, newProdId) =>
         },
     ) : null;
     
-    let cart = incCart ? await Cart.findOne({userId : userId}) : null;
-    let currentAmount = cart ? cart.amount.value : null;
-    let roundedValue = currentAmount ? currentAmount.toFixed(2) : null;
+    cartOperation = cartOperation.save()
     
-    let setRoundedValue = roundedValue ? await Cart.findOneAndUpdate(
-        {userId : userId}, 
-        {
-            $set:
-            {
-                "amount.value" : roundedValue
-            }
-        }) : null;
+    let roundedAmount = cartOperation?.amount?.value?.toFixed(2); 
+    let setRoundedValue = roundedAmount ? await Cart.findOneAndUpdate({userId : userId}, {$set:{"amount.value" : roundedAmount}}) : null;
     
     return {setRoundedValue}
 }

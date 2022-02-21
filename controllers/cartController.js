@@ -11,10 +11,10 @@ exports.cart = async(req, res, next) =>
     {
         const {productId, quantity, load, price} = req.body;
         const userId = req.user._id, newProdId = productId; 
-        const newProdQty = parseInt(quantity), newProdLoad = parseInt(load), newProdPrice = parseFloat(price);
-        
+        const newProdQty = parseFloat(quantity), newProdLoad = parseFloat(load), newProdPrice = parseFloat(price);
+
         let calculatedPrice = parseFloat((newProdPrice * newProdQty).toFixed(2))
-        
+
         const product = await Product.findOne({_id : newProdId}), existingCart = await Cart.findOne({userId : userId});
         const title = product.title, shape = product.shape, imgs = product.imgs;
 
@@ -23,9 +23,9 @@ exports.cart = async(req, res, next) =>
         const newProduct = prodIndex !== null && prodIndex !== -1 ? cartProducts[prodIndex].productItems.some(el => el.load === newProdLoad) : null;
         
         if(newProduct){(await cart.productAndLoadExist(userId, newProdQty, calculatedPrice, newProdLoad, newProdId));}
-        else if(prodIndex !== null && prodIndex !== -1){(await cart.productExist(userId, newProdQty, calculatedPrice, newProdLoad, newProdId));}
-        else if(existingCart){await (cart.cartExist(userId, title, shape, imgs, newProdQty, calculatedPrice, newProdLoad, newProdId));}
-        else{await (cart.newCart(userId, title, shape, imgs, newProdQty, calculatedPrice, newProdLoad, newProdId));req.new = true;}
+        else if(prodIndex !== null && prodIndex !== -1){await (cart.productExist(userId, newProdQty, calculatedPrice, newProdLoad, newProdId));}
+        else if(existingCart){(await cart.cartExist(userId, title, shape, imgs, newProdQty, calculatedPrice, newProdLoad, newProdId));}
+        else{await cart.newCart(userId, title, shape, imgs, newProdQty, calculatedPrice, newProdLoad, newProdId);req.new = true;}
         
         next();
     }
@@ -61,10 +61,11 @@ exports.productAndLoadExist = async(userId, newProdQty, calculatedPrice, newProd
         }],
         new: true,
     },)
-    if(updatedCart){await updatedCart.save();}
     
-    let roundedAmount = updatedCart?.amount?.value?.toFixed(2);
+    let roundedAmount = await updatedCart?.amount?.value?.toFixed(2);
     let setRoundedValue = roundedAmount ? await Cart.findOneAndUpdate({userId : userId}, {$set:{"amount.value" : roundedAmount}}) : null;
+    
+    if(await setRoundedValue){await setRoundedValue.save();}
     
     return {updatedCart: setRoundedValue}
 }
@@ -74,7 +75,8 @@ exports.productExist = async(userId, newProdQty, calculatedPrice, newProdLoad, n
     let updatedCart = await Cart.findOneAndUpdate(
     {"userId" : userId, "productId": mongoose.Types.ObjectId(newProdId)}, 
     {
-        $push: {
+        $push: 
+        {
             "products.$[outer].productItems": 
             {
                 id : mongoose.Types.ObjectId(),
@@ -87,9 +89,10 @@ exports.productExist = async(userId, newProdQty, calculatedPrice, newProdLoad, n
                 },
             },
         },
-        $inc: {
+        $inc: 
+        {
             "amount.value": calculatedPrice,
-            totalQuantity :newProdQty
+            totalQuantity : newProdQty
         },
     },
     {
@@ -97,13 +100,14 @@ exports.productExist = async(userId, newProdQty, calculatedPrice, newProdLoad, n
         {
             'outer.productId': mongoose.Types.ObjectId(newProdId)
         }],
-        new: true,
+        multi: true,
     },
     )
-    if(updatedCart){await updatedCart.save();}
     
     let roundedAmount = updatedCart?.amount?.value?.toFixed(2);    
     let setRoundedValue = roundedAmount ? await Cart.findOneAndUpdate({userId : userId}, {$set:{"amount.value" : roundedAmount}}) : null;
+    
+    if(await setRoundedValue){await setRoundedValue.save();}
 
     return {updatedCart: setRoundedValue}
 }
@@ -111,7 +115,7 @@ exports.productExist = async(userId, newProdQty, calculatedPrice, newProdLoad, n
 exports.cartExist = async(userId, title, shape, imgs, newProdQty, calculatedPrice, newProdLoad, newProdId) =>
 { 
     let updatedCart = await Cart.findOneAndUpdate(
-        {"userId" : userId}, 
+        {userId : userId}, 
         {
             $push: 
             {
@@ -137,15 +141,17 @@ exports.cartExist = async(userId, title, shape, imgs, newProdQty, calculatedPric
             },
             $inc: 
             {
-                "amount.value": calculatedPrice,
-                totalQuantity :newProdQty
-            }
+                totalQuantity : newProdQty,
+                "amount.value": calculatedPrice
+            },
+            multi: true,
         }
     )
-    if(updatedCart){await updatedCart.save();}
+
+    let roundedAmount =  parseFloat(await updatedCart?.amount?.value?.toFixed(2));
+    let setRoundedValue =  roundedAmount ? await Cart.findOneAndUpdate({userId : userId}, {$set:{"amount.value" : roundedAmount}}) : null;
     
-    let roundedAmount = updatedCart?.amount?.value?.toFixed(2); 
-    let setRoundedValue = roundedAmount ? await Cart.findOneAndUpdate({userId : userId}, {$set:{"amount.value" : roundedAmount}}) : null;
+    if(setRoundedValue){await setRoundedValue.save();}
 
     return {updatedCart: setRoundedValue}
 }
@@ -202,8 +208,8 @@ exports.updateQuantity = async(req, res, next) =>
         {
             const operation = (await cart.operation(userId, qty, val, newProdLoad, newProdId));
             const emptyCart = operation.setRoundedValue ? (await cart.emptyCart(userId, operation.setRoundedValue)) : null;
-            const productQuantityIsZero = emptyCart.total === false ? cart.productQuantityIsZero(userId, newProdLoad, newProdId, emptyCart.total) : null;
-            next();
+            const productQuantityIsZero = emptyCart.total === false ? (await cart.productQuantityIsZero(userId, newProdLoad, newProdId, emptyCart.total)) : null;
+            if(productQuantityIsZero){next()};
         }
     }
     catch(err)
@@ -327,15 +333,8 @@ exports.verifyStock = async(userId, productId, productLoad) =>
                 err.status = 400;
             }
         }
-        if(err)
-        {
-            return {err}
-        }
-        else
-        {
-            return
-        }
-    
+        if(err){return {err}}
+        else{return}
     }
     else
     {
@@ -385,7 +384,7 @@ exports.deleteProductInCart = async(req, res, next) =>
         {
             const deleteOperation = (await cart.deleteOperation(userId, newProdLoad, qty, productId, amount));
             let total = deleteOperation.setRoundedValue ? deleteOperation.setRoundedValue.amount.value <=  0 : null;
-            
+
             if(total){await Cart.deleteOne({userId : userId}); next();}
             else
             {
@@ -434,7 +433,6 @@ exports.deleteOperation = async(userId, newProdLoad, qty, productId, amount) =>
             ]
         },
     );
-    if(updatedCart){await updatedCart.save();}    
     
     let newUpdatedCart = await updatedCart ? await Cart.findOneAndUpdate(
         {userId : userId},
@@ -446,10 +444,10 @@ exports.deleteOperation = async(userId, newProdLoad, qty, productId, amount) =>
             }
         }
     ): null;
-    if(newUpdatedCart){await newUpdatedCart.save();}
     
     let roundedAmount = newUpdatedCart?.amount?.value?.toFixed(2); 
     let setRoundedValue = roundedAmount ? await Cart.findOneAndUpdate({userId : userId}, {$set:{"amount.value" : roundedAmount}}) : null;
     
+    if(await setRoundedValue){await setRoundedValue.save();}
     return {setRoundedValue}
 }

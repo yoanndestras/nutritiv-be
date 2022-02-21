@@ -25,7 +25,7 @@ exports.cart = async(req, res, next) =>
         if(newProduct){cart.productAndLoadExist(userId, newProdQty, calculatedPrice, newProdLoad, newProdId);}
         else if(prodIndex !== null && prodIndex !== -1){cart.productExist(userId, newProdQty, calculatedPrice, newProdLoad, newProdId);}
         else if(existingCart){cart.cartExist(userId, title, shape, imgs, newProdQty, calculatedPrice, newProdLoad, newProdId);}
-        else{cart.newCart(userId, title, shape, imgs, newProdQty, calculatedPrice, newProdLoad, newProdId);req.new = true;}
+        else{await (cart.newCart(userId, title, shape, imgs, newProdQty, calculatedPrice, newProdLoad, newProdId));req.new = true;}
         
         next();
     }
@@ -153,8 +153,7 @@ exports.cartExist = async(userId, title, shape, imgs, newProdQty, calculatedPric
 exports.newCart = async(userId, title, shape, imgs, newProdQty, calculatedPrice, newProdLoad, newProdId) =>
 {
     const newCart = await new Cart(
-    {
-        userId: userId,
+    {"userId": userId,
         products: 
         [{
             productId : mongoose.Types.ObjectId(newProdId),

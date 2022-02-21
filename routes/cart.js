@@ -19,7 +19,6 @@ product.verifyStock, product.verifyProduct, cart.cart, async(req, res) =>
     try
     {
         let cart = await Cart.findOne({userId : req.user._id});
-        console.log(cart);
         if(req.new === true) 
         {
             await cart.save();

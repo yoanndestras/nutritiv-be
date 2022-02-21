@@ -88,7 +88,6 @@ auth.verifyAuthorization, cart.deleteProductInCart, async (req, res) =>
     try
     {
         let cart = await Cart.findOne({userId : req.user._id});
-        await cart.save();
         if(cart)
         {
             await cart.save();

@@ -387,11 +387,7 @@ try
         const deleteOperation = cart.deleteOperation(userId, newProdLoad, qty, productId, amount);
         let total = (await deleteOperation).setRoundedValue ? (await deleteOperation).setRoundedValue.amount.value ===  0 : null;
         
-        if(total)
-        {
-            await Cart.deleteOne({userId : userId})
-            next();
-        }
+        if(total){await Cart.deleteOne({userId : userId}); next();}
         else
         {
             let productExist = (await deleteOperation).setRoundedValue ? ((await deleteOperation).setRoundedValue.products[prodIndex].productItems).length > 0 : null;

@@ -5,6 +5,7 @@ const router = require("express").Router();
 const cors = require('../controllers/corsController');
 const auth = require('../controllers/authController');
 const mailer = require("../controllers/mailerController");
+const user = require("../controllers/usersController");
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
@@ -149,13 +150,16 @@ router.get("/self", auth.verifyUser, auth.verifyAuth, async(req, res) =>
 {
     try
     {
+        const { username, email, isAdmin, isVerified, adressDetails} = req.user;
+
         res.status(200).json(
             {
                 loggedIn: true,
-                username: req.user.username,
-                email: req.user.email,
-                isAdmin: req.user.isAdmin,
-                isVerified: req.user.isVerified,
+                username,
+                email,
+                isAdmin,
+                isVerified,
+                adressDetails,
                 status: "User connected"
             });
     }
@@ -176,6 +180,32 @@ router.put('/updateUser', cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
             {
                 success: true, 
                 status: user
+            });
+    }
+    catch(err)
+    {
+        res.status(500).json(
+            {
+                success: false, 
+                err: err.message
+            });
+    }
+})
+
+//UPDATE USER
+router.put('/addAddress', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+user.verifyAddress, async (req, res) =>
+{
+    try
+    {
+        const user = await User.findOne({_id: req.user._id});
+        user.addressDetails.push(req.address);
+        user.save();
+        
+        res.status(200).json(
+            {
+                success: true, 
+                userInfo: user
             });
     }
     catch(err)

@@ -87,7 +87,7 @@ exports.productAndLoadExist = async(userId, Quantity, price, Load, Id) =>
         multi: true
     },
     )
-    
+    updatedCart = updatedCart.save()
     let cart = updatedCart ? await Cart.findOne({userId : userId}) : null;
     let currentAmount = cart ? cart.amount.value : null;
     let roundedValue = currentAmount ? currentAmount.toFixed(2) : null;

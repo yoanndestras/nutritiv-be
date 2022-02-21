@@ -35,7 +35,7 @@ const UserSchema = new Schema
     {
         type: String
     },
-    adressDetails:
+    addressDetails:
     [
         {
             address:

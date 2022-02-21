@@ -105,8 +105,8 @@ exports.countInStock = async(userId) =>
 {
   const cart = await Cart.findOne({userId : userId});
 
-  let load = cart.products.map(product => product.productItems.map(productItems => Object.values(productItems)[1])); // 1 = load
-  let qty = cart.products.map(product => product.productItems.map(productItems => Object.values(productItems)[2])); // 2 = quantity
+  let load = cart.products.map(product => product.productItems.map((productItems) => {return productItems.load;})); // 1 = load
+  let qty = cart.products.map(product => product.productItems.map((productItems) => {return productItems.quantity;})); // 2 = quantity
   let productArray = cart.products.map(product => product.productId);
   
   let sumWithInitial;

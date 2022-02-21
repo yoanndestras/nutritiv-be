@@ -156,9 +156,8 @@ exports.verifyStock = async(req, res, next) => {
 
     if(findProductId)
     {
-        let load = findProductId.productItems.map(productItems => Object.values(productItems)[1]); // 1 = load
-        let qty = findProductId.productItems.map(productItems => Object.values(productItems)[2]); // 2 = quantity
-        
+        let load = findProductId.productItems.map((productItems) => {return productItems.load;});
+        let qty = findProductId.productItems.map((productItems) => {return productItems.quantity;});
 
         let sumWithInitial;
         let err;
@@ -255,12 +254,12 @@ exports.countInStock = async(req, res, next) =>
     const productId = req.params.id;
     const cart = await Cart.findOne({userId : userId});
     let findProductId = cart ? cart.products.find(el => el.productId.toString() === productId) : null;
-
+    
     if(findProductId)
     {
-        let load = findProductId.productItems.map(productItems => Object.values(productItems)[1]); // 1 = load
-        let qty = findProductId.productItems.map(productItems => Object.values(productItems)[2]); // 2 = quantity
-
+        let load = findProductId.productItems.map((productItems) => {return productItems.load;});
+        let qty = findProductId.productItems.map((productItems) => {return productItems.quantity;});
+        
         let sumWithInitial;
         let emptyTable = []
         

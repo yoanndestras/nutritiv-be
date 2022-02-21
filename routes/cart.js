@@ -19,10 +19,11 @@ product.verifyStock, product.verifyProduct, cart.cart, async(req, res) =>
     try
     {
         let cart = await Cart.findOne({userId : req.user._id});
-        await cart.save();
+        
         
         if(req.new === true) 
         {
+            await cart.save();
             res.status(200).json(
                 {
                     success: true,
@@ -33,6 +34,7 @@ product.verifyStock, product.verifyProduct, cart.cart, async(req, res) =>
         }
         else
         {
+            await cart.save();
             res.status(200).json(
                 {
                     success: true,
@@ -149,10 +151,10 @@ router.get("/self", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, a
     try
     {
         const cart = await Cart.findOne({userId: req.user._id})
-        await cart.save();
         
         if(cart)
         {
+            await cart.save();
             res.status(200).json(
                 {
                     success: true,

@@ -308,10 +308,7 @@ exports.verifyStock = async(userId, productId, productLoad) =>
         let load = findProductId.productItems.map((productItems) => {return productItems.load;}); // 1 = load
         let qty = findProductId.productItems.map((productItems) => {return productItems.quantity;}); // 2 = quantity
         
-        
-        let sumWithInitial;
-        let err;
-        let emptyTable = []
+        let sumWithInitial, err, emptyTable = [];
         
         for (let i = 0; i < load.length; i++) 
         {

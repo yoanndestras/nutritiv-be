@@ -20,7 +20,7 @@ exports.cart = async(req, res, next) =>
 
         const cartProducts = existingCart?.products;
         const prodIndex = cartProducts ? cartProducts.findIndex(el => el.productId.toString() === newProdId) : null;
-        const newProduct = prodIndex !== null && prodIndex !== -1 ? cartProducts[prodIndex].some(el => el.load === newProdLoad) : null;
+        const newProduct = prodIndex !== null && prodIndex !== -1 ? cartProducts[prodIndex].productItems.some(el => el.load === newProdLoad) : null;
         
         if(newProduct){cart.productAndLoadExist(userId, newProdQty, calculatedPrice, newProdLoad, newProdId);}
         else if(prodIndex !== null && prodIndex !== -1){cart.productExist(userId, newProdQty, calculatedPrice, newProdLoad, newProdId);}
@@ -178,7 +178,7 @@ exports.newCart = async(userId, title, shape, imgs, newProdQty, calculatedPrice,
         totalQuantity: newProdQty,
         "amount.value" : calculatedPrice
     })
-    await newCart.save();
+    if(newCart){await newCart.save();}
 }
 
 

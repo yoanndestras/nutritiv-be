@@ -381,7 +381,6 @@ exports.productQuantityIsZero = async(userId, Load, Id, emptyCart) =>
                 }
             }
         ): null;
-        
         if(pullProduct){await pullProduct.save();}
     }
 }
@@ -440,7 +439,6 @@ exports.verifyStock = async(userId, productId, productLoad) =>
 }
 
 // DELETE PRODUCT IN CART
-
 exports.deleteProductInCart = async(req, res, next) => 
 {
 try
@@ -448,19 +446,36 @@ try
     const userId = req.params.userId;
     const productId = req.params.productId;
     const Load = parseFloat(req.params.load);
-    
+    let quantity;
+    let amount;
+
     const existingCart = await Cart.findOne({userId : userId});
     const productsArray = existingCart ? existingCart.products : null;
-    const productIndex =  productsArray ? productsArray.findIndex(el => el.productId.toString() === productId) : null;
-    const product = productIndex !== null && productIndex !== -1 ? productsArray.filter(el => el.productId.toString() === productId && el.productItems.find(el => el.load === Load)) : null;
+    const productIndex =  productsArray ? await productsArray.findIndex(el => el.productId.toString() === productId) : null;
     
-    const amount = product && product.length > 0 ? product[0].productItems[0].price.value : null;
-
+    let product = productIndex !== null && productIndex !== -1 ? await productsArray.filter((el) => 
+    {
+        if(el.productId.toString() === productId) 
+        {
+            let productItems = el.productItems.map((product) => 
+            {
+                if(product.load === Load)
+                {
+                    quantity = product.quantity;
+                    amount = product.price.value;
+                    return quantity
+                }
+            })
+            return productItems 
+        }
+    }) : null;
+    
+    product = product.flat();
     if(amount)
     {
-        const deleteOperation = cart.deleteOperation(userId, Load, productId, amount);
-        let total = deleteOperation.updatedCart ? await deleteOperation.updatedCart.amount.value ===  0 : null;
-
+        const deleteOperation = cart.deleteOperation(userId, Load, quantity, productId, amount);
+        let total = (await deleteOperation).setRoundedValue ? (await deleteOperation).setRoundedValue.amount.value ===  0 : null;
+        console.log((await deleteOperation).setRoundedValue);
         if(total)
         {
             await Cart.deleteOne({userId : userId})
@@ -468,6 +483,17 @@ try
         }
         else
         {
+            let productExist = (await deleteOperation).setRoundedValue ? ((await deleteOperation).setRoundedValue.products[productIndex].productItems).length > 0 : null;
+            pullProduct = productExist === false ? await Cart.findOneAndUpdate(
+                {userId : userId}, 
+                {
+                    $pull: 
+                    {
+                        "products": {productId : mongoose.Types.ObjectId(productId)}
+                    }
+                }
+            ): null;
+            if(pullProduct){await pullProduct.save();}
             next();
         }
     }
@@ -486,13 +512,14 @@ try
         res.status(500).json(
         {
             success: false,
-            status: "Unsuccessfull request!"
+            status: "Unsuccessfull request!",
+            err: err.message
         });
     }
     
 }
 
-exports.deleteOperation = async(userId, Load, productId, amount) =>
+exports.deleteOperation = async(userId, Load, quantity, productId, amount) =>
 {
     let updatedCart = await Cart.findOneAndUpdate(
         {userId : userId},
@@ -510,15 +537,30 @@ exports.deleteOperation = async(userId, Load, productId, amount) =>
             ]
         },
     );
-
-    await Cart.findOneAndUpdate(
+    updatedCart = await Cart.findOneAndUpdate(
         {userId : userId},
         {
             $inc: 
             {
-                "amount.value": - amount
+                "amount.value": - amount,
+                "totalQuantity": - quantity
             }
         }
     );
-    return {updatedCart}
+    if(updatedCart){await updatedCart.save();}
+    
+    let cart = updatedCart ? await Cart.findOne({userId : userId}) : null;
+    let currentAmount = cart ? cart.amount.value : null;
+    let roundedValue = currentAmount ? currentAmount.toFixed(2) : null;
+    
+    let setRoundedValue = roundedValue ? await Cart.findOneAndUpdate(
+        {userId : userId}, 
+        {
+            $set:
+            {
+                "amount.value" : roundedValue
+            }
+        }) : null;
+    
+    return {setRoundedValue}
 }

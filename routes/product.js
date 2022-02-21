@@ -253,7 +253,7 @@ product.verifyProductId, product.countInStock, async (req, res) =>
     try
     {
         const countInStock = req.stock;
-
+        
         res.status(200).json(
             {
                 countInStock

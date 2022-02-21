@@ -20,10 +20,11 @@ router.post("/create-checkout-session", auth.verifyUser, auth.verifyRefresh, asy
         async(product) => 
         {
           let myProduct =  await Product.findOne({_id : product.productId});
+          let name = product.productTitle;
+          
           let myProducts = product.productItems.map(productItem =>
             {
               let currency = productItem.price.currency;
-              let name = productItem.productTitle;
               let unitAmountArr = myProduct.productItems.filter(product => product.load === productItem.load);
               let unit_amount = Math.round(unitAmountArr[0].price.value * 100);
               let quantity = productItem.quantity;
@@ -58,6 +59,7 @@ router.post("/create-checkout-session", auth.verifyUser, auth.verifyRefresh, asy
           url : session.url
         });
     }
+    
     else
     {
       res.status(500).json(

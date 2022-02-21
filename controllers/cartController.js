@@ -350,15 +350,12 @@ exports.deleteProductInCart = async(req, res, next) =>
 {
     try
     {
-        const userId = req.params.userId;
-        const productId = req.params.productId;
-        const newProdLoad = parseFloat(req.params.load);
-        let qty;
-        let amount;
+        const userId = req.params.userId, productId = req.params.productId, newProdLoad = parseFloat(req.params.load);
+        let qty, amount;
 
         const existingCart = await Cart.findOne({userId : userId});
         const cartProducts = existingCart?.products;
-        const prodExist =  cartProducts ? await cartProducts.some(el => el.productId.toString() === productId) : null;
+        const prodExist =  cartProducts ? await cartProducts.some(product => product.productId.toString() === productId) : null;
         
         let product = prodExist ? await cartProducts.filter((el) => 
         {
@@ -377,17 +374,22 @@ exports.deleteProductInCart = async(req, res, next) =>
             }
         }) : null;
         product = product.flat();
-        console.log(product);
-
-        if(amount)
+        
+        if(!amount)
+        {
+            let err = new Error('Product not found!')
+            err.status = 403;
+            return next(err);
+        }
+        else if(amount)
         {
             const deleteOperation = (await cart.deleteOperation(userId, newProdLoad, qty, productId, amount));
             let total = deleteOperation.setRoundedValue ? deleteOperation.setRoundedValue.amount.value <=  0 : null;
-            console.log(total);
             
             if(total){await Cart.deleteOne({userId : userId}); next();}
             else
             {
+                let prodIndex = deleteOperation.setRoundedValue.products.findIndex(product => product.productId.toString() === productId)
                 let productExist = deleteOperation.setRoundedValue ? (deleteOperation.setRoundedValue.products[prodIndex].productItems).length > 0 : null;
                 pullProduct = productExist === false ? await Cart.findOneAndUpdate(
                     {userId : userId}, 
@@ -401,15 +403,6 @@ exports.deleteProductInCart = async(req, res, next) =>
                 if(pullProduct) {await pullProduct.save()}
                 next();
             }
-        }
-        else
-        {
-            res.status(500).json(
-            {
-                success: false,
-                status: "Unsuccessfull request!",
-                err: "Product not found"
-            });
         }
     }
     catch(err) 
@@ -441,7 +434,9 @@ exports.deleteOperation = async(userId, newProdLoad, qty, productId, amount) =>
             ]
         },
     );
-    updatedCart = await Cart.findOneAndUpdate(
+    if(updatedCart){await updatedCart.save();}    
+    
+    let newUpdatedCart = await updatedCart ? await Cart.findOneAndUpdate(
         {userId : userId},
         {
             $inc: 
@@ -450,10 +445,10 @@ exports.deleteOperation = async(userId, newProdLoad, qty, productId, amount) =>
                 "totalQuantity": - qty
             }
         }
-    );
-    if(updatedCart){await updatedCart.save();}
+    ): null;
+    if(newUpdatedCart){await newUpdatedCart.save();}
     
-    let roundedAmount = updatedCart?.amount?.value?.toFixed(2); 
+    let roundedAmount = newUpdatedCart?.amount?.value?.toFixed(2); 
     let setRoundedValue = roundedAmount ? await Cart.findOneAndUpdate({userId : userId}, {$set:{"amount.value" : roundedAmount}}) : null;
     
     return {setRoundedValue}

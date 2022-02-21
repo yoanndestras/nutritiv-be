@@ -23,7 +23,7 @@ exports.cart = async(req, res, next) =>
         const newProduct = prodIndex !== null && prodIndex !== -1 ? cartProducts[prodIndex].some(el => el.load === newProdLoad) : null;
         
         if(newProduct){cart.productAndLoadExist(userId, newProdQuantity, calculatedPrice, newProdLoad, newProdId);}
-        else if(prodExist){cart.productExist(userId, newProdQuantity, calculatedPrice, newProdLoad, newProdId);}
+        else if(prodIndex !== null && prodIndex !== -1){cart.productExist(userId, newProdQuantity, calculatedPrice, newProdLoad, newProdId);}
         else if(existingCart){cart.cartExist(userId, title, shape, imgs, newProdQuantity, calculatedPrice, newProdLoad, newProdId);}
         else{cart.newCart(userId, title, shape, imgs, newProdQuantity, calculatedPrice, newProdLoad, newProdId);req.new = true;}
         

@@ -27,7 +27,7 @@ product.verifyStock, product.verifyProduct, cart.cart, async(req, res) =>
                 {
                     success: true,
                     status: "Cart successfully added",
-                    cart: cart
+                    cart
                 }
             );
         }
@@ -37,7 +37,7 @@ product.verifyStock, product.verifyProduct, cart.cart, async(req, res) =>
                 {
                     success: true,
                     status: "Cart succesfully updated, product successfully added",
-                    cart: cart
+                    cart
                 }
             ); 
         }
@@ -67,7 +67,7 @@ product.verifyPricePerProduct, cart.updateQuantity, async(req, res) =>
             {
                 success: true,
                 status: "Cart succesfully updated",
-                cart: cart
+                cart
             });
     }
     catch(err)
@@ -96,7 +96,7 @@ auth.verifyAuthorization, cart.deleteProductInCart, async (req, res) =>
                 {
                     success: true,
                     status: "Cart succesfully updated",
-                    cart: cart
+                    cart
                 });
         }
         else
@@ -158,7 +158,7 @@ router.get("/self", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, a
                 {
                     success: true,
                     status: "User cart found",
-                    cart: cart
+                    cart
                 });
         }
         else if(!cart)
@@ -194,7 +194,7 @@ router.get("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.
             {
                 success: true,
                 status: "All carts found",
-                cart: carts
+                carts
             });
     }
     catch(err)

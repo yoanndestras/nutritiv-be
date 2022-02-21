@@ -4,54 +4,30 @@ const mongoose = require('mongoose');
 const Cart = require("../models/Cart");
 const Product = require("../models/Product");
 
-
-
 // ADD TO CART
 exports.cart = async(req, res, next) => 
 {
     try
     {
-        const userId = req.user._id;
-        const Id = req.body.productId;
+        const {productId, quantity, load, price} = req.body;
+        const userId = req.user._id, newProdId = productId; 
+        const newProdQty = parseInt(quantity), newProdLoad = parseInt(load), newProdPrice = parseFloat(price);
         
-        const Quantity = parseFloat(req.body.quantity);
-        const Load = parseFloat(req.body.load);
-        const Price = parseFloat(req.body.price);
+        let calculatedPrice = parseFloat((newProdPrice * newProdQty).toFixed(2))
+        
+        const product = await Product.findOne({_id : newProdId}), existingCart = await Cart.findOne({userId : userId});
+        const title = product.title, shape = product.shape, imgs = product.imgs;
 
-        let price = parseFloat((Price * Quantity).toFixed(2))
+        const cartProducts = existingCart?.products;
+        const prodIndex = cartProducts ? cartProducts.findIndex(el => el.productId.toString() === newProdId) : null;
+        const newProduct = prodIndex !== null && prodIndex !== -1 ? cartProducts[prodIndex].some(el => el.load === newProdLoad) : null;
         
-        const product = await Product.findOne({_id : Id})
-        
-        const Title = product.title;
-        const Shape = product.shape;
-        const Imgs = product.imgs;
-
-        const existingCart = await Cart.findOne({userId : userId});
-        const productsArray = existingCart ? existingCart.products : null;
-        const productIndex = productsArray ? productsArray.findIndex(el => el.productId.toString() === Id) : null;
-        
-        const newProduct = productIndex !== null && productIndex !== -1 ? productsArray.filter(el => el.productId.toString() === Id && el.productItems.some(el => el.load === Load)) : null;
-
-        if (newProduct !== null && newProduct.length > 0) 
-        {
-            cart.productAndLoadExist(userId, Quantity, price, Load, Id);
-        }
-        else if(productIndex !== null && productIndex !== -1)
-        {
-            cart.productExist(userId, Quantity, price, Load, Id);
-        }
-        else if (existingCart)
-        {
-            cart.cartExist(userId, Title, Shape, Imgs, Quantity, price, Load, Id);
-        }
-        else
-        {
-            await cart.newCart(userId, Title, Shape, Imgs, Quantity, price, Load, Id);
-            req.new = true;
-        }
+        if(newProduct){cart.productAndLoadExist(userId, newProdQuantity, calculatedPrice, newProdLoad, newProdId);}
+        else if(prodExist){cart.productExist(userId, newProdQuantity, calculatedPrice, newProdLoad, newProdId);}
+        else if(existingCart){cart.cartExist(userId, title, shape, imgs, newProdQuantity, calculatedPrice, newProdLoad, newProdId);}
+        else{cart.newCart(userId, title, shape, imgs, newProdQuantity, calculatedPrice, newProdLoad, newProdId);req.new = true;}
         
         next();
-
     }
     catch(err)
     {
@@ -64,176 +40,144 @@ exports.cart = async(req, res, next) =>
     }
 }
 
-exports.productAndLoadExist = async(userId, Quantity, price, Load, Id) =>
+exports.productAndLoadExist = async(userId, newProdQuantity, calculatedPrice, newProdLoad, newProdId) =>
 {
-    let updatedCart = await Cart.findOneAndUpdate(
-    {"userId": userId},
+    let updatedCart = await Cart.findOneAndUpdate({"userId": userId},
     {
         $inc: {
-            "products.$[outer].productItems.$[inner].quantity": Quantity,
-            "products.$[outer].productItems.$[inner].price.value": price,
-            "amount.value": price,
-            "totalQuantity" :Quantity
+            "products.$[outer].productItems.$[inner].quantity": newProdQuantity,
+            "products.$[outer].productItems.$[inner].price.value": calculatedPrice,
+            "amount.value": calculatedPrice,
+            "totalQuantity" : newProdQuantity
         }
     },
     {
         arrayFilters: [
         {
-            'outer.productId': mongoose.Types.ObjectId(Id)
+            'outer.productId': mongoose.Types.ObjectId(newProdId)
         },
         {
-            'inner.load': Load
+            'inner.load': newProdLoad
         }],
-        multi: true
-    },
-    )
+        new: true,
+    },)
     updatedCart = updatedCart.save()
-    let cart = updatedCart ? await Cart.findOne({userId : userId}) : null;
-    let currentAmount = cart ? cart.amount.value : null;
-    let roundedValue = currentAmount ? currentAmount.toFixed(2) : null;
     
-    let setRoundedValue = roundedValue ? await Cart.findOneAndUpdate(
-        {userId : userId}, 
-        {
-            $set:
-            {
-                "amount.value" : roundedValue
-            }
-        }) : null;
+    let roundedAmount = updatedCart?.amount?.value?.toFixed(2);
+    let setRoundedValue = roundedAmount ? await Cart.findOneAndUpdate({userId : userId}, {$set:{"amount.value" : roundedAmount}}) : null;
     
     return {updatedCart: setRoundedValue}
 }
 
-exports.productExist = async(userId, Quantity, price, Load, Id) =>
+exports.productExist = async(userId, newProdQuantity, calculatedPrice, newProdLoad, newProdId) =>
 {
-    let productItems =  
-    {
-        id: mongoose.Types.ObjectId(),
-        load : Load, 
-        quantity : Quantity,
-        price : 
-        {
-            value : price,
-            currency : "EUR"
-        },
-    }
-    
     let updatedCart = await Cart.findOneAndUpdate(
-    {"userId" : userId, "productId": mongoose.Types.ObjectId(Id)}, 
+    {"userId" : userId, "productId": mongoose.Types.ObjectId(newProdId)}, 
     {
         $push: {
-            "products.$[outer].productItems": productItems,
+            "products.$[outer].productItems": 
+            {
+                id : mongoose.Types.ObjectId(),
+                load : newProdLoad, 
+                quantity : newProdQuantity,
+                price : 
+                {
+                    value : calculatedPrice,
+                    currency : "EUR"
+                },
+            },
         },
         $inc: {
-            "amount.value": price,
-            totalQuantity :Quantity
+            "amount.value": calculatedPrice,
+            totalQuantity :newProdQuantity
         },
     },
     {
         arrayFilters: [
         {
-            'outer.productId': mongoose.Types.ObjectId(Id)
+            'outer.productId': mongoose.Types.ObjectId(newProdId)
         }],
-        new: true
+        new: true,
     },
     )
+    updatedCart = updatedCart.save()
 
-    let cart = updatedCart ? await Cart.findOne({userId : userId}) : null;
-    let currentAmount = cart ? cart.amount.value : null;
-    let roundedValue = currentAmount ? currentAmount.toFixed(2) : null;
-    
-    let setRoundedValue = roundedValue ? await Cart.findOneAndUpdate(
-        {userId : userId}, 
-        {
-            $set:
-            {
-                "amount.value" : roundedValue
-            }
-        }) : null;
+    let roundedAmount = updatedCart?.amount?.value?.toFixed(2);    
+    let setRoundedValue = roundedAmount ? await Cart.findOneAndUpdate({userId : userId}, {$set:{"amount.value" : roundedAmount}}) : null;
 
     return {updatedCart: setRoundedValue}
 }
 
-exports.cartExist = async(userId, Title, Shape, Imgs, Quantity, price, Load, Id) =>
-{
-    let productItems =  [
-                {
-                    id: mongoose.Types.ObjectId(),
-                    load : Load, 
-                    quantity : Quantity,
-                    price : 
-                        {
-                            value : price,
-                            currency : "EUR"
-                        }
-                }
-            ]
-
-    let newProduct = {
-        productId : mongoose.Types.ObjectId(Id), 
-        productTitle: Title,
-        productImgs : Imgs,
-        productShape: Shape,
-        productItems: productItems};
-
-    updatedCart = await Cart.findOneAndUpdate(
+exports.cartExist = async(userId, title, shape, imgs, newProdQuantity, calculatedPrice, newProdLoad, newProdId) =>
+{ 
+    let updatedCart = await Cart.findOneAndUpdate(
         {"userId" : userId}, 
         {
             $push: 
             {
-                products: newProduct
+                products: 
+                {
+                    productId : mongoose.Types.ObjectId(newProdId), 
+                    productTitle: title,
+                    productImgs : imgs,
+                    productShape: shape,
+                    productItems: [
+                        {
+                            id: mongoose.Types.ObjectId(),
+                            load : newProdLoad, 
+                            quantity : newProdQuantity,
+                            price : 
+                                {
+                                    value : calculatedPrice,
+                                    currency : "EUR"
+                                }
+                        }
+                    ]
+                }
             },
             $inc: 
             {
-                "amount.value": price,
-                totalQuantity :Quantity
+                "amount.value": calculatedPrice,
+                totalQuantity :newProdQuantity
             }
         }
     )
-    
-    let cart = updatedCart ? await Cart.findOne({userId : userId}) : null;
-    let currentAmount = cart ? cart.amount.value : null;
-    let roundedValue = currentAmount ? currentAmount.toFixed(2) : null;
-    
-    let setRoundedValue = roundedValue ? await Cart.findOneAndUpdate(
-        {userId : userId}, 
-        {
-            $set:
-            {
-                "amount.value" : roundedValue
-            }
-        }) : null;
+
+    updatedCart = updatedCart.save()
+
+    let roundedAmount = updatedCart?.amount?.value?.toFixed(2); 
+    let setRoundedValue = roundedAmount ? await Cart.findOneAndUpdate({userId : userId}, {$set:{"amount.value" : roundedAmount}}) : null;
 
     return {updatedCart: setRoundedValue}
 }
 
-exports.newCart = async(userId, Title, Shape, Imgs, Quantity, price, Load, Id) =>
+exports.newCart = async(userId, title, shape, imgs, newProdQuantity, calculatedPrice, newProdLoad, newProdId) =>
 {
     const newCart = await new Cart(
     {
         userId: userId,
         products: 
         [{
-            productId : mongoose.Types.ObjectId(Id),
-            productTitle: Title,
-            productImgs : Imgs,
-            productShape: Shape,
+            productId : mongoose.Types.ObjectId(newProdId),
+            productTitle: title,
+            productImgs : imgs,
+            productShape: shape,
             productItems: 
             [
                 {
                     id: mongoose.Types.ObjectId(),
-                    load : Load,
-                    quantity : Quantity,
+                    load : newProdLoad,
+                    quantity : newProdQuantity,
                     price : 
                     {
-                        value : price,
+                        value : calculatedPrice,
                         currency : "EUR"
                     }
                 }
             ]
         }],
-        totalQuantity: Quantity,
-        "amount.value" : price
+        totalQuantity: newProdQuantity,
+        "amount.value" : calculatedPrice
     })
     await newCart.save();
 }
@@ -244,34 +188,24 @@ exports.updateQuantity = async(req, res, next) =>
 {
     try
     {
-        const userId = req.user._id;
-        const Id = req.params.id;
-        const Load = parseFloat(req.params.load);
-        const Price = parseFloat(req.price);
+        const userId = req.user._id, newProdId = req.params.id, newProdLoad = parseFloat(req.params.load), newProdPrice = parseFloat(req.price);
 
-        const quantity = req.params.operation === "inc" ? 1 : req.params.operation === "dec" ? -1 : null;
-        const value = req.params.operation === "inc" ? Price : req.params.operation === "dec" ? - Price : null;
+        const qty = req.params.operation === "inc" ? 1 : req.params.operation === "dec" ? -1 : null;
+        const val = req.params.operation === "inc" ? newProdPrice : req.params.operation === "dec" ? - newProdPrice : null;
         
-        if(quantity === 1)
+        if(!qty){res.status(500).json({success: false,status: "This operation do not exist, please enter inc or dec!"});}
+        else if(qty === 1)
         {
-            const verifyStock = cart.verifyStock(userId, Id, Load);
+            const verifyStock = cart.verifyStock(userId, newProdId, newProdLoad);
             const error = (await verifyStock).err ? next((await verifyStock).err) : null;
         }
         
-        if(quantity && value)
+        if(qty)
         {
-            const operation = cart.operation(userId, quantity, value, Load, Id);
+            const operation = cart.operation(userId, qty, val, newProdLoad, newProdId);
             const emptyCart = (await operation).setRoundedValue ? cart.emptyCart(userId, (await operation).setRoundedValue) : null;
-            const productQuantityIsZero = (await emptyCart).total === false ? cart.productQuantityIsZero(userId, Load, Id, (await emptyCart).total) : null;
+            const productQuantityIsZero = (await emptyCart).total === false ? cart.productQuantityIsZero(userId, newProdLoad, newProdId, (await emptyCart).total) : null;
             next();
-        }
-        else
-        {
-            res.status(500).json(
-            {
-                success: false,
-                status: "This operation do not exist!"
-            });
         }
     }
     catch(err)
@@ -286,34 +220,34 @@ exports.updateQuantity = async(req, res, next) =>
         
 }
 
-exports.operation = async(userId, quantity, value, Load, Id) =>
+exports.operation = async(userId, qty, val, newProdLoad, newProdId) =>
 {
     const updatedCart = await Cart.findOne({userId : userId});
-    const productsArray = updatedCart ? updatedCart.products : null; 
-    const productIndex =  productsArray ? productsArray.findIndex(el => el.productId.toString() === Id) : null;
-    const currentProduct = productIndex !== null && productIndex !== -1 ? productsArray[productIndex].productItems : null;
-    let findProduct = currentProduct ? currentProduct.findIndex(el => el.load === Load) : null;
+    const cartProducts = updatedCart?.products; 
+    const prodIndex =  cartProducts ? cartProducts.findIndex(el => el.productId.toString() === newProdId) : null;
+    const currentProduct = prodIndex !== null && prodIndex !== -1 ? cartProducts[prodIndex].productItems : null;
+    let findProduct = currentProduct ? currentProduct.findIndex(el => el.load === newProdLoad) : null;
     
     let incCart = findProduct !== null && findProduct !== -1 ? await Cart.findOneAndUpdate(
         {userId : userId}, 
         {
             $inc: 
             {
-                "products.$[outer].productItems.$[inner].quantity": quantity,
-                "products.$[outer].productItems.$[inner].price.value": value,
-                "amount.value" : value,
-                "totalQuantity" : quantity
+                "products.$[outer].productItems.$[inner].quantity": qty,
+                "products.$[outer].productItems.$[inner].price.value": val,
+                "amount.value" : val,
+                "totalQuantity" : qty
             }
         },
         {
             arrayFilters: [
             {
-                'outer.productId': mongoose.Types.ObjectId(Id)
+                'outer.productId': mongoose.Types.ObjectId(newProdId)
             },
             {
-                'inner.load': Load
+                'inner.load': newProdLoad
             }],
-            new: true
+            new: true,
         },
     ) : null;
     
@@ -340,15 +274,15 @@ exports.emptyCart = async(userId, setRoundedValue) =>
     return {total}
 }
 
-exports.productQuantityIsZero = async(userId, Load, Id, emptyCart) =>
+exports.productQuantityIsZero = async(userId, newProdLoad, newProdId, emptyCart) =>
 {
     if(emptyCart){return}
     else
     {
         const updatedCart = await Cart.findOne({userId : userId});
-        const productsArray = updatedCart ? updatedCart.products : null; 
-        const productIndex =  productsArray ? productsArray.findIndex(el => el.productId.toString() === Id) : null;
-        const currentProduct = productIndex !== null && productIndex !== -1 ? productsArray[productIndex].productItems : null;
+        const cartProducts = updatedCart ? updatedCart.products : null; 
+        const prodIndex =  cartProducts ? cartProducts.findIndex(el => el.productId.toString() === newProdId) : null;
+        const currentProduct = prodIndex !== null && prodIndex !== -1 ? cartProducts[prodIndex].productItems : null;
         let findProduct = currentProduct ? currentProduct.findIndex(el => el.quantity <= 0) : null;
         
         
@@ -357,27 +291,27 @@ exports.productQuantityIsZero = async(userId, Load, Id, emptyCart) =>
         {
             $pull: 
             {
-                "products.$[outer].productItems": {load : Load} ,
+                "products.$[outer].productItems": {load : newProdLoad} ,
             }
         },
         {
             arrayFilters: [
             {
-                'outer.productId': mongoose.Types.ObjectId(Id)
+                'outer.productId': mongoose.Types.ObjectId(newProdId)
             }],
-            new: true
+            new: true,
         },
         ): null;
         if(pullProduct){await pullProduct.save();}
                 
-        let productExist = pullProduct ? (pullProduct.products[productIndex].productItems).length > 0 : null;
+        let productExist = pullProduct ? (pullProduct.products[prodIndex].productItems).length > 0 : null;
         
         pullProduct = productExist === false ? await Cart.findOneAndUpdate(
             {userId : userId}, 
             {
                 $pull: 
                 {
-                    "products": {productId : mongoose.Types.ObjectId(Id)}
+                    "products": {productId : mongoose.Types.ObjectId(newProdId)}
                 }
             }
         ): null;
@@ -445,25 +379,25 @@ try
 {
     const userId = req.params.userId;
     const productId = req.params.productId;
-    const Load = parseFloat(req.params.load);
-    let quantity;
+    const newProdLoad = parseFloat(req.params.load);
+    let qty;
     let amount;
 
     const existingCart = await Cart.findOne({userId : userId});
-    const productsArray = existingCart ? existingCart.products : null;
-    const productIndex =  productsArray ? await productsArray.findIndex(el => el.productId.toString() === productId) : null;
+    const cartProducts = existingCart?.products;
+    const prodExist =  cartProducts ? await cartProducts.some(el => el.productId.toString() === productId) : null;
     
-    let product = productIndex !== null && productIndex !== -1 ? await productsArray.filter((el) => 
+    let product = prodExist ? await cartProducts.filter((el) => 
     {
         if(el.productId.toString() === productId) 
         {
             let productItems = el.productItems.map((product) => 
             {
-                if(product.load === Load)
+                if(product.load === newProdLoad)
                 {
-                    quantity = product.quantity;
+                    qty = product.quantity;
                     amount = product.price.value;
-                    return quantity
+                    return qty
                 }
             })
             return productItems 
@@ -472,7 +406,7 @@ try
     product = product.flat();
     if(amount)
     {
-        const deleteOperation = cart.deleteOperation(userId, Load, quantity, productId, amount);
+        const deleteOperation = cart.deleteOperation(userId, newProdLoad, qty, productId, amount);
         let total = (await deleteOperation).setRoundedValue ? (await deleteOperation).setRoundedValue.amount.value ===  0 : null;
         
         if(total)
@@ -482,7 +416,7 @@ try
         }
         else
         {
-            let productExist = (await deleteOperation).setRoundedValue ? ((await deleteOperation).setRoundedValue.products[productIndex].productItems).length > 0 : null;
+            let productExist = (await deleteOperation).setRoundedValue ? ((await deleteOperation).setRoundedValue.products[prodIndex].productItems).length > 0 : null;
             pullProduct = productExist === false ? await Cart.findOneAndUpdate(
                 {userId : userId}, 
                 {
@@ -518,14 +452,14 @@ try
     
 }
 
-exports.deleteOperation = async(userId, Load, quantity, productId, amount) =>
+exports.deleteOperation = async(userId, newProdLoad, qty, productId, amount) =>
 {
     let updatedCart = await Cart.findOneAndUpdate(
         {userId : userId},
         {
             $pull: 
                 {
-                    "products.$[outer].productItems" : {load : Load} 
+                    "products.$[outer].productItems" : {load : newProdLoad} 
                 },
         },
         {
@@ -542,7 +476,7 @@ exports.deleteOperation = async(userId, Load, quantity, productId, amount) =>
             $inc: 
             {
                 "amount.value": - amount,
-                "totalQuantity": - quantity
+                "totalQuantity": - qty
             }
         }
     );

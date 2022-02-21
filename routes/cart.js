@@ -20,16 +20,16 @@ product.verifyStock, product.verifyProduct, cart.cart, async(req, res) =>
     {
         let cart = await Cart.findOne({userId : req.user._id});
         await cart.save();
-
+        
         if(req.new === true) 
         {
             res.status(200).json(
                 {
                     success: true,
                     status: "Cart successfully added",
-                    newCart: await Cart.findOne({userId : req.user._id})
+                    cart: cart
                 }
-            );            
+            );
         }
         else
         {
@@ -37,7 +37,7 @@ product.verifyStock, product.verifyProduct, cart.cart, async(req, res) =>
                 {
                     success: true,
                     status: "Cart succesfully updated, product successfully added",
-                    updatedCart: await Cart.findOne({userId : req.user._id})
+                    cart: cart
                 }
             ); 
         }
@@ -67,7 +67,7 @@ product.verifyPricePerProduct, cart.updateQuantity, async(req, res) =>
             {
                 success: true,
                 status: "Cart succesfully updated",
-                updatedCart: await Cart.findOne({userId : req.user._id})
+                cart: cart
             });
     }
     catch(err)
@@ -88,6 +88,7 @@ auth.verifyAuthorization, cart.deleteProductInCart, async (req, res) =>
     try
     {
         let cart = await Cart.findOne({userId : req.user._id});
+        await cart.save();
         if(cart)
         {
             await cart.save();
@@ -95,7 +96,7 @@ auth.verifyAuthorization, cart.deleteProductInCart, async (req, res) =>
                 {
                     success: true,
                     status: "Cart succesfully updated",
-                    updatedCart: await Cart.findOne({userId : req.user._id})
+                    cart: cart
                 });
         }
         else
@@ -149,6 +150,7 @@ router.get("/self", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, a
     try
     {
         const cart = await Cart.findOne({userId: req.user._id})
+        await cart.save();
         
         if(cart)
         {
@@ -186,11 +188,13 @@ router.get("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.
     try
     {
         const carts = await Cart.find();
+        await carts.save();
+        
         res.status(200).json(
             {
                 success: true,
                 status: "All carts found",
-                carts: carts
+                cart: carts
             });
     }
     catch(err)

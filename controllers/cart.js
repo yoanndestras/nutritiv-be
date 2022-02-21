@@ -469,13 +469,12 @@ try
             return productItems 
         }
     }) : null;
-    
     product = product.flat();
     if(amount)
     {
         const deleteOperation = cart.deleteOperation(userId, Load, quantity, productId, amount);
         let total = (await deleteOperation).setRoundedValue ? (await deleteOperation).setRoundedValue.amount.value ===  0 : null;
-        console.log((await deleteOperation).setRoundedValue);
+        
         if(total)
         {
             await Cart.deleteOne({userId : userId})
@@ -493,7 +492,7 @@ try
                     }
                 }
             ): null;
-            if(pullProduct){await pullProduct.save();}
+            if(pullProduct) {await pullProduct.save()}
             next();
         }
     }
@@ -551,7 +550,7 @@ exports.deleteOperation = async(userId, Load, quantity, productId, amount) =>
     
     let cart = updatedCart ? await Cart.findOne({userId : userId}) : null;
     let currentAmount = cart ? cart.amount.value : null;
-    let roundedValue = currentAmount ? currentAmount.toFixed(2) : null;
+    let roundedValue = currentAmount ||  currentAmount === 0 ? currentAmount.toFixed(2) : null;
     
     let setRoundedValue = roundedValue ? await Cart.findOneAndUpdate(
         {userId : userId}, 

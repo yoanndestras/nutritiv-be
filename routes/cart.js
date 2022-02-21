@@ -88,14 +88,24 @@ auth.verifyAuthorization, cart.deleteProductInCart, async (req, res) =>
     try
     {
         let cart = await Cart.findOne({userId : req.user._id});
-        await cart.save();
-
-        res.status(200).json(
-            {
-                success: true,
-                status: "Cart succesfully updated",
-                updatedCart: await Cart.findOne({userId : req.user._id})
-            });
+        if(cart)
+        {
+            await cart.save();
+            res.status(200).json(
+                {
+                    success: true,
+                    status: "Cart succesfully updated",
+                    updatedCart: await Cart.findOne({userId : req.user._id})
+                });
+        }
+        else
+        {
+            res.status(200).json(
+                {
+                    success: true,
+                    status: "Cart succesfully updated & deleted!"
+                });
+        }
     }
     catch(err)
     {

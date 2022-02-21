@@ -61,7 +61,7 @@ exports.productAndLoadExist = async(userId, newProdQty, calculatedPrice, newProd
         }],
         new: true,
     },)
-    updatedCart = updatedCart.save()
+    if(updatedCart){await updatedCart.save();}
     
     let roundedAmount = updatedCart?.amount?.value?.toFixed(2);
     let setRoundedValue = roundedAmount ? await Cart.findOneAndUpdate({userId : userId}, {$set:{"amount.value" : roundedAmount}}) : null;
@@ -100,8 +100,8 @@ exports.productExist = async(userId, newProdQty, calculatedPrice, newProdLoad, n
         new: true,
     },
     )
-    updatedCart = updatedCart.save()
-
+    if(updatedCart){await updatedCart.save();}
+    
     let roundedAmount = updatedCart?.amount?.value?.toFixed(2);    
     let setRoundedValue = roundedAmount ? await Cart.findOneAndUpdate({userId : userId}, {$set:{"amount.value" : roundedAmount}}) : null;
 
@@ -142,9 +142,8 @@ exports.cartExist = async(userId, title, shape, imgs, newProdQty, calculatedPric
             }
         }
     )
-
-    updatedCart = updatedCart.save()
-
+    if(updatedCart){await updatedCart.save();}
+    
     let roundedAmount = updatedCart?.amount?.value?.toFixed(2); 
     let setRoundedValue = roundedAmount ? await Cart.findOneAndUpdate({userId : userId}, {$set:{"amount.value" : roundedAmount}}) : null;
 
@@ -250,8 +249,7 @@ exports.operation = async(userId, qty, val, newProdLoad, newProdId) =>
             new: true,
         },
     ) : null;
-    
-    cartOperation = cartOperation.save()
+    if(cartOperation){await cartOperation.save();}
     
     let roundedAmount = cartOperation?.amount?.value?.toFixed(2); 
     let setRoundedValue = roundedAmount ? await Cart.findOneAndUpdate({userId : userId}, {$set:{"amount.value" : roundedAmount}}) : null;

@@ -103,7 +103,7 @@ auth.verifyAuthorization, cart.deleteProductInCart, async (req, res) =>
             res.status(200).json(
                 {
                     success: true,
-                    status: "Cart succesfully updated & deleted!"
+                    status: "Cart succesfully deleted!"
                 });
         }
     }

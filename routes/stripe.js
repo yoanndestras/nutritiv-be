@@ -4,8 +4,8 @@ const Cart = require("../models/Cart");
 const Product = require("../models/Product");
 
 // MIDDLEWARES
-const cors = require('../controllers/cors');
-const auth = require('../controllers/authenticate');
+const cors = require('../controllers/corsController');
+const auth = require('../controllers/authController');
 
 router.post("/create-checkout-session", auth.verifyUser, auth.verifyRefresh, async(req, res)  => 
 {

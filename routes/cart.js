@@ -3,10 +3,10 @@ const router = require("express").Router();
 const mongoose = require('mongoose');
 
 // MIDDLEWARES
-const cors = require('../controllers/cors');
-const auth = require('../controllers/authenticate');
-const product = require('../controllers/product');
-const cart = require('../controllers/cart');
+const cors = require('../controllers/corsController');
+const auth = require('../controllers/authController');
+const product = require('../controllers/productsController');
+const cart = require('../controllers/cartController');
 const {upload} = require('./upload');
 
 //OPTIONS FOR CORS

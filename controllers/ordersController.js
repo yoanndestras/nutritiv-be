@@ -3,7 +3,7 @@ const Cart = require("../models/Cart");
 const Product = require("../models/Product");
 const Order = require("../models/Order");
 const mongoose = require('mongoose');
-const order = require('./order');
+const order = require('./ordersController');
 
 const addressValidator = require('address-validator');
 const validatePhoneNumber = require('validate-phone-number-node-js');

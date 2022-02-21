@@ -2,9 +2,9 @@ const User = require("../models/User");
 const router = require("express").Router();
 
 // MIDDLEWARES
-const cors = require('../controllers/cors');
-const auth = require('../controllers/authenticate');
-const mailer = require("../controllers/mailer");
+const cors = require('../controllers/corsController');
+const auth = require('../controllers/authController');
+const mailer = require("../controllers/mailerController");
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })

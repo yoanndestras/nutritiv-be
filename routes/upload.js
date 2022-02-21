@@ -3,8 +3,8 @@ const multer = require('multer');
 const { nanoid } = require('nanoid');
 
 // MIDDLEWARES
-const auth = require('../controllers/authenticate');
-const cors = require('../controllers/cors');
+const auth = require('../controllers/authController');
+const cors = require('../controllers/corsController');
 
 //OPTIONS FOR CORS CHECK
 uploadRouter.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })

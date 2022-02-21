@@ -1,6 +1,6 @@
 const express = require('express');
 const Product = require("../models/Product");
-const check = require('./product');
+const check = require('./productsController');
 const Cart = require("../models/Cart");
 
 const mongoose = require('mongoose');
@@ -292,7 +292,7 @@ exports.countInStock = async(req, res, next) =>
 }
 
 // RESIZE IMG
-exports.resizeImage = async(req, res, next) => 
+exports.resizeProductImage = async(req, res, next) => 
 {
     if (!req.files) return next();
     await Promise.all
@@ -302,7 +302,7 @@ exports.resizeImage = async(req, res, next) =>
             await sharp(file.path)
                 .resize(200, 200)
                 .toFile(
-                    path.resolve(file.destination,'resized', file.filename)
+                    path.resolve(file.destination,'productsImgs', file.filename)
                 )
                 fs.unlinkSync(file.path) 
             })

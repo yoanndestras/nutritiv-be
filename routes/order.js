@@ -4,9 +4,9 @@ const router = require("express").Router();
 const mongoose = require('mongoose');
 
 // MIDDLEWARES
-const cors = require('../controllers/cors');
-const auth = require('../controllers/authenticate');
-const order = require('../controllers/order')
+const cors = require('../controllers/corsController');
+const auth = require('../controllers/authController');
+const order = require('../controllers/ordersController')
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })

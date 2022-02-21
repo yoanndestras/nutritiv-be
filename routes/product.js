@@ -4,18 +4,18 @@ const _ = require("lodash")
 const fs = require('fs');
 
 // MIDDLEWARES
-const cors = require('../controllers/cors');
-const auth = require('../controllers/authenticate');
-const product = require('../controllers/product');
+const cors = require('../controllers/corsController');
+const auth = require('../controllers/authController');
+const product = require('../controllers/productsController');
 const {upload} = require('./upload');
-const { countInStock } = require("../controllers/order");
+const { countInStock } = require("../controllers/ordersController");
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
 // CREATE PRODUCT
 router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, 
-upload.any('imageFile'), product.resizeImage, product.newProduct, async(req, res) =>
+upload.any('imageFile'), product.resizeProductImage, product.newProduct, async(req, res) =>
 {
     try
     {
@@ -57,7 +57,7 @@ upload.any('imageFile'), product.resizeImage, product.newProduct, async(req, res
 
 // UPDATE PRODUCT //TODO:  form adaptability 
 router.put("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, product.verifyProductId,
- upload.any('imageFile'), product.newProduct, product.removeImgs, product.resizeImage, async(req, res) =>
+ upload.any('imageFile'), product.newProduct, product.removeImgs, product.resizeProductImage, async(req, res) =>
 {
     try
     {

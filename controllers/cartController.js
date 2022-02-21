@@ -1,5 +1,5 @@
 const express = require('express');
-const cart = require('../controllers/cart');
+const cart = require('./cartController');
 const mongoose = require('mongoose');
 const Cart = require("../models/Cart");
 const Product = require("../models/Product");

@@ -1,5 +1,5 @@
 const sgMail = require("@sendgrid/mail");
-const auth = require("./authenticate");
+const auth = require("./authController");
 
 
 exports.sendVerifyAccountMail = async(req, res, next) =>

@@ -22,10 +22,10 @@ exports.cart = async(req, res, next) =>
         const prodIndex = cartProducts ? cartProducts.findIndex(el => el.productId.toString() === newProdId) : null;
         const newProduct = prodIndex !== null && prodIndex !== -1 ? cartProducts[prodIndex].some(el => el.load === newProdLoad) : null;
         
-        if(newProduct){cart.productAndLoadExist(userId, newProdQuantity, calculatedPrice, newProdLoad, newProdId);}
-        else if(prodIndex !== null && prodIndex !== -1){cart.productExist(userId, newProdQuantity, calculatedPrice, newProdLoad, newProdId);}
-        else if(existingCart){cart.cartExist(userId, title, shape, imgs, newProdQuantity, calculatedPrice, newProdLoad, newProdId);}
-        else{cart.newCart(userId, title, shape, imgs, newProdQuantity, calculatedPrice, newProdLoad, newProdId);req.new = true;}
+        if(newProduct){cart.productAndLoadExist(userId, newProdQty, calculatedPrice, newProdLoad, newProdId);}
+        else if(prodIndex !== null && prodIndex !== -1){cart.productExist(userId, newProdQty, calculatedPrice, newProdLoad, newProdId);}
+        else if(existingCart){cart.cartExist(userId, title, shape, imgs, newProdQty, calculatedPrice, newProdLoad, newProdId);}
+        else{cart.newCart(userId, title, shape, imgs, newProdQty, calculatedPrice, newProdLoad, newProdId);req.new = true;}
         
         next();
     }
@@ -40,15 +40,15 @@ exports.cart = async(req, res, next) =>
     }
 }
 
-exports.productAndLoadExist = async(userId, newProdQuantity, calculatedPrice, newProdLoad, newProdId) =>
+exports.productAndLoadExist = async(userId, newProdQty, calculatedPrice, newProdLoad, newProdId) =>
 {
     let updatedCart = await Cart.findOneAndUpdate({"userId": userId},
     {
         $inc: {
-            "products.$[outer].productItems.$[inner].quantity": newProdQuantity,
+            "products.$[outer].productItems.$[inner].quantity": newProdQty,
             "products.$[outer].productItems.$[inner].price.value": calculatedPrice,
             "amount.value": calculatedPrice,
-            "totalQuantity" : newProdQuantity
+            "totalQuantity" : newProdQty
         }
     },
     {
@@ -69,7 +69,7 @@ exports.productAndLoadExist = async(userId, newProdQuantity, calculatedPrice, ne
     return {updatedCart: setRoundedValue}
 }
 
-exports.productExist = async(userId, newProdQuantity, calculatedPrice, newProdLoad, newProdId) =>
+exports.productExist = async(userId, newProdQty, calculatedPrice, newProdLoad, newProdId) =>
 {
     let updatedCart = await Cart.findOneAndUpdate(
     {"userId" : userId, "productId": mongoose.Types.ObjectId(newProdId)}, 
@@ -79,7 +79,7 @@ exports.productExist = async(userId, newProdQuantity, calculatedPrice, newProdLo
             {
                 id : mongoose.Types.ObjectId(),
                 load : newProdLoad, 
-                quantity : newProdQuantity,
+                quantity : newProdQty,
                 price : 
                 {
                     value : calculatedPrice,
@@ -89,7 +89,7 @@ exports.productExist = async(userId, newProdQuantity, calculatedPrice, newProdLo
         },
         $inc: {
             "amount.value": calculatedPrice,
-            totalQuantity :newProdQuantity
+            totalQuantity :newProdQty
         },
     },
     {
@@ -108,7 +108,7 @@ exports.productExist = async(userId, newProdQuantity, calculatedPrice, newProdLo
     return {updatedCart: setRoundedValue}
 }
 
-exports.cartExist = async(userId, title, shape, imgs, newProdQuantity, calculatedPrice, newProdLoad, newProdId) =>
+exports.cartExist = async(userId, title, shape, imgs, newProdQty, calculatedPrice, newProdLoad, newProdId) =>
 { 
     let updatedCart = await Cart.findOneAndUpdate(
         {"userId" : userId}, 
@@ -125,7 +125,7 @@ exports.cartExist = async(userId, title, shape, imgs, newProdQuantity, calculate
                         {
                             id: mongoose.Types.ObjectId(),
                             load : newProdLoad, 
-                            quantity : newProdQuantity,
+                            quantity : newProdQty,
                             price : 
                                 {
                                     value : calculatedPrice,
@@ -138,7 +138,7 @@ exports.cartExist = async(userId, title, shape, imgs, newProdQuantity, calculate
             $inc: 
             {
                 "amount.value": calculatedPrice,
-                totalQuantity :newProdQuantity
+                totalQuantity :newProdQty
             }
         }
     )
@@ -151,7 +151,7 @@ exports.cartExist = async(userId, title, shape, imgs, newProdQuantity, calculate
     return {updatedCart: setRoundedValue}
 }
 
-exports.newCart = async(userId, title, shape, imgs, newProdQuantity, calculatedPrice, newProdLoad, newProdId) =>
+exports.newCart = async(userId, title, shape, imgs, newProdQty, calculatedPrice, newProdLoad, newProdId) =>
 {
     const newCart = await new Cart(
     {
@@ -167,7 +167,7 @@ exports.newCart = async(userId, title, shape, imgs, newProdQuantity, calculatedP
                 {
                     id: mongoose.Types.ObjectId(),
                     load : newProdLoad,
-                    quantity : newProdQuantity,
+                    quantity : newProdQty,
                     price : 
                     {
                         value : calculatedPrice,
@@ -176,7 +176,7 @@ exports.newCart = async(userId, title, shape, imgs, newProdQuantity, calculatedP
                 }
             ]
         }],
-        totalQuantity: newProdQuantity,
+        totalQuantity: newProdQty,
         "amount.value" : calculatedPrice
     })
     await newCart.save();
@@ -261,7 +261,7 @@ exports.operation = async(userId, qty, val, newProdLoad, newProdId) =>
 
 exports.emptyCart = async(userId, setRoundedValue) => 
 {
-    let total = setRoundedValue ? await setRoundedValue.amount.value <=  0 : null;
+    let total = setRoundedValue ? (await setRoundedValue).amount.value <=  0 : null;
     if(total){await Cart.deleteOne({userId : userId})};
     return {total}
 }
@@ -272,33 +272,21 @@ exports.productQuantityIsZero = async(userId, newProdLoad, newProdId, emptyCart)
     else
     {
         const updatedCart = await Cart.findOne({userId : userId});
-        const cartProducts = updatedCart ? updatedCart.products : null; 
+        const cartProducts = updatedCart?.products; 
         const prodIndex =  cartProducts ? cartProducts.findIndex(el => el.productId.toString() === newProdId) : null;
         const currentProduct = prodIndex !== null && prodIndex !== -1 ? cartProducts[prodIndex].productItems : null;
         let findProduct = currentProduct ? currentProduct.findIndex(el => el.quantity <= 0) : null;
         
         
-        let pullProduct = findProduct !== null && findProduct !== -1 ? await Cart.findOneAndUpdate(
+        let deleteProduct = findProduct !== null && findProduct !== -1 ? await Cart.findOneAndUpdate(
         {userId : userId}, 
-        {
-            $pull: 
-            {
-                "products.$[outer].productItems": {load : newProdLoad} ,
-            }
-        },
-        {
-            arrayFilters: [
-            {
-                'outer.productId': mongoose.Types.ObjectId(newProdId)
-            }],
-            new: true,
-        },
-        ): null;
-        if(pullProduct){await pullProduct.save();}
-                
-        let productExist = pullProduct ? (pullProduct.products[prodIndex].productItems).length > 0 : null;
+        {$pull: {"products.$[outer].productItems": {load : newProdLoad} ,}},
+        {arrayFilters: [{'outer.productId': mongoose.Types.ObjectId(newProdId)}],new: true,},): null;
+
+        if(deleteProduct){await deleteProduct.save();}
         
-        pullProduct = productExist === false ? await Cart.findOneAndUpdate(
+        let productExist = deleteProduct ? (deleteProduct.products[prodIndex].productItems).length > 0 : null;
+        deleteProduct = productExist === false ? await Cart.findOneAndUpdate(
             {userId : userId}, 
             {
                 $pull: 
@@ -307,7 +295,7 @@ exports.productQuantityIsZero = async(userId, newProdLoad, newProdId, emptyCart)
                 }
             }
         ): null;
-        if(pullProduct){await pullProduct.save();}
+        if(deleteProduct){await deleteProduct.save();}
     }
 }
 

@@ -44,27 +44,29 @@ exports.productAndLoadExist = async(userId, newProdQty, calculatedPrice, newProd
 {
     let updatedCart = await Cart.findOneAndUpdate({"userId": userId},
     {
-        $inc: {
+        $inc: 
+        {
             "products.$[outer].productItems.$[inner].quantity": newProdQty,
             "products.$[outer].productItems.$[inner].price.value": calculatedPrice,
-            "amount.value": calculatedPrice,
             "totalQuantity" : newProdQty
         }
     },
     {
-        arrayFilters: [
-        {
-            'outer.productId': mongoose.Types.ObjectId(newProdId)
-        },
-        {
-            'inner.load': newProdLoad
-        }],
+        arrayFilters: 
+        [
+            {
+                'outer.productId': mongoose.Types.ObjectId(newProdId)
+            },
+            {
+                'inner.load': newProdLoad
+            }
+        ],
         new: true,
     },)
-    
-    let roundedAmount = await updatedCart?.amount?.value?.toFixed(2);
+    if(updatedCart){await updatedCart.save()};
+
+    let roundedAmount = parseFloat((updatedCart?.amount?.value + calculatedPrice).toFixed(2));
     let setRoundedValue = roundedAmount ? await Cart.findOneAndUpdate({userId : userId}, {$set:{"amount.value" : roundedAmount}}) : null;
-    
     if(await setRoundedValue){await setRoundedValue.save();}
     
     return {updatedCart: setRoundedValue}
@@ -96,17 +98,19 @@ exports.productExist = async(userId, newProdQty, calculatedPrice, newProdLoad, n
         },
     },
     {
-        arrayFilters: [
-        {
-            'outer.productId': mongoose.Types.ObjectId(newProdId)
-        }],
+        arrayFilters: 
+        [
+            {
+                'outer.productId': mongoose.Types.ObjectId(newProdId)
+            }
+        ],
         multi: true,
     },
     )
+    if(updatedCart){await updatedCart.save()};
     
-    let roundedAmount = updatedCart?.amount?.value?.toFixed(2);    
+    let roundedAmount = parseFloat((updatedCart?.amount?.value + calculatedPrice).toFixed(2));  
     let setRoundedValue = roundedAmount ? await Cart.findOneAndUpdate({userId : userId}, {$set:{"amount.value" : roundedAmount}}) : null;
-    
     if(await setRoundedValue){await setRoundedValue.save();}
 
     return {updatedCart: setRoundedValue}
@@ -114,6 +118,7 @@ exports.productExist = async(userId, newProdQty, calculatedPrice, newProdLoad, n
 
 exports.cartExist = async(userId, title, shape, imgs, newProdQty, calculatedPrice, newProdLoad, newProdId) =>
 { 
+
     let updatedCart = await Cart.findOneAndUpdate(
         {userId : userId}, 
         {
@@ -125,7 +130,8 @@ exports.cartExist = async(userId, title, shape, imgs, newProdQty, calculatedPric
                     productTitle: title,
                     productImgs : imgs,
                     productShape: shape,
-                    productItems: [
+                    productItems: 
+                    [
                         {
                             id: mongoose.Types.ObjectId(),
                             load : newProdLoad, 
@@ -139,21 +145,20 @@ exports.cartExist = async(userId, title, shape, imgs, newProdQty, calculatedPric
                     ]
                 }
             },
-            $inc: 
+            $inc:
             {
-                totalQuantity : newProdQty,
-                "amount.value": calculatedPrice
+                totalQuantity : newProdQty
             },
             multi: true,
         }
     )
-
-    let roundedAmount =  parseFloat(await updatedCart?.amount?.value?.toFixed(2));
-    let setRoundedValue =  roundedAmount ? await Cart.findOneAndUpdate({userId : userId}, {$set:{"amount.value" : roundedAmount}}) : null;
+    if(updatedCart){await updatedCart.save()};
     
-    if(setRoundedValue){await setRoundedValue.save();}
+    let roundedAmount =  parseFloat((updatedCart?.amount?.value + calculatedPrice).toFixed(2));
+    setRoundedValue = roundedAmount ? await Cart.findOneAndUpdate({userId : userId}, {$set:{"amount.value" : roundedAmount}}) : null;
+    if(setRoundedValue){await setRoundedValue.save()};
 
-    return {updatedCart: setRoundedValue}
+    return {updatedCart: await setRoundedValue}
 }
 
 exports.newCart = async(userId, title, shape, imgs, newProdQty, calculatedPrice, newProdLoad, newProdId) =>
@@ -209,7 +214,7 @@ exports.updateQuantity = async(req, res, next) =>
             const operation = (await cart.operation(userId, qty, val, newProdLoad, newProdId));
             const emptyCart = operation.setRoundedValue ? (await cart.emptyCart(userId, operation.setRoundedValue)) : null;
             const productQuantityIsZero = emptyCart.total === false ? (await cart.productQuantityIsZero(userId, newProdLoad, newProdId, emptyCart.total)) : null;
-            if(productQuantityIsZero){next()};
+            if(productQuantityIsZero || emptyCart){next()};
         }
     }
     catch(err)
@@ -238,8 +243,7 @@ exports.operation = async(userId, qty, val, newProdLoad, newProdId) =>
             {
                 "products.$[outer].productItems.$[inner].quantity": qty,
                 "products.$[outer].productItems.$[inner].price.value": val,
-                "amount.value" : val,
-                "totalQuantity" : qty
+                "totalQuantity": qty,
             }
         },
         {
@@ -254,10 +258,10 @@ exports.operation = async(userId, qty, val, newProdLoad, newProdId) =>
         },
     ) : null;
     if(cartOperation){await cartOperation.save();}
-    
-    let roundedAmount = cartOperation?.amount?.value?.toFixed(2); 
+    let roundedAmount =  parseFloat((cartOperation?.amount?.value + val).toFixed(2));
     let setRoundedValue = roundedAmount ? await Cart.findOneAndUpdate({userId : userId}, {$set:{"amount.value" : roundedAmount}}) : null;
-    
+    if(setRoundedValue){await setRoundedValue.save();}
+
     return {setRoundedValue}
 }
 
@@ -372,7 +376,7 @@ exports.deleteProductInCart = async(req, res, next) =>
                 return productItems 
             }
         }) : null;
-        product = product.flat();
+        if(product){product = product.flat()};
         
         if(!amount)
         {
@@ -433,21 +437,13 @@ exports.deleteOperation = async(userId, newProdLoad, qty, productId, amount) =>
             ]
         },
     );
+    if(updatedCart){await updatedCart.save();}
     
-    let newUpdatedCart = await updatedCart ? await Cart.findOneAndUpdate(
-        {userId : userId},
-        {
-            $inc: 
-            {
-                "amount.value": - amount,
-                "totalQuantity": - qty
-            }
-        }
-    ): null;
-    
-    let roundedAmount = newUpdatedCart?.amount?.value?.toFixed(2); 
-    let setRoundedValue = roundedAmount ? await Cart.findOneAndUpdate({userId : userId}, {$set:{"amount.value" : roundedAmount}}) : null;
-    
+    let roundedAmount =  parseFloat((updatedCart?.amount?.value - amount).toFixed(2));
+    let roundedTotalQty = parseInt((updatedCart?.totalQuantity - qty));
+    let setRoundedValue = roundedAmount ? await Cart.findOneAndUpdate({userId : userId}, {$set:{"amount.value" : roundedAmount, "totalQuantity" : roundedTotalQty}}) : null;
+
     if(await setRoundedValue){await setRoundedValue.save();}
+
     return {setRoundedValue}
 }

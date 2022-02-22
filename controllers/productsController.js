@@ -44,11 +44,9 @@ exports.newProduct = async(req, res, next) =>
     }
     else
     {
-        res.status(500).json(
-            {
-                success: false,
-                status: "Unsuccessfull request!",
-            });
+        let err = new Error("Missing or wrong elements");
+        err.status = 403;
+        return next(err);
     }
     req.product = product;
     req.tags = tagsArr;

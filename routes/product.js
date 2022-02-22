@@ -9,6 +9,7 @@ const auth = require('../controllers/authController');
 const product = require('../controllers/productsController');
 const {upload} = require('./upload');
 const { countInStock } = require("../controllers/ordersController");
+const { slice } = require("lodash");
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
@@ -87,36 +88,76 @@ router.get("/", cors.corsWithOptions, async(req, res) =>
 
     //method to get only new products with "?limit=15" in request
     const queryLimit = parseFloat(req.query.limit);
+    
+    const queryStart = req.query.start;
+    const queryEnd = req.query.end;
     try
     {
         let products;
-        
+        let length;
         if(queryNew)
         {
             // the last products
             products = await Product.find().sort({_id:-1}).limit(1).select(['-countInStock']);
+            length = products.length;
         }
         else if(queryTags)
         {
             // the products with the queryTags
             products = await Product.find({tags:{$in: [queryTags]}}).select(['-countInStock']);
+            length = products.length;
         }
         else if(queryLimit)
         {
             // the products with the quertNumber
             products = await Product.find().sort({_id:-1}).limit(queryLimit).select(['-countInStock']);
+            length = products.length;
+        }
+        else if(queryStart && queryEnd)
+        {
+            products = await Product.find().sort({_id:-1}).select(['-countInStock']);
+            length = products.length;
+            products = products.slice(queryStart, queryEnd);
         }
         else
         {
             // all products
             products = await Product.find().select(['-countInStock']);
+            length = products.length;
         }
         
         res.status(200).json(
             {
                 // success: true,
                 // status: "Products found",
-                products
+                products,
+                length
+            });
+    }
+    catch(err)
+    {
+        res.status(500).json(
+            {
+                success: false,
+                status: "Unsuccessfull request!",
+                err: err
+            });
+    }
+});
+
+// GET ALL PRODUCTS
+router.get("/length", cors.corsWithOptions, async(req, res) =>
+{
+    try
+    {
+        let products;
+        products = await Product.find();
+        let length = products.length;
+        res.status(200).json(
+            {
+                // success: true,
+                // status: "Products found",
+                length
             });
     }
     catch(err)
@@ -198,7 +239,7 @@ upload.any('imageFile'), product.resizeProductImage, product.newProduct, async(r
 
 // UPDATE PRODUCT //TODO:  form adaptability 
 router.put("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, product.verifyProductId,
- upload.any('imageFile'), product.newProduct, product.removeImgs, product.resizeProductImage, async(req, res) =>
+upload.any('imageFile'), product.newProduct, product.removeImgs, product.resizeProductImage, async(req, res) =>
 {
     try
     {

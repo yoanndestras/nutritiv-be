@@ -486,8 +486,7 @@ exports.deleteProductInCartById = async(req, res, next) =>
         else if(amount)
         {
             const deleteOperation = (await cart.deleteOperationById(userId, load, qty, productId, amount));
-            let total = deleteOperation.setRoundedValue ? deleteOperation.setRoundedValue.amount.value <=  0 : null;
-
+            let total = deleteOperation.setRoundedValue ? deleteOperation?.setRoundedValue?.amount?.value <=  0 : null;
             if(total){await Cart.deleteOne({userId : userId}); next();}
             else
             {
@@ -536,14 +535,15 @@ exports.deleteOperationById = async(userId, load, qty, productId, amount) =>
             ]
         },
     );
-    if(updatedCart){await updatedCart.save();}
     
     let roundedAmount =  parseFloat((updatedCart?.amount?.value - amount).toFixed(2));
     let roundedTotalQty = parseInt((updatedCart?.totalQuantity - qty));
-    let setRoundedValue = roundedAmount ? await Cart.findOneAndUpdate({userId : userId}, {$set:{"amount.value" : roundedAmount, "totalQuantity" : roundedTotalQty}}) : null;
-
-    if(await setRoundedValue){await setRoundedValue.save();}
-
+    setRoundedValue = roundedAmount !== null && roundedTotalQty !== null ? await Cart.findOneAndUpdate({userId : userId}, {$set:{"amount.value" : roundedAmount, totalQuantity : roundedTotalQty}}) : null;
+    
+    let cart = await Cart.findOne({userId : userId});
+    await cart.save();
+    
+    setRoundedValue = cart;
     return {setRoundedValue}
 }
 

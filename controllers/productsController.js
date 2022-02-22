@@ -23,7 +23,7 @@ exports.newProduct = async(req, res, next) =>
     
     const req_tags = tags && Array.isArray(tags) ? tags : tags !== undefined ? [tags] : null;
     const loadArr = load && Array.isArray(load) ? load : load !== undefined ? [load] : null;
-    let imgsArr = files ? files.map((el, i) => {return path.join(el.destination,'resized', el.filename)}) : null;
+    let imgsArr = files ? files.map((el, i) => {return path.join(el.destination,'productsImgs', el.filename)}) : null;
     let tagsArr = req_tags ? req_tags.map((el, i) => {return el}) : null;    
     
     if(shape === "capsules" && PPCapsule)

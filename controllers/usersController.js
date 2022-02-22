@@ -23,7 +23,7 @@ app.use(express.urlencoded({extended: true}));
 //             await sharp(file.path)
 //                 .resize(200, 200)
 //                 .toFile(
-//                     path.resolve(file.destination,'productsImgs', file.filename)
+//                     path.resolve(file.destination,'usersIcons', file.filename)
 //                 )
 //                 fs.unlinkSync(file.path) 
 //             })

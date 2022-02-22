@@ -10,99 +10,6 @@ const mailer = require("../controllers/mailerController");
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
-//REGISTER
-router.post("/register", auth.verifyUsername, auth.verifyEmail, auth.verifyEmailSyntax, 
-auth.verifyPasswordSyntax, mailer.sendVerifyAccountMail, async(req, res) =>
-{
-    try
-    {
-        User.register(new User({username: req.body.formData.username, email: req.body.formData.email}), 
-        req.body.formData.password, async(err, user) =>
-        {
-            if(err)
-            {
-                return res.status(400).json(
-                    {
-                        success: false, 
-                        status: 'Registration Failed! Please try again later!', 
-                        err: err
-                    });
-            } 
-            else 
-            {
-                await user.save(() => 
-                {
-                    console.log("User registered");
-                    res.status(201).json(
-                        {
-                            success: true, 
-                            status: 'Registration Successfull! Check your emails!'
-                        });
-                })
-            }
-        });
-    }
-    catch(err)
-    {
-        console.log("User not registered ");
-        res.status(400).json(
-            {
-                success: false, 
-                status: 'Registration Failed! Please try again later!', 
-                err: err
-            });
-    }
-});
-
-//FORGOT PASSWORD
-router.get("/verify-email", auth.verifyEmailToken, async(req, res, next) =>
-{
-    const user = req.user;
-    try
-    {
-        user.isVerified = true;
-        await user.save(() => 
-                {
-                    res.status(201).json(
-                        {
-                            success: true, 
-                            status: 'User Verification Successfull!'
-                        });
-                })
-    }
-    catch(err)
-        {
-            res.status(400).json(
-            {
-                success: false, 
-                status: 'Unsuccessfull request!', 
-                err: err
-            });
-        }
-});
-
-//GENERATE NEW EMAIL TOKEN
-router.get("/new_register_email", auth.verifyNewEmail, mailer.sendVerifyAccountMail, async(req, res, next) =>
-{
-    try
-    {
-        res.status(201).json(
-            {
-                success: true, 
-                status: 'Check your emails!'
-            });
-    }
-    catch(err)
-        {
-            res.status(400).json(
-                {
-                    success: false, 
-                    status: 'Unsuccessfull request!', 
-                    err: err
-                });
-        }
-});
-
 
 //FORGET PASSWORD EMAIL
 router.get("/forget_pwd", auth.verifyEmailExist, mailer.sendForgetPassword, async(req, res, next) =>
@@ -146,6 +53,99 @@ router.get("/verify_forget_pwd", auth.verifyEmailToken, async(req, res, next) =>
                     err: err.message
                 });
         }
+});
+
+//GENERATE NEW EMAIL TOKEN
+router.get("/new_register_email", auth.verifyNewEmail, mailer.sendVerifyAccountMail, async(req, res, next) =>
+{
+    try
+    {
+        res.status(201).json(
+            {
+                success: true, 
+                status: 'Check your emails!'
+            });
+    }
+    catch(err)
+        {
+            res.status(400).json(
+                {
+                    success: false, 
+                    status: 'Unsuccessfull request!', 
+                    err: err
+                });
+        }
+});
+
+//FORGOT PASSWORD
+router.get("/verify-email", auth.verifyEmailToken, async(req, res, next) =>
+{
+    const user = req.user;
+    try
+    {
+        user.isVerified = true;
+        await user.save(() => 
+                {
+                    res.status(201).json(
+                        {
+                            success: true, 
+                            status: 'User Verification Successfull!'
+                        });
+                })
+    }
+    catch(err)
+        {
+            res.status(400).json(
+            {
+                success: false, 
+                status: 'Unsuccessfull request!', 
+                err: err
+            });
+        }
+});
+
+//REGISTER
+router.post("/register", auth.verifyUsername, auth.verifyEmail, auth.verifyEmailSyntax, 
+auth.verifyPasswordSyntax, mailer.sendVerifyAccountMail, async(req, res) =>
+{
+    try
+    {
+        User.register(new User({username: req.body.formData.username, email: req.body.formData.email}), 
+        req.body.formData.password, async(err, user) =>
+        {
+            if(err)
+            {
+                return res.status(400).json(
+                    {
+                        success: false, 
+                        status: 'Registration Failed! Please try again later!', 
+                        err: err
+                    });
+            } 
+            else 
+            {
+                await user.save(() => 
+                {
+                    console.log("User registered");
+                    res.status(201).json(
+                        {
+                            success: true, 
+                            status: 'Registration Successfull! Check your emails!'
+                        });
+                })
+            }
+        });
+    }
+    catch(err)
+    {
+        console.log("User not registered ");
+        res.status(400).json(
+            {
+                success: false, 
+                status: 'Registration Failed! Please try again later!', 
+                err: err
+            });
+    }
 });
 
 //NEW PASSWORD AND RESET LOGIN ATTEMPTS
@@ -276,7 +276,7 @@ router.delete("/logout", cors.corsWithOptions, auth.verifyUser, auth.verifyRefre
     }
 });
 
-//TEST FRONT
+//////////////////////////////////////////////////TEST FRONT////////////////////////////////////////////////////////////
 router.post("/data", async(req, res, next) =>
 {
     try {
@@ -291,6 +291,7 @@ router.post("/data", async(req, res, next) =>
         res.status(500).json({ success: false, err })
         }
 });
+//////////////////////////////////////////////////TEST FRONT////////////////////////////////////////////////////////////
 
 
 module.exports = router;

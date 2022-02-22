@@ -59,7 +59,6 @@ router.post("/create-checkout-session", auth.verifyUser, auth.verifyRefresh, asy
           url : session.url
         });
     }
-    
     else
     {
       res.status(500).json(

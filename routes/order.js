@@ -11,79 +11,6 @@ const order = require('../controllers/ordersController')
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
-// CREATE ORDER
-router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, order.verifyPhoneNumber, order.newOrder, async (req, res) =>
-{    
-    try
-    {
-        if(req.cart === true)
-        {
-            res.status(200).json(
-                {
-                    success: true,
-                    status: req.user.username + ", thank you for your order",
-                    NewOrder: req.order
-                }
-            );
-        }
-        else if (req.cart === false)
-        {
-            res.status(500).json(
-                {
-                    success: false,
-                    status: "Cart do not exist!"
-                }
-            );
-        }
-        
-    }
-    catch(err)
-    {
-        res.status(500).json(
-            {
-                success: false,
-                status: "Unsuccessfull request!",
-                err : err.message
-            }
-        );
-    }
-});
-
-// UPDATE ORDER
-router.put("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, async(req, res) =>
-{
-    try
-    {
-        const updatedOrder = await Order.findByIdAndUpdate(
-            req.params.id, 
-            {
-                $set: req.body
-            },
-            {new: true}
-        );
-
-        res.status(200).json(updatedOrder);
-    }
-    catch(err)
-    {
-        res.status(500).json(err);
-    }
-});
-
-// DELETE ORDER
-router.delete("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, async (req, res) =>
-{
-    try
-    {
-        await Order.findByIdAndDelete(req.params.id)
-        res.status(200).json("Order has been deleted...")
-    }
-    catch(err)
-    {
-        res.status(500).json(err);
-    }
-
-});
 
 // GET USER ORDERS
 router.get("/find/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAuthorization, async (req, res) =>
@@ -152,6 +79,79 @@ router.get("/income", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
                 },
             ]);
         res.status(200).json(income);
+    }
+    catch(err)
+    {
+        res.status(500).json(err);
+    }
+});
+
+// CREATE ORDER
+router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, order.verifyPhoneNumber, order.newOrder, async (req, res) =>
+{    
+    try
+    {
+        if(req.cart === true)
+        {
+            res.status(200).json(
+                {
+                    success: true,
+                    status: req.user.username + ", thank you for your order",
+                    NewOrder: req.order
+                }
+            );
+        }
+        else if (req.cart === false)
+        {
+            res.status(500).json(
+                {
+                    success: false,
+                    status: "Cart do not exist!"
+                }
+            );
+        }
+        
+    }
+    catch(err)
+    {
+        res.status(500).json(
+            {
+                success: false,
+                status: "Unsuccessfull request!",
+                err : err.message
+            }
+        );
+    }
+});
+
+// UPDATE ORDER
+router.put("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, async(req, res) =>
+{
+    try
+    {
+        const updatedOrder = await Order.findByIdAndUpdate(
+            req.params.id, 
+            {
+                $set: req.body
+            },
+            {new: true}
+        );
+
+        res.status(200).json(updatedOrder);
+    }
+    catch(err)
+    {
+        res.status(500).json(err);
+    }
+});
+
+// DELETE ORDER
+router.delete("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, async (req, res) =>
+{
+    try
+    {
+        await Order.findByIdAndDelete(req.params.id)
+        res.status(200).json("Order has been deleted...")
     }
     catch(err)
     {

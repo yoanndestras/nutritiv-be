@@ -11,80 +11,6 @@ const user = require("../controllers/usersController");
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
 
-//RESET PASSWORD
-router.put("/reset_password", auth.verifyUser, auth.verifyRefresh, 
-auth.verifyNewPasswordSyntax, auth.verifyNewPasswordEquality, async(req, res, next) =>
-{
-    try
-    {
-        const oldPass = req.body.oldPass;
-        const newPass = req.body.confirmNewPass;
-        const user = req.user;
-        
-        user.changePassword(oldPass, newPass, (err, user) => 
-            {                
-                if(err)
-                {
-                    res.status(400).json(
-                        {
-                            success: false, 
-                            err: 'OldPassword is incorrect'
-                        }); 
-                }
-                else
-                {
-                    res.status(200).json(
-                        {
-                            success: true, 
-                            status: 'Password has been modified!', 
-                            user: user.user
-                        });
-                }
-            });
-    }
-    catch(err)
-        {
-            res.status(400).json(
-                {
-                    success: false, 
-                    status: 'Unsuccessfull request!', 
-                    err: err
-                });
-        }
-});
-
-// DELETE
-router.delete("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAuthorization, async (req, res) =>
-{
-    try
-    {
-        await User.findByIdAndDelete(req.params.id)
-        res.status(200).json("User has been deleted...")
-    }
-    catch(err)
-    {
-        res.status(500).json({success: false, err: err.message});
-    }
-
-})
-
-// GET USER // verify user exist in BDD & is connected. Return User info except PWD
-router.get("/find/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAuthorization, async (req, res) =>
-{
-    try
-    {
-        const user = await User.findById(req.params.id)
-        
-        const {email, ...public} = user._doc;
-        
-        res.status(200).json({success: true, user: public});
-    }
-    catch(err)
-    {
-        res.status(500).json({success: false, err: err.message});
-    }
-})
-
 // GET ALL USERS
 router.get("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, async (req, res) =>
 {
@@ -169,6 +95,25 @@ router.get("/self", auth.verifyUser, auth.verifyAuth, async(req, res) =>
     }
 })
 
+
+// GET USER // verify user exist in BDD & is connected. Return User info except PWD
+router.get("/find/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAuthorization, async (req, res) =>
+{
+    try
+    {
+        const user = await User.findById(req.params.id)
+        
+        const {email, ...public} = user._doc;
+        
+        res.status(200).json({success: true, user: public});
+    }
+    catch(err)
+    {
+        res.status(500).json({success: false, err: err.message});
+    }
+})
+
+
 //UPDATE USER
 router.put('/updateUser', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async (req, res) =>
 {
@@ -192,7 +137,7 @@ router.put('/updateUser', cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
     }
 })
 
-//UPDATE USER
+//UPDATE USER ADDRESS
 router.put('/addAddress', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
 user.verifyAddress, async (req, res) =>
 {
@@ -216,6 +161,89 @@ user.verifyAddress, async (req, res) =>
                 err: err.message
             });
     }
+})
+
+//UPDATE USER ICON
+router.put('/addIcon', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+user.verifyAddress, async (req, res) =>
+{
+    try
+    {
+        const user = await User.findOne({_id: req.user._id});
+        user.addressDetails.push(req.address);
+        user.save();
+        
+        res.status(200).json(
+            {
+                success: true, 
+                userInfo: user
+            });
+    }
+    catch(err)
+    {
+        res.status(500).json(
+            {
+                success: false, 
+                err: err.message
+            });
+    }
+})
+
+//RESET PASSWORD
+router.put("/reset_password", auth.verifyUser, auth.verifyRefresh, 
+auth.verifyNewPasswordSyntax, auth.verifyNewPasswordEquality, async(req, res, next) =>
+{
+    try
+    {
+        const oldPass = req.body.oldPass;
+        const newPass = req.body.confirmNewPass;
+        const user = req.user;
+        
+        user.changePassword(oldPass, newPass, (err, user) => 
+            {                
+                if(err)
+                {
+                    res.status(400).json(
+                        {
+                            success: false, 
+                            err: 'OldPassword is incorrect'
+                        }); 
+                }
+                else
+                {
+                    res.status(200).json(
+                        {
+                            success: true, 
+                            status: 'Password has been modified!', 
+                            user: user.user
+                        });
+                }
+            });
+    }
+    catch(err)
+        {
+            res.status(400).json(
+                {
+                    success: false, 
+                    status: 'Unsuccessfull request!', 
+                    err: err
+                });
+        }
+});
+
+// DELETE
+router.delete("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAuthorization, async (req, res) =>
+{
+    try
+    {
+        await User.findByIdAndDelete(req.params.id)
+        res.status(200).json("User has been deleted...")
+    }
+    catch(err)
+    {
+        res.status(500).json({success: false, err: err.message});
+    }
+
 })
 
 module.exports = router;

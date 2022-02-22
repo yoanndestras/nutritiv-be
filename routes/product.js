@@ -89,8 +89,11 @@ router.get("/", cors.corsWithOptions, async(req, res) =>
     //method to get only new products with "?limit=15" in request
     const queryLimit = parseFloat(req.query.limit);
     
-    const queryStart = req.query.start;
-    const queryEnd = req.query.end;
+    const queryStart = parseFloat(req.query.start);
+    const queryEnd = parseFloat(req.query.end);
+
+    console.log(queryStart);
+    console.log(queryEnd);
     try
     {
         let products;
@@ -117,7 +120,7 @@ router.get("/", cors.corsWithOptions, async(req, res) =>
         {
             products = await Product.find().sort({_id:-1}).select(['-countInStock']);
             length = products.length;
-            products = products.slice(queryStart, queryEnd);
+            products = products.slice(queryStart, queryEnd); 
         }
         else
         {

@@ -91,7 +91,6 @@ router.get("/", cors.corsWithOptions, async(req, res) =>
     
     const queryStart = parseFloat(req.query.start);
     const queryEnd = parseFloat(req.query.end);
-    
     try
     {
         let products;
@@ -134,6 +133,7 @@ router.get("/", cors.corsWithOptions, async(req, res) =>
                 products,
                 length
             });
+    
     }
     catch(err)
     {
@@ -151,8 +151,7 @@ router.get("/length", cors.corsWithOptions, async(req, res) =>
 {
     try
     {
-        let products;
-        products = await Product.find();
+        let products = await Product.find();
         let length = products.length;
         res.status(200).json(
             {

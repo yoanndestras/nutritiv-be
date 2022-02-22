@@ -15,6 +15,7 @@ app.use(express.urlencoded({extended: true}));
 // RESIZE USER ICON
 exports.resizeUserIcon = async(req, res, next) => 
 {
+  const user = await User.findOne({_id: req.user._id})
     if (!req.files) return next();
     await Promise.all
     (
@@ -25,8 +26,8 @@ exports.resizeUserIcon = async(req, res, next) =>
                 .toFile(
                     path.resolve(file.destination,'usersIcons', file.filename)
                 )
-                fs.unlinkSync(path.join(file.destination,'usersIcons', file.filename)) 
-                console.log(path.join(file.destination,'usersIcons', file.filename));
+                fs.unlinkSync(file.path) 
+                if(user.icon){fs.unlinkSync(path.join("public/", user.icon))}
             })
     );
     

@@ -157,7 +157,7 @@ exports.cartExist = async(userId, title, shape, imgs, newProdQty, calculatedPric
     let roundedAmount =  parseFloat((updatedCart?.amount?.value + calculatedPrice).toFixed(2));
     setRoundedValue = roundedAmount ? await Cart.findOneAndUpdate({userId : userId}, {$set:{"amount.value" : roundedAmount}}) : null;
     if(setRoundedValue){await setRoundedValue.save()};
-
+    
     return {updatedCart: await setRoundedValue}
 }
 
@@ -356,8 +356,7 @@ exports.deleteProductInCart = async(req, res, next) =>
         const userId = req.params.userId, productId = req.params.productId, newProdLoad = parseFloat(req.params.load);
         let qty, amount;
 
-        const existingCart = await Cart.findOne({userId : userId});
-        const cartProducts = existingCart?.products;
+        const existingCart = await Cart.findOne({userId : userId}), cartProducts = existingCart?.products;
         const prodExist =  cartProducts ? await cartProducts.some(product => product.productId.toString() === productId) : null;
         
         let product = prodExist ? await cartProducts.filter((el) => 
@@ -444,6 +443,107 @@ exports.deleteOperation = async(userId, newProdLoad, qty, productId, amount) =>
     let setRoundedValue = roundedAmount ? await Cart.findOneAndUpdate({userId : userId}, {$set:{"amount.value" : roundedAmount, "totalQuantity" : roundedTotalQty}}) : null;
 
     if(await setRoundedValue){await setRoundedValue.save();}
+    
+    return {setRoundedValue}
+}
+
+// DELETE PRODUCT IN CART
+exports.deleteProductInCartById = async(req, res, next) => 
+{
+    try
+    {
+        const userId = req.params.userId, productId = req.params.productId, newProdId = req.params.id;
+        let qty, amount, load;
+
+        const existingCart = await Cart.findOne({userId : userId}), cartProducts = existingCart?.products;
+        const prodExist =  cartProducts ? await cartProducts.some(product => product.productId.toString() === productId) : null;
+        
+        let product = prodExist ? await cartProducts.filter((el) => 
+        {
+            if(el.productId.toString() === productId) 
+            {
+                let productItems = el.productItems.map((product) => 
+                {
+                    if(product.id.toString() === newProdId)
+                    {
+                        qty = product.quantity;
+                        amount = product.price.value;
+                        load = product.load;
+                        return qty
+                    }
+                })
+                return productItems 
+            }
+        }) : null;
+        if(product){product = product.flat()};
+        
+        if(!amount)
+        {
+            let err = new Error('Product not found!')
+            err.status = 403;
+            return next(err);
+        }
+        else if(amount)
+        {
+            const deleteOperation = (await cart.deleteOperationById(userId, load, qty, productId, amount));
+            let total = deleteOperation.setRoundedValue ? deleteOperation.setRoundedValue.amount.value <=  0 : null;
+
+            if(total){await Cart.deleteOne({userId : userId}); next();}
+            else
+            {
+                let prodIndex = deleteOperation.setRoundedValue.products.findIndex(product => product.productId.toString() === productId)
+                let productExist = deleteOperation.setRoundedValue ? (deleteOperation.setRoundedValue.products[prodIndex].productItems).length > 0 : null;
+                pullProduct = productExist === false ? await Cart.findOneAndUpdate(
+                    {userId : userId}, 
+                    {
+                        $pull: 
+                        {
+                            "products": {productId : mongoose.Types.ObjectId(productId)}
+                        }
+                    }
+                ): null;
+                if(pullProduct) {await pullProduct.save()}
+                next();
+            }
+        }
+    }
+    catch(err) 
+    {
+        res.status(500).json(
+        {
+            success: false,
+            status: "Unsuccessfull request!",
+            err: err.message
+        });
+    }
+}
+
+exports.deleteOperationById = async(userId, load, qty, productId, amount) =>
+{
+    let updatedCart = await Cart.findOneAndUpdate(
+        {userId : userId},
+        {
+            $pull: 
+                {
+                    "products.$[outer].productItems" : {load : load} 
+                },
+        },
+        {
+            arrayFilters: [
+            {
+                'outer.productId': mongoose.Types.ObjectId(productId)
+            }
+            ]
+        },
+    );
+    if(updatedCart){await updatedCart.save();}
+    
+    let roundedAmount =  parseFloat((updatedCart?.amount?.value - amount).toFixed(2));
+    let roundedTotalQty = parseInt((updatedCart?.totalQuantity - qty));
+    let setRoundedValue = roundedAmount ? await Cart.findOneAndUpdate({userId : userId}, {$set:{"amount.value" : roundedAmount, "totalQuantity" : roundedTotalQty}}) : null;
+
+    if(await setRoundedValue){await setRoundedValue.save();}
 
     return {setRoundedValue}
 }
+

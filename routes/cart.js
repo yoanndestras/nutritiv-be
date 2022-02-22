@@ -81,43 +81,43 @@ product.verifyPricePerProduct, cart.updateQuantity, async(req, res) =>
     }
 })
 
-// DELETE PRODUCT IN CART
-router.delete("/:userId/:productId/:load", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
-auth.verifyAuthorization, cart.deleteProductInCart, async (req, res) =>
-{
-    try
-    {
-        let cart = await Cart.findOne({userId : req.user._id});
-        if(cart)
-        {
-            await cart.save();
-            res.status(200).json(
-                {
-                    success: true,
-                    status: "Cart succesfully updated",
-                    cart: cart
-                });
-        }
-        else
-        {
-            res.status(200).json(
-                {
-                    success: true,
-                    status: "Cart succesfully deleted!"
-                });
-        }
-    }
-    catch(err)
-    {
-        res.status(500).json(
-            {
-                success: false,
-                status: "Unsuccessfull request!",
-                err: err.message
-            });
-    }
+// // DELETE PRODUCT IN CART
+// router.delete("/:userId/:productId/:load", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+// auth.verifyAuthorization, cart.deleteProductInCart, async (req, res) =>
+// {
+//     try
+//     {
+//         let cart = await Cart.findOne({userId : req.user._id});
+//         if(cart)
+//         {
+//             await cart.save();
+//             res.status(200).json(
+//                 {
+//                     success: true,
+//                     status: "Cart succesfully updated",
+//                     cart: cart
+//                 });
+//         }
+//         else
+//         {
+//             res.status(200).json(
+//                 {
+//                     success: true,
+//                     status: "Cart succesfully deleted!"
+//                 });
+//         }
+//     }
+//     catch(err)
+//     {
+//         res.status(500).json(
+//             {
+//                 success: false,
+//                 status: "Unsuccessfull request!",
+//                 err: err.message
+//             });
+//     }
 
-})
+// })
 
 // DELETE CART
 router.delete("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAuthorization, async (req, res) =>
@@ -207,4 +207,73 @@ router.get("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.
     }
 })
 
+
+
+// DELETE PRODUCT IN CART
+router.delete("/:userId/:productId/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+auth.verifyAuthorization, cart.deleteProductInCartById, async (req, res) =>
+{
+    try
+    {
+        let cart = await Cart.findOne({userId : req.user._id});
+        if(cart)
+        {
+            await cart.save();
+            res.status(200).json(
+                {
+                    success: true,
+                    status: "Cart succesfully updated",
+                    cart: cart
+                });
+        }
+        else
+        {
+            res.status(200).json(
+                {
+                    success: true,
+                    status: "Cart succesfully deleted!"
+                });
+        }
+    }
+    catch(err)
+    {
+        res.status(500).json(
+            {
+                success: false,
+                status: "Unsuccessfull request!",
+                err: err.message
+            });
+    }
+
+})
+
+// ADD QUANTITY PRODUCT IN CART 
+router.put("/updateQuantity/:id/:load/:operation", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+product.verifyPricePerProduct, cart.updateQuantity, async(req, res) =>
+{
+    try
+    {
+        let cart = await Cart.findOne({userId : req.user._id});
+        await cart.save();
+
+        res.status(200).json(
+            {
+                success: true,
+                status: "Cart succesfully updated",
+                cart: cart
+            });
+    }
+    catch(err)
+    {
+        res.status(500).json(
+            {
+                success: false,
+                status: "Unsuccessfull request!",
+                err: err.message
+            });
+    }
+})
+
 module.exports = router;
+
+

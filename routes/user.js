@@ -6,6 +6,7 @@ const cors = require('../controllers/corsController');
 const auth = require('../controllers/authController');
 const mailer = require("../controllers/mailerController");
 const user = require("../controllers/usersController");
+const {upload} = require('./upload');
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
@@ -165,12 +166,11 @@ user.verifyAddress, async (req, res) =>
 
 //UPDATE USER ICON
 router.put('/addIcon', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
-user.verifyAddress, async (req, res) =>
+upload.any('imageFile'), user.resizeUserIcon, user.addUserIcon, async (req, res) =>
 {
     try
     {
         const user = await User.findOne({_id: req.user._id});
-        user.addressDetails.push(req.address);
         user.save();
         
         res.status(200).json(

@@ -9,7 +9,6 @@ const cors = require('../controllers/corsController');
 //OPTIONS FOR CORS CHECK
 uploadRouter.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
-
 const storage = multer.diskStorage(
 {
     destination: (req, file, cb) => 

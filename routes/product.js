@@ -91,9 +91,7 @@ router.get("/", cors.corsWithOptions, async(req, res) =>
     
     const queryStart = parseFloat(req.query.start);
     const queryEnd = parseFloat(req.query.end);
-
-    console.log(queryStart);
-    console.log(queryEnd);
+    
     try
     {
         let products;
@@ -116,7 +114,7 @@ router.get("/", cors.corsWithOptions, async(req, res) =>
             products = await Product.find().sort({_id:-1}).limit(queryLimit).select(['-countInStock']);
             length = products.length;
         }
-        else if(queryStart && queryEnd)
+        else if(queryStart !== null && queryEnd !== null)
         {
             products = await Product.find().sort({_id:-1}).select(['-countInStock']);
             length = products.length;

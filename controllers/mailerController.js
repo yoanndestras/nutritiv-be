@@ -32,7 +32,7 @@ exports.sendVerifyAccountMail = async(req, res, next) =>
     catch(err)
     {
         var err = new Error('Email sending Error!');
-        err.status = 400;
+        err.statusCode = 400;
         return next(err);
     }
     
@@ -68,7 +68,7 @@ exports.sendForgetPassword = async(req, res, next) =>
     catch(err)
     {
         var err = new Error('Email sending Error!');
-        err.status = 400;
+        err.statusCode = 400;
         return next(err);
     }
     

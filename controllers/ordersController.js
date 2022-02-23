@@ -136,7 +136,7 @@ exports.countInStock = async(userId) =>
     if(stockAvailable - sumWithInitial <= 0)
     {
       err = new Error('The stock for this product is not available : ' + cartProduct.title);
-      err.status = 400;
+      err.statusCode = 400;
       return {err};
     }
   }

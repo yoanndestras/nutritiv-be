@@ -45,7 +45,7 @@ exports.newProduct = async(req, res, next) =>
     else
     {
         let err = new Error("Missing or wrong elements");
-        err.status = 403;
+        err.statusCode = 403;
         return next(err);
     }
     req.product = product;
@@ -81,13 +81,13 @@ exports.verifyProduct = async(req, res, next) =>
     else if(productQuantityInStock === false)
     {
         let err = new Error("Not enough quantity in stock for this new product");
-        err.status = 403;
+        err.statusCode = 403;
         return next(err);
     }
     else
     {
         let err = new Error('Id : ' + newProductId + ', Val : ' + newProductLoad + ", Price : " + newProductPrice + " doesnt exist");
-        err.status = 403;
+        err.statusCode = 403;
         return next(err);
     }
 }
@@ -113,13 +113,13 @@ exports.verifyPricePerProduct = async(req, res, next) => {
     else if(productQuantityInStock === false)
     {
         let err = new Error("Not enough quantity in stock for this new product");
-        err.status = 403;
+        err.statusCode = 403;
         return next(err);
     }
     else
     {
         let err = new Error('Id : ' + newProductId + ' Val : ' + newProductLoad + " doesnt exist");
-        err.status = 403;
+        err.statusCode = 403;
         return next(err);
     }
 }
@@ -159,7 +159,7 @@ exports.verifyStock = async(req, res, next) => {
             if(stockAvailable - (sumWithInitial + productLoad * productQuantity) <= 0)
             {
                 err = new Error('The stock for this product is not available : ' + cartProduct.title);
-                err.status = 400;
+                err.statusCode = 400;
             }
         }
         if(err)
@@ -192,14 +192,14 @@ exports.verifyProductId = async(req, res, next) =>
         else
         {
             let err = new Error('This product do not exist : ' + productId);
-            err.status = 400;
+            err.statusCode = 400;
             next(err);
         }
     }
     else
     {
         let err = new Error('The productId is not an ObjectId : ' + productId);
-        err.status = 400;
+        err.statusCode = 400;
         next(err);
     }
     

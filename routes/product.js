@@ -44,7 +44,7 @@ router.get("/findByTitle/:title", async(req, res) =>
     try
     {
         const title = req.params.title;
-        const product = await Product.find({title : title}).select(['-countInStock'])
+        const product = await Product.find({title : title})
 
         if(product.length > 0)
         {
@@ -78,53 +78,42 @@ router.get("/findByTitle/:title", async(req, res) =>
 // GET ALL PRODUCTS
 router.get("/", cors.corsWithOptions, async(req, res) =>
 {
-    //method to get only new products with "?new=true" in request
-    const queryNew = req.query.new;
-    
-    //method to get only products with the appropriate tag with "?tags=endurance" for example in request
-    const queryTags = req.query.tags;
-    
-    //const products = queryTags ? find.tags : [product.find()].sort(( queryNew ? {id} : '')).limit(queryNew ? 1 : '')
-
-    //method to get only new products with "?limit=15" in request
-    const queryLimit = parseFloat(req.query.limit);
-    
-    const queryStart = parseFloat(req.query.start);
-    const queryEnd = parseFloat(req.query.end);
     try
     {
-        let products;
-        let length;
-        if(queryNew)
+        const allProducts = await Product.find();
+        const productsLength = allProducts.length;
+
+        const queryNew = req.query.new && req.query.new === true ? req.query.new : null, queryTags = req.query.tags;
+        const queryLimit = parseInt(req.query.limit); 
+        
+        const queryStart = req.query.start && req.query.start < 0 ? req.query.start = 0 : parseInt(req.query.start);
+        const queryEnd = req.query.end && req.query.end > productsLength ? req.query.end = productsLength: parseInt(req.query.end);
+
+        let products, length;
+        
+        if(queryNew) 
         {
-            // the last products
-            products = await Product.find().sort({_id:-1}).limit(1).select(['-countInStock']);
-            length = products.length;
+            products = await Product.find().sort({_id:-1}).limit(1);
         }
         else if(queryTags)
         {
-            // the products with the queryTags
-            products = await Product.find({tags:{$in: [queryTags]}}).select(['-countInStock']);
-            length = products.length;
+            products = await Product.find({tags:{$in: [queryTags]}});
         }
         else if(queryLimit)
         {
-            // the products with the quertNumber
-            products = await Product.find().sort({_id:-1}).limit(queryLimit).select(['-countInStock']);
-            length = products.length;
+            products = await Product.find().sort({_id:-1}).limit(queryLimit);
         }
-        else if(queryStart !== null && queryEnd !== null)
+        else if(queryStart !== null && queryEnd !== null && queryStart < queryEnd)
         {
-            products = await Product.find().sort({_id:-1}).select(['-countInStock']);
-            length = products.length;
-            products = products.slice(queryStart, queryEnd); 
+            products = await Product.find().sort({_id:-1});
+            products = products.slice(queryStart, queryEnd)
         }
         else
         {
-            // all products
-            products = await Product.find().select(['-countInStock']);
-            length = products.length;
+            products = allProducts;
         }
+        
+        length = products.length;
         
         res.status(200).json(
             {

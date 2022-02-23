@@ -334,7 +334,7 @@ exports.verifyStock = async(userId, productId, productLoad) =>
             if(stockAvailable - (sumWithInitial + productLoad) <= 0)
             {
                 err = new Error('The stock for this product is not available : ' + cartProduct.title);
-                err.status = 400;
+                err.statusCode = 400;
             }
         }
         if(err){return {err}}
@@ -343,7 +343,7 @@ exports.verifyStock = async(userId, productId, productLoad) =>
     else
     {
         err = new Error('Product not found');
-        err.status = 400;
+        err.statusCode = 400;
         return {err}
     }
 }
@@ -380,7 +380,7 @@ exports.deleteProductInCart = async(req, res, next) =>
         if(!amount)
         {
             let err = new Error('Product not found!')
-            err.status = 403;
+            err.statusCode = 403;
             return next(err);
         }
         else if(amount)
@@ -480,7 +480,7 @@ exports.deleteProductInCartById = async(req, res, next) =>
         if(!amount)
         {
             let err = new Error('Product not found!')
-            err.status = 403;
+            err.statusCode = 403;
             return next(err);
         }
         else if(amount)

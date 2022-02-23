@@ -119,7 +119,7 @@ exports.verifyAdmin = function(req, res, next)
         else
         {
             let err = new Error('You are not authorized to perform this operation!');
-            err.status = 403;
+            err.statusCode = 403;
             return next(err);
         }
 };
@@ -136,12 +136,9 @@ exports.verifyAuthorization = async(req, res, next) =>
         }
         else
         {
-            res.status(403).json(
-                {
-                    success: false,
-                    status: "You are not allowed to perform this operation!"
-                }    
-            );
+            let err = new Error('You are not authorized to perform this operation!');
+            err.statusCode = 403;
+            return next(err);
         }
     }
     catch(err)
@@ -168,7 +165,7 @@ exports.verifyUser = (req, res, next) =>
         else if (user.isVerified === false)
         {
             let err = new Error('You account has not been verified. Please check your email to verify your account');
-            err.status = 403;
+            err.statusCode = 403;
             return next(err);
         }
         req.user = user;
@@ -272,14 +269,9 @@ exports.verifyNoRefresh = (req, res, next) =>
         }
         else
         {
-            req.user = user;
-
-            return res.status(500).json(
-                {
-                    success: false, 
-                    status: "You are already connected as "+ user.username +", disconnect your account to login", 
-                    err: "refresh_token header exist, a user is connected",
-                });
+            let err = new Error('You are connected');
+            err.statusCode = 500;
+            return next(err);
         }
     })(req, res, next);  
 };
@@ -342,7 +334,7 @@ exports.verifyEmailSyntax = (req, res, next) =>
     else
     {
         let err = new Error('You Email syntax is wrong!');
-        err.status = 400;
+        err.statusCode = 400;
         return next(err);
     }
 
@@ -358,7 +350,7 @@ exports.verifyPasswordSyntax = (req, res, next) =>
     else
     {
         let err = new Error('You password syntax is wrong!');
-        err.status = 400;
+        err.statusCode = 400;
         return next(err);
     }
 };
@@ -370,7 +362,7 @@ exports.verifyUsername = (req, res, next) =>
             if(user !== null)
             {
                 let err = new Error('An account with your username already exists!');
-                err.status = 400;
+                err.statusCode = 400;
                 return next(err);
             }
             else
@@ -388,7 +380,7 @@ exports.verifyEmail = (req, res, next) =>
             if(user !== null)
             {
                 let err = new Error('An account with your email already exists!');
-                err.status = 400;
+                err.statusCode = 400;
                 return next(err);
             }
             else
@@ -407,7 +399,7 @@ exports.verifyNewPasswordEquality = (req, res, next) =>
     if(password1 != password2)
     {
         let err = new Error('Passwords do not match');
-        err.status = 400;
+        err.statusCode = 400;
         return next(err);
     }
     else
@@ -433,7 +425,7 @@ exports.verifyNewPasswordSyntax = (req, res, next) =>
     else
     {
         let err = new Error('You password syntax is wrong!');
-        err.status = 400;
+        err.statusCode = 400;
         return next(err);
     }
 };
@@ -447,7 +439,7 @@ exports.verifyEmailToken = (req, res, next) =>
         if (err || !user) 
         {   
             let err = new Error('TOKEN EXPIRED OR CORRUPTED');
-            err.status = 403;
+            err.statusCode = 403;
             return next(err);
         }
         else
@@ -472,7 +464,7 @@ exports.verifyNewEmail = (req, res, next) =>
             else
             {
                 let err = new Error('Wrong email or already verified user');
-                err.status = 400;
+                err.statusCode = 400;
                 return next(err);
             }
         })
@@ -491,7 +483,7 @@ exports.verifyEmailExist = (req, res, next) =>
             else
             {
                 let err = new Error('Wrong email');
-                err.status = 400;
+                err.statusCode = 400;
                 return next(err);
             }
         })

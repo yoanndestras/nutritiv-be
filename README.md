@@ -59,9 +59,8 @@ Our app file is app.js, running the command **npm start** ("start": "nodemon app
 
 Our team use Trello to organize tasks and manage the project.
 
-
-Back-end Developper : [Yoann Destras](https://github.com/yoanndestras)
-Front-end Developper : [Monstar](https://github.com/Monstarrrr)
-
+- Back-end Developper : [Yoann Destras](https://github.com/yoanndestras)
+- Front-end Developper : [Monstar](https://github.com/Monstarrrr)
+  - [**Front-end Repository**](https://github.com/Monstarrrr/nutritiv-fe)
 
 

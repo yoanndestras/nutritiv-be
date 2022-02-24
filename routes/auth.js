@@ -1,8 +1,9 @@
 const router = require("express").Router();
 const User = require("../models/User");
-const passport = require("passport");
 
 // MIDDLEWARES
+
+const passport = require("passport");
 const cors = require('../controllers/corsController');
 const auth = require("../controllers/authController");
 const mailer = require("../controllers/mailerController");

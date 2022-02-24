@@ -39,14 +39,14 @@ We use **MongoDB** with mongoose module, a schema based solution for our data.
 >We choosed middlewares following some criterias, usuability, maintainability, functionnality...
 Thanks to middlewares, our application features handle differents scenario :
 
-1. CORS policy, including a whitelist *(cors).*
-2. Request spam *(limitter).*
-3. Cookies *(cookieParser).*
-4. SecretKeys *(dotenv).*
-5. Static files *(path, fs, multer, sharp, nanoid).*
-6. Registration, authentification... *(passport, passport-local, passport-jwt, jsonwebtoken).*
-7. Mails *(sgMail, mailer, email_validator)*
-8. Payment *(stripe).*
+- CORS policy, including a whitelist *(cors).*
+- Request spam *(limitter).*
+- Cookies *(cookieParser).*
+- SecretKeys *(dotenv).*
+- Static files *(path, fs, multer, sharp, nanoid).*
+- Registration, authentification... *(passport, passport-local, passport-jwt, jsonwebtoken).*
+- Mails *(sgMail, mailer, email_validator)*
+- Payment *(stripe).*
 
 To install a new middleware go in terminal : **npm i "mymiddleware"**
 

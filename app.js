@@ -76,7 +76,7 @@ app.use(function(err, req, res, next)
     if (err.shouldRedirect) 
     {
         res.render('myErrorPage') // Renders a myErrorPage.html for the user
-    } 
+    }
     else 
     {
         res.status(err.statusCode).send(err.message); // If shouldRedirect is not defined in our error, sends our original err data

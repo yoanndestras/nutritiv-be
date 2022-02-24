@@ -73,7 +73,7 @@ router.get("/stats", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
 })
 
 // CHECK JWT TOKEN
-router.get("/self", auth.verifyUser, auth.verifyAuth, async(req, res) =>
+router.get("/self", cors.corsWithOptions, auth.verifyUser, auth.verifyAuth, async(req, res) =>
 {
     try
     {
@@ -190,7 +190,7 @@ upload.any('imageFile'), user.resizeUserIcon, user.addUserIcon, async (req, res)
 })
 
 //RESET PASSWORD
-router.put("/reset_password", auth.verifyUser, auth.verifyRefresh, 
+router.put("/reset_password", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
 auth.verifyNewPasswordSyntax, auth.verifyNewPasswordEquality, async(req, res, next) =>
 {
     try

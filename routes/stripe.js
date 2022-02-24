@@ -7,7 +7,7 @@ const Product = require("../models/Product");
 const cors = require('../controllers/corsController');
 const auth = require('../controllers/authController');
 
-router.post("/create-checkout-session", auth.verifyUser, auth.verifyRefresh, async(req, res)  => 
+router.post("/create-checkout-session", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async(req, res)  => 
 {
   try
   {

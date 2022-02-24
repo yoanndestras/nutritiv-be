@@ -499,7 +499,9 @@ exports.loginData = (req, res, next) => {
         }
     else
     {
-        console.log(req.body);
+        let err = new Error('Missing loginData');
+        err.statusCode = 400;
+        return next(err);
     }
 };
 

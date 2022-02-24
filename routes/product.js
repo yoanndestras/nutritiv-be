@@ -14,66 +14,6 @@ const { slice } = require("lodash");
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
-// GET PRODUCT BY ID
-router.get("/findById/:id", async(req, res) =>
-{
-    try
-    {
-        const product = await Product.findById(req.params.id).select(['-countInStock'])
-        res.status(200).json(
-            {
-                success: true,
-                status: "Product found",
-                Product: product
-            });
-    }
-    catch(err)
-    {
-        res.status(500).json(
-            {
-                success: false,
-                status: "Unsuccessfull request!",
-                err: err
-            });
-    }
-});
-
-// GET PRODUCT BY TITLE
-router.get("/findByTitle/:title", async(req, res) =>
-{
-    try
-    {
-        const title = req.params.title;
-        const product = await Product.find({title : title})
-
-        if(product.length > 0)
-        {
-            res.status(200).json(
-                {
-                    success: true,
-                    status: "Product(s) found",
-                    Product: product
-                });
-        }
-        else if(product.length === 0)
-        {
-            res.status(200).json(
-                {
-                    success: false,
-                    status: "Product(s) "+ title +" not found"
-                });
-        }
-    }
-    catch(err)
-    {
-        res.status(500).json(
-            {
-                success: false,
-                status: "Unsuccessfull request!",
-                err: err
-            });
-    }
-});
 
 // GET ALL PRODUCTS
 router.get("/", cors.corsWithOptions, async(req, res) =>
@@ -83,7 +23,7 @@ router.get("/", cors.corsWithOptions, async(req, res) =>
         const allProducts = await Product.find();
         const productsLength = allProducts.length;
 
-        const queryNew = req.query.new && req.query.new === true ? req.query.new : null, queryTags = req.query.tags;
+        const queryNew = req.query.new, queryTags = req.query.tags;
         const queryLimit = parseInt(req.query.limit); 
         
         const queryStart = req.query.start && req.query.start < 0 ? req.query.start = 0 : parseInt(req.query.start);
@@ -135,7 +75,68 @@ router.get("/", cors.corsWithOptions, async(req, res) =>
     }
 });
 
-// GET ALL PRODUCTS
+// GET PRODUCT BY ID
+router.get("/findById/:id", cors.corsWithOptions, async(req, res) =>
+{
+    try
+    {
+        const product = await Product.findById(req.params.id)
+        res.status(200).json(
+            {
+                success: true,
+                status: "Product found",
+                Product: product
+            });
+    }
+    catch(err)
+    {
+        res.status(500).json(
+            {
+                success: false,
+                status: "Unsuccessfull request!",
+                err: err
+            });
+    }
+});
+
+// GET PRODUCT BY TITLE
+router.get("/findByTitle/:title", cors.corsWithOptions, async(req, res) =>
+{
+    try
+    {
+        const title = req.params.title;
+        const product = await Product.find({title : title})
+
+        if(product.length > 0)
+        {
+            res.status(200).json(
+                {
+                    success: true,
+                    status: "Product(s) found",
+                    Product: product
+                });
+        }
+        else if(product.length === 0)
+        {
+            res.status(200).json(
+                {
+                    success: false,
+                    status: "Product(s) "+ title +" not found"
+                });
+        }
+    }
+    catch(err)
+    {
+        res.status(500).json(
+            {
+                success: false,
+                status: "Unsuccessfull request!",
+                err: err
+            });
+    }
+});
+
+// GET ALL PRODUCTS LENGTH
 router.get("/length", cors.corsWithOptions, async(req, res) =>
 {
     try

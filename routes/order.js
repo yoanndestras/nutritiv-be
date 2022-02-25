@@ -13,11 +13,11 @@ router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); }
 
 
 // GET USER ORDERS
-router.get("/find/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAuthorization, async (req, res) =>
+router.get("/find/:userId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAuthorization, async (req, res) =>
 {
     try
     {
-        const orders = await Order.find({userId: req.params.id})
+        const orders = await Order.find({userId: req.params.userId})
         res.status(200).json(orders);
     }
     catch(err)

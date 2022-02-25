@@ -483,6 +483,7 @@ exports.verifyEmailExist = (req, res, next) =>
             else
             {
                 let err = new Error('Wrong email');
+                console.log(req.body.email);
                 err.statusCode = 400;
                 return next(err);
             }

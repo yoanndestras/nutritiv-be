@@ -180,7 +180,7 @@ exports.verifyStock = async(req, res, next) => {
 
 exports.verifyProductId = async(req, res, next) =>
 {
-    const productId = req.params.id;
+    const productId = req.params.productId;
 
     if(ObjectId.isValid(productId))
     {
@@ -221,7 +221,7 @@ exports.removeImgs = async(req, res, next) =>
         }
     }
     
-    const product = await Product.findOne({_id : req.params.id})
+    const product = await Product.findOne({_id : req.params.productId})
     let productImg = product.imgs;
     let unlickImg = productImg ? productImg.map(img => fs.unlink('public/' + img, removeFile)) : null;
     
@@ -231,7 +231,7 @@ exports.removeImgs = async(req, res, next) =>
 exports.countInStock = async(req, res, next) =>
 {
     const userId = req.user._id;
-    const productId = req.params.id;
+    const productId = req.params.productId;
     const cart = await Cart.findOne({userId : userId});
     let findProductId = cart ? cart.products.find(el => el.productId.toString() === productId) : null;
     

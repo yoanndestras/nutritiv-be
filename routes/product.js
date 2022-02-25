@@ -76,11 +76,11 @@ router.get("/", cors.corsWithOptions, async(req, res) =>
 });
 
 // GET PRODUCT BY ID
-router.get("/findById/:id", cors.corsWithOptions, async(req, res) =>
+router.get("/findById/:productId", cors.corsWithOptions, async(req, res) =>
 {
     try
     {
-        const product = await Product.findById(req.params.id)
+        const product = await Product.findById(req.params.productId)
         res.status(200).json(
             {
                 success: true,
@@ -100,11 +100,11 @@ router.get("/findById/:id", cors.corsWithOptions, async(req, res) =>
 });
 
 // GET PRODUCT BY TITLE
-router.get("/findByTitle/:title", cors.corsWithOptions, async(req, res) =>
+router.get("/findByTitle/:productTitle", cors.corsWithOptions, async(req, res) =>
 {
     try
     {
-        const title = req.params.title;
+        const title = req.params.productTitle;
         const product = await Product.find({title : title})
 
         if(product.length > 0)
@@ -162,7 +162,7 @@ router.get("/length", cors.corsWithOptions, async(req, res) =>
 });
 
 // GET COUNTINSTOCK // 
-router.get('/countInStock/:id', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+router.get('/countInStock/:productId', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
 product.verifyProductId, product.countInStock, async (req, res) =>
 {
     try
@@ -228,7 +228,7 @@ upload.any('imageFile'), product.resizeProductImage, product.newProduct, async(r
 });
 
 // UPDATE PRODUCT //TODO:  form adaptability 
-router.put("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, product.verifyProductId,
+router.put("/:productId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, product.verifyProductId,
 upload.any('imageFile'), product.newProduct, product.removeImgs, product.resizeProductImage, async(req, res) =>
 {
     try
@@ -239,7 +239,7 @@ upload.any('imageFile'), product.newProduct, product.removeImgs, product.resizeP
         let replace = imgs.map(img => img.replace("public/", ""))
         
         let updatedProduct = await Product.findByIdAndUpdate(
-            req.params.id, 
+            req.params.productId, 
             {
                 $set: 
                 {
@@ -277,12 +277,12 @@ upload.any('imageFile'), product.newProduct, product.removeImgs, product.resizeP
 });
 
 // DELETE
-router.delete("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+router.delete("/:productId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
 auth.verifyAdmin, product.removeImgs, async(req, res) =>
-{   
+{
     try
     {
-        await Product.findByIdAndDelete(req.params.id)
+        await Product.findByIdAndDelete(req.params.productId)
         
         res.status(200).json(
             {

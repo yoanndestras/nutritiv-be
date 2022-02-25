@@ -98,11 +98,11 @@ router.get("/self", cors.corsWithOptions, auth.verifyUser, auth.verifyAuth, asyn
 
 
 // GET USER // verify user exist in BDD & is connected. Return User info except PWD
-router.get("/find/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAuthorization, async (req, res) =>
+router.get("/find/:userId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAuthorization, async (req, res) =>
 {
     try
     {
-        const user = await User.findById(req.params.id)
+        const user = await User.findById(req.params.userId)
         
         const {email, ...public} = user._doc;
         
@@ -232,11 +232,11 @@ auth.verifyNewPasswordSyntax, auth.verifyNewPasswordEquality, async(req, res, ne
 });
 
 // DELETE
-router.delete("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAuthorization, async (req, res) =>
+router.delete("/:userId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAuthorization, async (req, res) =>
 {
     try
     {
-        await User.findByIdAndDelete(req.params.id)
+        await User.findByIdAndDelete(req.params.userId)
         res.status(200).json("User has been deleted...")
     }
     catch(err)

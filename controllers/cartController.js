@@ -197,7 +197,7 @@ exports.updateQuantity = async(req, res, next) =>
 {
     try
     {
-        const userId = req.user._id, newProdId = req.params.id, newProdLoad = parseFloat(req.params.load), newProdPrice = parseFloat(req.price);
+        const userId = req.user._id, newProdId = req.params.productId, newProdLoad = parseFloat(req.params.load), newProdPrice = parseFloat(req.price);
         
         const qty = req.params.operation === "inc" ? 1 : req.params.operation === "dec" ? -1 : null;
         const val = req.params.operation === "inc" ? newProdPrice : req.params.operation === "dec" ? - newProdPrice : null;

@@ -130,7 +130,7 @@ exports.verifyAuthorization = async(req, res, next) =>
     {
         
         let userId = JSON.stringify(req.user._id).replace(/\"/g, "");
-        if( userId === req.params.id || req.user.isAdmin == true)
+        if( userId === req.params.id || req.user.isAdmin === true || userId === req.params.userId)
         {
             next();
         }

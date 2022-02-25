@@ -56,7 +56,6 @@ router.get("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.
     try
     {
         const carts = await Cart.find();
-        await carts.save();
         
         res.status(200).json(
             {
@@ -71,7 +70,7 @@ router.get("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.
             {
                 success: false,
                 status: "Unsuccessfull request!",
-                err: err
+                err: err.message
             });
     }
 })
@@ -119,7 +118,7 @@ product.verifyStock, product.verifyProduct, cart.cart, async(req, res) =>
 })
 
 // ADD QUANTITY PRODUCT IN CART 
-router.put("/updateQuantity/:id/:load/:operation", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+router.put("/updateQuantity/:productId/:load/:operation", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
 product.verifyPricePerProduct, cart.updateQuantity, async(req, res) =>
 {
     try
@@ -180,15 +179,14 @@ auth.verifyAuthorization, cart.deleteProductInCartById, async (req, res) =>
                 err: err.message
             });
     }
-
 })
 
 // DELETE CART
-router.delete("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAuthorization, async (req, res) =>
+router.delete("/:userId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAuthorization, async (req, res) =>
 {
     try
     {
-        await Cart.findByIdAndDelete(req.params.id)
+        await Cart.findOne({userId: req.params.userId})
         res.status(200).json(
             {
                 success: true,

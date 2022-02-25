@@ -124,8 +124,8 @@ router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, orde
     }
 });
 
-// UPDATE ORDER
-router.put("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, async(req, res) =>
+// UPDATE ORDER STATUS
+router.put("/status", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, async(req, res) =>
 {
     try
     {

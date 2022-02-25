@@ -7,3 +7,5 @@ node_modules
 
 .vscode
 Old_rdm.md
+
+.env-cmdrc.json

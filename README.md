@@ -53,7 +53,7 @@ To install a new middleware go in terminal : **npm i "mymiddleware"**
 ## Run the app
 
 >Its not possible to run the app without the .env file.
-Our app file is app.js, running the command **npm start** ("start": "nodemon app.js") will start the back-end server.
+Our app file is app.js, running the command **npm run start-dev** ("start": "env-cmd -e development nodemon app.js") will start the back-end server.
 
 ### Additionnal informations
 

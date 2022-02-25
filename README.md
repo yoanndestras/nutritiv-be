@@ -13,7 +13,10 @@ We use **npm**, the default package manager for Node.js Javascript runtime envir
 ## API
 >To perform API calls on development and testing, we used **Postman**, click on link below to access to our API documentation.
  
- [Nutritiv Postman API documentation](https://documenter.getpostman.com/view/15856568/UVkpMv2U#78474388-f20b-460c-9300-705113cadee4)
+ 
+ ## [**Postman API documentation**](https://documenter.getpostman.com/view/15856568/UVkpMv2U#78474388-f20b-460c-9300-705113cadee4) 
+![postman logo.](/public/images/postman_logo.png "This is a sample image.")
+
 
 ### Create a new API endpoint
 

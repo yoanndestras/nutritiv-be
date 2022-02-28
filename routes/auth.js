@@ -25,7 +25,7 @@ router.get("/forget_pwd", auth.verifyEmailExist, mailer.sendForgetPassword, asyn
     }
     catch(err)
         {
-            res.status(400).json(
+            res.status(500).json(
                 {
                     success: false, 
                     status: 'Unsuccessfull request!', 
@@ -47,7 +47,7 @@ router.get("/verify_forget_pwd", auth.verifyEmailToken, async(req, res, next) =>
     }
     catch(err)
         {
-            res.status(400).json(
+            res.status(500).json(
                 {
                     success: false, 
                     status: 'Unsuccessfull request!', 
@@ -61,7 +61,7 @@ router.get("/new_register_email", auth.verifyNewEmail, mailer.sendVerifyAccountM
 {
     try
     {
-        res.status(201).json(
+        res.status(200).json(
             {
                 success: true, 
                 status: 'Check your emails!'
@@ -69,7 +69,7 @@ router.get("/new_register_email", auth.verifyNewEmail, mailer.sendVerifyAccountM
     }
     catch(err)
         {
-            res.status(400).json(
+            res.status(500).json(
                 {
                     success: false, 
                     status: 'Unsuccessfull request!', 
@@ -96,7 +96,7 @@ router.get("/verify-email", auth.verifyEmailToken, async(req, res, next) =>
     }
     catch(err)
         {
-            res.status(400).json(
+            res.status(500).json(
             {
                 success: false, 
                 status: 'Unsuccessfull request!', 
@@ -116,7 +116,7 @@ auth.verifyPasswordSyntax, mailer.sendVerifyAccountMail, async(req, res) =>
         {
             if(err)
             {
-                return res.status(400).json(
+                return res.status(500).json(
                     {
                         success: false, 
                         status: 'Registration Failed! Please try again later!', 
@@ -127,7 +127,6 @@ auth.verifyPasswordSyntax, mailer.sendVerifyAccountMail, async(req, res) =>
             {
                 await user.save(() => 
                 {
-                    console.log("User registered");
                     res.status(201).json(
                         {
                             success: true, 
@@ -139,11 +138,10 @@ auth.verifyPasswordSyntax, mailer.sendVerifyAccountMail, async(req, res) =>
     }
     catch(err)
     {
-        console.log("User not registered ");
-        res.status(400).json(
+        res.status(500).json(
             {
                 success: false, 
-                status: 'Registration Failed! Please try again later!', 
+                status: 'Unsuccessfull Request!', 
                 err: err
             });
     }

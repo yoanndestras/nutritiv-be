@@ -45,7 +45,7 @@ exports.newProduct = async(req, res, next) =>
     else
     {
         let err = new Error("Missing or wrong elements");
-        err.statusCode = 403;
+        err.statusCode = 400;
         return next(err);
     }
     req.product = product;
@@ -81,13 +81,13 @@ exports.verifyProduct = async(req, res, next) =>
     else if(productQuantityInStock === false)
     {
         let err = new Error("Not enough quantity in stock for this new product");
-        err.statusCode = 403;
+        err.statusCode = 400;
         return next(err);
     }
     else
     {
         let err = new Error('Id : ' + newProductId + ', Val : ' + newProductLoad + ", Price : " + newProductPrice + " doesnt exist");
-        err.statusCode = 403;
+        err.statusCode = 400;
         return next(err);
     }
 }
@@ -113,13 +113,13 @@ exports.verifyPricePerProduct = async(req, res, next) => {
     else if(productQuantityInStock === false)
     {
         let err = new Error("Not enough quantity in stock for this new product");
-        err.statusCode = 403;
+        err.statusCode = 400;
         return next(err);
     }
     else
     {
         let err = new Error('Id : ' + newProductId + ' Val : ' + newProductLoad + " doesnt exist");
-        err.statusCode = 403;
+        err.statusCode = 400;
         return next(err);
     }
 }

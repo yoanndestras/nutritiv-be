@@ -119,7 +119,7 @@ exports.verifyAdmin = function(req, res, next)
         else
         {
             let err = new Error('You are not authorized to perform this operation!');
-            err.statusCode = 403;
+            err.statusCode = 401;
             return next(err);
         }
 };
@@ -137,7 +137,7 @@ exports.verifyAuthorization = async(req, res, next) =>
         else
         {
             let err = new Error('You are not authorized to perform this operation!');
-            err.statusCode = 403;
+            err.statusCode = 401;
             return next(err);
         }
     }
@@ -165,7 +165,7 @@ exports.verifyUser = (req, res, next) =>
         else if (user.isVerified === false)
         {
             let err = new Error('You account has not been verified. Please check your email to verify your account');
-            err.statusCode = 403;
+            err.statusCode = 401;
             return next(err);
         }
         req.user = user;
@@ -270,7 +270,7 @@ exports.verifyNoRefresh = (req, res, next) =>
         else
         {
             let err = new Error('You are connected');
-            err.statusCode = 500;
+            err.statusCode = 401;
             return next(err);
         }
     })(req, res, next);  
@@ -326,15 +326,11 @@ exports.verifyEmailSyntax = (req, res, next) =>
     console.log(req.body.formData);
     const valid_email = req.body.formData.email && email_validator.validate(req.body.formData.email);
     
-    if(valid_email === true)
-    {
-        console.log("Im here email syntax");
-        next();
-    }
+    if(valid_email === true) next();
     else
     {
         let err = new Error('You Email syntax is wrong!');
-        err.statusCode = 400;
+        err.statusCode = 401;
         return next(err);
     }
 
@@ -344,13 +340,12 @@ exports.verifyPasswordSyntax = (req, res, next) =>
 {
     if(req.body.formData.password.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/)) // password 8 characters, 1 low 1 upper 1 number
     {
-        console.log("Im here password syntax");
         next();
     }
     else
     {
         let err = new Error('You password syntax is wrong!');
-        err.statusCode = 400;
+        err.statusCode = 401;
         return next(err);
     }
 };
@@ -362,14 +357,10 @@ exports.verifyUsername = (req, res, next) =>
             if(user !== null)
             {
                 let err = new Error('An account with your username already exists!');
-                err.statusCode = 400;
+                err.statusCode = 401;
                 return next(err);
             }
-            else
-            {
-                console.log("Im here username");
-                next();
-            }
+            else next();
         })
 };
 
@@ -380,12 +371,11 @@ exports.verifyEmail = (req, res, next) =>
             if(user !== null)
             {
                 let err = new Error('An account with your email already exists!');
-                err.statusCode = 400;
+                err.statusCode = 401;
                 return next(err);
             }
             else
             {
-                console.log("Im here email");
                 next();
             }
         })
@@ -425,7 +415,7 @@ exports.verifyNewPasswordSyntax = (req, res, next) =>
     else
     {
         let err = new Error('You password syntax is wrong!');
-        err.statusCode = 400;
+        err.statusCode = 401;
         return next(err);
     }
 };
@@ -453,17 +443,21 @@ exports.verifyEmailToken = (req, res, next) =>
 
 exports.verifyNewEmail = (req, res, next) =>
 {
-    console.log(req.body.email);
     User.findOne({email: req.body.email}, (err, user) =>
         {
             if(user !== null && user.isVerified !== true)
             {
-                console.log("User found");
-                next();
+                return next();
+            }
+            else if(user.isVerified)
+            {
+                let err = new Error('Already verified user');
+                err.statusCode = 400;
+                return next(err);
             }
             else
             {
-                let err = new Error('Wrong email or already verified user');
+                let err = new Error('Wrong email');
                 err.statusCode = 400;
                 return next(err);
             }
@@ -476,22 +470,22 @@ exports.verifyEmailExist = (req, res, next) =>
         {
             if(user !== null)
             {
-                console.log("User found");
                 req.user = user;
                 next();
             }
             else
             {
                 let err = new Error('Wrong email');
-                console.log(req.body.email);
                 err.statusCode = 400;
                 return next(err);
             }
         })
 };
 
-exports.loginData = (req, res, next) => {
+exports.loginData = (req, res, next) => 
+{
     const loginData = req.body.loginData;
+
     if(loginData)
         {
             req.body.username = loginData.username;

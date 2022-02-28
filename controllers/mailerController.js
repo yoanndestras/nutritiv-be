@@ -5,16 +5,14 @@ const auth = require("./authController");
 exports.sendVerifyAccountMail = async(req, res, next) =>
 {
     try
-    {
-        console.log("Im here accountmail 1");
-        
+    {        
         const Email_Token = auth.GenerateEmailToken({email: req.body.formData.email});
-        
         sgMail.setApiKey(process.env.SENDGRID_API_KEY);
         
-        const msg = 
+        const email = req.body.formData.email;
+        const mailContent = 
         {
-            to: req.body.formData.email,
+            to: email,
             from:"nutritivshop@gmail.com",
             subject:"Nutritiv - Account email verification",
             html : `
@@ -24,16 +22,12 @@ exports.sendVerifyAccountMail = async(req, res, next) =>
             <a  href="http://${req.headers.host}/auth/verify-email?token=${Email_Token}">Verify your account</a>`
         }       //  ${req.headers.Host}
         
-        await sgMail.send(msg);
-    
-        console.log("Im here accountmail 2");
+        await sgMail.send(mailContent);
         next();
     }
     catch(err)
     {
-        var err = new Error('Email sending Error!');
-        err.statusCode = 400;
-        return next(err);
+        next(err);
     }
     
 } 
@@ -41,35 +35,29 @@ exports.sendVerifyAccountMail = async(req, res, next) =>
 exports.sendForgetPassword = async(req, res, next) =>
 {
     try
-    {
-        console.log("Im here forget password 1");
-        
+    {        
         const Email_Token = auth.GenerateEmailToken({email: req.body.email});
-        
         sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
+        const email = req.body.email;
         const user = req.user;
-        const msg = 
+        const mailContent = 
         {
-            to: req.body.email,
+            to: email,
             from:"nutritivshop@gmail.com",
             subject:"Nutritiv - Reset password",
             html : `
             <h1>Hello, ${user.username}</h1>
             <p>Please click on the link below to reset your password.</p>
             <a  href="http://${req.headers.host}/auth/verify_forget_pwd?token=${Email_Token}">Reset Password</a>`
-        }       //  ${req.headers.Host}
+        }   
         
-        await sgMail.send(msg);
-        
-        console.log("Im here forget password 2");
+        await sgMail.send(mailContent);
         next();
     }
     catch(err)
     {
-        var err = new Error('Email sending Error!');
-        err.statusCode = 400;
-        return next(err);
+        next(err);
     }
     
 } 

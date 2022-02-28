@@ -59,17 +59,17 @@ exports.verifyAddress = async(req, res, next) =>
   if(!req.body.addressDetails)
   {
     let missingElementErr =  new Error('No address details found!');
-    missingElementErr.code = 404;
+    missingElementErr.code = 400;
     next(missingElementErr);
   }
   let addressDetails = req.body.addressDetails;
   const {address, zip, city, country, phoneNumber} = addressDetails;
     
   let missingElementErr =  new Error('Missing or wrong address details!');
-  missingElementErr.code = 404;
+  missingElementErr.code = 400;
 
   let addressAlreadyExistErr = new Error('This Address already exists!');
-  addressAlreadyExistErr.code = 404;
+  addressAlreadyExistErr.code = 400;
   
   let phoneValidation = validatePhoneNumber.validate(phoneNumber);
 

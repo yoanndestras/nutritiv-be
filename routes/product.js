@@ -185,6 +185,30 @@ product.verifyProductId, product.countInStock, async (req, res) =>
     }
 });
 
+// GET TAGS THAT EXIST ON THE LIST OF PRODUCTS
+router.get('/tags', cors.corsWithOptions, async (req, res) =>
+{
+    try
+    {
+        let products = await Product.find();
+        let tags = products.map((product) => product.tags).flat();
+        let uniqueTags = [...new Set(tags)]
+        
+        res.status(200).json(
+            {
+                uniqueTags
+            });
+    }
+    catch(err)
+    {
+        res.status(500).json(
+            {
+                success: false,
+                status: "Unsuccessfull request!",
+                err: err.message
+            });
+    }
+})
 // CREATE PRODUCT
 router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, 
 upload.any('imageFile'), product.resizeProductImage, product.newProduct, async(req, res) =>

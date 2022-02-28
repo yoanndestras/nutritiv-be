@@ -1,13 +1,14 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const limitter = require('express-rate-limit');
 
+const limitter = require('express-rate-limit');
 const path = require('path');
 const dotenv = require("dotenv");
 const passport = require('passport');
 const cookieParser = require("cookie-parser");
 const cors = require('cors');
 const http = require('http');
+const createError = require('http-errors');
 
 // router based on url
 const userRoute = require("./routes/user");
@@ -52,7 +53,7 @@ app.use(
     )
 
 app.use(express.static(path.join(__dirname, 'public')));
-// http://localhost:3001/images/Q1RAMagnesium_capsules.png
+// http://localhost:3001/images/productImgs/Q1RAMagnesium_capsules.png
 
 app.use("/users", userRoute);
 app.use("/auth", authRoute);
@@ -68,19 +69,19 @@ app.listen(process.env.PORT || 5000, () =>
     console.log("Backend server is running on port " + process.env.PORT);
 })
 
-app.use(function(err, req, res, next) 
+app.use((req, res, next) => {next(createError(404));});
+
+//ERROR HANDLING
+app.use((err, req, res, next) =>
 {
-    console.error(err.message);
-    if (!err.statusCode) err.statusCode = 500; // Sets a generic server error status code if none is part of the err
+    if(!err.statusCode)next(createError(404))
+    else
+    {
+        console.error(err.message);
+        next(createError(err.statusCode, err.message));
+    }
     
-    if (err.shouldRedirect) 
-    {
-        res.render('myErrorPage') // Renders a myErrorPage.html for the user
-    }
-    else 
-    {
-        res.status(err.statusCode).send(err.message); // If shouldRedirect is not defined in our error, sends our original err data
-    }
 });
+
 
 module.exports = app;

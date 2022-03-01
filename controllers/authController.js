@@ -119,7 +119,7 @@ exports.verifyAdmin = function(req, res, next)
         else
         {
             let err = new Error('You are not authorized to perform this operation!');
-            err.statusCode = 401;
+            err.statusCode = 403;
             return next(err);
         }
 };
@@ -137,7 +137,7 @@ exports.verifyAuthorization = async(req, res, next) =>
         else
         {
             let err = new Error('You are not authorized to perform this operation!');
-            err.statusCode = 401;
+            err.statusCode = 403;
             return next(err);
         }
     }
@@ -330,7 +330,7 @@ exports.verifyEmailSyntax = (req, res, next) =>
     else
     {
         let err = new Error('You Email syntax is wrong!');
-        err.statusCode = 401;
+        err.statusCode = 400;
         return next(err);
     }
 
@@ -345,7 +345,7 @@ exports.verifyPasswordSyntax = (req, res, next) =>
     else
     {
         let err = new Error('You password syntax is wrong!');
-        err.statusCode = 401;
+        err.statusCode = 400;
         return next(err);
     }
 };
@@ -357,7 +357,7 @@ exports.verifyUsername = (req, res, next) =>
             if(user !== null)
             {
                 let err = new Error('An account with your username already exists!');
-                err.statusCode = 401;
+                err.statusCode = 400;
                 return next(err);
             }
             else next();
@@ -371,7 +371,7 @@ exports.verifyEmail = (req, res, next) =>
             if(user !== null)
             {
                 let err = new Error('An account with your email already exists!');
-                err.statusCode = 401;
+                err.statusCode = 400;
                 return next(err);
             }
             else
@@ -415,7 +415,7 @@ exports.verifyNewPasswordSyntax = (req, res, next) =>
     else
     {
         let err = new Error('You password syntax is wrong!');
-        err.statusCode = 401;
+        err.statusCode = 400;
         return next(err);
     }
 };
@@ -452,7 +452,7 @@ exports.verifyNewEmail = (req, res, next) =>
             else if(user.isVerified)
             {
                 let err = new Error('Already verified user');
-                err.statusCode = 400;
+                err.statusCode = 403;
                 return next(err);
             }
             else

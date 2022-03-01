@@ -1,15 +1,16 @@
 const Product = require("../models/Product");
 const router = require("express").Router();
 const _ = require("lodash")
+const { slice } = require("lodash");
 const fs = require('fs');
+const randomWords = require('random-words');
 
-// MIDDLEWARES
+// CONTROLLERS
 const cors = require('../controllers/corsController');
 const auth = require('../controllers/authController');
 const product = require('../controllers/productsController');
 const {upload} = require('./upload');
 const { countInStock } = require("../controllers/ordersController");
-const { slice } = require("lodash");
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
@@ -81,12 +82,23 @@ router.get("/findById/:productId", cors.corsWithOptions, async(req, res) =>
     try
     {
         const product = await Product.findById(req.params.productId)
-        res.status(200).json(
-            {
-                success: true,
-                status: "Product found",
-                Product: product
-            });
+        if(product)
+        {
+            res.status(200).json(
+                {
+                    success: true,
+                    status: "Product found",
+                    Product: product
+                });
+        }
+        else if(req.params.productId)
+        {
+            res.status(400).json(
+                {
+                    success: false,
+                    status: "Product with id : "+ req.params.productId +", not found"
+                });
+        }
     }
     catch(err)
     {
@@ -118,7 +130,7 @@ router.get("/findByTitle/:productTitle", cors.corsWithOptions, async(req, res) =
         }
         else if(product.length === 0)
         {
-            res.status(200).json(
+            res.status(400).json(
                 {
                     success: false,
                     status: "Product(s) "+ title +" not found"
@@ -145,8 +157,6 @@ router.get("/length", cors.corsWithOptions, async(req, res) =>
         let length = products.length;
         res.status(200).json(
             {
-                // success: true,
-                // status: "Products found",
                 length
             });
     }
@@ -209,6 +219,76 @@ router.get('/tags', cors.corsWithOptions, async (req, res) =>
             });
     }
 })
+
+// GENERATE PRODUCTS
+router.post("/generate/:value", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, 
+async(req, res) =>
+{
+    try
+    {
+        let value = req.params.value, newProduct, newProducts = [];
+        const shape = ["powder", "capsules"];
+
+        const tags = [
+            "anti-oxydant",
+            "immunity",
+            "longevity",
+            "skin",
+            "joints",
+            "anti-inflammatory",
+            "endurance"
+        ]
+
+        function randomShapeFunction(){return Math.floor(Math.random() * shape.length)}
+        function randomTagFunction(){return Math.floor(Math.random() * tags.length)}
+        function randomLoadFunction(){return Math.floor(Math.random()*50)*40}
+        function randomPriceFunction(){return Math.floor(Math.random()*50)*10}
+        
+        for(let i = 0; i < value; i++)
+        {
+            let randomTitle = randomWords(), randomDesc = randomWords(), randomTag = tags[randomTagFunction()];
+            let randomLoad = randomLoadFunction(), randomPrice = randomPriceFunction(), randomShape = shape[randomShapeFunction()];
+            
+            newProduct = await new Product(
+                {
+                    title : randomTitle,
+                    desc : randomDesc,
+                    shape : randomShape,
+                    tags : [randomTag],
+                    imgs: ["images/productsImgs/RtNaMultivitamines_powder.png"],
+                    productItems: [
+                    {
+                        load : randomLoad,
+                        price : 
+                        {
+                            value : randomPrice,
+                            currency : "EUR"
+                        }
+                    }],
+                    countInStock : 20000
+                })
+            newProducts.push(newProduct);
+            await newProduct.save();
+        }
+        
+        res.status(200).json(
+            {
+                newProducts
+            });
+
+    }
+    catch(err)
+    {
+        res.status(500).json(
+            {
+                success: false,
+                status: "Unsuccessfull request!",
+                err: err.message
+            });
+    }
+    
+})
+
 // CREATE PRODUCT
 router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, 
 upload.any('imageFile'), product.resizeProductImage, product.newProduct, async(req, res) =>
@@ -233,7 +313,7 @@ upload.any('imageFile'), product.resizeProductImage, product.newProduct, async(r
         );
 
         const savedProduct = await newProduct.save();
-        res.status(200).json(
+        res.status(201).json(
             {
                 success: true,
                 status: "Product Successfull added",
@@ -281,7 +361,7 @@ upload.any('imageFile'), product.newProduct, product.removeImgs, product.resizeP
         
         updatedProduct = await updatedProduct.save();
 
-        res.status(200).json(
+        res.status(201).json(
             {
                 success: true,
                 status: "Product Successfull updated",
@@ -301,7 +381,7 @@ upload.any('imageFile'), product.newProduct, product.removeImgs, product.resizeP
 });
 
 // DELETE
-router.delete("/:productId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+router.delete("/delete/:productId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
 auth.verifyAdmin, product.removeImgs, async(req, res) =>
 {
     try
@@ -325,4 +405,22 @@ auth.verifyAdmin, product.removeImgs, async(req, res) =>
     }
 });
 
+//DELETE RECENT PRODUCTS
+router.delete("/lastDay", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, async (req, res) =>
+{
+    const date = new Date();
+    const lastDay = new Date(date.setUTCDate(date.getUTCDate() -1));
+
+    try
+    {
+        let income = await Product.deleteMany( { "createdAt" : {$gt : lastDay } })
+            
+        res.status(200).json(income);
+    }
+    catch(err)
+    {
+        res.status(500).json(err);
+    }
+
+})
 module.exports = router;

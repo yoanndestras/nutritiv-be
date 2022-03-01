@@ -202,7 +202,7 @@ exports.updateQuantity = async(req, res, next) =>
         const qty = req.params.operation === "inc" ? 1 : req.params.operation === "dec" ? -1 : null;
         const val = req.params.operation === "inc" ? newProdPrice : req.params.operation === "dec" ? - newProdPrice : null;
         
-        if(!qty){res.status(500).json({success: false,status: "This operation do not exist, please enter inc or dec!"});}
+        if(!qty){let err = new Error("Operation do not exist");err.Statuscode = 403; next(err);}
         else if(qty === 1)
         {
             const verifyStock = (await cart.verifyStock(userId, newProdId, newProdLoad));
@@ -219,12 +219,7 @@ exports.updateQuantity = async(req, res, next) =>
     }
     catch(err)
     {
-        res.status(500).json(
-            {
-                success: false,
-                status: "Unsuccessfull request!",
-                err: err.message
-            });
+        next(err);
     }
 }
 
@@ -334,7 +329,7 @@ exports.verifyStock = async(userId, productId, productLoad) =>
             if(stockAvailable - (sumWithInitial + productLoad) <= 0)
             {
                 err = new Error('The stock for this product is not available : ' + cartProduct.title);
-                err.statusCode = 400;
+                err.statusCode = 403;
             }
         }
         if(err){return {err}}
@@ -508,12 +503,7 @@ exports.deleteProductInCartById = async(req, res, next) =>
     }
     catch(err) 
     {
-        res.status(500).json(
-        {
-            success: false,
-            status: "Unsuccessfull request!",
-            err: err.message
-        });
+        next(err);
     }
 }
 

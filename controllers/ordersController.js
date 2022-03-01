@@ -129,14 +129,14 @@ exports.countInStock = async(userId) =>
     }
     array.push(sumWithInitial);
     console.log(array);
-
+    
     let cartProduct = await Product.findOne({_id: productArray[i]});
     let stockAvailable = cartProduct.countInStock;
     
     if(stockAvailable - sumWithInitial <= 0)
     {
       err = new Error('The stock for this product is not available : ' + cartProduct.title);
-      err.statusCode = 400;
+      err.statusCode = 403;
       return {err};
     }
   }

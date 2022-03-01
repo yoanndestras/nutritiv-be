@@ -2,7 +2,7 @@ const Cart = require("../models/Cart");
 const router = require("express").Router();
 const mongoose = require('mongoose');
 
-// MIDDLEWARES
+// CONTROLLERS
 const cors = require('../controllers/corsController');
 const auth = require('../controllers/authController');
 const product = require('../controllers/productsController');
@@ -31,7 +31,7 @@ router.get("/self", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, a
         }
         else if(!cart)
         {
-            res.status(200).json(
+            res.status(400).json(
                 {
                     success: true,
                     status: "Cart do not exist!"
@@ -85,7 +85,7 @@ product.verifyStock, product.verifyProduct, cart.cart, async(req, res) =>
         if(req.new === true) 
         {
             await cart.save();
-            res.status(200).json(
+            res.status(201).json(
                 {
                     success: true,
                     status: "Cart successfully added",
@@ -96,7 +96,7 @@ product.verifyStock, product.verifyProduct, cart.cart, async(req, res) =>
         else
         {
             await cart.save();
-            res.status(200).json(
+            res.status(201).json(
                 {
                     success: true,
                     status: "Cart succesfully updated, product successfully added",
@@ -126,7 +126,7 @@ product.verifyPricePerProduct, cart.updateQuantity, async(req, res) =>
         let cart = await Cart.findOne({userId : req.user._id});
         await cart.save();
 
-        res.status(200).json(
+        res.status(201).json(
             {
                 success: true,
                 status: "Cart succesfully updated",
@@ -154,7 +154,7 @@ auth.verifyAuthorization, cart.deleteProductInCartById, async (req, res) =>
         if(cart)
         {
             await cart.save();
-            res.status(200).json(
+            res.status(201).json(
                 {
                     success: true,
                     status: "Cart succesfully updated",

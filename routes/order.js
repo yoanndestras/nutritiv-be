@@ -3,7 +3,7 @@ const Cart = require("../models/Cart");
 const router = require("express").Router();
 const mongoose = require('mongoose');
 
-// MIDDLEWARES
+// CONTROLLERS
 const cors = require('../controllers/corsController');
 const auth = require('../controllers/authController');
 const order = require('../controllers/ordersController')
@@ -103,7 +103,7 @@ router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, orde
         }
         else if (req.cart === false)
         {
-            res.status(500).json(
+            res.status(400).json(
                 {
                     success: false,
                     status: "Cart do not exist!"
@@ -137,7 +137,7 @@ router.put("/status", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
             {new: true}
         );
 
-        res.status(200).json(updatedOrder);
+        res.status(201).json(updatedOrder);
     }
     catch(err)
     {

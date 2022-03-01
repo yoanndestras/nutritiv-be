@@ -80,8 +80,8 @@ exports.verifyProduct = async(req, res, next) =>
     if(Array.isArray(productLoadAndPrice) && productLoadAndPrice[0] && newProductId && productQuantityInStock){next();}
     else if(productQuantityInStock === false)
     {
-        let err = new Error("Not enough quantity in stock for this new product");
-        err.statusCode = 400;
+        let err = new Error("Not enough quantity in stock for this product");
+        err.statusCode = 403;
         return next(err);
     }
     else
@@ -92,7 +92,8 @@ exports.verifyProduct = async(req, res, next) =>
     }
 }
 
-exports.verifyPricePerProduct = async(req, res, next) => {
+exports.verifyPricePerProduct = async(req, res, next) => 
+{
     
     const newProductId = req.params.id, newProductLoad = parseFloat(req.params.load);
 
@@ -112,20 +113,21 @@ exports.verifyPricePerProduct = async(req, res, next) => {
     }
     else if(productQuantityInStock === false)
     {
-        let err = new Error("Not enough quantity in stock for this new product");
+        let err = new Error("Not enough quantity in stock for this product");
         err.statusCode = 400;
         return next(err);
     }
     else
     {
         let err = new Error('Id : ' + newProductId + ' Val : ' + newProductLoad + " doesnt exist");
-        err.statusCode = 400;
+        err.statusCode = 403;
         return next(err);
     }
 }
 
-exports.verifyStock = async(req, res, next) => {
-
+exports.verifyStock = async(req, res, next) => 
+{
+    
     const productLoad = parseFloat(req.body.load);
     const productQuantity = parseInt(req.body.quantity)
     const productId = req.body.productId;
@@ -159,7 +161,7 @@ exports.verifyStock = async(req, res, next) => {
             if(stockAvailable - (sumWithInitial + productLoad * productQuantity) <= 0)
             {
                 err = new Error('The stock for this product is not available : ' + cartProduct.title);
-                err.statusCode = 400;
+                err.statusCode = 403;
             }
         }
         if(err)
@@ -208,86 +210,99 @@ exports.verifyProductId = async(req, res, next) =>
 
 exports.removeImgs = async(req, res, next) =>
 {
-    const removeFile= function (err) 
+    try
     {
-        if (err) 
+        const removeFile= function (err) 
         {
-            console.log("unlink failed", err);
-            next(err)
-        } 
-        else 
-        {
-            console.log("file deleted");
+            if (err) 
+            {
+                console.log("unlink failed", err);
+                next(err)
+            } 
+            else 
+            {
+                console.log("file deleted");
+            }
         }
+        
+        const product = await Product.findOne({_id : req.params.productId})
+        let productImg = product.imgs;
+        let unlickImg = productImg ? productImg.map(img => fs.unlink('public/' + img, removeFile)) : null;
+        
+        next();
     }
+    catch (err) {next(err)}
     
-    const product = await Product.findOne({_id : req.params.productId})
-    let productImg = product.imgs;
-    let unlickImg = productImg ? productImg.map(img => fs.unlink('public/' + img, removeFile)) : null;
-    
-    next();
 }
 
 exports.countInStock = async(req, res, next) =>
 {
-    const userId = req.user._id;
-    const productId = req.params.productId;
-    const cart = await Cart.findOne({userId : userId});
-    let findProductId = cart ? cart.products.find(el => el.productId.toString() === productId) : null;
-    
-    if(findProductId)
+    try
     {
-        let load = findProductId.productItems.map((productItems) => {return productItems.load;});
-        let qty = findProductId.productItems.map((productItems) => {return productItems.quantity;});
+        const userId = req.user._id;
+        const productId = req.params.productId;
+        const cart = await Cart.findOne({userId : userId});
+        let findProductId = cart ? cart.products.find(el => el.productId.toString() === productId) : null;
         
-        let sumWithInitial;
-        let emptyTable = []
-        
-        for (let i = 0; i < load.length; i++) 
+        if(findProductId)
         {
-            let initialValue = 0;
+            let load = findProductId.productItems.map((productItems) => {return productItems.load;});
+            let qty = findProductId.productItems.map((productItems) => {return productItems.quantity;});
             
-            emptyTable.push(load[i] * qty[i])
-            sumWithInitial = emptyTable.reduce(
-            (previousValue, currentValue) => previousValue + currentValue,
-            initialValue
-            );            
+            let sumWithInitial;
+            let emptyTable = []
             
-            let cartProduct = await Product.findOne({_id: productId});
-            let stockAvailable = cartProduct.countInStock;
-            const stockCalculated = stockAvailable - sumWithInitial;
-            req.stock = stockCalculated;
+            for (let i = 0; i < load.length; i++) 
+            {
+                let initialValue = 0;
+                
+                emptyTable.push(load[i] * qty[i])
+                sumWithInitial = emptyTable.reduce(
+                (previousValue, currentValue) => previousValue + currentValue,
+                initialValue
+                );            
+                
+                let cartProduct = await Product.findOne({_id: productId});
+                let stockAvailable = cartProduct.countInStock;
+                const stockCalculated = stockAvailable - sumWithInitial;
+                req.stock = stockCalculated;
+            }
+            
+            next();
         }
-        
-        next();
+        else if(productId)
+        {
+            const product = await Product.findOne({_id: productId});
+            const stockAvailable = product.countInStock;
+            req.stock = stockAvailable;
+            next();
+        }
     }
-    else if(productId)
-    {
-        const product = await Product.findOne({_id: productId});
-        const stockAvailable = product.countInStock;
-        req.stock = stockAvailable;
-        next();
-    }
+    catch(err) {next(err)}
     
 }
 
 // RESIZE IMG
 exports.resizeProductImage = async(req, res, next) => 
 {
-    if (!req.files) return next();
-    await Promise.all
-    (
-        req.files.map(async file => 
-            {
-            await sharp(file.path)
-                .resize(200, 200)
-                .toFile(
-                    path.resolve(file.destination,'productsImgs', file.filename)
-                )
-                fs.unlinkSync(file.path) 
-            })
-    );
-    
-    next();
+    try
+    {
+        if (!req.files) return next();
+        await Promise.all
+        (
+            req.files.map(async file => 
+                {
+                await sharp(file.path)
+                    .resize(200, 200)
+                    .toFile(
+                        path.resolve(file.destination,'productsImgs', file.filename)
+                    )
+                    fs.unlinkSync(file.path) 
+                })
+        );
+        
+        next();
+    }
+    catch(err){next(err)}
 
 };

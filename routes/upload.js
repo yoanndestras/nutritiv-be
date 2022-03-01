@@ -2,7 +2,7 @@ const uploadRouter = require("express").Router();
 const multer = require('multer');
 const { nanoid } = require('nanoid');
 
-// MIDDLEWARES
+// CONTROLLERS
 const auth = require('../controllers/authController');
 const cors = require('../controllers/corsController');
 

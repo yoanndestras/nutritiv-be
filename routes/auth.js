@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const User = require("../models/User");
 
-// MIDDLEWARES
+// CONTROLLERS
 
 const passport = require("passport");
 const cors = require('../controllers/corsController');
@@ -87,7 +87,7 @@ router.get("/verify-email", auth.verifyEmailToken, async(req, res, next) =>
         user.isVerified = true;
         await user.save(() => 
                 {
-                    res.status(201).json(
+                    res.status(200).json(
                         {
                             success: true, 
                             status: 'User Verification Successfull!'
@@ -184,7 +184,7 @@ router.post("/new_password", auth.verifyNewPasswordSyntax, auth.verifyNewPasswor
     }
     catch(err)
         {
-            res.status(400).json(
+            res.status(500).json(
                 {
                     success: false, 
                     status: 'Unsuccessfull request!', 
@@ -197,56 +197,68 @@ router.post("/new_password", auth.verifyNewPasswordSyntax, auth.verifyNewPasswor
 //LOGIN
 router.post("/login", cors.corsWithOptions, auth.loginData, auth.verifyNoRefresh, async(req, res, next)=>
 {
-    //passport.authenticate('local', { successRedirect: '/',failureRedirect: '/login' }));
-    passport.authenticate('local', { session: false }, (err, user, info) => 
+    try
     {
-        
-        if(err || !user || user.isVerified === false) 
+        //passport.authenticate('local', { successRedirect: '/',failureRedirect: '/login' }));
+        passport.authenticate('local', { session: false }, (err, user, info) => 
         {
-            res.status(401).json(
-                {
-                    success: false, 
-                    status: 'Login Unsuccessful!', 
-                    err: err,
-                    info: info
-                });
-        }
-        else
-        {
-            req.login(user, { session: false }, async(err) => 
+            
+            if(err || !user || user.isVerified === false) 
             {
-                if(err)
+                res.status(400).json(
+                    {
+                        success: false, 
+                        status: 'Login Unsuccessful!', 
+                        err: err,
+                        info: info
+                    });
+            }
+            else
+            {
+                req.login(user, { session: false }, async(err) => 
                 {
-                    res.status(401).json(
-                        {
-                            success: false, 
-                            status: 'Login Unsuccessful!', 
-                            err: err
-                        });
-                }
-                else
-                {
-                    const accessToken = auth.GenerateAccessToken({_id: req.user._id});
-                    const refreshToken = auth.GenerateRefreshToken({_id: req.user._id});
-                    
-                    res.header('access_token', accessToken)
-                        .header('refresh_token', refreshToken)
-                        .cookie("refresh_token", refreshToken, 
-                        {
-                            httpOnly: true,
-                            secure: process.env.REF_JWT_SEC_COOKIE === "production"
-                        })
-                        .status(200).json(
+                    if(err)
+                    {
+                        res.status(400).json(
                             {
-                                success: true,
-                                loggedIn: true,
-                                isAdmin: req.user.isAdmin,
-                                status: 'Login Successful!'
+                                success: false, 
+                                status: 'Login Unsuccessful!', 
+                                err: err
                             });
-                }
-            })
-        };
-    })(req, res, next);
+                    }
+                    else
+                    {
+                        const accessToken = auth.GenerateAccessToken({_id: req.user._id});
+                        const refreshToken = auth.GenerateRefreshToken({_id: req.user._id});
+                        
+                        res.header('access_token', accessToken)
+                            .header('refresh_token', refreshToken)
+                            .cookie("refresh_token", refreshToken, 
+                            {
+                                httpOnly: true,
+                                secure: process.env.REF_JWT_SEC_COOKIE === "production"
+                            })
+                            .status(200).json(
+                                {
+                                    success: true,
+                                    loggedIn: true,
+                                    isAdmin: req.user.isAdmin,
+                                    status: 'Login Successful!'
+                                });
+                    }
+                })
+            };
+        })(req, res, next);
+    }
+    catch (err)
+    {
+        res.status(500).json(
+            {
+                success: false, 
+                status: 'Unsuccessfull request!', 
+                err: err.message
+            });
+        }
 });
 
 

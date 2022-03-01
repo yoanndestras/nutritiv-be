@@ -1,7 +1,7 @@
 const User = require("../models/User");
 const router = require("express").Router();
 
-// MIDDLEWARES
+// CONTROLLERS
 const cors = require('../controllers/corsController');
 const auth = require('../controllers/authController');
 const mailer = require("../controllers/mailerController");
@@ -148,7 +148,7 @@ user.verifyAddress, async (req, res) =>
         user.addressDetails.push(req.address);
         user.save();
         
-        res.status(200).json(
+        res.status(201).json(
             {
                 success: true, 
                 userInfo: user
@@ -173,7 +173,7 @@ upload.any('imageFile'), user.resizeUserIcon, user.addUserIcon, async (req, res)
         const user = await User.findOne({_id: req.user._id});
         user.save();
         
-        res.status(200).json(
+        res.status(201).json(
             {
                 success: true, 
                 userInfo: user
@@ -211,7 +211,7 @@ auth.verifyNewPasswordSyntax, auth.verifyNewPasswordEquality, async(req, res, ne
                 }
                 else
                 {
-                    res.status(200).json(
+                    res.status(201).json(
                         {
                             success: true, 
                             status: 'Password has been modified!', 
@@ -222,7 +222,7 @@ auth.verifyNewPasswordSyntax, auth.verifyNewPasswordEquality, async(req, res, ne
     }
     catch(err)
         {
-            res.status(400).json(
+            res.status(500).json(
                 {
                     success: false, 
                     status: 'Unsuccessfull request!', 

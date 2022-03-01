@@ -69,12 +69,11 @@ app.listen(process.env.PORT || 5000, () =>
     console.log("Backend server is running on port " + process.env.PORT);
 })
 
-app.use((req, res, next) => {next(createError(404));});
 
 //ERROR HANDLING
 app.use((err, req, res, next) =>
 {
-    if(!err.statusCode)next(createError(404))
+    if(!err.statusCode)next(createError(500))
     else
     {
         console.error(err.message);

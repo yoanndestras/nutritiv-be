@@ -3,7 +3,7 @@ const stripe = require("stripe")(process.env.STRIPE_KEY);
 const Cart = require("../models/Cart");
 const Product = require("../models/Product");
 
-// MIDDLEWARES
+// CONTROLLERS
 const cors = require('../controllers/corsController');
 const auth = require('../controllers/authController');
 
@@ -61,7 +61,7 @@ router.post("/create-checkout-session", cors.corsWithOptions, auth.verifyUser, a
     }
     else
     {
-      res.status(500).json(
+      res.status(400).json(
         {
             success: false,
             status: "You have no cart!",

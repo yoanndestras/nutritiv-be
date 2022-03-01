@@ -15,8 +15,10 @@ app.use(express.urlencoded({extended: true}));
 // RESIZE USER ICON
 exports.resizeUserIcon = async(req, res, next) => 
 {
-  const user = await User.findOne({_id: req.user._id})
-    if (!req.files) return next();
+  try
+  {
+    const user = await User.findOne({_id: req.user._id})
+    if (!req.files) return next(err);
     await Promise.all
     (
         req.files.map(async file => 
@@ -30,26 +32,33 @@ exports.resizeUserIcon = async(req, res, next) =>
                 if(user.icon){fs.unlinkSync(path.join("public/", user.icon))}
             })
     );
-    
-    next();
+      next();
+  }
+  catch(err) {next(err);}
+  
 };
 
 exports.addUserIcon = async(req, res, next) =>
 {
-  let file = req.files[0];
-  file = path.join(file.destination,'usersIcons', file.filename)
-  let icon = await (file.replace(/\\/g, "/")).replace("public/", "");
-  
-  
-  const user = await User.findOneAndUpdate({_id: req.user._id},
-    {
-      $set:
+  try
+  {
+    let file = req.files[0];
+    file = path.join(file.destination,'usersIcons', file.filename)
+    let icon = await (file.replace(/\\/g, "/")).replace("public/", "");
+    
+    
+    const user = await User.findOneAndUpdate({_id: req.user._id},
       {
-        icon
-      }
-    });
-  user.save();
-  next();
+        $set:
+        {
+          icon
+        }
+      });
+    user.save();
+    next();
+  }
+  catch(err){next(err)}
+  
 }
 
 exports.verifyAddress = async(req, res, next) => 
@@ -63,7 +72,7 @@ exports.verifyAddress = async(req, res, next) =>
     next(missingElementErr);
   }
   let addressDetails = req.body.addressDetails;
-  const {address, zip, city, country, phoneNumber} = addressDetails;
+  const {street, zip, city, country, phoneNumber} = addressDetails;
     
   let missingElementErr =  new Error('Missing or wrong address details!');
   missingElementErr.code = 400;
@@ -75,7 +84,7 @@ exports.verifyAddress = async(req, res, next) =>
 
   address && zip && city && country && phoneValidation ? user.addressDetails.some((address) => 
   {
-    if (address.zip === addressDetails.zip && address.address === addressDetails.address) 
+    if (address.zip === addressDetails.zip && address.street === addressDetails.street) 
     {
       return next(addressAlreadyExistErr); 
     } 

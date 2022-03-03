@@ -16,7 +16,7 @@ const UserSchema = new Schema
         required: true,
         unique: true
     },
-    password: 
+    password:
     {
         type: String
     },
@@ -31,7 +31,7 @@ const UserSchema = new Schema
         type: Boolean,
         default: false
     },
-    icon:
+    avatar:
     {
         type: String
     },

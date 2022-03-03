@@ -13,7 +13,8 @@ router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); }
 
 
 // GET ALL USERS
-router.get("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, async (req, res) =>
+router.get("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, 
+async (req, res) =>
 {
     try
     {
@@ -34,7 +35,8 @@ router.get("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.
 
 // GET USER STATS
 // For admin Dashboard
-router.get("/stats", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, async (req, res) =>
+router.get("/stats", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+auth.verifyAdmin, async (req, res) =>
 {   
     try
     {
@@ -98,7 +100,8 @@ router.get("/self", cors.corsWithOptions, auth.verifyUser, auth.verifyAuth, asyn
 
 
 // GET USER // verify user exist in BDD & is connected. Return User info except PWD
-router.get("/find/:userId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAuthorization, async (req, res) =>
+router.get("/find/:userId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+auth.verifyAuthorization, async (req, res) =>
 {
     try
     {
@@ -165,8 +168,8 @@ user.verifyAddress, async (req, res) =>
 })
 
 //UPDATE USER ICON
-router.put('/addIcon', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
-upload.any('imageFile'), user.resizeUserIcon, user.addUserIcon, async (req, res) =>
+router.put('/addAvatar', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+upload.any('imageFile'), user.resizeUserAvatar, user.addUserAvatar, async (req, res) =>
 {
     try
     {
@@ -191,7 +194,7 @@ upload.any('imageFile'), user.resizeUserIcon, user.addUserIcon, async (req, res)
 
 //RESET PASSWORD
 router.put("/reset_password", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
-auth.verifyNewPasswordSyntax, auth.verifyNewPasswordEquality, async(req, res, next) =>
+auth.verifyNewPasswordSyntax, auth.verifyNewPasswordEquality, async(req, res) =>
 {
     try
     {
@@ -232,7 +235,8 @@ auth.verifyNewPasswordSyntax, auth.verifyNewPasswordEquality, async(req, res, ne
 });
 
 // DELETE
-router.delete("/:userId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAuthorization, async (req, res) =>
+router.delete("/:userId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+auth.verifyAuthorization, async (req, res) =>
 {
     try
     {

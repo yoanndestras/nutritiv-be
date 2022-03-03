@@ -13,7 +13,7 @@ router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); }
 
 
 //FORGET PASSWORD EMAIL
-router.get("/forget_pwd", auth.verifyEmailExist, mailer.sendForgetPassword, async(req, res, next) =>
+router.get("/forget_pwd", auth.verifyEmailExist, mailer.sendForgetPassword, async(req, res) =>
 {
     try
     {
@@ -35,7 +35,7 @@ router.get("/forget_pwd", auth.verifyEmailExist, mailer.sendForgetPassword, asyn
 });
 
 //VERIFY FORGET PASSWORD EMAIL
-router.get("/verify_forget_pwd", auth.verifyEmailToken, async(req, res, next) =>
+router.get("/verify_forget_pwd", auth.verifyEmailToken, async(req, res) =>
 {
     try
     {
@@ -57,7 +57,7 @@ router.get("/verify_forget_pwd", auth.verifyEmailToken, async(req, res, next) =>
 });
 
 //GENERATE NEW EMAIL TOKEN
-router.get("/new_register_email", auth.verifyNewEmail, mailer.sendVerifyAccountMail, async(req, res, next) =>
+router.get("/new_register_email", auth.verifyNewEmail, mailer.sendVerifyAccountMail, async(req, res) =>
 {
     try
     {
@@ -79,7 +79,7 @@ router.get("/new_register_email", auth.verifyNewEmail, mailer.sendVerifyAccountM
 });
 
 //FORGOT PASSWORD
-router.get("/verify-email", auth.verifyEmailToken, async(req, res, next) =>
+router.get("/verify-email", auth.verifyEmailToken, async(req, res) =>
 {
     const user = req.user;
     try
@@ -149,7 +149,7 @@ auth.verifyPasswordSyntax, mailer.sendVerifyAccountMail, async(req, res) =>
 
 //NEW PASSWORD AND RESET LOGIN ATTEMPTS
 //auth.verifyEmailToken
-router.post("/new_password", auth.verifyNewPasswordSyntax, auth.verifyNewPasswordEquality, async(req, res, next) =>
+router.post("/new_password", auth.verifyNewPasswordSyntax, auth.verifyNewPasswordEquality, async(req, res) =>
 {
     try
     {
@@ -195,7 +195,7 @@ router.post("/new_password", auth.verifyNewPasswordSyntax, auth.verifyNewPasswor
 
 
 //LOGIN
-router.post("/login", cors.corsWithOptions, auth.loginData, auth.verifyNoRefresh, async(req, res, next)=>
+router.post("/login", cors.corsWithOptions, auth.loginData, auth.verifyNoRefresh, async(req, res)=>
 {
     try
     {
@@ -288,7 +288,7 @@ router.delete("/logout", cors.corsWithOptions, auth.verifyUser, auth.verifyRefre
 });
 
 //////////////////////////////////////////////////TEST FRONT////////////////////////////////////////////////////////////
-router.post("/data", async(req, res, next) =>
+router.post("/data", async(req, res) =>
 {
     try {
         console.log("test");

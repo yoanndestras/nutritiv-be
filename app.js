@@ -76,10 +76,8 @@ app.use((err, req, res, next) =>
     if(!err.statusCode)next(createError(500))
     else
     {
-        console.error(err.message);
         next(createError(err.statusCode, err.message));
     }
-    
 });
 
 

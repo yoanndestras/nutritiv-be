@@ -41,7 +41,7 @@ const upload = multer(
 
 uploadRouter.route('/')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
-.get(cors.cors, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, (req, res, next) => 
+.get(cors.cors, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, (req, res) => 
 {
     res.status(403).json(
         {
@@ -56,14 +56,14 @@ uploadRouter.route('/')
             file : req.file 
         });
 })
-.put(cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, (req, res, next) => 
+.put(cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, (req, res) => 
 {
     res.status(403).json(
         {
             status: 'PUT operation not supported on /imageUpload', 
         });
 })
-.delete(cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, (req, res, next) => 
+.delete(cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, (req, res) => 
 {
     res.status(403).json(
         {

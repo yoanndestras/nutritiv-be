@@ -12,8 +12,8 @@ const app = express();
 app.use(express.json()); // to read JSON    
 app.use(express.urlencoded({extended: true}));
 
-// RESIZE USER ICON
-exports.resizeUserIcon = async(req, res, next) => 
+// RESIZE USER AVATAR
+exports.resizeUserAvatar = async(req, res, next) => 
 {
   try
   {
@@ -26,10 +26,10 @@ exports.resizeUserIcon = async(req, res, next) =>
             await sharp(file.path)
                 .resize(200, 200)
                 .toFile(
-                    path.resolve(file.destination,'usersIcons', file.filename)
+                    path.resolve(file.destination,'usersAvatar', file.filename)
                 )
                 fs.unlinkSync(file.path) 
-                if(user.icon){fs.unlinkSync(path.join("public/", user.icon))}
+                if(user.avatar){fs.unlinkSync(path.join("public/", user.avatar))}
             })
     );
       next();
@@ -38,20 +38,19 @@ exports.resizeUserIcon = async(req, res, next) =>
   
 };
 
-exports.addUserIcon = async(req, res, next) =>
+exports.addUserAvatar = async(req, res, next) =>
 {
   try
   {
     let file = req.files[0];
-    file = path.join(file.destination,'usersIcons', file.filename)
-    let icon = await (file.replace(/\\/g, "/")).replace("public/", "");
-    
+    file = path.join(file.destination,'usersAvatar', file.filename)
+    let avatar = await (file.replace(/\\/g, "/")).replace("public/", "");
     
     const user = await User.findOneAndUpdate({_id: req.user._id},
       {
         $set:
         {
-          icon
+          avatar
         }
       });
     user.save();
@@ -82,9 +81,9 @@ exports.verifyAddress = async(req, res, next) =>
   
   let phoneValidation = validatePhoneNumber.validate(phoneNumber);
 
-  address && zip && city && country && phoneValidation ? user.addressDetails.some((address) => 
+  street && zip && city && country && phoneValidation ? user.addressDetails.some((addressDetail) => 
   {
-    if (address.zip === addressDetails.zip && address.street === addressDetails.street) 
+    if (addressDetail.zip === addressDetails.zip && addressDetail.street === addressDetails.street) 
     {
       return next(addressAlreadyExistErr); 
     } 

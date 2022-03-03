@@ -62,34 +62,102 @@ exports.addUserAvatar = async(req, res, next) =>
 
 exports.verifyAddress = async(req, res, next) => 
 {
-  const user = await User.findOne({_id: req.user._id});
-  
-  if(!req.body.addressDetails)
+  try
   {
-    let missingElementErr =  new Error('No address details found!');
-    missingElementErr.code = 400;
-    next(missingElementErr);
-  }
-  let addressDetails = req.body.addressDetails;
-  const {street, zip, city, country, phoneNumber} = addressDetails;
+    let addressDetails = req.body.addressDetails;
+    const {street, zip, city, country, phoneNumber} = addressDetails;
     
-  let missingElementErr =  new Error('Missing or wrong address details!');
-  missingElementErr.code = 400;
-
-  let addressAlreadyExistErr = new Error('This Address already exists!');
-  addressAlreadyExistErr.code = 400;
+    let missingElementErr =  new Error('Missing or wrong address details!');
+    missingElementErr.code = 400;
+    
+    let phoneValidation = validatePhoneNumber.validate(phoneNumber);
+    street && zip && city && country && phoneValidation === true ? next() : next(missingElementErr);
+  }
+  catch(err){next(err)}
   
-  let phoneValidation = validatePhoneNumber.validate(phoneNumber);
+}
 
-  street && zip && city && country && phoneValidation ? user.addressDetails.some((addressDetail) => 
+exports.maxAmountOfAdresses = async(req, res, next) =>
+{
+  const user = await User.findOne({_id: req.user._id});
+  const addressDetailsLength = user && user.addressDetails ? user.addressDetails.length : null;
+
+  if(addressDetailsLength === 3)
   {
-    if (addressDetail.zip === addressDetails.zip && addressDetail.street === addressDetails.street) 
-    {
-      return next(addressAlreadyExistErr); 
-    } 
-  }) : next(missingElementErr);
+    let err = new Error('You already have the maximum amount of addresses registered on this account!');
+    err.statusCode = 401;
+    next(err);
+  }
+  else if(addressDetailsLength < 3)
+  {
+    next();
+  }
+}
+
+exports.verifyAdressId = async(req, res, next) =>
+{
+  const user = await User.findOne({_id: req.user._id});
+  const addressId = req.params.addressId;
+  const addressDetails = user && user.addressDetails && user.addressDetails.length > 0 ? user.addressDetails : null;
+  const addressExist = addressDetails.some(address => address._id.toString() === addressId)
   
-  req.address = addressDetails;
-  next()
+  if(addressExist) 
+  {
+    req.adressId = addressId;
+    return next()
+  }
   
+  let err = new Error("Adress Id nor found in user's address list!");
+  err.statusCode = 400;
+  next(err)
+}
+
+exports.updateAddress = async(req, res, next) =>
+{
+  try
+  {
+    const addressDetail = req.body.addressDetails;
+
+    let modifyAdress = await User.findOneAndUpdate(
+      {_id: req.user._id},
+      {
+        $set:
+        {
+          "addressDetails.$[inner]": addressDetail
+        },
+      
+      },
+      {
+        arrayFilters: [
+        {
+            'inner._id': mongoose.Types.ObjectId(req.adressId)
+        }
+        ]
+      },
+    );
+  
+    await modifyAdress.save();
+    next();
+  }
+  catch(err){next(err);}
+}
+
+exports.deleteAddress = async(req, res, next) =>
+{
+  try
+  {
+    let modifyAdress = await User.findOneAndUpdate(
+      {_id: req.user._id},
+      {
+        $pull:
+        {
+          "addressDetails": {_id : mongoose.Types.ObjectId(req.adressId)}
+        },
+      },
+    );
+  
+    await modifyAdress.save();
+    next();
+  }
+  catch(err){next(err);}
 }

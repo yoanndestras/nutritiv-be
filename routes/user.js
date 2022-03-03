@@ -13,8 +13,8 @@ router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); }
 
 
 // GET ALL USERS
-router.get("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, 
-async (req, res) =>
+router.get("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+auth.verifyAdmin, async (req, res) =>
 {
     try
     {
@@ -75,7 +75,8 @@ auth.verifyAdmin, async (req, res) =>
 })
 
 // CHECK JWT TOKEN
-router.get("/self", cors.corsWithOptions, auth.verifyUser, auth.verifyAuth, async(req, res) =>
+router.get("/self", cors.corsWithOptions, auth.verifyUser, auth.verifyAuth, 
+async(req, res) =>
 {
     try
     {
@@ -119,7 +120,8 @@ auth.verifyAuthorization, async (req, res) =>
 
 
 //UPDATE USER
-router.put('/updateUser', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async (req, res) =>
+router.put('/updateUser', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+async (req, res) =>
 {
     try
     {
@@ -141,9 +143,9 @@ router.put('/updateUser', cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
     }
 })
 
-//UPDATE USER ADDRESS
+//ADD USER ADDRESS
 router.put('/addAddress', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
-user.verifyAddress, async (req, res) =>
+user.maxAmountOfAdresses, user.verifyAddress, async (req, res) =>
 {
     try
     {
@@ -167,7 +169,53 @@ user.verifyAddress, async (req, res) =>
     }
 })
 
-//UPDATE USER ICON
+//UPDATE USER ADDRESS
+router.put('/updateAddress/:addressId', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
+user.verifyAddress, user.verifyAdressId, user.updateAddress, async (req, res) =>
+{
+    try
+    {
+        const user = await User.findOne({_id: req.user._id});
+        res.status(201).json(
+            {
+                success: true, 
+                addressDetails: user.addressDetails
+            });
+    }
+    catch(err)
+    {
+        res.status(500).json(
+            {
+                success: false, 
+                err: err.message
+            });
+    }
+})
+
+//DELETE ADDRESS
+router.delete('/removeAddress/:addressId', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
+user.verifyAdressId, user.deleteAddress, async (req, res) =>
+{
+    try
+    {
+        const user = await User.findOne({_id: req.user._id});
+        res.status(200).json(
+            {
+                success: true, 
+                addressDetails: user.addressDetails
+            });
+    }
+    catch(err)
+    {
+        res.status(500).json(
+            {
+                success: false, 
+                err: err.message
+            });
+    }
+})
+
+//ADD OR REPLACE USER ICON
 router.put('/addAvatar', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
 upload.any('imageFile'), user.resizeUserAvatar, user.addUserAvatar, async (req, res) =>
 {

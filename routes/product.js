@@ -271,7 +271,7 @@ async(req, res) =>
             await newProduct.save();
         }
         
-        res.status(200).json(
+        res.status(201).json(
             {
                 newProducts
             });

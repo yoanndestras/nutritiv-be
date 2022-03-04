@@ -309,8 +309,6 @@ exports.verifyEmailSyntax = (req, res, next) =>
     let err = new Error('You Email syntax is wrong!');
     err.statusCode = 400;
     next(err);
-    
-
 };
 
 exports.verifyPasswordSyntax = (req, res, next) =>
@@ -321,7 +319,6 @@ exports.verifyPasswordSyntax = (req, res, next) =>
     let err = new Error('You password syntax is wrong!');
     err.statusCode = 400;
     next(err);
-    
 };
 
 exports.verifyUsername = (req, res, next) =>
@@ -361,7 +358,7 @@ exports.verifyNewPasswordEquality = (req, res, next) =>
     {
         let err = new Error('Passwords do not match');
         err.statusCode = 400;
-        return next(err);
+        next(err);
     }
     else
     {
@@ -382,7 +379,7 @@ exports.verifyNewPasswordSyntax = (req, res, next) =>
     
     let err = new Error('You password syntax is wrong!');
     err.statusCode = 400;
-    return next(err);
+    next(err);
 };
 
 // VERIFY EMAIL SENDING
@@ -399,8 +396,6 @@ exports.verifyEmailToken = (req, res, next) =>
         }
         req.user = user;
         return next();
-        
-    
     })(req, res, next); 
 };
 
@@ -436,7 +431,6 @@ exports.verifyEmailExist = (req, res, next) =>
                 req.user = user;
                 next();
             }
-            
             err.statusCode = 400;
             return next(err);
         })
@@ -445,18 +439,15 @@ exports.verifyEmailExist = (req, res, next) =>
 exports.loginData = (req, res, next) => 
 {
     const loginData = req.body.loginData;
-
     if(loginData)
     {
         req.body.username = loginData.username;
         req.body.password = loginData.password;
         next();
     }
-    
     let err = new Error('Missing loginData');
     err.statusCode = 400;
     return next(err);
-    
 };
 
 

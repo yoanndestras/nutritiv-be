@@ -72,7 +72,6 @@ app.listen(process.env.PORT || 5000, () =>
 //ERROR HANDLING
 app.use((err, req, res, next) =>
 {
-    // ERROR STATUS 500 IF ERRROR STATUS DO NOT EXIST
     let message = err.message ? err.message : "Unsuccessfull request!"
     
     !err.statusCode 

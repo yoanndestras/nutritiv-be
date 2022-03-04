@@ -4,7 +4,7 @@
   "description": "Back-end of Nutritiv project",
   "main": "app.js",
   "scripts": {
-    "start": "env-cmd -e development nodemon app.js",
+    "start": "nodemon app.js",
     "start-dev": "env-cmd -e development nodemon app.js",
     "start-prod": "env-cmd -e production nodemon app.js"
   },

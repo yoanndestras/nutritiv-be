@@ -218,12 +218,10 @@ router.delete("/logout", cors.corsWithOptions, auth.verifyUser, auth.verifyRefre
 router.post("/data", async(req, res) =>
 {
     try {
-        console.log("test");
-        const data = await User.find()
-        console.log(data);
-        console.log(JSON.stringify(data))
+        console.log(req.body);
+        const tes = req.body;
         
-        res.json({ data })
+        res.json({ tes })
         
         } catch (err){
         res.status(500).json({ success: false, err })

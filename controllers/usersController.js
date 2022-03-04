@@ -62,7 +62,7 @@ exports.verifyAddress = async(req, res, next) =>
 {
   try
   {
-    let addressDetails = req.body.addressDetails;
+    let addressDetails = req.body;
     const {street, zip, city, country, phoneNumber} = addressDetails;
     
     let missingElementErr =  new Error('Missing or wrong address details!');
@@ -123,8 +123,8 @@ exports.updateAddress = async(req, res, next) =>
 {
   try
   {
-    const addressDetail = req.body.addressDetails;
-
+    const addressDetail = req.body;
+    
     let modifyAdress = await User.findOneAndUpdate(
       {_id: req.user._id},
       {

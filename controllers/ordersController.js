@@ -15,29 +15,30 @@ app.use(express.urlencoded({extended: true}));
 
 exports.verifyPhoneNumber = (req, res, next) =>
 {
-  let phoneNumber = req.body.phoneNumber;
-  if(validatePhoneNumber.validate(phoneNumber))
+  try
   {
-    next();
-  }
-  else
-  {
-    res.status(500).json(
-      {
-        success: false,
-        error: 'Invalid phone number'
-      }
-      );
-  }
+    let phoneNumber = req.body.phoneNumber;
+    if(validatePhoneNumber.validate(phoneNumber))
+    {
+      next();
+    }
+    else
+    {
+      res.status(500).json(
+        {
+          success: false,
+          error: 'Invalid phone number'
+        }
+        );
+    }
+  }catch(err){next(err)}
 }
 
 exports.newOrder = async(req, res, next) =>
 {
   try
   {
-    const userId = req.user.id;
-    const cart = await Cart.findOne({userId : userId});
-    
+    const userId = req.user.id, cart = await Cart.findOne({userId : userId});
     let countInStock = order.countInStock(userId);
     
     let err = await countInStock && (await countInStock).err ? (await countInStock).err : null;
@@ -45,9 +46,7 @@ exports.newOrder = async(req, res, next) =>
     
     if(cart)
     {
-      let products =  cart.products;
-      let amount =  cart.amount;
-      
+      let products =  cart.products, amount =  cart.amount;
       const {address, zip, city, country, phoneNumber} = req.body;
       let orderDetails =  
         {
@@ -64,9 +63,7 @@ exports.newOrder = async(req, res, next) =>
             products: products,
             amount: amount,
             orderDetails: orderDetails,
-        });
-      
-      const savedOrder = await newOrder.save();
+        }), savedOrder = await newOrder.save();
       
       if(savedOrder)
       {
@@ -75,86 +72,60 @@ exports.newOrder = async(req, res, next) =>
         req.cart = true;
         next();
       }
-      else
-      {
-        req.cart = false;
-        next();
-      }
-      
+      else{req.cart = false;next();}
     }
-    else
-    {
-      req.cart = false;
-      next();
-    }
-    
-  }
-  catch(err)
-  {
-    res.status(500).json(
-      {
-          success: false,
-          status: "Unsuccessfull request!",
-          err : err.message
-      }
-  );
-  }
+    else{req.cart = false;next();}
+  }catch(err){next(err)}
 }
 
 exports.countInStock = async(userId) =>
 {
-  const cart = await Cart.findOne({userId : userId});
-
-  let load = cart.products.map(product => product.productItems.map((productItems) => {return productItems.load;})); // 1 = load
-  let qty = cart.products.map(product => product.productItems.map((productItems) => {return productItems.quantity;})); // 2 = quantity
-  let productArray = cart.products.map(product => product.productId);
-  
-  let sumWithInitial;
-  let result;
-  let err;
-  let array = [];
-
-  for (let i = 0; i < load.length; i++) 
+  try
   {
-    let emptyTable = [];
-    let initialValue = 0;
-    
-    for (let j = 0; j < load[i].length; j++) 
-    {
-        emptyTable.push(load[i][j] * qty[i][j])
-        sumWithInitial = emptyTable.reduce(
-          (previousValue, currentValue) => previousValue + currentValue,
-          initialValue
-        );
-    }
-    array.push(sumWithInitial);
-    console.log(array);
-    
-    let cartProduct = await Product.findOne({_id: productArray[i]});
-    let stockAvailable = cartProduct.countInStock;
-    
-    if(stockAvailable - sumWithInitial <= 0)
-    {
-      err = new Error('The stock for this product is not available : ' + cartProduct.title);
-      err.statusCode = 403;
-      return {err};
-    }
-  }
+    const cart = await Cart.findOne({userId : userId});
   
-  for (let i = 0; i < load.length; i++) 
-  {
-
-    result = await Product.findOneAndUpdate(
-      {_id: productArray[i]},
+    let load = cart.products.map(product => product.productItems.map((productItems) => {return productItems.load;})); // 1 = load
+    let qty = cart.products.map(product => product.productItems.map((productItems) => {return productItems.quantity;})); // 2 = quantity
+    let productArray = cart.products.map(product => product.productId);
+    
+    let sumWithInitial, result, err, array = [];
+  
+    for (let i = 0; i < load.length; i++) 
+    {
+      let emptyTable = [], initialValue = 0;
+      
+      for (let j = 0; j < load[i].length; j++) 
       {
-        $inc :
-        {
-          "countInStock" : - array[i]
-        }
+          emptyTable.push(load[i][j] * qty[i][j])
+          sumWithInitial = emptyTable.reduce(
+            (previousValue, currentValue) => previousValue + currentValue,
+            initialValue
+          );
       }
-    )
-  }
-  
+      array.push(sumWithInitial);
+      
+      let cartProduct = await Product.findOne({_id: productArray[i]}), stockAvailable = cartProduct.countInStock;
+      
+      if(stockAvailable - sumWithInitial <= 0)
+      {
+        err = new Error('The stock for this product is not available : ' + cartProduct.title);
+        err.statusCode = 403;
+        return {err};
+      }
+    }
     
+    for (let i = 0; i < load.length; i++) 
+    {
+      result = await Product.findOneAndUpdate(
+        {_id: productArray[i]},
+        {
+          $inc :
+          {
+            "countInStock" : - array[i]
+          }
+        }
+      )
+    }
+  }catch(err){next(err)}
   
 }

@@ -24,11 +24,7 @@ exports.sendVerifyAccountMail = async(req, res, next) =>
         
         await sgMail.send(mailContent);
         next();
-    }
-    catch(err)
-    {
-        next(err);
-    }
+    }catch(err){next(err)}
     
 } 
 
@@ -39,8 +35,7 @@ exports.sendForgetPassword = async(req, res, next) =>
         const Email_Token = auth.GenerateEmailToken({email: req.body.email});
         sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-        const email = req.body.email;
-        const user = req.user;
+        const email = req.body.email, user = req.user;
         const mailContent = 
         {
             to: email,
@@ -54,11 +49,8 @@ exports.sendForgetPassword = async(req, res, next) =>
         
         await sgMail.send(mailContent);
         next();
-    }
-    catch(err)
-    {
-        next(err);
-    }
+    }catch(err){next(err)}
+    
     
 } 
 

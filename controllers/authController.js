@@ -140,17 +140,7 @@ exports.verifyAuthorization = async(req, res, next) =>
             err.statusCode = 403;
             return next(err);
         }
-    }
-    catch(err)
-    {
-        res.status(500).json(
-            {
-                status: false,
-                err: err.message,
-            });
-    }
-    
-
+    }catch(err){next(err)}
 };
 
 exports.verifyUser = (req, res, next) => 
@@ -253,26 +243,16 @@ exports.verifyAuth = (req, res, next) =>
             
         })(req, res, next);  
     }
-    else
-    {
-        next();
-    }
+    else return next();
 };
 
 exports.verifyNoRefresh = (req, res, next) => 
 {
     passport.authenticate('jwt_rt', { session: false }, (err, user, info) => 
     {        
-        if (err || !user) 
-        {
-            next();
-        }
-        else
-        {
-            let err = new Error('You are connected');
-            err.statusCode = 401;
-            return next(err);
-        }
+        if (err || !user) return next();
+        err.statusCode = 401;
+        return next(err);
     })(req, res, next);  
 };
 
@@ -280,7 +260,6 @@ exports.verifyNoRefresh = (req, res, next) =>
 // GENERATE JWT TOKENS
 exports.GenerateAccessToken = function(_id) 
 {
-    
     return jwt.sign
     (
         _id, 
@@ -323,31 +302,26 @@ exports.GeneratePasswordToken = function(user)
 // VERIFY REGISTER FORM
 exports.verifyEmailSyntax = (req, res, next) =>
 {
-    console.log(req.body.formData);
     const valid_email = req.body.formData.email && email_validator.validate(req.body.formData.email);
     
-    if(valid_email === true) next();
-    else
-    {
-        let err = new Error('You Email syntax is wrong!');
-        err.statusCode = 400;
-        return next(err);
-    }
+    if(valid_email === true) return next();
+    
+    let err = new Error('You Email syntax is wrong!');
+    err.statusCode = 400;
+    next(err);
+    
 
 };
 
 exports.verifyPasswordSyntax = (req, res, next) =>
 {
     if(req.body.formData.password.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/)) // password 8 characters, 1 low 1 upper 1 number
-    {
-        next();
-    }
-    else
-    {
-        let err = new Error('You password syntax is wrong!');
-        err.statusCode = 400;
-        return next(err);
-    }
+    {next();}
+
+    let err = new Error('You password syntax is wrong!');
+    err.statusCode = 400;
+    next(err);
+    
 };
 
 exports.verifyUsername = (req, res, next) =>
@@ -360,7 +334,7 @@ exports.verifyUsername = (req, res, next) =>
                 err.statusCode = 400;
                 return next(err);
             }
-            else next();
+            next();
         })
 };
 
@@ -374,10 +348,7 @@ exports.verifyEmail = (req, res, next) =>
                 err.statusCode = 400;
                 return next(err);
             }
-            else
-            {
-                next();
-            }
+            next();
         })
 };
 
@@ -407,17 +378,11 @@ exports.verifyNewPasswordSyntax = (req, res, next) =>
     // 1 lower case, 1 upper case, 1 number, minimum 8 length
     let regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/;
     
-    if(newPass.match(regex) && confirmNewPass.match(regex))
-    {
-        console.log("Im here password syntax");
-        next();
-    }
-    else
-    {
-        let err = new Error('You password syntax is wrong!');
-        err.statusCode = 400;
-        return next(err);
-    }
+    if(newPass.match(regex) && confirmNewPass.match(regex)) return next()
+    
+    let err = new Error('You password syntax is wrong!');
+    err.statusCode = 400;
+    return next(err);
 };
 
 // VERIFY EMAIL SENDING
@@ -432,11 +397,9 @@ exports.verifyEmailToken = (req, res, next) =>
             err.statusCode = 403;
             return next(err);
         }
-        else
-        {
-            req.user = user;
-            return next();
-        }
+        req.user = user;
+        return next();
+        
     
     })(req, res, next); 
 };
@@ -473,12 +436,9 @@ exports.verifyEmailExist = (req, res, next) =>
                 req.user = user;
                 next();
             }
-            else
-            {
-                let err = new Error('Wrong email');
-                err.statusCode = 400;
-                return next(err);
-            }
+            
+            err.statusCode = 400;
+            return next(err);
         })
 };
 
@@ -487,17 +447,16 @@ exports.loginData = (req, res, next) =>
     const loginData = req.body.loginData;
 
     if(loginData)
-        {
-            req.body.username = loginData.username;
-            req.body.password = loginData.password;
-            next();
-        }
-    else
     {
-        let err = new Error('Missing loginData');
-        err.statusCode = 400;
-        return next(err);
+        req.body.username = loginData.username;
+        req.body.password = loginData.password;
+        next();
     }
+    
+    let err = new Error('Missing loginData');
+    err.statusCode = 400;
+    return next(err);
+    
 };
 
 

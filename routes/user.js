@@ -126,8 +126,7 @@ user.maxAmountOfAdresses, user.verifyAddress, async (req, res, next) =>
     try
     {
         const user = await User.findOne({_id: req.user._id});
-        req.address = req.body;
-        await user.addressDetails.push(req.address);
+        await user.addressDetails.push(req.body);
         await user.save();
         
         res.status(201).json(

@@ -62,11 +62,9 @@ async(req, res, next)  =>
     }
     else
     {
-      res.status(400).json(
-        {
-            success: false,
-            status: "You have no cart!",
-        });
+      let err = new Error("You have no cart!");
+      err.statusCode = 400;
+      next(err);
     }
   }catch(err){next(err)}
   

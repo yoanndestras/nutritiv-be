@@ -132,7 +132,6 @@ exports.updateAddress = async(req, res, next) =>
         {
           "addressDetails.$[inner]": addressDetail
         },
-      
       },
       {
         arrayFilters: [

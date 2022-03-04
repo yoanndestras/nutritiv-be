@@ -95,7 +95,6 @@ auth.verifyAuthorization, async (req, res, next) =>
     try
     {
         const user = await User.findById(req.params.userId)
-        
         const {email, ...public} = user._doc;
         
         res.status(200).json({success: true, user: public});
@@ -196,11 +195,8 @@ auth.verifyNewPasswordSyntax, auth.verifyNewPasswordEquality, async(req, res, ne
             {                
                 if(err)
                 {
-                    res.status(400).json(
-                        {
-                            success: false, 
-                            err: 'OldPassword is incorrect'
-                        }); 
+                    err.statusCode = 400;
+                    next(err)
                 }
                 else
                 {

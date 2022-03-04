@@ -64,9 +64,9 @@ app.use('/imageUpload', uploadRouter);
 app.use('/stripe', stripeRoute);
 
 // process.env.PORT = value PORT in .env file
-app.listen(process.env.PORT || 5000, () =>
+app.listen(3001, () =>
 {
-    console.log("Backend server is running on port " + process.env.PORT);
+    console.log("Backend server is running on port " + 3001);
 })
 
 //ERROR HANDLING

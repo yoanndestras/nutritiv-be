@@ -62,7 +62,7 @@ app.use("/carts", cartRoute);
 app.use("/orders", orderRoute);
 app.use('/imageUpload', uploadRouter);
 app.use('/stripe', stripeRoute);
-
+console.log("eee");
 // process.env.PORT = value PORT in .env file
 app.listen((process.env.PORT || 5000), () =>
 {

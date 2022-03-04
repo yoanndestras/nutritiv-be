@@ -14,7 +14,7 @@ router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); }
 
 // GET ALL USERS
 router.get("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
-auth.verifyAdmin, async (req, res) =>
+auth.verifyAdmin, async (req, res, next) =>
 {
     try
     {
@@ -26,17 +26,13 @@ auth.verifyAdmin, async (req, res) =>
             ? await User.find().sort({_id:-1}).limit(5) 
             : await User.find();
         res.status(200).json({users});
-    }
-    catch(err)
-    {
-        res.status(500).json({success: false, err: err.message});
-    }
+    }catch(err){next(err)}
 })
 
 // GET USER STATS
 // For admin Dashboard
 router.get("/stats", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
-auth.verifyAdmin, async (req, res) =>
+auth.verifyAdmin, async (req, res, next) =>
 {   
     try
     {
@@ -67,16 +63,12 @@ auth.verifyAdmin, async (req, res) =>
                 },
             ]);
         res.status(200).json(data);
-    }
-    catch(err)
-    {
-        res.status(500).json({success: false, err: err.message});
-    }
+    }catch(err){next(err)}
 })
 
 // CHECK JWT TOKEN
 router.get("/self", cors.corsWithOptions, auth.verifyUser, auth.verifyAuth, 
-async(req, res) =>
+async(req, res, next) =>
 {
     try
     {
@@ -92,17 +84,13 @@ async(req, res) =>
                 adressDetails,
                 status: "User connected"
             });
-    }
-    catch(err)
-    {
-        res.status(500).json({success: false, err: err.message});
-    }
+    }catch(err){next(err)}
 })
 
 
 // GET USER // verify user exist in BDD & is connected. Return User info except PWD
 router.get("/find/:userId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
-auth.verifyAuthorization, async (req, res) =>
+auth.verifyAuthorization, async (req, res, next) =>
 {
     try
     {
@@ -111,17 +99,13 @@ auth.verifyAuthorization, async (req, res) =>
         const {email, ...public} = user._doc;
         
         res.status(200).json({success: true, user: public});
-    }
-    catch(err)
-    {
-        res.status(500).json({success: false, err: err.message});
-    }
+    }catch(err){next(err)}
 })
 
 
 //UPDATE USER
 router.put('/updateUser', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
-async (req, res) =>
+async (req, res, next) =>
 {
     try
     {
@@ -132,20 +116,12 @@ async (req, res) =>
                 success: true, 
                 status: user
             });
-    }
-    catch(err)
-    {
-        res.status(500).json(
-            {
-                success: false, 
-                err: err.message
-            });
-    }
+    }catch(err){next(err)}
 })
 
 //ADD USER ADDRESS
 router.put('/addAddress', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
-user.maxAmountOfAdresses, user.verifyAddress, async (req, res) =>
+user.maxAmountOfAdresses, user.verifyAddress, async (req, res, next) =>
 {
     try
     {
@@ -158,20 +134,12 @@ user.maxAmountOfAdresses, user.verifyAddress, async (req, res) =>
                 success: true, 
                 userInfo: user
             });
-    }
-    catch(err)
-    {
-        res.status(500).json(
-            {
-                success: false, 
-                err: err.message
-            });
-    }
+    }catch(err){next(err)}
 })
 
 //UPDATE USER ADDRESS
 router.put('/updateAddress/:addressId', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
-user.verifyAddress, user.verifyAdressId, user.updateAddress, async (req, res) =>
+user.verifyAddress, user.verifyAdressId, user.updateAddress, async (req, res, next) =>
 {
     try
     {
@@ -181,20 +149,12 @@ user.verifyAddress, user.verifyAdressId, user.updateAddress, async (req, res) =>
                 success: true, 
                 addressDetails: user.addressDetails
             });
-    }
-    catch(err)
-    {
-        res.status(500).json(
-            {
-                success: false, 
-                err: err.message
-            });
-    }
+    }catch(err){next(err)}
 })
 
 //DELETE ADDRESS
 router.delete('/removeAddress/:addressId', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
-user.verifyAdressId, user.deleteAddress, async (req, res) =>
+user.verifyAdressId, user.deleteAddress, async (req, res, next) =>
 {
     try
     {
@@ -204,20 +164,12 @@ user.verifyAdressId, user.deleteAddress, async (req, res) =>
                 success: true, 
                 addressDetails: user.addressDetails
             });
-    }
-    catch(err)
-    {
-        res.status(500).json(
-            {
-                success: false, 
-                err: err.message
-            });
-    }
+    }catch(err){next(err)}
 })
 
 //ADD OR REPLACE USER ICON
 router.put('/addAvatar', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
-upload.any('imageFile'), user.resizeUserAvatar, user.addUserAvatar, async (req, res) =>
+upload.any('imageFile'), user.resizeUserAvatar, user.addUserAvatar, async (req, res, next) =>
 {
     try
     {
@@ -229,26 +181,16 @@ upload.any('imageFile'), user.resizeUserAvatar, user.addUserAvatar, async (req, 
                 success: true, 
                 userInfo: user
             });
-    }
-    catch(err)
-    {
-        res.status(500).json(
-            {
-                success: false, 
-                err: err.message
-            });
-    }
+    }catch(err){next(err)}
 })
 
 //RESET PASSWORD
 router.put("/reset_password", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
-auth.verifyNewPasswordSyntax, auth.verifyNewPasswordEquality, async(req, res) =>
+auth.verifyNewPasswordSyntax, auth.verifyNewPasswordEquality, async(req, res, next) =>
 {
     try
     {
-        const oldPass = req.body.oldPass;
-        const newPass = req.body.confirmNewPass;
-        const user = req.user;
+        const oldPass = req.body.oldPass, newPass = req.body.confirmNewPass, user = req.user;
         
         user.changePassword(oldPass, newPass, (err, user) => 
             {                
@@ -270,31 +212,18 @@ auth.verifyNewPasswordSyntax, auth.verifyNewPasswordEquality, async(req, res) =>
                         });
                 }
             });
-    }
-    catch(err)
-        {
-            res.status(500).json(
-                {
-                    success: false, 
-                    status: 'Unsuccessfull request!', 
-                    err: err
-                });
-        }
+    }catch(err){next(err)}
 });
 
 // DELETE
 router.delete("/:userId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
-auth.verifyAuthorization, async (req, res) =>
+auth.verifyAuthorization, async (req, res, next) =>
 {
     try
     {
         await User.findByIdAndDelete(req.params.userId)
         res.status(200).json("User has been deleted...")
-    }
-    catch(err)
-    {
-        res.status(500).json({success: false, err: err.message});
-    }
+    }catch(err){next(err)}
 
 })
 

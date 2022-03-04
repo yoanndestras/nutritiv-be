@@ -7,7 +7,8 @@ const Product = require("../models/Product");
 const cors = require('../controllers/corsController');
 const auth = require('../controllers/authController');
 
-router.post("/create-checkout-session", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async(req, res)  => 
+router.post("/create-checkout-session", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+async(req, res, next)  => 
 {
   try
   {
@@ -67,16 +68,7 @@ router.post("/create-checkout-session", cors.corsWithOptions, auth.verifyUser, a
             status: "You have no cart!",
         });
     }
-  }
-  catch(err)
-  {
-    res.status(500).json(
-      {
-          success: false,
-          status: "Unsuccessfull request!",
-          err: err.message
-      });
-  }
+  }catch(err){next(err)}
   
 });
 

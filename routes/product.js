@@ -17,7 +17,7 @@ router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); }
 
 
 // GET ALL PRODUCTS
-router.get("/", cors.corsWithOptions, async(req, res) =>
+router.get("/", cors.corsWithOptions, async(req, res, next) =>
 {
     try
     {
@@ -64,20 +64,11 @@ router.get("/", cors.corsWithOptions, async(req, res) =>
                 length
             });
     
-    }
-    catch(err)
-    {
-        res.status(500).json(
-            {
-                success: false,
-                status: "Unsuccessfull request!",
-                err: err
-            });
-    }
+    }catch(err){next(err)}
 });
 
 // GET PRODUCT BY ID
-router.get("/findById/:productId", cors.corsWithOptions, async(req, res) =>
+router.get("/findById/:productId", cors.corsWithOptions, async(req, res, next) =>
 {
     try
     {
@@ -99,20 +90,11 @@ router.get("/findById/:productId", cors.corsWithOptions, async(req, res) =>
                     status: "Product with id : "+ req.params.productId +", not found"
                 });
         }
-    }
-    catch(err)
-    {
-        res.status(500).json(
-            {
-                success: false,
-                status: "Unsuccessfull request!",
-                err: err
-            });
-    }
+    }catch(err){next(err)}
 });
 
 // GET PRODUCT BY TITLE
-router.get("/findByTitle/:productTitle", cors.corsWithOptions, async(req, res) =>
+router.get("/findByTitle/:productTitle", cors.corsWithOptions, async(req, res, next) =>
 {
     try
     {
@@ -136,44 +118,27 @@ router.get("/findByTitle/:productTitle", cors.corsWithOptions, async(req, res) =
                     status: "Product(s) "+ title +" not found"
                 });
         }
-    }
-    catch(err)
-    {
-        res.status(500).json(
-            {
-                success: false,
-                status: "Unsuccessfull request!",
-                err: err
-            });
-    }
+    }catch(err){next(err)}
 });
 
 // GET ALL PRODUCTS LENGTH
-router.get("/length", cors.corsWithOptions, async(req, res) =>
+router.get("/length", cors.corsWithOptions, async(req, res, next) =>
 {
     try
     {
         let products = await Product.find();
         let length = products.length;
+
         res.status(200).json(
             {
                 length
             });
-    }
-    catch(err)
-    {
-        res.status(500).json(
-            {
-                success: false,
-                status: "Unsuccessfull request!",
-                err: err
-            });
-    }
+    }catch(err){next(err)}
 });
 
 // GET COUNTINSTOCK // 
 router.get('/countInStock/:productId', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
-product.verifyProductId, product.countInStock, async (req, res) =>
+product.verifyProductId, product.countInStock, async (req, res, next) =>
 {
     try
     {
@@ -183,20 +148,11 @@ product.verifyProductId, product.countInStock, async (req, res) =>
             {
                 countInStock
             });
-    }
-    catch(err)
-    {
-        res.status(500).json(
-            {
-                success: false,
-                status: "Unsuccessfull request!",
-                err: err
-            });
-    }
+    }catch(err){next(err)}
 });
 
 // GET TAGS THAT EXIST ON THE LIST OF PRODUCTS
-router.get('/tags', cors.corsWithOptions, async (req, res) =>
+router.get('/tags', cors.corsWithOptions, async (req, res, next) =>
 {
     try
     {
@@ -208,21 +164,12 @@ router.get('/tags', cors.corsWithOptions, async (req, res) =>
             {
                 uniqueTags
             });
-    }
-    catch(err)
-    {
-        res.status(500).json(
-            {
-                success: false,
-                status: "Unsuccessfull request!",
-                err: err.message
-            });
-    }
+    }catch(err){next(err)}
 })
 
 // GENERATE PRODUCTS
 router.post("/generate/:value", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, 
-async(req, res) =>
+async(req, res, next) =>
 {
     try
     {
@@ -276,22 +223,13 @@ async(req, res) =>
                 newProducts
             });
 
-    }
-    catch(err)
-    {
-        res.status(500).json(
-            {
-                success: false,
-                status: "Unsuccessfull request!",
-                err: err.message
-            });
-    }
+    }catch(err){next(err)}
     
 })
 
 // CREATE PRODUCT
 router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, 
-upload.any('imageFile'), product.resizeProductImage, product.newProduct, async(req, res) =>
+upload.any('imageFile'), product.resizeProductImage, product.newProduct, async(req, res, next) =>
 {
     try
     {
@@ -319,21 +257,12 @@ upload.any('imageFile'), product.resizeProductImage, product.newProduct, async(r
                 status: "Product Successfull added",
                 New_product: savedProduct
             });
-    }
-    catch(err)
-    {
-        res.status(500).json(
-            {
-                success: false,
-                status: "Unsuccessfull request!",
-                err: err.message
-            });
-    }
+    }catch(err){next(err)}
 });
 
 // UPDATE PRODUCT //TODO:  form adaptability 
 router.put("/:productId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, product.verifyProductId,
-upload.any('imageFile'), product.newProduct, product.removeImgs, product.resizeProductImage, async(req, res) =>
+upload.any('imageFile'), product.newProduct, product.removeImgs, product.resizeProductImage, async(req, res, next) =>
 {
     try
     {
@@ -368,21 +297,12 @@ upload.any('imageFile'), product.newProduct, product.removeImgs, product.resizeP
                 Updated_product: updatedProduct
             });
         
-    }
-    catch(err)
-    {
-        res.status(500).json(
-            {
-                success: false,
-                status: "Unsuccessfull request!",
-                err: err.message
-            });
-    }
+    }catch(err){next(err)}
 });
 
 // DELETE
 router.delete("/delete/:productId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
-auth.verifyAdmin, product.removeImgs, async(req, res) =>
+auth.verifyAdmin, product.removeImgs, async(req, res, next) =>
 {
     try
     {
@@ -393,34 +313,22 @@ auth.verifyAdmin, product.removeImgs, async(req, res) =>
                 success: true,
                 status: "Product has been deleted"
             });
-    }
-    catch(err)
-    {
-        res.status(500).json(
-            {
-                success: false,
-                status: "Unsuccessfull request!",
-                err: err
-            });
-    }
+    }catch(err){next(err)}
 });
 
 //DELETE RECENT PRODUCTS
-router.delete("/lastDay", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, async (req, res) =>
+router.delete("/lastDay", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, 
+async (req, res, next) =>
 {
     const date = new Date();
     const lastDay = new Date(date.setUTCDate(date.getUTCDate() -1));
-
+    
     try
     {
         let income = await Product.deleteMany( { "createdAt" : {$gt : lastDay } })
             
         res.status(200).json(income);
-    }
-    catch(err)
-    {
-        res.status(500).json(err);
-    }
+    }catch(err){next(err)}
 
 })
 module.exports = router;

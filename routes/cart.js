@@ -13,7 +13,7 @@ const {upload} = require('./upload');
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
 // GET USER CART
-router.get("/self", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async (req, res) =>
+router.get("/self", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async (req, res, next) =>
 {
     try
     {
@@ -33,25 +33,16 @@ router.get("/self", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, a
         {
             res.status(400).json(
                 {
-                    success: true,
+                    success: false,
                     status: "Cart do not exist!"
                 });
         }
         
-    }
-    catch(err)
-    {
-        res.status(500).json(
-            {
-                success: false,
-                status: "Unsuccessfull request!",
-                err: err
-            });
-    }
+    }catch(err){next(err)}
 })
 
 // GET ALL 
-router.get("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, async (req, res) =>
+router.get("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, async (req, res, next) =>
 {
     try
     {
@@ -63,21 +54,12 @@ router.get("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.
                 status: "All carts found",
                 carts: carts
             });
-    }
-    catch(err)
-    {
-        res.status(500).json(
-            {
-                success: false,
-                status: "Unsuccessfull request!",
-                err: err.message
-            });
-    }
+    }catch(err){next(err)}
 })
 
 // CREATE CART // cart.cart,
 router.post("/addToCart", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, upload.any('imageFile'), 
-product.verifyStock, product.verifyProduct, cart.cart, async(req, res) =>
+product.verifyStock, product.verifyProduct, cart.cart, async(req, res, next) =>
 {
     try
     {
@@ -104,22 +86,12 @@ product.verifyStock, product.verifyProduct, cart.cart, async(req, res) =>
                 }
             ); 
         }
-    }
-    catch(err)
-    {
-        res.status(500).json(
-            {
-                success: false,
-                status: "Unsuccessfull request!",
-                err: err.message
-            }
-        );
-    }
+    }catch(err){next(err)}
 })
 
 // ADD QUANTITY PRODUCT IN CART 
 router.put("/updateQuantity/:productId/:load/:operation", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
-product.verifyPricePerProduct, cart.updateQuantity, async(req, res) =>
+product.verifyPricePerProduct, cart.updateQuantity, async(req, res, next) =>
 {
     try
     {
@@ -132,21 +104,12 @@ product.verifyPricePerProduct, cart.updateQuantity, async(req, res) =>
                 status: "Cart succesfully updated",
                 cart: cart
             });
-    }
-    catch(err)
-    {
-        res.status(500).json(
-            {
-                success: false,
-                status: "Unsuccessfull request!",
-                err: err.message
-            });
-    }
+    }catch(err){next(err)}
 })
 
 // DELETE PRODUCT IN CART
 router.delete("/:userId/:productId/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
-auth.verifyAuthorization, cart.deleteProductInCartById, async (req, res) =>
+auth.verifyAuthorization, cart.deleteProductInCartById, async (req, res, next) =>
 {
     try
     {
@@ -169,20 +132,12 @@ auth.verifyAuthorization, cart.deleteProductInCartById, async (req, res) =>
                     status: "Cart succesfully deleted!"
                 });
         }
-    }
-    catch(err)
-    {
-        res.status(500).json(
-            {
-                success: false,
-                status: "Unsuccessfull request!",
-                err: err.message
-            });
-    }
+    }catch(err){next(err)}
 })
 
 // DELETE CART
-router.delete("/:userId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAuthorization, async (req, res) =>
+router.delete("/:userId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAuthorization, 
+async (req, res, next) =>
 {
     try
     {
@@ -192,16 +147,7 @@ router.delete("/:userId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                 success: true,
                 status: "Cart has been deleted...",
             });
-    }
-    catch(err)
-    {
-        res.status(500).json(
-            {
-                success: false,
-                status: "Unsuccessfull request!",
-                err: err
-            });
-    }
+    }catch(err){next(err)}
 
 })
 

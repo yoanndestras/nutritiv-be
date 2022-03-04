@@ -73,9 +73,19 @@ app.listen(process.env.PORT || 5000, () =>
 app.use((err, req, res, next) =>
 {
     // ERROR STATUS 500 IF ERRROR STATUS DO NOT EXIST
-    !err.statusCode ? res.status(500).send(err.message) : res.status(err.statusCode).send(err.message);
-
+    let message = err.message ? err.message : "Unsuccessfull request!"
+    
+    !err.statusCode 
+    ? res.status(500).json(
+        {
+            success: false, 
+            err: message
+        })
+    : res.status(err.statusCode).json(
+        {
+            success: false, 
+            err: message
+        })
 });
-
 
 module.exports = app;

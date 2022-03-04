@@ -11,9 +11,8 @@ const mailer = require("../controllers/mailerController");
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
-
 //FORGET PASSWORD EMAIL
-router.get("/forget_pwd", auth.verifyEmailExist, mailer.sendForgetPassword, async(req, res) =>
+router.get("/forget_pwd", auth.verifyEmailExist, mailer.sendForgetPassword, async(req, res, next) =>
 {
     try
     {
@@ -22,20 +21,11 @@ router.get("/forget_pwd", auth.verifyEmailExist, mailer.sendForgetPassword, asyn
                 success: true, 
                 status: 'Check your emails!!'
             });
-    }
-    catch(err)
-        {
-            res.status(500).json(
-                {
-                    success: false, 
-                    status: 'Unsuccessfull request!', 
-                    err: err.message
-                });
-        }
+    }catch(err){next(err)}
 });
 
 //VERIFY FORGET PASSWORD EMAIL
-router.get("/verify_forget_pwd", auth.verifyEmailToken, async(req, res) =>
+router.get("/verify_forget_pwd", auth.verifyEmailToken, async(req, res, next) =>
 {
     try
     {
@@ -44,20 +34,11 @@ router.get("/verify_forget_pwd", auth.verifyEmailToken, async(req, res) =>
                 success: true, 
                 status: 'Email verification successfull!'
             });
-    }
-    catch(err)
-        {
-            res.status(500).json(
-                {
-                    success: false, 
-                    status: 'Unsuccessfull request!', 
-                    err: err.message
-                });
-        }
+    }catch(err){next(err)}
 });
 
 //GENERATE NEW EMAIL TOKEN
-router.get("/new_register_email", auth.verifyNewEmail, mailer.sendVerifyAccountMail, async(req, res) =>
+router.get("/new_register_email", auth.verifyNewEmail, mailer.sendVerifyAccountMail, async(req, res, next) =>
 {
     try
     {
@@ -66,20 +47,11 @@ router.get("/new_register_email", auth.verifyNewEmail, mailer.sendVerifyAccountM
                 success: true, 
                 status: 'Check your emails!'
             });
-    }
-    catch(err)
-        {
-            res.status(500).json(
-                {
-                    success: false, 
-                    status: 'Unsuccessfull request!', 
-                    err: err
-                });
-        }
+    }catch(err){next(err)}
 });
 
 //FORGOT PASSWORD
-router.get("/verify-email", auth.verifyEmailToken, async(req, res) =>
+router.get("/verify-email", auth.verifyEmailToken, async(req, res, next) =>
 {
     const user = req.user;
     try
@@ -93,21 +65,12 @@ router.get("/verify-email", auth.verifyEmailToken, async(req, res) =>
                             status: 'User Verification Successfull!'
                         });
                 })
-    }
-    catch(err)
-        {
-            res.status(500).json(
-            {
-                success: false, 
-                status: 'Unsuccessfull request!', 
-                err: err
-            });
-        }
+    }catch(err){next(err)}
 });
 
 //REGISTER
 router.post("/register", auth.verifyUsername, auth.verifyEmail, auth.verifyEmailSyntax, 
-auth.verifyPasswordSyntax, mailer.sendVerifyAccountMail, async(req, res) =>
+auth.verifyPasswordSyntax, mailer.sendVerifyAccountMail, async(req, res, next) =>
 {
     try
     {
@@ -135,21 +98,12 @@ auth.verifyPasswordSyntax, mailer.sendVerifyAccountMail, async(req, res) =>
                 })
             }
         });
-    }
-    catch(err)
-    {
-        res.status(500).json(
-            {
-                success: false, 
-                status: 'Unsuccessfull Request!', 
-                err: err
-            });
-    }
+    }catch(err){next(err)}
 });
 
 //NEW PASSWORD AND RESET LOGIN ATTEMPTS
 //auth.verifyEmailToken
-router.post("/new_password", auth.verifyNewPasswordSyntax, auth.verifyNewPasswordEquality, async(req, res) =>
+router.post("/new_password", auth.verifyNewPasswordSyntax, auth.verifyNewPasswordEquality, async(req, res, next) =>
 {
     try
     {
@@ -181,21 +135,12 @@ router.post("/new_password", auth.verifyNewPasswordSyntax, auth.verifyNewPasswor
                     err: err.message
                 });
         }
-    }
-    catch(err)
-        {
-            res.status(500).json(
-                {
-                    success: false, 
-                    status: 'Unsuccessfull request!', 
-                    err: err.message
-                });
-        }
+    }catch(err){next(err)}
 });
 
 
 //LOGIN
-router.post("/login", cors.corsWithOptions, auth.loginData, auth.verifyNoRefresh, async(req, res)=>
+router.post("/login", cors.corsWithOptions, auth.loginData, auth.verifyNoRefresh, async(req, res, next)=>
 {
     try
     {
@@ -249,21 +194,12 @@ router.post("/login", cors.corsWithOptions, auth.loginData, auth.verifyNoRefresh
                 })
             };
         })(req, res, next);
-    }
-    catch (err)
-    {
-        res.status(500).json(
-            {
-                success: false, 
-                status: 'Unsuccessfull request!', 
-                err: err.message
-            });
-        }
+    }catch(err){next(err)}
 });
 
 
 // CLEAR COOKIE TOKEN // LOGOUT
-router.delete("/logout", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async(req, res) =>
+router.delete("/logout", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async(req, res, next) =>
 {   
     try
     {
@@ -275,16 +211,7 @@ router.delete("/logout", cors.corsWithOptions, auth.verifyUser, auth.verifyRefre
                             loggedIn: false,
                             status: "Successfully logged out!"
                         });
-    }
-    catch(err)
-    {
-        res.status(500).json(
-            {
-                success: false, 
-                status: 'Logout Unsuccessfull!', 
-                err: err.message
-            });
-    }
+    }catch(err){err.message = 'Logout Unsuccessfull!'; next(err)}
 });
 
 //////////////////////////////////////////////////TEST FRONT////////////////////////////////////////////////////////////

@@ -13,21 +13,19 @@ router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); }
 
 
 // GET USER ORDERS
-router.get("/find/:userId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAuthorization, async (req, res) =>
+router.get("/find/:userId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+auth.verifyAuthorization, async (req, res, next) =>
 {
     try
     {
         const orders = await Order.find({userId: req.params.userId})
         res.status(200).json(orders);
-    }
-    catch(err)
-    {
-        res.status(500).json(err);
-    }
+    }catch(err){next(err)}
 });
 
 // GET ALL ORDERS
-router.get("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, async (req, res) =>
+router.get("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, 
+async (req, res, next) =>
 {
     try
     {
@@ -35,16 +33,13 @@ router.get("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.
         const orders = await Order.find();
         
         res.status(200).json(orders);
-    }
-    catch(err)
-    {
-        res.status(500).json(err);
-    }
+    }catch(err){next(err)}
 
 });
 
 // GET MONTHLY INCOME
-router.get("/income", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, async (req, res) =>
+router.get("/income", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, 
+async (req, res, next) =>
 {
     const date = new Date();
     // 1 month ago
@@ -79,15 +74,12 @@ router.get("/income", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
                 },
             ]);
         res.status(200).json(income);
-    }
-    catch(err)
-    {
-        res.status(500).json(err);
-    }
+    }catch(err){next(err)}
 });
 
 // CREATE ORDER
-router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, order.verifyPhoneNumber, order.newOrder, async (req, res) =>
+router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, order.verifyPhoneNumber, 
+order.newOrder, async (req, res, next) =>
 {    
     try
     {
@@ -111,21 +103,12 @@ router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, orde
             );
         }
         
-    }
-    catch(err)
-    {
-        res.status(500).json(
-            {
-                success: false,
-                status: "Unsuccessfull request!",
-                err : err.message
-            }
-        );
-    }
+    }catch(err){next(err)}
 });
 
 // UPDATE ORDER STATUS
-router.put("/status", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, async(req, res) =>
+router.put("/status", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+auth.verifyAdmin, async(req, res, next) =>
 {
     try
     {
@@ -138,26 +121,18 @@ router.put("/status", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
         );
 
         res.status(201).json(updatedOrder);
-    }
-    catch(err)
-    {
-        res.status(500).json(err);
-    }
+    }catch(err){next(err)}
 });
 
 // DELETE ORDER
-router.delete("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, async (req, res) =>
+router.delete("/:id", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+auth.verifyAdmin, async (req, res, next) =>
 {
     try
     {
         await Order.findByIdAndDelete(req.params.id)
         res.status(200).json("Order has been deleted...")
-    }
-    catch(err)
-    {
-        res.status(500).json(err);
-    }
-
+    }catch(err){next(err)}
 });
 
 

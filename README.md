@@ -1,6 +1,10 @@
 # Nutritiv-be
 
-*Read this in other languages : [English](README.md) ![GB-flag.](/public/images/GB@2px.png "This is the GB flag.") [French](README.fr.md) ![FR-flag.](/public/images/FR@2px.png "This is the french flag.")*
+*Read this in other languages : 
+[English](README.md) 
+![GB-flag.](/public/images/GB@2px.png "This is the GB flag.") 
+[French](README.fr.md) 
+![FR-flag.](/public/images/FR@2px.png "This is the french flag.")*
 ## Introduction
 
 >This repository contains the back-end (be) of **Nutritiv** project.

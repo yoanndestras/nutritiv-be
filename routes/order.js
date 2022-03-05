@@ -29,9 +29,7 @@ async (req, res, next) =>
 {
     try
     {
-        //method to get all orders
         const orders = await Order.find();
-        
         res.status(200).json(orders);
     }catch(err){next(err)}
 
@@ -119,7 +117,6 @@ auth.verifyAdmin, async(req, res, next) =>
             },
             {new: true}
         );
-
         res.status(201).json(updatedOrder);
     }catch(err){next(err)}
 });

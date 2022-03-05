@@ -109,9 +109,7 @@ router.post("/new_password", auth.verifyNewPasswordSyntax, auth.verifyNewPasswor
     {
         //const user = req.user.username;
         const user = await User.findOne({username: "yoann"});
-
         const newPass = req.body.confirmNewPass;
-        console.log(newPass);
         
         if(user && newPass)
         {
@@ -137,7 +135,6 @@ router.post("/new_password", auth.verifyNewPasswordSyntax, auth.verifyNewPasswor
         }
     }catch(err){next(err)}
 });
-
 
 //LOGIN
 router.post("/login", cors.corsWithOptions, auth.loginData, auth.verifyNoRefresh, async(req, res, next)=>
@@ -196,7 +193,6 @@ router.post("/login", cors.corsWithOptions, auth.loginData, auth.verifyNoRefresh
         })(req, res, next);
     }catch(err){next(err)}
 });
-
 
 // CLEAR COOKIE TOKEN // LOGOUT
 router.delete("/logout", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async(req, res, next) =>

@@ -1,4 +1,6 @@
 # Nutritiv-be
+
+*Read this in other languages : [English](README.md) ![GB-flag.](/public/images/GB@2px.png "This is the GB flag.") [French](README.fr.md) ![FR-flag.](/public/images/FR@2px.png "This is the french flag.")*
 ## Introduction
 
 >This repository contains the back-end (be) of **Nutritiv** project.
@@ -15,7 +17,7 @@ We use **npm**, the default package manager for Node.js Javascript runtime envir
  
  
  ## [**Postman API documentation**](https://documenter.getpostman.com/view/15856568/UVkpMv2U#78474388-f20b-460c-9300-705113cadee4) 
-![postman logo.](/public/images/postman_logo.png "This is a sample image.")
+![postman logo.](/public/images/postman_logo.png "This is the postman logo.")
 
 
 ### Create a new API endpoint

@@ -175,7 +175,7 @@ async(req, res, next) =>
     {
         let value = req.params.value, newProduct, newProducts = [];
         const shape = ["powder", "capsules"];
-
+        
         const tags = [
             "anti-oxydant",
             "immunity",
@@ -234,7 +234,7 @@ upload.any('imageFile'), product.resizeProductImage, product.newProduct, async(r
     try
     {
         const { title, desc, shape, countInStock } = req.body;
-
+        
         let imgs = req.imgs.map(img => img.replaceAll("\\", "/"))
         let replace = imgs.map(img => img.replace("public/", ""))
         
@@ -326,7 +326,6 @@ async (req, res, next) =>
     try
     {
         let income = await Product.deleteMany( { "createdAt" : {$gt : lastDay } })
-            
         res.status(200).json(income);
     }catch(err){next(err)}
 

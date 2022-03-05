@@ -37,7 +37,6 @@ router.get("/self", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, a
                     status: "Cart do not exist!"
                 });
         }
-        
     }catch(err){next(err)}
 })
 

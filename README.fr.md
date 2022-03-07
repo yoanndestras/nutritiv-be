@@ -18,7 +18,7 @@ Nous avons choisit MERN car cette technologie est facilement réutilisable et ra
 Nous utilisons **npm**, le gestionnaire de packages par défaut pour l'environnement d'exécution **Javascript Node.js** *(npm init -y)*.
 ## API
 
-> Afin d'effectuer des appels API pendant la phase de développement te de tests, nous avons utilisé **Postman**, cliquez sur le lien ci-dessous pour accéder à notre documentation API.
+> Afin d'effectuer des appels API pendant la phase de développement et de tests, nous avons utilisé **Postman**, cliquez sur le lien ci-dessous pour accéder à notre documentation API.
  
  
  ## [**Documentation API Postman**](https://documenter.getpostman.com/view/15856568/UVkpMv2U#78474388-f20b-460c-9300-705113cadee4) 

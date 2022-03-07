@@ -71,6 +71,7 @@ npm run start-dev
 Notre équipe utilise Trello afin d'organiser nos tâches et nos projets.
 ___
 - Développeur Back-end : [Yoann Destras](https://github.com/yoanndestras)
+  - [**Dépôt Github Back-end**](https://github.com/yoanndestras/nutritiv-be)
 - Développeur Front-end : [Monstar](https://github.com/Monstarrrr)
   - [**Dépôt Github Front-end**](https://github.com/Monstarrrr/nutritiv-fe)
 

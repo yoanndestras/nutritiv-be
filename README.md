@@ -12,7 +12,7 @@ Nutritiv is an **e-commerce** project for **food supplements** for the health of
 Nutritiv is made to cast a wide net on basic functionality used on most websites and isn't intended to be in production.
 
 >This website is made on **MERN** stack using **REST API**.
-We choosed MERN technologies because it's very reusable and fast to use, morever we particulary appreciate to work on Javascript.
+We choosed MERN technologies because it's very reusable and fast to use, morever we particulary appreciate to work on **Javascript**.
 ## Initialize the project
 
 We use **npm**, the default package manager for Node.js Javascript runtime environment *(npm init -y)*.

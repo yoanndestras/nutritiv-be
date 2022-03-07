@@ -87,6 +87,22 @@ async(req, res, next) =>
     }catch(err){next(err)}
 })
 
+// GET USER ADDRESSES
+router.get("/selfAddresses", cors.corsWithOptions, auth.verifyUser, auth.verifyAuth, 
+async(req, res, next) =>
+{
+    try
+    {
+
+        const user =  await User.findOne({_id: req.user._id});
+        const addressDetails = user.addressDetails;
+
+        res.status(200).json(
+            {
+                addressDetails
+            });
+    }catch(err){next(err)}
+})
 
 // GET USER // verify user exist in BDD & is connected. Return User info except PWD
 router.get("/find/:userId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 

@@ -88,7 +88,7 @@ async(req, res, next) =>
 })
 
 // GET USER ADDRESSES
-router.get("/selfAddresses", cors.corsWithOptions, auth.verifyUser, auth.verifyAuth, 
+router.get("/selfAddresses", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
 async(req, res, next) =>
 {
     try

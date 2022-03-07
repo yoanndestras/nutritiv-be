@@ -57,13 +57,18 @@ Thanks to middlewares, our application features handle differents scenario :
 - Mails *(sgMail, mailer, email_validator)*
 - Payment *(stripe).*
 
-To install a new middleware go in terminal : **npm i "mymiddleware"**
+To install a new middleware go in terminal :
+```
+npm i "mymiddleware"
+```
 
 ## Run the app
 
 >Its not possible to run the app without the .env file.
-Our app file is app.js, running the command **npm run start-dev** ("start": "env-cmd -e development nodemon app.js") will start the back-end server.
-
+Our app file is app.js, running this command will start the back-end server :
+```
+npm run start-dev 
+```
 ### Additionnal informations
 
 Our team use Trello to organize tasks and manage the project.

@@ -72,7 +72,7 @@ async(req, res, next) =>
 {
     try
     {
-        const { username, email, isAdmin, isVerified, adressDetails} = req.user;
+        const { username, email, isAdmin, isVerified, addressDetails} = req.user;
 
         res.status(200).json(
             {
@@ -81,7 +81,7 @@ async(req, res, next) =>
                 email,
                 isAdmin,
                 isVerified,
-                adressDetails,
+                addressDetails,
                 status: "User connected"
             });
     }catch(err){next(err)}

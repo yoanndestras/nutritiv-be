@@ -158,9 +158,11 @@ exports.verifyUser = (req, res, next) =>
             err.statusCode = 401;
             return next(err);
         }
-        req.user = user;
-        return next();
-    
+        else
+        {
+            req.user = user;
+            return next();
+        }
     })(req, res, next); 
 };
 
@@ -305,10 +307,13 @@ exports.verifyEmailSyntax = (req, res, next) =>
     const valid_email = req.body.formData.email && email_validator.validate(req.body.formData.email);
     
     if(valid_email === true) return next();
+    else
+    {
+        let err = new Error('You Email syntax is wrong!');
+        err.statusCode = 400;
+        next(err);
+    }
     
-    let err = new Error('You Email syntax is wrong!');
-    err.statusCode = 400;
-    next(err);
 };
 
 exports.verifyPasswordSyntax = (req, res, next) =>
@@ -331,7 +336,10 @@ exports.verifyUsername = (req, res, next) =>
                 err.statusCode = 400;
                 return next(err);
             }
-            next();
+            else
+            {
+                next();
+            }
         })
 };
 
@@ -345,7 +353,10 @@ exports.verifyEmail = (req, res, next) =>
                 err.statusCode = 400;
                 return next(err);
             }
-            next();
+            else
+            {
+                next();
+            }
         })
 };
 
@@ -394,8 +405,11 @@ exports.verifyEmailToken = (req, res, next) =>
             err.statusCode = 403;
             return next(err);
         }
-        req.user = user;
-        return next();
+        else
+        {
+            req.user = user;
+            return next();
+        }
     })(req, res, next); 
 };
 
@@ -431,8 +445,11 @@ exports.verifyEmailExist = (req, res, next) =>
                 req.user = user;
                 next();
             }
-            err.statusCode = 400;
-            return next(err);
+            else
+            {
+                err.statusCode = 400;
+                return next(err);
+            }
         })
 };
 
@@ -445,9 +462,13 @@ exports.loginData = (req, res, next) =>
         req.body.password = loginData.password;
         next();
     }
-    let err = new Error('Missing loginData');
-    err.statusCode = 400;
-    return next(err);
+    else
+    {
+        let err = new Error('Missing loginData');
+        err.statusCode = 400;
+        return next(err);
+    }
+    
 };
 
 

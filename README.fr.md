@@ -7,6 +7,10 @@
 ![FR-flag.](/public/images/FR@2x.png "This is the french flag.")*
 ## Introduction
 
+>Ce dépôt github contient la partie back-end (be) du projet **Nutritiv**.
+Nutritiv est un projet de site **e-commerce** de **compléments alimentaires** déstiné à la santé des sportifs.
+Nutritiv a été conçu afin de 
+
 >This repository contains the back-end (be) of **Nutritiv** project.
 Nutritiv is an **e-commerce** project for **food supplements** for the health of athletes.
 Nutritiv is made to cast a wide net on basic functionality used on most websites and isn't intended to be in production.

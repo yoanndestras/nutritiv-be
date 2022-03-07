@@ -58,7 +58,7 @@ Thanks to middlewares, our application features handle differents scenario :
 - Payment *(stripe).*
 
 To install a new middleware go in terminal :
-```
+```bash
 npm i "mymiddleware"
 ```
 
@@ -66,7 +66,7 @@ npm i "mymiddleware"
 
 >Its not possible to run the app without the .env file.
 Our app file is app.js, running this command will start the back-end server :
-```
+```bash
 npm run start-dev 
 ```
 ### Additionnal informations

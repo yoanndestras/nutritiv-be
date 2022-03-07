@@ -54,7 +54,7 @@ Grâce aux middlewares, les fonctionnalités de nos applications gèrent les cas
 - Paiement *(stripe).*
 
 Pour installer un nouveau middlewares, il faut entrer dans le terminal : 
-```
+```bash
 npm i "mymiddleware"
 ```
 
@@ -62,7 +62,7 @@ npm i "mymiddleware"
 
 >Il est impossible de lancer l'application sans le fichier .env.
 Notre fichier app est app.js, le serveur back-end démarre à la commande :
-```
+```bash
 npm run start-dev 
 ```
 

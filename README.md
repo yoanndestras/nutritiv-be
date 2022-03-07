@@ -59,7 +59,7 @@ Thanks to middlewares, our application features handle differents scenario :
 
 To install a new middleware go in terminal :
 ```bash
-npm i "mymiddleware"
+npm i "newMiddleware"
 ```
 
 ## Run the app

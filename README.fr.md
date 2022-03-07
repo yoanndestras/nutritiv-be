@@ -26,7 +26,7 @@ Nous utilisons **npm**, le gestionnaire de packages par défaut pour l'environne
 ### Créer un nouvelle endpoint de l'API
 
 1. Créer un nouveau fichier route
-2. Ajouter le fichier route au routeur basé sur l'url dans app.js,*ex : authRoute = require("./routes/auth");*
+2. Ajouter le fichier route au routeur basé sur l'url dans app.js, *ex : authRoute = require("./routes/auth");*
 3. Créer le contenu de l'endpoint, *ex : router.post("/login"... async(req, res, next){content...});*
 4. Utiliser la méthode *try{...}.catch(err){...}*
 5. Ajouter des fonctions controller au endpoint pour gérer le cors etc...
@@ -38,30 +38,30 @@ Nous utilisons **MongoDB** avec le module mongoose, une solution basée sur un s
 
 1. Créer un cluster sur MongoDB
 2. Gérer le Réseau et l'accès à la BDD sur MongoDB
-3. Copier l'url' de connexion au cluster
+3. Copier l'url de connexion au cluster
 4. Connecter la BDD au serveur avec mongoose en utilisant cet url
 ## Middlewares
 
 >Nous avons séléctionné des middlewares en suivant certains critères, l'utilisabilité, la maintenabilité, les fonctionnalités...
 Grâce aux middlewares, les fonctionnalités de nos applications gèrent les cas de figures suivants :
-- La politique CORS, intégration d'une liste blanche *(cors).*
+- La politique CORS, l'intégration d'une liste blanche *(cors).*
 - Le spam de requêtes *(limitter).*
 - Les cookies *(cookieParser).*
 - Les clés secrètes *(dotenv).*
 - Les fichiers statiques *(path, fs, multer, sharp, nanoid).*
-- Inscription, connexion... *(passport, passport-local, passport-jwt, jsonwebtoken).*
-- Mails *(sgMail, mailer, email_validator)*
-- Paiement *(stripe).*
+- L'inscription, connexion... *(passport, passport-local, passport-jwt, jsonwebtoken).*
+- L'envoi de mails *(sgMail, mailer, email_validator)*
+- Les procédures de paiement *(stripe).*
 
-Pour installer un nouveau middlewares, il faut entrer dans le terminal : 
+Pour installer un nouveau middleware, il faut entrer dans le terminal : 
 ```bash
-npm i "mymiddleware"
+npm i "newMiddleware"
 ```
 
 ## Run the app
 
 >Il est impossible de lancer l'application sans le fichier .env.
-Notre fichier app est app.js, le serveur back-end démarre à la commande :
+Notre applicayion est sur le fichier app.js, le serveur back-end démarre à la commande :
 ```bash
 npm run start-dev 
 ```
@@ -72,6 +72,6 @@ Notre équipe utilise Trello afin d'organiser nos tâches et nos projets.
 ___
 - Développeur Back-end : [Yoann Destras](https://github.com/yoanndestras)
 - Développeur Front-end : [Monstar](https://github.com/Monstarrrr)
-  - [**Dépôt Front-end**](https://github.com/Monstarrrr/nutritiv-fe)
+  - [**Dépôt Github Front-end**](https://github.com/Monstarrrr/nutritiv-fe)
 
 

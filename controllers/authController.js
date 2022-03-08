@@ -306,24 +306,25 @@ exports.verifyEmailSyntax = (req, res, next) =>
 {
     const valid_email = req.body.email && email_validator.validate(req.body.email);
     
-    if(valid_email === true) return next();
+    if(valid_email === true) next();
     else
     {
         let err = new Error('You Email syntax is wrong!');
         err.statusCode = 400;
         next(err);
     }
-    
 };
 
 exports.verifyPasswordSyntax = (req, res, next) =>
 {
     if(req.body.password.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/)) // password 8 characters, 1 low 1 upper 1 number
     {next();}
-
-    let err = new Error('You password syntax is wrong!');
-    err.statusCode = 400;
-    next(err);
+    else
+    {
+        let err = new Error('You password syntax is wrong!');
+        err.statusCode = 400;
+        next(err);
+    }
 };
 
 exports.verifyUsername = (req, res, next) =>

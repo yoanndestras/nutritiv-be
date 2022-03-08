@@ -22,6 +22,7 @@
   "dependencies": {
     "@sendgrid/mail": "^7.6.0",
     "address-validator": "^0.2.3",
+    "aws-sdk": "^2.1088.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",

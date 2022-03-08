@@ -7,6 +7,7 @@ const auth = require('../controllers/authController');
 const mailer = require("../controllers/mailerController");
 const user = require("../controllers/usersController");
 const {upload} = require('./upload');
+const fileUpload = require('../controllers/fileUploadController');
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
@@ -189,6 +190,11 @@ upload.any('imageFile'), user.resizeUserAvatar, user.addUserAvatar, async (req, 
     {
         const user = await User.findOne({_id: req.user._id});
         user.save();
+        
+        // const file = req.file;
+        // const result = await fileUpload.uploadFile(file);
+
+        // console.log(result);
         
         res.status(201).json(
             {

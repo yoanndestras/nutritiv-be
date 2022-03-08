@@ -32,7 +32,7 @@ exports.resizeUserAvatar = async(req, res, next) =>
                 if(user.avatar){fs.unlinkSync(path.join("public/", user.avatar))}
             })
     );
-      next();
+    next();
   }catch(err) {next(err);}
   
 };
@@ -44,8 +44,7 @@ exports.addUserAvatar = async(req, res, next) =>
     let file = req.files[0];
     file = path.join(file.destination,'usersAvatar', file.filename)
     let avatar = await (file.replace(/\\/g, "/")).replace("public/", "");
-    
-    const user = await User.findOneAndUpdate({_id: req.user._id},
+        const user = await User.findOneAndUpdate({_id: req.user._id},
       {
         $set:
         {

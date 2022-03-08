@@ -31,10 +31,10 @@ router.get("/self", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, a
         }
         else if(!cart)
         {
-            res.status(400).json(
+            res.status(200).json(
                 {
-                    success: false,
-                    status: "Cart do not exist!"
+                    success: true,
+                    status: "No cart found!"
                 });
         }
     }catch(err){next(err)}

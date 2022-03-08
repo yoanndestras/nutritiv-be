@@ -191,10 +191,10 @@ upload.any('imageFile'), user.resizeUserAvatar, user.addUserAvatar, async (req, 
         const user = await User.findOne({_id: req.user._id});
         user.save();
         
-        // const file = req.file;
-        // const result = await fileUpload.uploadFile(file);
-
-        // console.log(result);
+        const file = req.files[0];
+        const result = await fileUpload.uploadFile(file);
+        
+        console.log(result);
         
         res.status(201).json(
             {

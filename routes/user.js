@@ -93,7 +93,6 @@ async(req, res, next) =>
 {
     try
     {
-
         const user =  await User.findOne({_id: req.user._id});
         const addressDetails = user.addressDetails;
 
@@ -118,15 +117,15 @@ auth.verifyAuthorization, async (req, res, next) =>
 })
 
 
-//UPDATE USER
-router.put('/updateUser', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
-async (req, res, next) =>
+//UPDATE USERNAME
+router.put('/updateUsername', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+user.verifyUsername, user.updateUsername, mailer.sendUpdateUsername, async (req, res, next) =>
 {
     try
     {
         const user = await User.findOne({_id: req.user._id});
         
-        res.status(200).json(
+        res.status(201).json(
             {
                 success: true, 
                 status: user

@@ -1,3 +1,5 @@
+const User = require("../models/User");
+
 const sgMail = require("@sendgrid/mail");
 const auth = require("./authController");
 
@@ -6,10 +8,10 @@ exports.sendVerifyAccountMail = async(req, res, next) =>
 {
     try
     {        
-        const Email_Token = auth.GenerateEmailToken({email: req.body.formData.email});
+        const Email_Token = auth.GenerateEmailToken({email: req.body.email});
         sgMail.setApiKey(process.env.SENDGRID_API_KEY);
         
-        const email = req.body.formData.email;
+        const email = req.body.email;
         const mailContent = 
         {
             to: email,
@@ -54,3 +56,26 @@ exports.sendForgetPassword = async(req, res, next) =>
     
 } 
 
+exports.sendUpdateUsername = async(req, res, next) =>
+{
+    try
+    {   
+        const user = await User.findOne({_id: req.user._id});
+
+        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+        
+        const email = user.email, username = user.username;
+        const mailContent = 
+        {
+            to: email,
+            from:"nutritivshop@gmail.com",
+            subject:"Nutritiv - Change username",
+            html : `
+            <h1>Hello, ${username}</h1>
+            <p>You just have changed your username!</p>`
+        }   
+        
+        await sgMail.send(mailContent);
+        next();
+    }catch(err){next(err)}
+}

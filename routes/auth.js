@@ -74,8 +74,8 @@ auth.verifyPasswordSyntax, mailer.sendVerifyAccountMail, async(req, res, next) =
 {
     try
     {
-        User.register(new User({username: req.body.formData.username, email: req.body.formData.email}), 
-        req.body.formData.password, async(err, user) =>
+        User.register(new User({username: req.body.username, email: req.body.email}), 
+        req.body.password, async(err, user) =>
         {
             if(err)
             {

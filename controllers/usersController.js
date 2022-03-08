@@ -167,3 +167,40 @@ exports.deleteAddress = async(req, res, next) =>
     
   }catch(err){next(err);}
 }
+
+exports.verifyUsername = (req, res, next) =>
+{
+    User.findOne({username: req.body.username}, (err, user) =>
+        {
+            if(user !== null)
+            {
+                let err = new Error('An account with your username already exists!');
+                err.statusCode = 400;
+                return next(err);
+            }
+            else
+            {
+                next();
+            }
+        })
+};
+
+exports.updateUsername = async(req, res, next) =>
+{
+  try
+  {
+    const username = req.body.username;  
+    let updateUsername = await User.findOneAndUpdate(
+      {_id: req.user._id},
+      {
+        $set: 
+        {
+          username: username
+        }
+      }
+    )
+    await updateUsername.save();
+    next();
+  
+  }catch(err){next(err);}
+}

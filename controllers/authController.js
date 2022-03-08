@@ -454,23 +454,23 @@ exports.verifyEmailExist = (req, res, next) =>
         })
 };
 
-exports.loginData = (req, res, next) => 
-{
-    const loginData = req.body.loginData;
-    if(loginData)
-    {
-        req.body.username = loginData.username;
-        req.body.password = loginData.password;
-        next();
-    }
-    else
-    {
-        let err = new Error('Missing loginData');
-        err.statusCode = 400;
-        return next(err);
-    }
+// exports.loginData = (req, res, next) => 
+// {
+//     const loginData = req.body.loginData;
+//     if(loginData)
+//     {
+//         req.body.username = loginData.username;
+//         req.body.password = loginData.password;
+//         next();
+//     }
+//     else
+//     {
+//         let err = new Error('Missing loginData');
+//         err.statusCode = 400;
+//         return next(err);
+//     }
     
-};
+// };
 
 
 // exports.registerLimitter = async(req, res, next) =>

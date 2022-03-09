@@ -39,7 +39,7 @@ exports.resizeUserAvatar = async(req, res, next) =>
 
       fileArray.map(async file => 
             {
-              fs.readdir("../public/images/usersAvatar", (err, files) => 
+              fs.readdirSync(path.resolve(file.destination,'usersAvatar'), (err, files) => 
               {
                 if (err)
                   console.log(err);

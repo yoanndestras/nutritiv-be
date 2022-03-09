@@ -1,13 +1,15 @@
 const User = require("../models/User");
 const router = require("express").Router();
 
+const aws = require('aws-sdk');
+
 // CONTROLLERS
 const cors = require('../controllers/corsController');
 const auth = require('../controllers/authController');
 const mailer = require("../controllers/mailerController");
 const user = require("../controllers/usersController");
-const {upload} = require('./upload');
 const fileUpload = require('../controllers/fileUploadController');
+const {upload} = require('./upload');
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
@@ -96,11 +98,30 @@ async(req, res, next) =>
     {
         const user =  await User.findOne({_id: req.user._id});
         const addressDetails = user.addressDetails;
-
+        
         res.status(200).json(
             {
                 addressDetails
             });
+    }catch(err){next(err)}
+})
+
+// GET USER AVATAR
+router.get("/selfAvatar", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+async(req, res, next) =>
+{
+    try
+    {
+        const user =  await User.findOne({_id: req.user._id});
+        const avatar = user.avatar;
+        const readStream = fileUpload.getFileStream(avatar)
+
+        //display the avater
+        readStream.pipe(res);
+        // res.status(200).json(
+        //     {
+        //         addressDetails
+        //     });
     }catch(err){next(err)}
 })
 
@@ -184,22 +205,19 @@ user.verifyAdressId, user.deleteAddress, async (req, res, next) =>
 
 //ADD OR REPLACE USER ICON
 router.put('/addAvatar', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
-upload.any('imageFile'), user.resizeUserAvatar, user.addUserAvatar, async (req, res, next) =>
+upload.single('imageFile'), user.resizeUserAvatar, user.addUserAvatar, async (req, res, next) =>
 {
     try
     {
         const user = await User.findOne({_id: req.user._id});
         user.save();
         
-        const file = req.files[0];
-        const result = await fileUpload.uploadFile(file);
-        
-        console.log(result);
+        let avatar = user.avatar;
         
         res.status(201).json(
             {
-                success: true, 
-                userInfo: user
+                success: true,
+                avatar
             });
     }catch(err){next(err)}
 })
@@ -211,7 +229,6 @@ auth.verifyNewPasswordSyntax, auth.verifyNewPasswordEquality, async(req, res, ne
     try
     {
         const oldPass = req.body.oldPass, newPass = req.body.confirmNewPass, user = req.user;
-        
         user.changePassword(oldPass, newPass, (err, user) => 
             {                
                 if(err)

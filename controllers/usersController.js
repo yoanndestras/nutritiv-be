@@ -5,7 +5,11 @@ const mongoose = require('mongoose');
 const fs = require('fs');
 const sharp = require('sharp');
 const path = require('path');
+
 const validatePhoneNumber = require('validate-phone-number-node-js');
+
+// CONTROLLERS
+const fileUpload = require('../controllers/fileUploadController');
 
 const app = express();
 
@@ -18,20 +22,27 @@ exports.resizeUserAvatar = async(req, res, next) =>
   try
   {
     const user = await User.findOne({_id: req.user._id})
-    if (!req.files) return next(err);
+    if (!req.file)
+    {
+      let err = new Error('File not found!')
+      next(err);
+    }
+    let avatar = user.avatar;
+    avatar ? fileUpload.deleteFile(avatar) : null;
+    
+    let fileArray = [req.file];
     await Promise.all
     (
-        req.files.map(async file => 
+      fileArray.map(async file => 
             {
-            await sharp(file.path)
-                .resize(200, 200)
-                .toFile(
-                    path.resolve(file.destination,'usersAvatar', file.filename)
-                )
-                fs.unlinkSync(file.path) 
-                if(user.avatar){fs.unlinkSync(path.join("public/", user.avatar))}
+              await sharp(file.path)
+                  .resize(200, 200)
+                  .toFile(path.resolve(file.destination,'usersAvatar', file.filename))
             })
     );
+    
+    // if(avatar){fs.unlinkSync(path.join("public/images/usersAvatar/", avatar))}
+    fs.unlinkSync(path.join("public/images/", req.file.filename))
     next();
   }catch(err) {next(err);}
   
@@ -41,17 +52,27 @@ exports.addUserAvatar = async(req, res, next) =>
 {
   try
   {
-    let file = req.files[0];
+    let file = req.file;
     file = path.join(file.destination,'usersAvatar', file.filename)
-    let avatar = await (file.replace(/\\/g, "/")).replace("public/", "");
-        const user = await User.findOneAndUpdate({_id: req.user._id},
+
+    const filePath = file;
+    const fileName = req.file.filename
+    
+    const result = await fileUpload.uploadFile(filePath, fileName);
+    let key = result.Key;
+
+    fs.unlinkSync(path.join("public/images/usersAvatar", fileName))
+        
+    const user = await User.findOneAndUpdate({_id: req.user._id},
       {
         $set:
         {
-          avatar
+          avatar: key
         }
       });
-    user.save();
+      
+    
+    await user.save();
     next();
   }catch(err){next(err)}
   

@@ -30,24 +30,29 @@ exports.resizeUserAvatar = async(req, res, next) =>
     let avatar = user.avatar;
     avatar ? fileUpload.deleteFile(avatar) : null;
 
-    fs.readdir("../public/images/usersAvatar", (err, files) => {
-      if (err)
-        console.log(err);
-      else {
-        console.log("\nCurrent directory filenames:");
-        files.forEach(file => {
-          console.log(file);
-        })
-      }
-    })
+    
+    
     
     let fileArray = [req.file];
     await Promise.all
     (
+
       fileArray.map(async file => 
             {
-              console.log(req.file);
-              
+              fs.readdir("../public/images/usersAvatar", (err, files) => 
+              {
+                if (err)
+                  console.log(err);
+                else 
+                {
+                  console.log("\nCurrent directory filenames:");
+                  files.forEach(file => 
+                    {
+                    console.log(file);
+                  })
+                }
+              })
+
               await sharp(file.path)
                   .resize(200, 200)
                   .toFile(path.resolve(file.destination,'usersAvatar', file.filename))

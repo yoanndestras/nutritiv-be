@@ -21,7 +21,6 @@ exports.resizeUserAvatar = async(req, res, next) =>
 {
   try
   {
-    console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
     const user = await User.findOne({_id: req.user._id})
     if (!req.file)
     {
@@ -30,6 +29,8 @@ exports.resizeUserAvatar = async(req, res, next) =>
     }
     let avatar = user.avatar;
     avatar ? fileUpload.deleteFile(avatar) : null;
+
+    console.log(path.resolve(file.destination,'usersAvatar', file.filename));
     
     let fileArray = [req.file];
     await Promise.all
@@ -41,7 +42,7 @@ exports.resizeUserAvatar = async(req, res, next) =>
                   .toFile(path.resolve(file.destination,'usersAvatar', file.filename))
             })
     );
-    
+    console.log(path.join("public/images/", req.file.filename));
     // if(avatar){fs.unlinkSync(path.join("public/images/usersAvatar/", avatar))}
     fs.unlinkSync(path.join("public/images/", req.file.filename))
     next();
@@ -53,11 +54,15 @@ exports.addUserAvatar = async(req, res, next) =>
 {
   try
   {
+    console.log("addUserAvatar");
     let file = req.file;
     file = path.join(file.destination,'usersAvatar', file.filename)
 
     const filePath = file;
     const fileName = req.file.filename
+
+    console.log(filePath);
+    console.log(fileName);
     
     const result = await fileUpload.uploadFile(filePath, fileName);
     let key = result.Key;

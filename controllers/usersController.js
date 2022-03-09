@@ -39,7 +39,7 @@ exports.resizeUserAvatar = async(req, res, next) =>
 
       fileArray.map(async file => 
             {
-              fs.readdirSync(path.resolve(file.destination), (err, files) => 
+              fs.readdirSync(path.resolve(file.destination, "productsImgs"), (err, files) => 
               {
                 if (err)
                   console.log(err);
@@ -52,7 +52,7 @@ exports.resizeUserAvatar = async(req, res, next) =>
                   })
                 }
               })
-              console.log(file.destination);
+              console.log(path.resolve(file.destination));
               await sharp(file.path)
                   .resize(200, 200)
                   .toFile(path.resolve(file.destination,'usersAvatar', file.filename))

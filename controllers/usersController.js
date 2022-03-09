@@ -36,7 +36,7 @@ exports.resizeUserAvatar = async(req, res, next) =>
     (
       fileArray.map(async file => 
             {
-              console.log(path.resolve(file.destination,'usersAvatar', file.filename));
+              console.log(req.file);
               
               await sharp(file.path)
                   .resize(200, 200)

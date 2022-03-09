@@ -29,16 +29,22 @@ exports.resizeUserAvatar = async(req, res, next) =>
     }
     let avatar = user.avatar;
     avatar ? fileUpload.deleteFile(avatar) : null;
+
     
-    
+    fs.readdir(function () {
+
+          console.log(path.resolve(file.destination,'usersAvatar')); 
+      });    
     let fileArray = [req.file];
     await Promise.all
     (
       fileArray.map(async file => 
-            {              
+            {
+              console.log(req.file);
+              
               await sharp(file.path)
                   .resize(200, 200)
-                  .toFile(path.join('public/images/usersAvatar', file.filename))
+                  .toFile(path.resolve(file.destination,'usersAvatar', file.filename))
             })
     );
     console.log(path.join("public/images/", req.file.filename));
@@ -55,7 +61,7 @@ exports.addUserAvatar = async(req, res, next) =>
   {
     console.log("addUserAvatar");
     let file = req.file;
-    file = path.join('public/images/usersAvatar', file.filename)
+    file = path.join(file.destination,'usersAvatar', file.filename)
 
     const filePath = file;
     const fileName = req.file.filename

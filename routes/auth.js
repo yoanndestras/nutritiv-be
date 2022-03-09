@@ -211,7 +211,7 @@ router.delete("/logout", cors.corsWithOptions, auth.verifyUser, auth.verifyRefre
 });
 
 //////////////////////////////////////////////////TEST REQUEST////////////////////////////////////////////////////////////
-router.post("/test", async(req, res) =>
+router.get("/test", async(req, res) =>
 {
     try 
     {

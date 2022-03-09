@@ -52,7 +52,7 @@ exports.resizeUserAvatar = async(req, res, next) =>
                   })
                 }
               })
-
+              console.log(file.destination);
               await sharp(file.path)
                   .resize(200, 200)
                   .toFile(path.resolve(file.destination,'usersAvatar', file.filename))

@@ -36,7 +36,6 @@ exports.resizeUserAvatar = async(req, res, next) =>
     let fileArray = [req.file];
     await Promise.all
     (
-
       fileArray.map(async file => 
             {
               fs.readdirSync(path.resolve(file.destination, "productsImgs"), (err, files) => 

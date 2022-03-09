@@ -53,9 +53,9 @@ exports.resizeUserAvatar = async(req, res, next) =>
                 }
               })
               console.log(path.resolve(file.destination));
-              await sharp(file.path)
-                  .resize(200, 200)
-                  .toFile(path.resolve(file.destination,'usersAvatar', file.filename))
+              // await sharp(file.path)
+              //     .resize(200, 200)
+              //     .toFile(path.resolve(file.destination,'usersAvatar', file.filename))
             })
     );
     // if(avatar){fs.unlinkSync(path.join("public/images/usersAvatar/", avatar))}

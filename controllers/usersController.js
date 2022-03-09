@@ -30,13 +30,14 @@ exports.resizeUserAvatar = async(req, res, next) =>
     let avatar = user.avatar;
     avatar ? fileUpload.deleteFile(avatar) : null;
 
-    console.log(path.resolve(file.destination,'usersAvatar', file.filename));
     
     let fileArray = [req.file];
     await Promise.all
     (
       fileArray.map(async file => 
             {
+              console.log(path.resolve(file.destination,'usersAvatar', file.filename));
+              
               await sharp(file.path)
                   .resize(200, 200)
                   .toFile(path.resolve(file.destination,'usersAvatar', file.filename))

@@ -115,7 +115,7 @@ async(req, res, next) =>
         const user =  await User.findOne({_id: req.user._id});
         const avatar = user.avatar;
         const readStream = fileUpload.getFileStream(avatar)
-
+        
         //display the avater
         readStream.pipe(res);
         // res.status(200).json(

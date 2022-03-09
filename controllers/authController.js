@@ -306,7 +306,11 @@ exports.verifyEmailSyntax = (req, res, next) =>
 {
     const valid_email = req.body.email && email_validator.validate(req.body.email);
     
-    if(valid_email === true) next();
+    if(valid_email === true) 
+    {
+        console.log("test");
+        next();
+    }
     else
     {
         let err = new Error('You Email syntax is wrong!');

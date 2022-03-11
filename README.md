@@ -61,7 +61,6 @@ To install a new middleware go in terminal :
 ```bash
 npm i "newMiddleware"
 ```
-
 ## Run the app
 
 >Its not possible to run the app without the .env file.

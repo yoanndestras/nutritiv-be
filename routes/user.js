@@ -116,12 +116,12 @@ async(req, res, next) =>
         const avatar = user.avatar;
         const readStream = fileUpload.getFileStream(avatar)
         
-        //display the avater
-        readStream.pipe(res);
-        // res.status(200).json(
-        //     {
-        //         addressDetails
-        //     });
+        
+        res.status(200).json(
+            {
+                avatar
+            });
+    
     }catch(err){next(err)}
 })
 

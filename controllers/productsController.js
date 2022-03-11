@@ -23,13 +23,12 @@ exports.newProduct = async(req, res, next) =>
     try
     {
 
-        const {shape, tags, load, pricePerCapsule, pricePerKilograms} = req.body, files = req.files
+        const {shape, tags, load, pricePerCapsule, pricePerKilograms} = req.body
         const PPCapsule = pricePerCapsule, PPKg = pricePerKilograms;
         let product;
         
         const req_tags = tags && Array.isArray(tags) ? tags : tags !== undefined ? [tags] : null;
         const loadArr = load && Array.isArray(load) ? load : load !== undefined ? [load] : null;
-        let imgsArr = files ? files.map((el, i) => {return path.join(el.destination,'productsImgs', el.filename)}) : null;
         let tagsArr = req_tags ? req_tags.map((el, i) => {return el}) : null;    
         
         if(shape === "capsules" && PPCapsule)
@@ -54,9 +53,27 @@ exports.newProduct = async(req, res, next) =>
             err.statusCode = 400;
             return next(err);
         }
-        req.product = product;
-        req.tags = tagsArr;
-        req.imgs = imgsArr;
+        
+        if(!req.params.productId)
+        {
+            const { title, desc, countInStock } = req.body;
+            req.title = title;
+    
+            const newProduct = await new Product(
+                {
+                    title,
+                    desc,
+                    shape,
+                    tags : tagsArr,
+                    productItems: product,
+                    countInStock
+                },
+                {new: true}
+            );
+            await newProduct.save();
+        }
+        
+
         next();
     }catch(err){next(err)}
 }
@@ -211,19 +228,18 @@ exports.removeImgs = async(req, res, next) =>
 {
     try
     {
-        const removeFile= function (err) 
-        {
-            if (err) next(err)
-            else 
-            {
-                console.log("file deleted");
-            }
-        }
-        
         const product = await Product.findOne({_id : req.params.productId})
-        const productImg = product.imgs;
-        productImg ? productImg.map(img => fs.unlink('public/' + img, removeFile)) : null;
 
+        let imgs = product ? product.imgs : null;
+        imgs ? 
+        await Promise.all
+        (
+            imgs.map(async img =>
+                {
+                    fileUpload.deleteFile(img)
+                })
+        ) : null;
+        
         next();
 
     }catch(err){next(err)}
@@ -281,14 +297,12 @@ exports.resizeProductImage = async(req, res, next) =>
 {
     try
     {
-        const product = await Product.findOne({_id: req.params.productId});
         if (!req.files)
         {   
             let err = new Error('Files not found!')
+            err.statusCode = 400;
             next(err);
         }
-        // let imgs = product.imgs;
-        // imgs ? fileUpload.deleteFile(avatar) : null;
         
         let filesArr = req.files;
         await Promise.all
@@ -319,22 +333,30 @@ exports.addProductImgs = async(req, res, next) =>
                 {
                     
                     let file =  path.join(img.destination,'productsImgs', img.filename)
-                    let filePath = file, fileName = img.filename
+                    let filePath = file, fileName = img.filename, fileType = img.mimetype;
                     
-                    let result = await fileUpload.uploadFile(filePath, fileName);
+                    let result = await fileUpload.uploadFile(filePath, fileName, fileType);
                     key.push(result.Key); 
                     fs.unlinkSync(path.join("public/images/productsImgs", fileName))
                 
                 })
         );
-        const product = await Product.findOneAndUpdate({_id: req.params.productId},
+        const newProduct = await Product.findOne({title : req.title})
+        
+        const product = !newProduct ? await Product.findOneAndUpdate({_id: req.params.productId},
+            {
+                $set:
+                {
+                    imgs: key
+                }
+            }) : await Product.findOneAndUpdate({title : req.title},
             {
                 $set:
                 {
                     imgs: key
                 }
             });
-    
+        
         await product.save();
         next();
     }catch(err){next(err)}

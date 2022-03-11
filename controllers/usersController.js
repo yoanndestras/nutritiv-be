@@ -56,8 +56,8 @@ exports.addUserAvatar = async(req, res, next) =>
 
     const filePath = file;
     const fileName = req.file.filename
-    
-    const result = await fileUpload.uploadFile(filePath, fileName);
+    const fileType = req.file.mimetype;
+    const result = await fileUpload.uploadFile(filePath, fileName, fileType);
     let key = result.Key; 
 
     fs.unlinkSync(path.join("public/images/usersAvatar", fileName))

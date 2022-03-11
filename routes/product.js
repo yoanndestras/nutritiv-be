@@ -229,33 +229,16 @@ auth.verifyAdmin, async(req, res, next) =>
 
 // CREATE PRODUCT
 router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, 
-upload.any('imageFile'), product.resizeProductImage, product.newProduct, async(req, res, next) =>
+upload.any('imageFile'), product.resizeProductImage, product.newProduct, product.addProductImgs, async(req, res, next) =>
 {
     try
     {
-        const { title, desc, shape, countInStock } = req.body;
-        
-        let imgs = req.imgs.map(img => img.replaceAll("\\", "/"))
-        let replace = imgs.map(img => img.replace("public/", ""))
-        
-        const newProduct = await new Product(
-            {
-                title,
-                desc,
-                shape,
-                tags : req.tags,
-                imgs: replace,
-                productItems: req.product,
-                countInStock
-            }
-        );
-
-        const savedProduct = await newProduct.save();
+        const product = await Product.findOne({title : req.title})
+        await product.save();
         res.status(201).json(
             {
                 success: true,
-                status: "Product Successfull added",
-                New_product: savedProduct
+                product
             });
     }catch(err){next(err)}
 });
@@ -263,8 +246,8 @@ upload.any('imageFile'), product.resizeProductImage, product.newProduct, async(r
 
 // UPDATE PRODUCT //TODO:  form adaptability 
 router.post("/updateImgs/:productId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
-auth.verifyAdmin, product.verifyProductId, upload.any('imageFile'), product.resizeProductImage,
-product.addProductImgs, async(req, res, next) =>
+auth.verifyAdmin, product.verifyProductId, upload.any('imageFile'), product.removeImgs, 
+product.resizeProductImage, product.addProductImgs, async(req, res, next) =>
 {
     try
     {
@@ -281,16 +264,13 @@ product.addProductImgs, async(req, res, next) =>
 });
 
 // UPDATE PRODUCT //TODO:  form adaptability 
-// router.put("/:productId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, product.verifyProductId,
-// upload.any('imageFile'), product.newProduct, product.removeImgs, product.resizeProductImage, async(req, res, next) =>
+// router.put("/:productId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+//auth.verifyAdmin, product.verifyProductId, product.newProduct, async(req, res, next) =>
 // {
 //     try
 //     {
 //         const { title, desc, shape, countInStock} = req.body;
-        
-//         let imgs = req.imgs.map(img => img.replaceAll("\\", "/"))
-//         let replace = imgs.map(img => img.replace("public/", ""))
-        
+
 //         let updatedProduct = await Product.findByIdAndUpdate(
 //             req.params.productId, 
 //             {
@@ -300,7 +280,6 @@ product.addProductImgs, async(req, res, next) =>
 //                     desc,
 //                     shape,
 //                     tags : req.tags,
-//                     imgs: replace,
 //                     productItems: req.product,
 //                     countInStock
 //                 }

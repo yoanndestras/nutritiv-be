@@ -25,7 +25,7 @@ exports.deleteFile = (Key) =>
   s3.deleteObject(deleteParams).promise()
 }
 
-exports.uploadFile = (filePath, fileName) => 
+exports.uploadFile = (filePath, fileName, fileType) => 
 {
   const fileStream = fs.createReadStream(filePath)
 
@@ -33,6 +33,7 @@ exports.uploadFile = (filePath, fileName) =>
   {
     Bucket: bucketName,
     Body: fileStream,
+    ContentType: fileType,
     Key: fileName
   }
   

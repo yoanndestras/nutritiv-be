@@ -224,8 +224,6 @@ exports.removeImgs = async(req, res, next) =>
         const productImg = product.imgs;
         productImg ? productImg.map(img => fs.unlink('public/' + img, removeFile)) : null;
 
-        
-
         next();
 
     }catch(err){next(err)}
@@ -291,13 +289,13 @@ exports.resizeProductImage = async(req, res, next) =>
         }
         // let imgs = product.imgs;
         // imgs ? fileUpload.deleteFile(avatar) : null;
-
+        
         let filesArr = req.files;
         await Promise.all
         (
             filesArr.map(async file => 
                 {
-                await sharp(file.path)
+                    await sharp(file.path)
                     .resize(200, 200)
                     .toFile(path.resolve(file.destination,'productsImgs', file.filename))
                     fs.unlinkSync(path.join("public/images/", file.filename))
@@ -313,24 +311,22 @@ exports.addProductImgs = async(req, res, next) =>
 {
     try
     {
-        let filesArr = req.file;
+        let filesArr = req.files;
         let key = [];
         await Promise.all
         (
-            filesArr.map(img => 
+            filesArr.map(async(img) => 
                 {
-                    let file =  path.join(img.destination,'productImgs', img.filename)
-                    let filePath = file
-                    let fileName = img.filename
-
+                    
+                    let file =  path.join(img.destination,'productsImgs', img.filename)
+                    let filePath = file, fileName = img.filename
+                    
                     let result = await fileUpload.uploadFile(filePath, fileName);
-
                     key.push(result.Key); 
-
-                    fs.unlinkSync(path.join("public/images/productImgs", fileName))
+                    fs.unlinkSync(path.join("public/images/productsImgs", fileName))
+                
                 })
         );
-        
         const product = await Product.findOneAndUpdate({_id: req.params.productId},
             {
                 $set:

@@ -35,6 +35,7 @@ exports.uploadFile = (filePath, fileName) =>
     Body: fileStream,
     Key: fileName
   }
+  
   return s3.upload(uploadParams).promise()
 }
 

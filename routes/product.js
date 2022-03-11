@@ -262,77 +262,63 @@ upload.any('imageFile'), product.resizeProductImage, product.newProduct, async(r
 
 
 // UPDATE PRODUCT //TODO:  form adaptability 
-router.put("/updateImgs/:productId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+router.post("/updateImgs/:productId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
 auth.verifyAdmin, product.verifyProductId, upload.any('imageFile'), product.resizeProductImage,
 product.addProductImgs, async(req, res, next) =>
 {
     try
     {
-        let imgs = req.imgs.map(img => img.replaceAll("\\", "/"))
-        let replace = imgs.map(img => img.replace("public/", ""))
-        
-        let updatedProduct = await Product.findByIdAndUpdate(
-            req.params.productId, 
-            {
-                $set: 
-                {
-                    imgs: replace,
-                }
-            },
-            {new: true}
-        );
-        
-        updatedProduct = await updatedProduct.save();
+        const product = await Product.findOne({_id : req.params.productId});
+        product.save();
 
         res.status(201).json(
             {
                 success: true,
-                status: "Product Successfull updated",
-                Updated_product: updatedProduct
+                product
             });
         
     }catch(err){next(err)}
 });
 
 // UPDATE PRODUCT //TODO:  form adaptability 
-router.put("/:productId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, product.verifyProductId,
-upload.any('imageFile'), product.newProduct, product.removeImgs, product.resizeProductImage, async(req, res, next) =>
-{
-    try
-    {
-        const { title, desc, shape, countInStock} = req.body;
+// router.put("/:productId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, product.verifyProductId,
+// upload.any('imageFile'), product.newProduct, product.removeImgs, product.resizeProductImage, async(req, res, next) =>
+// {
+//     try
+//     {
+//         const { title, desc, shape, countInStock} = req.body;
         
-        let imgs = req.imgs.map(img => img.replaceAll("\\", "/"))
-        let replace = imgs.map(img => img.replace("public/", ""))
+//         let imgs = req.imgs.map(img => img.replaceAll("\\", "/"))
+//         let replace = imgs.map(img => img.replace("public/", ""))
         
-        let updatedProduct = await Product.findByIdAndUpdate(
-            req.params.productId, 
-            {
-                $set: 
-                {
-                    title,
-                    desc,
-                    shape,
-                    tags : req.tags,
-                    imgs: replace,
-                    productItems: req.product,
-                    countInStock
-                }
-            },
-            {new: true}
-        );
+//         let updatedProduct = await Product.findByIdAndUpdate(
+//             req.params.productId, 
+//             {
+//                 $set: 
+//                 {
+//                     title,
+//                     desc,
+//                     shape,
+//                     tags : req.tags,
+//                     imgs: replace,
+//                     productItems: req.product,
+//                     countInStock
+//                 }
+//             },
+//             {new: true}
+//         );
         
-        updatedProduct = await updatedProduct.save();
+//         updatedProduct = await updatedProduct.save();
 
-        res.status(201).json(
-            {
-                success: true,
-                status: "Product Successfull updated",
-                Updated_product: updatedProduct
-            });
+//         res.status(201).json(
+//             {
+//                 success: true,
+//                 status: "Product Successfull updated",
+//                 Updated_product: updatedProduct
+//             });
         
-    }catch(err){next(err)}
-});
+//     }catch(err){next(err)}
+// });
 
 // DELETE
 router.delete("/delete/:productId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 

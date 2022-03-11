@@ -204,7 +204,7 @@ user.verifyAdressId, user.deleteAddress, async (req, res, next) =>
 })
 
 //ADD OR REPLACE USER ICON
-router.put('/addAvatar', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+router.post('/addAvatar', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
 upload.single('imageFile'), user.resizeUserAvatar, user.addUserAvatar, async (req, res, next) =>
 {
     try

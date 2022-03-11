@@ -75,6 +75,8 @@ async(req, res, next) =>
 {
     try
     {
+        const user =  await User.findOne({_id: req.user._id});
+        let avatar =  process.env.AWS_BUCKET_LINK + user.avatar;
         const { username, email, isAdmin, isVerified, addressDetails} = req.user;
 
         res.status(200).json(
@@ -82,6 +84,7 @@ async(req, res, next) =>
                 loggedIn: true,
                 username,
                 email,
+                avatar,
                 isAdmin,
                 isVerified,
                 addressDetails,
@@ -113,10 +116,9 @@ async(req, res, next) =>
     try
     {
         const user =  await User.findOne({_id: req.user._id});
-        let avatar = user.avatar;
+        let avatar = process.env.AWS_BUCKET_LINK + user.avatar;
         const readStream = fileUpload.getFileStream(avatar)
         
-        avatar = process.env.AWS_BUCKET_LINK + user.avatar;
         res.status(200).json(
             {
                 avatar
@@ -132,9 +134,10 @@ auth.verifyAuthorization, async (req, res, next) =>
     try
     {
         const user = await User.findById(req.params.userId)
+        let avatar = process.env.AWS_BUCKET_LINK + user.avatar;
         const {email, ...public} = user._doc;
         
-        res.status(200).json({success: true, user: public});
+        res.status(200).json({success: true, user: public, avatar});
     }catch(err){next(err)}
 })
 

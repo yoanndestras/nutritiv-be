@@ -2,6 +2,7 @@ const User = require("../models/User");
 
 const sgMail = require("@sendgrid/mail");
 const auth = require("./authController");
+const path = require('path');
 
 
 exports.sendVerifyAccountMail = async(req, res, next) =>
@@ -11,17 +12,31 @@ exports.sendVerifyAccountMail = async(req, res, next) =>
         const Email_Token = auth.GenerateEmailToken({email: req.body.email});
         sgMail.setApiKey(process.env.SENDGRID_API_KEY);
         
+        const imgPath = path.resolve("public/images/Nutritiv.png")
+        console.log(imgPath);
         const email = req.body.email;
         const mailContent = 
         {
             to: email,
             from:"nutritivshop@gmail.com",
-            subject:"Nutritiv - Account email verification",
+            subject:"Verify your email to activate your account !",
+            text: "About your Nutritiv account. Verify email address :",
             html : `
-            <h1>Hello, </h1>
-            <p style="color: red;">Thanks for registering on our website.</p>
-            <p>Please click on the link below to verify your account.</p>
-            <a  href="http://${req.headers.host}/auth/verify-email?token=${Email_Token}">Verify your account</a>`
+            <div style="width: 100%; background-color: #F6F9FC; font-size: 15px ;font-family: -apple-system, 
+                BlinkMacSystemFont,'Segoe UI', Roboto, 'Helvetica Neue', Ubuntu, sans-serif; color: rgb(82, 95, 127)">
+                <div style="margin-left: 30%;margin-right: 30%; padding: 50px; background-color:white">
+                    <h1 style="font-size:2em; color: #00A8F3">Nutritiv</h1>
+                    <hr>
+                    <p>Verify your email address so we know it’s really you—and so we can activate your Nutritiv account.</p>
+                    <a style="text-decoration: none;display:block; text-align: center;width:100%;font-weight: bold; padding: 10px; color: white; 
+                    background-color: #00A8F3; border: none; border-radius:  5px;"
+                    href='http://${req.headers.host}/auth/verify-email?token=${Email_Token}'>Verify email address</a>
+                    
+                    <p>Thanks,</p>
+                    <p>Nutritiv</p>
+                </div>
+            </div>
+            `
         }       //  ${req.headers.Host}
         
         await sgMail.send(mailContent);
@@ -42,11 +57,25 @@ exports.sendForgetPassword = async(req, res, next) =>
         {
             to: email,
             from:"nutritivshop@gmail.com",
-            subject:"Nutritiv - Reset password",
+            subject:"Reset your Nutritiv account password",
+            text: "About your Nutritiv account. Reset your password :",
             html : `
-            <h1>Hello, ${user.username}</h1>
-            <p>Please click on the link below to reset your password.</p>
-            <a  href="http://${req.headers.host}/auth/verify_forget_pwd?token=${Email_Token}">Reset Password</a>`
+            <div style="width: 100%; background-color: #F6F9FC; font-size: 15px ;font-family: -apple-system,
+                BlinkMacSystemFont,'Segoe UI', Roboto, 'Helvetica Neue', Ubuntu, sans-serif; color: rgb(82, 95, 127)">
+                <div style="margin-left: 30%;margin-right: 30%; padding: 50px; background-color:white">
+                    <h1 style="font-size:2em; color: #00A8F3">Nutritiv</h1>
+                    <hr>
+                    <p>Hello, ${user.username}</p>
+                    <p>Please click on the link below to reset your Nutritiv account password.</p>
+                    <a style="text-decoration: none;display:block; text-align: center;width:100%;font-weight: bold; padding: 10px; color: white; 
+                    background-color: #00A8F3; border: none; border-radius:  5px;"
+                    href="http://${req.headers.host}/auth/verify_forget_pwd?token=${Email_Token}">Reset Password</a>
+                    
+                    <p>Thanks,</p>
+                    <p>Nutritiv</p>
+                </div>
+            </div>
+            `
         }   
         
         await sgMail.send(mailContent);
@@ -69,10 +98,21 @@ exports.sendUpdateUsername = async(req, res, next) =>
         {
             to: email,
             from:"nutritivshop@gmail.com",
-            subject:"Nutritiv - Change username",
+            subject:"Your username has been updated",
             html : `
-            <h1>Hello, ${username}</h1>
-            <p>You just have changed your username!</p>`
+            <div style="width: 100%; background-color: #F6F9FC; font-size: 15px ;font-family: -apple-system, 
+                BlinkMacSystemFont,'Segoe UI', Roboto, 'Helvetica Neue', Ubuntu, sans-serif; color: rgb(82, 95, 127)">
+                <div style="margin-left: 30%;margin-right: 30%; padding: 50px; background-color:white">
+                    <h1 style="font-size:2em; color: #00A8F3">Nutritiv</h1>
+                    <hr>
+                    <p>Hello, ${username}</p>
+                    <p>Your username has been updated from ${req.user.username} to ${username}.</p>
+                    
+                    <p>Thanks,</p>
+                    <p>Nutritiv</p>
+                </div>
+            </div>
+            `
         }   
         
         await sgMail.send(mailContent);

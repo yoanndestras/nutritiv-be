@@ -1,11 +1,9 @@
+#dependencies
 node_modules
 
-#dotenv environement variables
+#misc
 .env
-
-#color
-
-.vscode
-Old_rdm.md
-
 .env-cmdrc.json
+
+#custom vscode
+.vscode

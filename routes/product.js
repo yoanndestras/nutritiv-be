@@ -168,8 +168,8 @@ router.get('/tags', cors.corsWithOptions, async (req, res, next) =>
 })
 
 // GENERATE PRODUCTS
-router.post("/generate/:value", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, 
-async(req, res, next) =>
+router.post("/generate/:value", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+auth.verifyAdmin, async(req, res, next) =>
 {
     try
     {
@@ -185,7 +185,7 @@ async(req, res, next) =>
             "anti-inflammatory",
             "endurance"
         ]
-
+        
         function randomShapeFunction(){return Math.floor(Math.random() * shape.length)}
         function randomTagFunction(){return Math.floor(Math.random() * tags.length)}
         function randomLoadFunction(){return Math.floor(Math.random()*50)*40}
@@ -257,6 +257,40 @@ upload.any('imageFile'), product.resizeProductImage, product.newProduct, async(r
                 status: "Product Successfull added",
                 New_product: savedProduct
             });
+    }catch(err){next(err)}
+});
+
+
+// UPDATE PRODUCT //TODO:  form adaptability 
+router.put("/updateImgs/:productId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+auth.verifyAdmin, product.verifyProductId, upload.any('imageFile'), product.resizeProductImage,
+product.addProductImgs, async(req, res, next) =>
+{
+    try
+    {
+        let imgs = req.imgs.map(img => img.replaceAll("\\", "/"))
+        let replace = imgs.map(img => img.replace("public/", ""))
+        
+        let updatedProduct = await Product.findByIdAndUpdate(
+            req.params.productId, 
+            {
+                $set: 
+                {
+                    imgs: replace,
+                }
+            },
+            {new: true}
+        );
+        
+        updatedProduct = await updatedProduct.save();
+
+        res.status(201).json(
+            {
+                success: true,
+                status: "Product Successfull updated",
+                Updated_product: updatedProduct
+            });
+        
     }catch(err){next(err)}
 });
 

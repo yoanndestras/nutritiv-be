@@ -29,32 +29,15 @@ exports.resizeUserAvatar = async(req, res, next) =>
     }
     let avatar = user.avatar;
     avatar ? fileUpload.deleteFile(avatar) : null;
-
-    
-    
     
     let fileArray = [req.file];
     await Promise.all
     (
       fileArray.map(async file => 
             {
-              fs.readdirSync(path.resolve(file.destination, "productsImgs"), (err, files) => 
-              {
-                if (err)
-                  console.log(err);
-                else 
-                {
-                  console.log("\nCurrent directory filenames:");
-                  files.forEach(file => 
-                    {
-                    console.log(file);
-                  })
-                }
-              })
-              console.log(path.resolve(file.destination));
-              await sharp(file.path)
-                  .resize(200, 200)
-                  .toFile(path.resolve(file.destination,'usersAvatar', file.filename))
+                await sharp(file.path)
+                .resize(200, 200)
+                .toFile(path.resolve(file.destination,'usersAvatar', file.filename))
             })
     );
     // if(avatar){fs.unlinkSync(path.join("public/images/usersAvatar/", avatar))}
@@ -68,18 +51,14 @@ exports.addUserAvatar = async(req, res, next) =>
 {
   try
   {
-    console.log("addUserAvatar");
     let file = req.file;
     file = path.join(file.destination,'usersAvatar', file.filename)
 
     const filePath = file;
     const fileName = req.file.filename
-
-    console.log(filePath);
-    console.log(fileName);
     
     const result = await fileUpload.uploadFile(filePath, fileName);
-    let key = result.Key;
+    let key = result.Key; 
 
     fs.unlinkSync(path.join("public/images/usersAvatar", fileName))
         

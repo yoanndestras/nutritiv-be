@@ -9,6 +9,9 @@ const fs = require('fs');
 const sharp = require('sharp');
 const path = require('path');
 
+// CONTROLLERS
+const fileUpload = require('../controllers/fileUploadController');
+
 const app = express();
 
 app.use(express.json()); // to read JSON    
@@ -210,11 +213,7 @@ exports.removeImgs = async(req, res, next) =>
     {
         const removeFile= function (err) 
         {
-            if (err) 
-            {
-                console.log("unlink failed", err);
-                next(err)
-            } 
+            if (err) next(err)
             else 
             {
                 console.log("file deleted");
@@ -222,10 +221,13 @@ exports.removeImgs = async(req, res, next) =>
         }
         
         const product = await Product.findOne({_id : req.params.productId})
-        let productImg = product.imgs;
-        let unlickImg = productImg ? productImg.map(img => fs.unlink('public/' + img, removeFile)) : null;
+        const productImg = product.imgs;
+        productImg ? productImg.map(img => fs.unlink('public/' + img, removeFile)) : null;
+
         
+
         next();
+
     }catch(err){next(err)}
     
 }
@@ -281,17 +283,24 @@ exports.resizeProductImage = async(req, res, next) =>
 {
     try
     {
-        if (!req.files) return next();
+        const product = await Product.findOne({_id: req.params.productId});
+        if (!req.files)
+        {   
+            let err = new Error('Files not found!')
+            next(err);
+        }
+        // let imgs = product.imgs;
+        // imgs ? fileUpload.deleteFile(avatar) : null;
+
+        let filesArr = req.files;
         await Promise.all
         (
-            req.files.map(async file => 
+            filesArr.map(async file => 
                 {
                 await sharp(file.path)
                     .resize(200, 200)
-                    .toFile(
-                        path.resolve(file.destination,'productsImgs', file.filename)
-                    )
-                    fs.unlinkSync(file.path) 
+                    .toFile(path.resolve(file.destination,'productsImgs', file.filename))
+                    fs.unlinkSync(path.join("public/images/", file.filename))
                 })
         );
         
@@ -299,3 +308,38 @@ exports.resizeProductImage = async(req, res, next) =>
     }catch(err){next(err)}
 
 };
+
+exports.addProductImgs = async(req, res, next) =>
+{
+    try
+    {
+        let filesArr = req.file;
+        let key = [];
+        await Promise.all
+        (
+            filesArr.map(img => 
+                {
+                    let file =  path.join(img.destination,'productImgs', img.filename)
+                    let filePath = file
+                    let fileName = img.filename
+
+                    let result = await fileUpload.uploadFile(filePath, fileName);
+
+                    key.push(result.Key); 
+
+                    fs.unlinkSync(path.join("public/images/productImgs", fileName))
+                })
+        );
+        
+        const product = await Product.findOneAndUpdate({_id: req.params.productId},
+            {
+                $set:
+                {
+                    imgs: key
+                }
+            });
+    
+        await product.save();
+        next();
+    }catch(err){next(err)}
+}

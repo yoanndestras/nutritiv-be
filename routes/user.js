@@ -116,10 +116,10 @@ async(req, res, next) =>
         const avatar = user.avatar;
         const readStream = fileUpload.getFileStream(avatar)
         
-        
+        let link = process.env.AWS_BUCKET_LINK + user.avatar;
         res.status(200).json(
             {
-                avatar
+                link
             });
     
     }catch(err){next(err)}
@@ -212,12 +212,12 @@ upload.single('imageFile'), user.resizeUserAvatar, user.addUserAvatar, async (re
         const user = await User.findOne({_id: req.user._id});
         user.save();
         
-        let avatar = user.avatar;
+        let link = process.env.AWS_BUCKET_LINK + user.avatar;
         
         res.status(201).json(
             {
                 success: true,
-                avatar
+                link
             });
     }catch(err){next(err)}
 })

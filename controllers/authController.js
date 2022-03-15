@@ -148,10 +148,35 @@ exports.verifyUser = (req, res, next) =>
     
     passport.authenticate('jwt', { session: false }, (err, user, info) => 
     {
-        console.log(req);
         if (err || !user) 
         {   
+            req.statusCode = 401;
             req.user = "error";
+            return next();
+        }
+        else if (user.isVerified === false)
+        {
+            let err = new Error('You account has not been verified. Please check your email to verify your account');
+            err.statusCode = 401;
+            return next(err);
+        }
+        else
+        {
+            req.user = user;
+            return next();
+        }
+    })(req, res, next); 
+};
+
+exports.verifyUserCart = (req, res, next) => 
+{
+    
+    passport.authenticate('jwt', { session: false }, (err, user, info) => 
+    {
+        if (err || !user) 
+        {   
+            req.user = "emptyCart";
+            req.statusCode = 200;
             return next();
         }
         else if (user.isVerified === false)
@@ -170,13 +195,13 @@ exports.verifyUser = (req, res, next) =>
 
 exports.verifyRefresh = (req, res, next) => 
 {
-    if(req.user == "error")
+    if(req.user === "error" || req.user === "emptyCart")
     {
         passport.authenticate('jwt_rt', { session: false }, (err, user, info) => 
         {        
             if (err || !user) 
             {
-                return res.status(401).json(
+                return res.status(req.statusCode).json(
                     {
                         success: false, 
                         status: "You are not connected", 

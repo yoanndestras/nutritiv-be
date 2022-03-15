@@ -64,7 +64,6 @@ app.use(
     )
 
 app.use(express.static(path.join(__dirname, 'public')));
-// http://localhost:3001/images/productImgs/Q1RAMagnesium_capsules.png
 
 const version = process.env.API_VERSION;
 

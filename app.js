@@ -27,7 +27,20 @@ mongoose
         console.log(err);
     });
 
-let app = express();
+const app = express();
+const router = express.Router();
+
+// HEALTH CHECK
+router.get('/health', (req, res) => 
+{
+    const data = {
+        uptime: process.uptime(),
+        message: 'Ok',
+        date: new Date()
+    }
+
+    res.status(200).send(data);
+});
 
 app.use(express.json()); // to read JSON    
 app.use(express.urlencoded({extended: true}));
@@ -53,6 +66,7 @@ app.use(
 app.use(express.static(path.join(__dirname, 'public')));
 // http://localhost:3001/images/productImgs/Q1RAMagnesium_capsules.png
 
+app.use('/v1', router);
 app.use("/users", userRoute);
 app.use("/auth", authRoute);
 app.use("/products", productRoute);

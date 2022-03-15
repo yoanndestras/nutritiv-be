@@ -66,7 +66,7 @@ app.use(
 app.use(express.static(path.join(__dirname, 'public')));
 // http://localhost:3001/images/productImgs/Q1RAMagnesium_capsules.png
 
-app.use('/v1', router);
+app.use('/v2', router);
 app.use("/users", userRoute);
 app.use("/auth", authRoute);
 app.use("/products", productRoute);

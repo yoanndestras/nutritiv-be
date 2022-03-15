@@ -66,14 +66,16 @@ app.use(
 app.use(express.static(path.join(__dirname, 'public')));
 // http://localhost:3001/images/productImgs/Q1RAMagnesium_capsules.png
 
-app.use('/v2', router);
-app.use("/users", userRoute);
-app.use("/auth", authRoute);
-app.use("/products", productRoute);
-app.use("/carts", cartRoute);
-app.use("/orders", orderRoute);
-app.use('/imageUpload', uploadRouter);
-app.use('/stripe', stripeRoute);
+const version = process.env.API_VERSION;
+
+app.use(`/${version}`, router);
+app.use(`/${version}/users`, userRoute);
+app.use(`/${version}/auth`, authRoute);
+app.use(`/${version}/products`, productRoute);
+app.use(`/${version}/carts`, cartRoute);
+app.use(`/${version}/orders`, orderRoute);
+app.use(`/${version}/imageUpload`, uploadRouter);
+app.use(`/${version}/stripe`, stripeRoute);
 
 // process.env.PORT = value PORT in .env file
 const port = (process.env.PORT || 4000);

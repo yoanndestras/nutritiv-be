@@ -7,8 +7,6 @@ const dotenv = require("dotenv");
 const passport = require('passport');
 const cookieParser = require("cookie-parser");
 const cors = require('cors');
-const http = require('http');
-const createError = require('http-errors');
 
 // router based on url
 const userRoute = require("./routes/user");

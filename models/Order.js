@@ -21,7 +21,7 @@ const OrderSchema = new Schema
     orderDetails:
     [
         {
-            address:
+            street:
             {
                 type: String,
                 required: true

@@ -44,8 +44,8 @@ app.use(
     limitter(
         {
             windowMs: 5000,
-            max: 50,
-            message: { 
+            max: 10,
+            message: {
                 code: 429,
                 message: "Too many requests"
             }

@@ -17,16 +17,15 @@ router.get("/self", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, a
 {
     try
     {
-        const cart = await Cart.findOne({userId: req.user._id})
+        const cart = await Cart.findOne({userId: req.user._id}).lean();
         
         if(cart)
         {
-            await cart.save();
             res.status(200).json(
                 {
                     success: true,
                     status: "User cart found",
-                    cart: cart
+                    cart
                 });
         }
         else if(!cart)
@@ -34,7 +33,7 @@ router.get("/self", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, a
             res.status(200).json(
                 {
                     success: true,
-                    status: "No cart found!"
+                    status: "No cart has been found for user "+ req.user.username +"!"
                 });
         }
     }catch(err){next(err)}
@@ -45,14 +44,24 @@ router.get("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.
 {
     try
     {
-        const carts = await Cart.find();
+        const carts = await Cart.find().lean();
         
-        res.status(200).json(
-            {
-                success: true,
-                status: "All carts found",
-                carts: carts
-            });
+        if(!carts.length)
+        {
+            res.status(200).json(
+                {
+                    success: true,
+                    status: "No carts has been found!"
+                });
+        }
+        else if(carts)
+        {
+            res.status(200).json(
+                {
+                    success: true,
+                    carts
+                });
+        }
     }catch(err){next(err)}
 })
 

@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 const cors = require('../controllers/corsController');
 const auth = require('../controllers/authController');
 const order = require('../controllers/ordersController')
+const mailer = require("../controllers/mailerController");
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
@@ -76,8 +77,8 @@ async (req, res, next) =>
 });
 
 // CREATE ORDER
-router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, order.verifyPhoneNumber, 
-order.newOrder, async (req, res, next) =>
+router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
+order.newOrder, mailer.sendNewOrder, async (req, res, next) =>
 {    
     try
     {
@@ -87,7 +88,7 @@ order.newOrder, async (req, res, next) =>
                 {
                     success: true,
                     status: req.user.username + ", thank you for your order",
-                    NewOrder: req.order
+                    newOrder: req.order
                 }
             );
         }

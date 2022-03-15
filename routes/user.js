@@ -117,7 +117,7 @@ async(req, res, next) =>
     {
         const user =  await User.findOne({_id: req.user._id});
         let avatar = process.env.AWS_BUCKET_LINK + user.avatar;
-        const readStream = fileUpload.getFileStream(avatar)
+        // const readStream = fileUpload.getFileStream(avatar)
         
         res.status(200).json(
             {
@@ -133,14 +133,22 @@ auth.verifyAuthorization, async (req, res, next) =>
 {
     try
     {
-        const user = await User.findById(req.params.userId)
-        let avatar = process.env.AWS_BUCKET_LINK + user.avatar;
-        const {email, ...public} = user._doc;
+        const user = await User.findById(req.params.userId).lean();
+        if(user)
+        {
+            let avatar = process.env.AWS_BUCKET_LINK + user.avatar;
+            const {email, ...public} = user._doc;
+            
+            res.status(200).json({success: true, user: public, avatar});
+        }
+        else if(!user)
+        {
+            let error = new Error("User has not been found!")
+            res.status(400).json({success: false, error});
+        }
         
-        res.status(200).json({success: true, user: public, avatar});
     }catch(err){next(err)}
 })
-
 
 //UPDATE USERNAME
 router.put('/updateUsername', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 

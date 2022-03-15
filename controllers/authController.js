@@ -255,8 +255,13 @@ exports.verifyNoRefresh = (req, res, next) =>
     passport.authenticate('jwt_rt', { session: false }, (err, user, info) => 
     {        
         if (err || !user) return next();
-        err.statusCode = 401;
-        return next(err);
+        else
+        {
+            let err = new Error('You are already connected!');
+            err.statusCode = 401;
+            return next(err);
+        }
+        
     })(req, res, next);  
 };
 

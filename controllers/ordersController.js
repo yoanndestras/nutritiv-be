@@ -6,33 +6,11 @@ const mongoose = require('mongoose');
 const order = require('./ordersController');
 
 const addressValidator = require('address-validator');
-const validatePhoneNumber = require('validate-phone-number-node-js');
 
 const app = express();
 
 app.use(express.json()); // to read JSON    
 app.use(express.urlencoded({extended: true}));
-
-exports.verifyPhoneNumber = (req, res, next) =>
-{
-  try
-  {
-    let phoneNumber = req.body.phoneNumber;
-    if(validatePhoneNumber.validate(phoneNumber))
-    {
-      next();
-    }
-    else
-    {
-      res.status(500).json(
-        {
-          success: false,
-          error: 'Invalid phone number'
-        }
-        );
-    }
-  }catch(err){next(err)}
-}
 
 exports.newOrder = async(req, res, next) =>
 {
@@ -47,10 +25,10 @@ exports.newOrder = async(req, res, next) =>
     if(cart)
     {
       let products =  cart.products, amount =  cart.amount;
-      const {address, zip, city, country, phoneNumber} = req.body;
+      const {street, zip, city, country, phoneNumber} = req.body;
       let orderDetails =  
         {
-            address,
+            street,
             zip,
             city,
             country,
@@ -60,9 +38,9 @@ exports.newOrder = async(req, res, next) =>
       const newOrder = new Order(
         {
             userId: mongoose.Types.ObjectId(userId),
-            products: products,
-            amount: amount,
-            orderDetails: orderDetails,
+            products,
+            amount,
+            orderDetails,
         }), savedOrder = await newOrder.save();
       
       if(savedOrder)

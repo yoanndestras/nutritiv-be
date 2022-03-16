@@ -30,7 +30,6 @@ const orderRouteV2 = require(`./routes/v2/order`);
 const {uploadRouterV2} = require(`./routes/v2/upload`);
 const stripeRouteV2 = require(`./routes/v2/stripe`);
 
-
 dotenv.config();
 
 const io = require("socket.io")(8900, 

@@ -77,11 +77,12 @@ async(req, res, next) =>
     {
         const user =  await User.findOne({_id: req.user._id});
         let avatar =  process.env.AWS_BUCKET_LINK + user.avatar;
-        const { username, email, isAdmin, isVerified, addressDetails} = req.user;
+        const { username, _id, email, isAdmin, isVerified, addressDetails} = req.user;
 
         res.status(200).json(
             {
                 loggedIn: true,
+                _id,
                 username,
                 email,
                 avatar,

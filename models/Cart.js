@@ -89,7 +89,13 @@ const CartSchema = new Schema (
             type: String,
             default: 'EUR'
         }
-    }
+    },
+    version: 
+    {
+        type: Number,
+        immutable: true,
+        default: 2,
+    },
 },
 {
 timestamps: true,   //mongoose automatically do UpdateAt and CreatedAt

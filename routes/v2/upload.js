@@ -1,13 +1,13 @@
-const uploadRouter = require("express").Router();
+const uploadRouterV2 = require("express").Router();
 const multer = require('multer');
 const { nanoid } = require('nanoid');
 
 // CONTROLLERS
-const auth = require('../controllers/authController');
-const cors = require('../controllers/corsController');
+const auth = require('../../controllers/v2/authController');
+const cors = require('../../controllers/v2/corsController');
 
 //OPTIONS FOR CORS CHECK
-uploadRouter.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+uploadRouterV2.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
 const storage = multer.diskStorage(
 {
@@ -40,7 +40,7 @@ const upload = multer(
         fileFilter: imageFileFilter,
     });
 
-uploadRouter.route('/')
+uploadRouterV2.route('/')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 .get(cors.cors, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, (req, res) => 
 {
@@ -72,4 +72,4 @@ uploadRouter.route('/')
         });
 });
 
-module.exports = {uploadRouter, upload};
+module.exports = {uploadRouterV2, upload};

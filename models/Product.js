@@ -61,7 +61,13 @@ const ProductSchema = new Schema
     {
         type: Number,
         required: true
-    }
+    },
+    version: 
+    {
+        type: Number,
+        immutable: true,
+        default: 2,
+    },
 },
 {
     timestamps: true,   //mongoose automatically do UpdateAt and CreatedAt

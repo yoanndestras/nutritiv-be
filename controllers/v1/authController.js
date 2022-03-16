@@ -3,7 +3,7 @@ const authenticate = require("./authController");
 const express = require('express');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
-const User = require('../models/User');
+const User = require('../../models/User');
 const email_validator = require("email-validator");
 
 require('dotenv').config();

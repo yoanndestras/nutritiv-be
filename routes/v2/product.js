@@ -1,4 +1,4 @@
-const Product = require("../models/Product");
+const Product = require("../../models/Product");
 const router = require("express").Router();
 const _ = require("lodash")
 const { slice } = require("lodash");
@@ -6,11 +6,11 @@ const fs = require('fs');
 const randomWords = require('random-words');
 
 // CONTROLLERS
-const cors = require('../controllers/corsController');
-const auth = require('../controllers/authController');
-const product = require('../controllers/productsController');
+const cors = require('../../controllers/v2/corsController');
+const auth = require('../../controllers/v2/authController');
+const product = require('../../controllers/v2/productsController');
 const {upload} = require('./upload');
-const { countInStock } = require("../controllers/ordersController");
+const { countInStock } = require("../../controllers/v2/ordersController");
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })

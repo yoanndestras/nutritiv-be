@@ -1,14 +1,14 @@
-const User = require("../models/User");
+const User = require("../../models/User");
 const router = require("express").Router();
 
 const aws = require('aws-sdk');
 
 // CONTROLLERS
-const cors = require('../controllers/corsController');
-const auth = require('../controllers/authController');
-const mailer = require("../controllers/mailerController");
-const user = require("../controllers/usersController");
-const fileUpload = require('../controllers/fileUploadController');
+const cors = require('../../controllers/v2/corsController');
+const auth = require('../../controllers/v2/authController');
+const mailer = require("../../controllers/v2/mailerController");
+const user = require("../../controllers/v2/usersController");
+const fileUpload = require('../../controllers/v2/fileUploadController');
 const {upload} = require('./upload');
 
 //OPTIONS FOR CORS CHECK

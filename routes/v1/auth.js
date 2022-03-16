@@ -1,12 +1,12 @@
 const router = require("express").Router();
-const User = require("../models/User");
+const User = require("../../models/User");
 
 // CONTROLLERS
 
 const passport = require("passport");
-const cors = require('../controllers/corsController');
-const auth = require("../controllers/authController");
-const mailer = require("../controllers/mailerController");
+const cors = require('../../controllers/v1/corsController');
+const auth = require("../../controllers/v1/authController");
+const mailer = require("../../controllers/v1/mailerController");
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })

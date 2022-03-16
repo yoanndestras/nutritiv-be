@@ -1,11 +1,11 @@
 const router = require("express").Router();
 const stripe = require("stripe")(process.env.STRIPE_KEY);
-const Cart = require("../models/Cart");
-const Product = require("../models/Product");
+const Cart = require("../../models/Cart");
+const Product = require("../../models/Product");
 
 // CONTROLLERS
-const cors = require('../controllers/corsController');
-const auth = require('../controllers/authController');
+const cors = require('../../controllers/v2/corsController');
+const auth = require('../../controllers/v2/authController');
 
 router.post("/create-checkout-session", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
 async(req, res, next)  => 

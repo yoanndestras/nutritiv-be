@@ -1,13 +1,13 @@
-const Order = require("../models/Order");
-const Cart = require("../models/Cart");
+const Order = require("../../models/Order");
+const Cart = require("../../models/Cart");
 const router = require("express").Router();
 const mongoose = require('mongoose');
 
 // CONTROLLERS
-const cors = require('../controllers/corsController');
-const auth = require('../controllers/authController');
-const order = require('../controllers/ordersController')
-const mailer = require("../controllers/mailerController");
+const cors = require('../../controllers/v2/corsController');
+const auth = require('../../controllers/v2/authController');
+const order = require('../../controllers/v2/ordersController')
+const mailer = require("../../controllers/v2/mailerController");
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })

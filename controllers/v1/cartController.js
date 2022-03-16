@@ -1,8 +1,8 @@
 const express = require('express');
 const cart = require('./cartController');
 const mongoose = require('mongoose');
-const Cart = require("../models/Cart");
-const Product = require("../models/Product");
+const Cart = require("../../models/Cart");
+const Product = require("../../models/Product");
 
 // ADD TO CART
 exports.cart = async(req, res, next) => 

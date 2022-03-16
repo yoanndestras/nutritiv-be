@@ -1,7 +1,7 @@
 const express = require('express');
-const Product = require("../models/Product");
+const Product = require("../../models/Product");
 const check = require('./productsController');
-const Cart = require("../models/Cart");
+const Cart = require("../../models/Cart");
 
 const mongoose = require('mongoose');
 const ObjectId = require('mongoose').Types.ObjectId;
@@ -10,7 +10,7 @@ const sharp = require('sharp');
 const path = require('path');
 
 // CONTROLLERS
-const fileUpload = require('../controllers/fileUploadController');
+const fileUpload = require('../../controllers/v1/fileUploadController');
 
 const app = express();
 

@@ -1,5 +1,5 @@
 const express = require('express');
-const User = require("../models/User");
+const User = require("../../models/User");
 
 const mongoose = require('mongoose');
 const fs = require('fs');
@@ -9,7 +9,7 @@ const path = require('path');
 const validatePhoneNumber = require('validate-phone-number-node-js');
 
 // CONTROLLERS
-const fileUpload = require('../controllers/fileUploadController');
+const fileUpload = require('../../controllers/v2/fileUploadController');
 
 const app = express();
 

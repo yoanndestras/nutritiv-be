@@ -53,6 +53,12 @@ const OrderSchema = new Schema
         type: String,
         default: "pending"
     },
+    version: 
+    {
+        type: Number,
+        immutable: true,
+        default: 2,
+    },
 },
 {
     timestamps: true,   //mongoose automatically do UpdateAt and CreatedAt

@@ -1,12 +1,12 @@
-const Cart = require("../models/Cart");
+const Cart = require("../../models/Cart");
 const router = require("express").Router();
 const mongoose = require('mongoose');
 
 // CONTROLLERS
-const cors = require('../controllers/corsController');
-const auth = require('../controllers/authController');
-const product = require('../controllers/productsController');
-const cart = require('../controllers/cartController');
+const cors = require('../../controllers/v2/corsController');
+const auth = require('../../controllers/v2/authController');
+const product = require('../../controllers/v2/productsController');
+const cart = require('../../controllers/v2/cartController');
 const {upload} = require('./upload');
 
 //OPTIONS FOR CORS

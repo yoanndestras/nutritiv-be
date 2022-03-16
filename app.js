@@ -9,13 +9,23 @@ const cookieParser = require("cookie-parser");
 const cors = require('cors');
 
 // router based on url
-const userRoute = require("./routes/user");
-const authRoute = require("./routes/auth");
-const productRoute = require("./routes/product");
-const cartRoute = require("./routes/cart");
-const orderRoute = require("./routes/order");
-const {uploadRouter} = require('./routes/upload');
-const stripeRoute = require("./routes/stripe");
+
+const userRouteV1 = require(`./routes/v1/user`);
+const authRouteV1 = require(`./routes/v1/auth`);
+const productRouteV1 = require(`./routes/v1/product`);
+const cartRouteV1 = require(`./routes/v1/cart`);
+const orderRouteV1 = require(`./routes/v1/order`);
+const {uploadRouterV1} = require(`./routes/v1/upload`);
+const stripeRouteV1 = require(`./routes/v1/stripe`);
+
+const userRouteV2 = require(`./routes/v2/user`);
+const authRouteV2 = require(`./routes/v2/auth`);
+const productRouteV2 = require(`./routes/v2/product`);
+const cartRouteV2 = require(`./routes/v2/cart`);
+const orderRouteV2 = require(`./routes/v2/order`);
+const {uploadRouterV2} = require(`./routes/v2/upload`);
+const stripeRouteV2 = require(`./routes/v2/stripe`);
+
 
 dotenv.config();
 
@@ -65,16 +75,23 @@ app.use(
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-const version = process.env.API_VERSION;
+app.use(`/v1`, router);
+app.use(`/v1/users`, userRouteV1);
+app.use(`/v1/auth`, authRouteV1);
+app.use(`/v1/products`, productRouteV1);
+app.use(`/v1/carts`, cartRouteV1);
+app.use(`/v1/orders`, orderRouteV1);
+app.use(`/v1/imageUpload`, uploadRouterV1);
+app.use(`/v1/stripe`, stripeRouteV1);
 
-app.use(`/${version}`, router);
-app.use(`/${version}/users`, userRoute);
-app.use(`/${version}/auth`, authRoute);
-app.use(`/${version}/products`, productRoute);
-app.use(`/${version}/carts`, cartRoute);
-app.use(`/${version}/orders`, orderRoute);
-app.use(`/${version}/imageUpload`, uploadRouter);
-app.use(`/${version}/stripe`, stripeRoute);
+app.use(`/v2`, router);
+app.use(`/v2/users`, userRouteV2);
+app.use(`/v2/auth`, authRouteV2);
+app.use(`/v2/products`, productRouteV2);
+app.use(`/v2/carts`, cartRouteV2);
+app.use(`/v2/orders`, orderRouteV2);
+app.use(`/v2/imageUpload`, uploadRouterV2);
+app.use(`/v2/stripe`, stripeRouteV2);
 
 // process.env.PORT = value PORT in .env file
 const port = (process.env.PORT || 4000);

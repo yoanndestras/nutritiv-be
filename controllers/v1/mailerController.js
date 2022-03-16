@@ -1,5 +1,5 @@
-const User = require("../models/User");
-const Order = require("../models/Order");
+const User = require("../../models/User");
+const Order = require("../../models/Order");
 
 const sgMail = require("@sendgrid/mail");
 const auth = require("./authController");

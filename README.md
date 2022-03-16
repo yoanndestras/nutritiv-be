@@ -75,7 +75,7 @@ Our team use Trello to organize tasks and manage the project.
 ___
 - Back-end Developper : [Yoann Destras](https://github.com/yoanndestras)
   - [**Back-end Repository**](https://github.com/yoanndestras/nutritiv-be)
-- Front-end Developper : [Monstar](https://github.com/Monstarrrr)
+- Front-end Developper : [Hugo Bonpain](https://github.com/Monstarrrr)
   - [**Front-end Repository**](https://github.com/Monstarrrr/nutritiv-fe)
 
 

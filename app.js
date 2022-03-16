@@ -10,6 +10,7 @@ const cors = require('cors');
 
 // router based on url
 
+// V1
 const userRouteV1 = require(`./routes/v1/user`);
 const authRouteV1 = require(`./routes/v1/auth`);
 const productRouteV1 = require(`./routes/v1/product`);
@@ -17,7 +18,10 @@ const cartRouteV1 = require(`./routes/v1/cart`);
 const orderRouteV1 = require(`./routes/v1/order`);
 const {uploadRouterV1} = require(`./routes/v1/upload`);
 const stripeRouteV1 = require(`./routes/v1/stripe`);
+const conversationRouteV1 = require(`./routes/v1/conversations`);
+const messageRouteV1 = require(`./routes/v1/messages`);
 
+// V2
 const userRouteV2 = require(`./routes/v2/user`);
 const authRouteV2 = require(`./routes/v2/auth`);
 const productRouteV2 = require(`./routes/v2/product`);
@@ -28,6 +32,22 @@ const stripeRouteV2 = require(`./routes/v2/stripe`);
 
 
 dotenv.config();
+
+const io = require("socket.io")(8900, 
+    {
+        cors:
+        {
+            origin: "http://localhost:3001"
+        }
+    });
+
+// let users = [];
+
+io.on("connection", (socket) =>
+{
+    console.log("a user connected");
+    io.emit("welcome", "hello this is socket server!");
+})
 
 mongoose
     .connect(process.env.MONGO_URL)
@@ -75,6 +95,7 @@ app.use(
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+// V1
 app.use(`/v1`, router);
 app.use(`/v1/users`, userRouteV1);
 app.use(`/v1/auth`, authRouteV1);
@@ -83,7 +104,10 @@ app.use(`/v1/carts`, cartRouteV1);
 app.use(`/v1/orders`, orderRouteV1);
 app.use(`/v1/imageUpload`, uploadRouterV1);
 app.use(`/v1/stripe`, stripeRouteV1);
+app.use(`/v1/conversations`, conversationRouteV1);
+app.use(`/v1/messages`, messageRouteV1);
 
+// V2
 app.use(`/v2`, router);
 app.use(`/v2/users`, userRouteV2);
 app.use(`/v2/auth`, authRouteV2);

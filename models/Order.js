@@ -57,7 +57,7 @@ const OrderSchema = new Schema
     {
         type: Number,
         immutable: true,
-        default: 2,
+        default: 1,
     },
 },
 {

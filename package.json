@@ -45,6 +45,7 @@
     "passport-local-mongoose": "^6.1.0",
     "random-words": "^1.1.2",
     "sharp": "^0.30.1",
+    "socket.io": "^4.4.1",
     "stripe": "^8.202.0",
     "validate-phone-number-node-js": "^0.0.1"
   }

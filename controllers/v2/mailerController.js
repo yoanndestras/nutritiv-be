@@ -162,7 +162,7 @@ exports.sendNewOrder = async(req, res, next) =>
                     <hr>
                     <p>Hello, ${username}</p>
                     <p>Thank you for your order, your order is being prepared for delivery<br><br>
-                    ${order.products}<br><br>
+                    ${order}<br><br>
                     We will send you an email when the order has been shipped<br>
                     Thanks,<br>
                     </p>

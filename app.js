@@ -18,8 +18,7 @@ const cartRouteV1 = require(`./routes/v1/cart`);
 const orderRouteV1 = require(`./routes/v1/order`);
 const {uploadRouterV1} = require(`./routes/v1/upload`);
 const stripeRouteV1 = require(`./routes/v1/stripe`);
-const conversationRouteV1 = require(`./routes/v1/conversations`);
-const messageRouteV1 = require(`./routes/v1/messages`);
+const chatRouteV1 = require(`./routes/v1/chat`);
 
 // V2
 const userRouteV2 = require(`./routes/v2/user`);
@@ -103,8 +102,7 @@ app.use(`/v1/carts`, cartRouteV1);
 app.use(`/v1/orders`, orderRouteV1);
 app.use(`/v1/imageUpload`, uploadRouterV1);
 app.use(`/v1/stripe`, stripeRouteV1);
-app.use(`/v1/conversations`, conversationRouteV1);
-app.use(`/v1/messages`, messageRouteV1);
+app.use(`/v1/chats`, chatRouteV1);
 
 // V2
 app.use(`/v2`, router);

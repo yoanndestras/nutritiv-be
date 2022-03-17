@@ -145,11 +145,12 @@ exports.verifyAuthorization = async(req, res, next) =>
 
 exports.verifyUser = (req, res, next) => 
 {
-    
     passport.authenticate('jwt', { session: false }, (err, user, info) => 
     {
         if (err || !user) 
         {   
+            console.log(!user);
+            
             req.statusCode = 401;
             req.user = "error";
             return next();

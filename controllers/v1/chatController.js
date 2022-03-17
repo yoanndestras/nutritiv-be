@@ -1,9 +1,7 @@
-const mongoose = require('mongoose');
-const Message = require("../../models/Message");
-const Conversation = require("../../models/Conversation");
+const Chat = require("../../models/Chat");
 const User = require("../../models/User");
 
-exports.verifyReceiver = async(req, res, next) =>
+exports.verifyReceivers = async(req, res, next) =>
 {
   try 
   {
@@ -27,6 +25,27 @@ exports.verifyReceiver = async(req, res, next) =>
     else
     {
       let err = new Error("Couldn't find receiver!");
+      err.statusCode = 400;
+      next(err);
+    }
+
+  }catch(err){next(err)}
+}
+
+exports.verifyChatExist = async(req, res, next) =>
+{
+  try 
+  {
+    const chatId = req.params.chatId
+    const chat = await Chat.findOne({_id: chatId})
+  
+    if(chat)
+    {
+      next();
+    }
+    else
+    {
+      let err = new Error("No chat found with _id " + chatId);
       err.statusCode = 400;
       next(err);
     }

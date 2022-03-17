@@ -13,7 +13,7 @@ const ChatSchema = new Schema
     {
         type: Array,
         required: true,
-
+        
         sender:
         {
             type: mongoose.Schema.Types.ObjectId,
@@ -24,6 +24,11 @@ const ChatSchema = new Schema
             type: String,
             required: true
         },
+        id:
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true
+        }
         // replyTo:
         // {
         //     type: mongoose.Schema.Types.ObjectId,

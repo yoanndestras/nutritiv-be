@@ -61,8 +61,13 @@ router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, asyn
 {
   try
   {
-    let members = req.body.members;
-    members.push((req.user._id.toString()))
+    let membersId = req.body.members;
+    let members = membersId.map((member) =>
+      {
+        return member = new mongoose.Types.ObjectId(member)
+      })
+    
+    members.push((req.user._id))
     
     const newChat = new Chat(
       {
@@ -94,7 +99,8 @@ chat.verifyChatExist, async(req, res, next) =>
           messages : 
           {
             sender,
-            text
+            text,
+            id : new mongoose.Types.ObjectId()
           }
         }
       });

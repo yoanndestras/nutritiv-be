@@ -6,27 +6,6 @@ const cors = require('../../controllers/v1/corsController');
 const auth = require('../../controllers/v1/authController');
 const conv = require('../../controllers/v1/conversationsController');
 
-router.post("/:receiverId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin,
-conv.verifyReceiver, async(req, res, next) => 
-{
-  try
-  {
-    const senderId = req.user._id;
-    const receiverId = req.receiverId
-    
-    const newConversation = new Conversation(
-      {
-        members: [senderId, receiverId]
-      })
-
-    const savedConversation = await newConversation.save();
-    
-    res.status(201).json(savedConversation);
-
-  }catch(err) {next(err)}
-  
-})
-
 router.get("/:userId", cors.corsWithOptions, async(req, res, next) =>
 {
   try
@@ -53,6 +32,40 @@ router.get("/:userId", cors.corsWithOptions, async(req, res, next) =>
     
   }catch(err) {next(err)}
 
+})
+
+router.post("/:receiverId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin,
+conv.verifyReceiver, async(req, res, next) => 
+{
+  try
+  {
+    const senderId = req.user._id;
+    const receiverId = req.receiverId
+    
+    const newConversation = new Conversation(
+      {
+        members: [senderId, receiverId]
+      })
+
+    const savedConversation = await newConversation.save();
+    
+    res.status(201).json(savedConversation);
+
+  }catch(err) {next(err)}
+  
+})
+
+router.delete("/:conversationId", async(req, res, next) =>
+{
+  const conversationId = req.params.conversationId;
+
+  await Conversation.findByIdAndDelete(conversationId);
+
+  res.status(200).json(
+    {
+      success : true, 
+      message : "Conversation deleted"
+    });
 })
 
 module.exports = router;

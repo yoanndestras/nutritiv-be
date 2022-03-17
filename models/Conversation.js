@@ -6,7 +6,13 @@ const ConversationSchema = new Schema
 ({
     members: 
     {
-      type: Array,
+        type: Array,
+    },
+    version: 
+    {
+        type: Number,
+        immutable: true,
+        default: 1,
     },
 },
 {

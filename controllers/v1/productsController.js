@@ -17,7 +17,6 @@ const app = express();
 app.use(express.json()); // to read JSON    
 app.use(express.urlencoded({extended: true}));
 
-
 exports.newProduct = async(req, res, next) =>
 {
     try

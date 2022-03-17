@@ -1,25 +1,33 @@
 const router = require("express").Router();
 const Conversation = require('../../models/Conversation')
 
+// CONTROLLERS
+const cors = require('../../controllers/v1/corsController');
+const auth = require('../../controllers/v1/authController');
+const conv = require('../../controllers/v1/conversationsController');
 
-router.post("/", async(req, res, next) => 
+router.post("/:receiverId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin,
+conv.verifyReceiver, async(req, res, next) => 
 {
   try
   {
+    const senderId = req.user._id;
+    const receiverId = req.receiverId
+    
     const newConversation = new Conversation(
       {
-        members: [req.body.senderId, req.body.receiverId]
+        members: [senderId, receiverId]
       })
 
     const savedConversation = await newConversation.save();
-
+    
     res.status(201).json(savedConversation);
 
   }catch(err) {next(err)}
   
 })
 
-router.get("/:userId", async(req, res, next) =>
+router.get("/:userId", cors.corsWithOptions, async(req, res, next) =>
 {
   try
   {
@@ -31,8 +39,17 @@ router.get("/:userId", async(req, res, next) =>
           $in: [req.params.userId]
         }
       })
-
-    res.status(200).json(conversation);
+    
+    if(conversation)
+    {
+      res.status(200).json(conversation);
+    }
+    else
+    {
+      let err = new Error("No conversation found for user " + req.params.userId);
+      err.statusCode = 400;
+      next(err);
+    }
     
   }catch(err) {next(err)}
 

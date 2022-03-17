@@ -15,7 +15,13 @@ const MessageSchema = new Schema
     text:
     {
       type: String,
-    }
+    },
+    version: 
+    {
+        type: Number,
+        immutable: true,
+        default: 1,
+    },
 },
 {
     timestamps: true,   //mongoose automatically do UpdateAt and CreatedAt

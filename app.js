@@ -59,7 +59,7 @@ const app = express();
 const router = express.Router();
 
 // HEALTH CHECK
-router.get('/', (req, res) => 
+router.get('/health', (req, res) => 
 {
     const data = {
         uptime: process.uptime(),

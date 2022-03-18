@@ -114,7 +114,7 @@ app.use(`/v2/orders`, orderRouteV2);
 app.use(`/v2/imageUpload`, uploadRouterV2);
 app.use(`/v2/stripe`, stripeRouteV2);
 
-app.use(express.static(path.join(__dirname, "nutritiv-fe")));
+app.use(express.static(path.join(__dirname, "/nutritiv-fe/build")));
 
 app.get("*", (req, res) =>
 {

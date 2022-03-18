@@ -6,7 +6,8 @@
   "scripts": {
     "start": "nodemon app.js",
     "start-dev": "env-cmd -e development nodemon app.js",
-    "start-prod": "env-cmd -e production nodemon app.js"
+    "start-prod": "env-cmd -e production nodemon app.js",
+    "heroku-postbuild": "cd nutritiv-fe && npm install && npm run build"
   },
   "repository": {
     "type": "git",

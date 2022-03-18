@@ -117,7 +117,8 @@ chat.verifyChatExist, async(req, res, next) =>
 })
 
 
-router.delete("/single/:chatId", async(req, res, next) =>
+router.delete("/single/:chatId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+auth.verifyAdmin, async(req, res, next) =>
 {
   try
   {

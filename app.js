@@ -59,7 +59,7 @@ const app = express();
 const router = express.Router();
 
 // HEALTH CHECK
-router.get('/', (req, res) => 
+router.get('/health', (req, res) => 
 {
     const data = {
         uptime: process.uptime(),
@@ -115,13 +115,13 @@ app.use(`/v2/imageUpload`, uploadRouterV2);
 app.use(`/v2/stripe`, stripeRouteV2);
 
 
-app.use(express.static(path.join(__dirname, "/nutritiv-fe/build")));
-console.log(__dirname);
+// app.use(express.static(path.join(__dirname, "/nutritiv-fe/build")));
+// console.log(__dirname);
 
-app.get("*", (req, res) =>
-{
-    res.sendFile(path.join(__dirname, "/nutritiv-fe/build", "index.html"))
-});
+// app.get("*", (req, res) =>
+// {
+//     res.sendFile(path.join(__dirname, "/nutritiv-fe/build", "index.html"))
+// });
 
 // process.env.PORT = value PORT in .env file
 const port = (process.env.PORT || 4000);

@@ -22,7 +22,7 @@ async(req, res, next) =>
         {
           $in: [userId]
         }
-      })
+      },).sort({updatedAt:-1})
     
     if(chat)
     {

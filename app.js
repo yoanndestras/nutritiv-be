@@ -59,7 +59,7 @@ const app = express();
 const router = express.Router();
 
 // HEALTH CHECK
-router.get('/health', (req, res) => 
+router.get('/', (req, res) => 
 {
     const data = {
         uptime: process.uptime(),
@@ -114,10 +114,10 @@ app.use(`/v2/orders`, orderRouteV2);
 app.use(`/v2/imageUpload`, uploadRouterV2);
 app.use(`/v2/stripe`, stripeRouteV2);
 
-console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 
 app.use(express.static(path.join(__dirname, "/nutritiv-fe/build")));
 console.log(__dirname);
+
 app.get("*", (req, res) =>
 {
     res.sendFile(path.join(__dirname, "/nutritiv-fe/build", "index.html"))

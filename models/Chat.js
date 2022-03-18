@@ -4,6 +4,16 @@ const Schema = mongoose.Schema;
 
 const ChatSchema = new Schema
 ({
+    // name:
+    // {
+    //     type: String,
+    //     require: true
+    // },
+    // hosts:
+    // {
+    //      type: Array,
+    //      required: true
+    // },
     members: 
     {
         type: Array,

@@ -23,7 +23,7 @@ router.get("/", cors.corsWithOptions, async(req, res, next) =>
     {
         const allProducts = await Product.find();
         const productsLength = allProducts.length;
-
+        
         const queryNew = req.query.new, queryTags = req.query.tags;
         const queryLimit = parseInt(req.query.limit); 
         
@@ -300,7 +300,7 @@ product.resizeProductImage, product.addProductImgs, async(req, res, next) =>
 // });
 
 // DELETE
-router.delete("/delete/:productId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+router.delete("/single/:productId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
 auth.verifyAdmin, product.removeImgs, async(req, res, next) =>
 {
     try
@@ -321,7 +321,6 @@ async (req, res, next) =>
 {
     const date = new Date();
     const lastDay = new Date(date.setUTCDate(date.getUTCDate() -1));
-    
     try
     {
         let income = await Product.deleteMany( { "createdAt" : {$gt : lastDay } })

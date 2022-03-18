@@ -7,6 +7,9 @@ const cors = require('../../controllers/v1/corsController');
 const auth = require('../../controllers/v1/authController');
 const chat = require('../../controllers/v1/chatController');
 
+//OPTIONS FOR CORS CHECK
+router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+
 router.get("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
 async(req, res, next) =>
 {
@@ -57,11 +60,12 @@ async(req, res, next) =>
 //   }catch(err){next(err)}
 // })
 
-router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async(req, res, next) => 
+router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, chat.verifySyntax, 
+chat.verifyMembersExist, chat.verifyAdminMembers, async(req, res, next) => 
 {
   try
   {
-    let membersId = req.body.members;
+    const membersId = req.body.members;
     let members = membersId.map((member) =>
       {
         return member = new mongoose.Types.ObjectId(member)
@@ -73,7 +77,7 @@ router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, asyn
       {
         members
       })
-
+    
     const savedChat = await newChat.save();
     
     res.status(201).json(savedChat);
@@ -113,17 +117,35 @@ chat.verifyChatExist, async(req, res, next) =>
 })
 
 
-// router.delete("/:chatId", async(req, res, next) =>
-// {
-//   const chatId = req.params.chatId;
+router.delete("/single/:chatId", async(req, res, next) =>
+{
+  try
+  {
+    const chatId = req.params.chatId;
+  
+    await Chat.findByIdAndDelete(chatId);
+    
+    res.status(200).json(
+      {
+        success : true, 
+        message : "Chat deleted"
+      });
+  }catch(err) {next(err)}
+  
+})
 
-//   await Chat.findByIdAndDelete(chatId);
+//DELETE RECENT CHATS
+router.delete("/lastDay", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, 
+async (req, res, next) =>
+{
+    const date = new Date();
+    const lastDay = new Date(date.setUTCDate(date.getUTCDate() -1));
+    try
+    {
+        let income = await Chat.deleteMany( { "createdAt" : {$gt : lastDay } })
+        res.status(200).json(income);
+    }catch(err){next(err)}
 
-//   res.status(200).json(
-//     {
-//       success : true, 
-//       message : "Chat deleted"
-//     });
-// })
+})
 
 module.exports = router;

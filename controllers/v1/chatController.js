@@ -1,37 +1,68 @@
 const Chat = require("../../models/Chat");
 const User = require("../../models/User");
+const ObjectId = require('mongoose').Types.ObjectId;
 
-exports.verifyReceivers = async(req, res, next) =>
+exports.verifyAdminMembers = async(req, res, next) =>
 {
-  try 
+  try
   {
-    const receiverId = req.params.receiverId;
-    const receiver = await  User.findOne({_id: receiverId});
-    
-    if(receiver)
+    const membersId = req.body.members;
+        
+    for(let i = 0; i < membersId.length; i++)
     {
-      if(receiver.isAdmin === true)
+      let user = await User.findById({_id: membersId[i]})
+      if(user && user.isAdmin === false)
       {
-        req.receiverId = receiver;
-        next();
-      }
-      else
-      {
-        let err = new Error("Receiver is not admin!");
+        let err = new Error(user.username + " is not admin!");
         err.statusCode = 401;
         next(err);
       }
     }
-    else
+    
+    next();
+  }catch(err){next(err)}
+  
+}
+exports.verifyMembersExist = async(req, res, next) =>
+{
+  try 
+  {
+    const membersId = req.body.members;
+    
+    for(let i = 0; i < membersId.length; i++)
     {
-      let err = new Error("Couldn't find receiver!");
-      err.statusCode = 400;
-      next(err);
+      let user = await User.findById({_id: membersId[i]})
+      if(!user)
+        {   
+          let err = new Error(membersId[i] + " do not exist!");
+          err.statusCode = 400;
+          next(err);
+        }
     }
 
+    next();
   }catch(err){next(err)}
 }
 
+exports.verifySyntax = async(req, res, next) =>
+{
+  try
+  {
+    const membersId = req.body.members;
+        
+    for(let i = 0; i < membersId.length; i++)
+    {
+      if(ObjectId.isValid(membersId[i]) === false)
+        {
+          let err = new Error(membersId[i] + " is not a valid ObjectId");
+          err.statusCode = 400;
+          next(err);
+        }
+    }
+    
+    next();
+  }catch(err){next(err)}
+}
 exports.verifyChatExist = async(req, res, next) =>
 {
   try 

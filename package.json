@@ -49,5 +49,8 @@
     "socket.io": "^4.4.1",
     "stripe": "^8.202.0",
     "validate-phone-number-node-js": "^0.0.1"
+  },
+  "engines" : {
+    "node": "16.14.0"
   }
 }

@@ -1,1 +1,1 @@
-web : env-cmd -e development nodemon app.js
+web : node app.js

@@ -60,7 +60,7 @@ async(req, res, next) =>
 //   }catch(err){next(err)}
 // })
 
-router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, chat.verifySyntax, 
+router.post("/create", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, chat.verifySyntax, 
 chat.verifyMembersExist, chat.verifyAdminMembers, async(req, res, next) => 
 {
   try

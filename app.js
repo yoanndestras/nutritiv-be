@@ -62,12 +62,12 @@ app.use(
 app.use(express.static(path.join(__dirname, 'public')));
 
 
-app.use(express.static(path.join(__dirname, "/client/build")));
+app.use(express.static(path.join(__dirname, "/client/build/")));
 console.log(__dirname);
 
 app.get("*", (req, res) =>
 {
-    res.sendFile(path.join(__dirname, "/client/build", "index.html"))
+    res.sendFile(path.join(__dirname, "/client/build/", "index.html"))
 });
 
 // process.env.PORT = value PORT in .env file

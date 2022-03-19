@@ -63,7 +63,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 app.use(express.static(path.join(__dirname, "/client/build/")));
-console.log(__dirname);
 
 app.get("*", (req, res) =>
 {

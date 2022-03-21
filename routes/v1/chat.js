@@ -16,13 +16,7 @@ async(req, res, next) =>
   try
   {
     const userId = req.user._id;
-    const chat = await Chat.find(
-      {
-        members: 
-        {
-          $in: [userId]
-        }
-      },).sort({updatedAt:-1})
+    const chat = await Chat.find({members: {$in: [userId]}},).sort({updatedAt:-1})
     
     if(chat)
     {
@@ -39,26 +33,27 @@ async(req, res, next) =>
 
 })
 
-// router.get("/:chatId", async(req, res, next) =>
-// {
-//   try
-//   {
-//     const chatId = req.params.chatId;
-//     const chat = await Chat.findById({chatId})
+router.get("/:chatId/messages/", async(req, res, next) =>
+{
+  try
+  {
+    const chatId = req.params.chatId;
+    const chat = await Chat.findById({chatId})
   
-//     if(chat)
-//     {
-//       res.status(200).json(chat);
-//     }
-//     else
-//     {
-//       let err = new Error("No chat found for chatId : " + chatId);
-//       err.statusCode = 400;
-//       next(err);
-//     }
+    if(chat)
+    {
 
-//   }catch(err){next(err)}
-// })
+      res.status(200).json(chat);
+    }
+    else
+    {
+      let err = new Error("No chat found for chatId : " + chatId);
+      err.statusCode = 400;
+      next(err);
+    }
+
+  }catch(err){next(err)}
+})
 
 router.post("/create", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, chat.verifySyntax, 
 chat.verifyMembersExist, chat.verifyAdminMembers, async(req, res, next) => 

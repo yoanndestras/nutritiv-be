@@ -20,14 +20,23 @@ async(req, res, next) =>
     const chat = await Chat.find({members: {$in: [userId]}},).sort({updatedAt:-1})
     const messagesQty = parseInt(req.query.messagesQty);
     
-    console.log(messagesQty);
     if(chat)
     {
       const messages = await Chat.aggregate(
         [
           {
             $project :
-            {id : 1, message : {$slice: ["$messages", - messagesQty]}}
+            {
+              id : 1, 
+              messages : 
+              {
+                $slice: ["$messages", - messagesQty]
+              },
+              members:
+              {
+                $in: [ObjectId(userId), "$members"]
+              },
+            },
           }
       ]);
       res.status(200).json(messages);
@@ -43,7 +52,8 @@ async(req, res, next) =>
 
 })
 
-router.get("/:chatId/messages/", async(req, res, next) =>
+router.get("/:chatId/messages/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+async(req, res, next) =>
 {
   try
   {

@@ -35,7 +35,7 @@ export const ProductCard = ({ product }) => {
               maxWidth: "100px",
             }}
             key={i}
-            src={`${process.env.REACT_APP_SERVER_ADDRESS}${img}`}
+            src={`${process.env.REACT_APP_S3_ADDRESS}${img}`}
             alt={`${product.title} ${i+1}`}
           />
         ))

@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const Chat = require('../../models/Chat')
 const mongoose = require('mongoose');
+const ObjectId = mongoose.Types.ObjectId;
 
 // CONTROLLERS
 const cors = require('../../controllers/v1/corsController');
@@ -38,12 +39,15 @@ router.get("/:chatId/messages/", async(req, res, next) =>
   try
   {
     const chatId = req.params.chatId;
-    const chat = await Chat.findById({chatId})
-  
+    const chat = await Chat.findById({_id : chatId})
+    const queryStack = parseInt(req.query.stack), queryQuantity = parseInt(req.query.quantity);
+    const start = (queryStack-1)*queryQuantity;
+    const end = start + queryQuantity;
     if(chat)
     {
-
-      res.status(200).json(chat);
+      let messages = chat.messages.reverse();
+      messages = messages.slice(start, end).reverse();
+      res.status(200).json(messages);
     }
     else
     {

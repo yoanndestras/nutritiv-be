@@ -4,10 +4,10 @@
   "description": "Back-end of Nutritiv project",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon app.js",
+    "start": "node app.js",
     "start-dev": "env-cmd -e development nodemon app.js",
     "start-prod": "env-cmd -e production nodemon app.js",
-    "heroku-postbuild": "cd nutritiv-fe && npm i && npm run build"
+    "heroku-postbuild": "cd client && npm i && npm run build"
   },
   "repository": {
     "type": "git",
@@ -49,5 +49,8 @@
     "socket.io": "^4.4.1",
     "stripe": "^8.202.0",
     "validate-phone-number-node-js": "^0.0.1"
+  },
+  "engines" : {
+    "node": "16.14.0"
   }
 }

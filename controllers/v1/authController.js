@@ -173,9 +173,7 @@ exports.verifyUserCart = (req, res, next) =>
     passport.authenticate('jwt', { session: false }, (err, user, info) => 
     {
         if (err || !user) 
-        {   
-            req.user = "emptyCart";
-            req.statusCode = 200;
+        {
             return next();
         }
         else if (user.isVerified === false)

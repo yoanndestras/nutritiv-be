@@ -249,7 +249,7 @@ exports.countInStock = async(req, res, next) =>
 {
     try
     {
-        const userId = req.user._id;
+        const userId = req.user ? req.user._id : null;
         const productId = req.params.productId;
         const cart = await Cart.findOne({userId : userId});
         let findProductId = cart ? cart.products.find(el => el.productId.toString() === productId) : null;

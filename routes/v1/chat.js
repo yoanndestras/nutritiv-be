@@ -18,10 +18,19 @@ async(req, res, next) =>
   {
     const userId = req.user._id;
     const chat = await Chat.find({members: {$in: [userId]}},).sort({updatedAt:-1})
+    const messagesQty = parseInt(req.query.messagesQty);
     
+    console.log(messagesQty);
     if(chat)
     {
-      res.status(200).json(chat);
+      const messages = await Chat.aggregate(
+        [
+          {
+            $project :
+            {id : 1, message : {$slice: ["$messages", - messagesQty]}}
+          }
+      ]);
+      res.status(200).json(messages);
     }
     else
     {
@@ -39,7 +48,7 @@ router.get("/:chatId/messages/", async(req, res, next) =>
   try
   {
     const chatId = req.params.chatId;
-    const chat = await Chat.findById({_id : chatId})
+    const chat = await Chat.findById({_id : chatId}).lean();
     const queryStack = parseInt(req.query.stack), queryQuantity = parseInt(req.query.quantity);
     const start = (queryStack-1)*queryQuantity;
     const end = start + queryQuantity;
@@ -67,7 +76,7 @@ chat.verifyMembersExist, chat.verifyAdminMembers, async(req, res, next) =>
     const membersId = req.body.members;
     let members = membersId.map((member) =>
       {
-        return member = new mongoose.Types.ObjectId(member)
+        return member = new ObjectId(member)
       })
     
     members.push((req.user._id))
@@ -103,7 +112,7 @@ chat.verifyChatExist, async(req, res, next) =>
           {
             sender,
             text,
-            id : new mongoose.Types.ObjectId()
+            id : new ObjectId()
           }
         }
       });

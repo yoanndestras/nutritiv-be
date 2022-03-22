@@ -49,7 +49,7 @@ const io = require("socket.io")(http,
     {
         cors: 
         {
-            origin: "http://localhost:" + port,
+            origin: "http://localhost:4000",
             methods: ["GET", "POST"],
             credentials: true
         

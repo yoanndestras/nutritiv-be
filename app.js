@@ -19,6 +19,8 @@ const io = require("socket.io")(http,
         {
             origin: "http://localhost:" + port,
             methods: ["GET", "POST"],
+            credentials: true
+        
         },
     });
 io.on("connection", (socket) =>

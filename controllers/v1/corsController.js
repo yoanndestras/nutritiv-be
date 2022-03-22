@@ -2,13 +2,12 @@ const cors = require('cors');
 const dotenv = require("dotenv"); // ENV FILES
 dotenv.config(); // INITIALIZE ENVIRONNEMENT VARIABLE FILE ".env"
 
-const whitelist = process.env.CORS_WHITELIST.split(' '); //'https://DESKTOP-DBB3L91:3001'
+let whitelist = process.env.CORS_WHITELIST.split(' '); //'https://DESKTOP-DBB3L91:3001'
+whitelist.push(process.env.SERVER_ADDRESS);
 
-console.log(whitelist);
 const corsOptionsDelegate = (req, callback) => 
 {
     let corsOptions;
-    
     if(whitelist.indexOf(req.header('Origin')) !== -1) 
         {
             corsOptions = 

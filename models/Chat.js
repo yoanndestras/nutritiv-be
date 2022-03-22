@@ -44,11 +44,6 @@ const ChatSchema = new Schema
         //     type: mongoose.Schema.Types.ObjectId,
         // }
     },
-    type:
-    {
-        type: String,
-        default: "group",
-    },
     version: 
     {
         type: Number,

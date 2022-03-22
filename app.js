@@ -21,7 +21,10 @@ io.on("connection", (socket) =>
         io.emit("message", ({ name, message }));
     })
 })
-
+http.listen(4000, function () 
+{
+    console.log("listening on port 4000!");
+})
 // DATABASE ACCESS
 mongoose
     .connect(process.env.MONGO_URL)

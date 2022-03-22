@@ -18,19 +18,21 @@ async(req, res, next) =>
   try
   {
     const userId = req.user._id;
-    const chats = await Chat.findOne({members: {$in: [userId]}});
+    const chats = await Chat.find({members: {$in: [userId]}},).sort({updatedAt:-1});
     const messagesQty = parseInt(req.query.messagesQty);
     
-    if(!messagesQty && chats){res.status(200).json(chats)}
-    else if(chats)
+    if(!messagesQty && chats && chats.length > 0){res.status(200).json(chats)}
+    else if(chats && chats.length > 0)
     {
       let messagesArray = [];
       
-      chats._doc.messages = chats._doc.messages.slice(0, messagesQty);
-      const {members, type, version, createdAt, __v, ...message} = chats._doc;
-      messagesArray.push(message)
-
-        res.status(200).json(messagesArray);
+      chats.map((chat) => 
+      {
+        chat._doc.messages = chat._doc.messages.slice(0, messagesQty);
+        const {members, type, version, createdAt, __v, ...message} = chat._doc;
+        messagesArray.push(message)
+      });
+      res.status(200).json(messagesArray);
     }
     else
     {
@@ -43,32 +45,31 @@ async(req, res, next) =>
 
 })
 
-router.get("/messages", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+router.get("/messages/:chatId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
 async(req, res, next) =>
 {
   try
   {
-    const userId = req.user._id;
-    const chat = await Chat.findOne({members: {$in: [userId]}});
+    const chatId = req.params.chatId, userId = req.user._id;
+    const chat = await Chat.find({_id : chatId, members: {$in: [userId]}});
     const queryStack = parseInt(req.query.stack), queryQuantity = parseInt(req.query.quantity);
-
     
-    if((!queryStack || !queryQuantity) && chat)
+    if((!queryStack || !queryQuantity) && (chat && chat.length > 0))
     {
       res.status(200).json(chat.messages);
     }
-    else if(chat)
+    else if(chat && chat.length > 0)
     {
       const start = (queryStack-1)*queryQuantity;
       const end = start + queryQuantity;
       
-      let messages = chat.messages.reverse();
+      let messages = chat[0].messages.reverse();
       messages = messages.slice(start, end).reverse();
       res.status(200).json(messages);
     }
     else
     {
-      let err = new Error("No chat found for user " + req.user.username);
+      let err = new Error("No chat found for chatId : " + chatId + " and username " + req.user.username);
       err.statusCode = 404;
       next(err);
     }
@@ -98,16 +99,17 @@ chat.verifyChatNotExist, async(req, res, next) =>
   
 })
 
-router.post("/message", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
+router.post("/message/:chatId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
 chat.verifyChatExist, async(req, res, next) => 
 {
   try
   {
+    const chatId = req.params.chatId;
     const sender = req.user._id;
     const text = req.body.text;
     
     const newMessage = await Chat.findOneAndUpdate(
-      {members: {$in: [sender]}},
+      {_id: chatId, members: {$in: [sender]}},
       {
         $push :
         {
@@ -146,37 +148,37 @@ auth.verifyAdmin, async(req, res, next) =>
   
 })
 
-router.delete("/self", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
-async(req, res, next) =>
-{
-  try
-  {
-    const userId = req.user._id;
-    const chat = await Chat.findOne({members: {$in: [userId]}}); 
+// router.delete("/self", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+// async(req, res, next) =>
+// {
+//   try
+//   {
+//     const userId = req.user._id;
+//     const chat = await Chat.findOne({members: {$in: [userId]}}); 
 
-    if(chat)
-    {
-      const chatId =chat._id;
+//     if(chat)
+//     {
+//       const chatId =chat._id;
       
-      await Chat.findByIdAndDelete(chatId);
+//       await Chat.findByIdAndDelete(chatId);
       
-      res.status(200).json(
-        {
-          success : true, 
-          message : "Chat deleted"
-        });
-    }
-    else
-    {
-      let err = new Error("No chat found for user "+ req.user.username);
-      err.statusCode = 404;
-      next(err);
-    }
+//       res.status(200).json(
+//         {
+//           success : true, 
+//           message : "Chat deleted"
+//         });
+//     }
+//     else
+//     {
+//       let err = new Error("No chat found for user "+ req.user.username);
+//       err.statusCode = 404;
+//       next(err);
+//     }
     
     
-  }catch(err) {next(err)}
+//   }catch(err) {next(err)}
   
-})
+// })
 
 //DELETE RECENT CHATS
 router.delete("/lastDay", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, 

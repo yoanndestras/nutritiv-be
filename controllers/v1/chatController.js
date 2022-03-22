@@ -71,7 +71,7 @@ exports.verifyChatNotExist = async(req, res, next) =>
   {
     const userId = req.user._id;
     const chats = await Chat.findOne({members: {$in: [userId]}},);
-    if(chats)
+    if(chats && req.user.isAdmin === false)
     {
       let err = new Error("You are already part of a chat, chatId is : " + chats._id);
       err.statusCode = 400;
@@ -83,12 +83,14 @@ exports.verifyChatNotExist = async(req, res, next) =>
     }
   }catch(err){next(err)}
 }
+
 exports.verifyChatExist = async(req, res, next) =>
 {
   try 
   {
+    const chatId = req.params.chatId;
     const sender = req.user._id;
-    const chat = await Chat.findOne({members: {$in: [sender]}})
+    const chat = await Chat.findOne({_id: chatId, members: {$in: [sender]}})
   
     if(chat)
     {
@@ -96,7 +98,7 @@ exports.verifyChatExist = async(req, res, next) =>
     }
     else
     {
-      let err = new Error("No chat found for user "+ req.user.username);
+      let err = new Error("No chat found for user "+ req.user.username + " and chatId " + chatId);
       err.statusCode = 404;
       next(err);
     }

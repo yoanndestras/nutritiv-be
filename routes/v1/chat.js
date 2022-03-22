@@ -17,29 +17,22 @@ async(req, res, next) =>
   try
   {
     const userId = req.user._id;
-    const chat = await Chat.find({members: {$in: [userId]}},).sort({updatedAt:-1})
+    const chats = await Chat.find({members: {$in: [userId]}},).sort({updatedAt:-1});
     const messagesQty = parseInt(req.query.messagesQty);
-    
-    if(chat)
+    if(chats && messagesQty)
     {
-      const messages = await Chat.aggregate(
-        [
-          {
-            $project :
-            {
-              id : 1, 
-              messages : 
-              {
-                $slice: ["$messages", - messagesQty]
-              },
-              members:
-              {
-                $in: [ObjectId(userId), "$members"]
-              },
-            },
-          }
-      ]);
-      res.status(200).json(messages);
+      let messagesArray = [];
+      
+      chats.map((chat) => 
+      {
+        chat._doc.messages = chat._doc.messages.slice(0, messagesQty);
+        
+        const {members, type, version, createdAt, __v, ...message} = chat._doc;
+        
+        messagesArray.push(message)
+      });
+    
+      res.status(200).json(messagesArray);
     }
     else
     {
@@ -90,7 +83,7 @@ chat.verifyMembersExist, chat.verifyAdminMembers, async(req, res, next) =>
       })
     
     members.push((req.user._id))
-    
+
     const newChat = new Chat(
       {
         members

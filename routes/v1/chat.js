@@ -19,26 +19,17 @@ async(req, res, next) =>
     const userId = req.user._id;
     const chats = await Chat.find({members: {$in: [userId]}},).sort({updatedAt:-1});
     const messagesQty = parseInt(req.query.messagesQty);
-
-    if(!messagesQty)
-    {
-      const userId = req.user._id;
-      const chats = await Chat.find({members: {$in: [userId]}},).sort({updatedAt:-1});
-      res.status(200).json(chats);
-    }
+    
+    if(!messagesQty && chats){res.status(200).json(chats)}
     else if(chats)
     {
       let messagesArray = [];
-      
       chats.map((chat) => 
       {
         chat._doc.messages = chat._doc.messages.slice(0, messagesQty);
-        
         const {members, type, version, createdAt, __v, ...message} = chat._doc;
-        
         messagesArray.push(message)
       });
-    
       res.status(200).json(messagesArray);
     }
     else
@@ -57,20 +48,26 @@ async(req, res, next) =>
 {
   try
   {
-    const chatId = req.params.chatId;
-    const chat = await Chat.findById({_id : chatId}).lean();
+    const chatId = req.params.chatId, userId = req.user._id;
+    const chat = await Chat.find({_id : chatId, members: {$in: [userId]}});
     const queryStack = parseInt(req.query.stack), queryQuantity = parseInt(req.query.quantity);
-    const start = (queryStack-1)*queryQuantity;
-    const end = start + queryQuantity;
-    if(chat)
+
+    if(!queryStack || !queryQuantity && chat && chat.length > 0)
     {
-      let messages = chat.messages.reverse();
+      res.status(200).json(chat[0].messages);
+    }
+    else if(chat && chat.length > 0)
+    {
+      const start = (queryStack-1)*queryQuantity;
+      const end = start + queryQuantity;
+
+      let messages = chat[0].messages.reverse();
       messages = messages.slice(start, end).reverse();
       res.status(200).json(messages);
     }
     else
     {
-      let err = new Error("No chat found for chatId : " + chatId);
+      let err = new Error("No chat found for chatId : " + chatId + " and username " + req.user.username);
       err.statusCode = 404;
       next(err);
     }

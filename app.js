@@ -14,6 +14,8 @@ dotenv.config(); // INITIALIZE ENVIRONNEMENT VARIABLE FILE ".env"
 const http = require('http').createServer(express);
 const port = (process.env.PORT || 5000); // BACK-END PORT
 
+const whitelist = process.env.CORS_WHITELIST;
+
 const io = require("socket.io")(http,
     {
         cors: 
@@ -21,16 +23,15 @@ const io = require("socket.io")(http,
             origin: "http://192.168.1.23:" + 3000,
             methods: ["GET", "POST"],
             credentials: true
-        
         },
     });
 
 io.on("connection", (socket) =>
-{
+{   
     console.log("An user is connected to the socket.io chat!");
-    socket.on('message', ({ name, message }) =>
+    socket.on('message', (newMessage) =>
     {
-        io.emit("message", ({ name, message }));
+        io.emit("message", (newMessage));
     })
 })
 http.listen(4000, function () {console.log("Listening on port 4000!");})

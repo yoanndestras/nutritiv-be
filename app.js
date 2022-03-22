@@ -17,7 +17,7 @@ const io = require("socket.io")(http,
     {
         cors: 
         {
-            origin: "http://localhost:" + port,
+            origin: "*",
         },
     });
 io.on("connection", (socket) =>

@@ -19,7 +19,7 @@ async(req, res, next) =>
     const userId = req.user._id;
     const chats = await Chat.find({members: {$in: [userId]}},).sort({updatedAt:-1});
     const messagesQty = parseInt(req.query.messagesQty);
-    if(chats && messagesQty)
+    if(chats)
     {
       let messagesArray = [];
       
@@ -34,10 +34,16 @@ async(req, res, next) =>
     
       res.status(200).json(messagesArray);
     }
+    else if(!messagesQty)
+    {
+      const userId = req.user._id;
+      const chats = await Chat.find({members: {$in: [userId]}},).sort({updatedAt:-1});
+      res.status(200).json(chats);
+    }
     else
     {
-      let err = new Error("No chat found for user " + req.params.userId);
-      err.statusCode = 400;
+      let err = new Error("No chat found for user " + req.user.username);
+      err.statusCode = 404;
       next(err);
     }
     

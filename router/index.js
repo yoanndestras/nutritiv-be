@@ -1,6 +1,17 @@
 const express = require("express");
 const router = express.Router();
 
+router.get('/health', (req, res) => 
+{
+    const data = {
+        uptime: process.uptime(),
+        message: 'Ok',
+        date: new Date()
+    }
+    
+    res.status(200).send(data);
+}); // HEALTH CHECK ENDPOINT
+
 // V1 ROUTER BASE ON URL
 const userRouteV1 = require(`../routes/v1/user`);
 const authRouteV1 = require(`../routes/v1/auth`);

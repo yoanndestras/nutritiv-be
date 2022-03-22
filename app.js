@@ -12,7 +12,14 @@ dotenv.config(); // INITIALIZE ENVIRONNEMENT VARIABLE FILE ".env"
 
 //SOCKET IO BACK-END CONFIGURATION
 const http = require('http').createServer(express);
-const io = require("socket.io")(http);
+const port = (process.env.PORT || 5000); // BACK-END PORT
+const io = require("socket.io")(http,
+    {
+        cors: 
+        {
+            origin: "http://localhost:" + port,
+        },
+    });
 io.on("connection", (socket) =>
 {
     console.log("An user is connected to the socket.io chat!");
@@ -21,10 +28,8 @@ io.on("connection", (socket) =>
         io.emit("message", ({ name, message }));
     })
 })
-http.listen(4000, function () 
-{
-    console.log("listening on port 4000!");
-})
+http.listen(4000, function () {console.log("Listening on port 4000!");})
+
 // DATABASE ACCESS
 mongoose
     .connect(process.env.MONGO_URL)
@@ -56,7 +61,6 @@ app.use(express.static(path.join(__dirname, 'public'))); // USE STATIC FILES ON 
 app.use(express.static(path.join(__dirname, "/client/build/"))); // STATIC FILES FOR FRONT-END APP
 app.get("*", (req, res) =>{res.sendFile(path.join(__dirname, "/client/build/", "index.html"))});
 
-const port = (process.env.PORT || 5000); // BACK-END PORT
 app.listen(port, () =>{console.log(`Backend server is running on port : ${port}`);})
 
 app.use((err, req, res, next) =>

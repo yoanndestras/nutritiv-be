@@ -10,29 +10,6 @@ const routes = require("./router") // CALL V1 & V2 ROUTES FROM ROUTER FOLDER
 
 dotenv.config(); // INITIALIZE ENVIRONNEMENT VARIABLE FILE ".env"
 
-//SOCKET IO BACK-END CONFIGURATION
-const http = require('http').createServer(express);
-const port = (process.env.PORT || 5000); // BACK-END PORT
-const io = require("socket.io")(http,
-    {
-        cors: 
-        {
-            origin: "http://localhost:" + 4000,
-            methods: ["GET", "POST"],
-            credentials: true
-        
-        },
-    });
-io.on("connection", (socket) =>
-{
-    console.log("An user is connected to the socket.io chat!");
-    socket.on('message', ({ name, message }) =>
-    {
-        io.emit("message", ({ name, message }));
-    })
-})
-http.listen(4000, function () {console.log("Listening on port 4000!");})
-
 // DATABASE ACCESS
 mongoose
     .connect(process.env.MONGO_URL)
@@ -63,6 +40,30 @@ app.use(
 app.use(express.static(path.join(__dirname, 'public'))); // USE STATIC FILES ON PUBLIC FOLDER
 app.use(express.static(path.join(__dirname, "/client/build/"))); // STATIC FILES FOR FRONT-END APP
 app.get("*", (req, res) =>{res.sendFile(path.join(__dirname, "/client/build/", "index.html"))});
+
+//SOCKET IO BACK-END CONFIGURATION
+const http = require('http').createServer(express);
+const port = (process.env.PORT || 5000); // BACK-END PORT
+
+const io = require("socket.io")(http,
+    {
+        cors: 
+        {
+            origin: "http://localhost:" + port,
+            methods: ["GET", "POST"],
+            credentials: true
+        
+        },
+    });
+io.on("connection", (socket) =>
+{
+    console.log("An user is connected to the socket.io chat!");
+    socket.on('message', ({ name, message }) =>
+    {
+        io.emit("message", ({ name, message }));
+    })
+})
+http.listen(4000, function () {console.log("Listening on port 4000!");})
 
 app.listen(port, () =>{console.log(`Backend server is running on port : ${port}`);})
 

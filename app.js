@@ -15,6 +15,7 @@ const http = require('http').createServer(express);
 const io = require("socket.io")(http);
 io.on("connection", (socket) =>
 {
+    console.log("An user is connected to the socket.io chat!");
     socket.on('message', ({ name, message }) =>
     {
         io.emit("message", ({ name, message }));

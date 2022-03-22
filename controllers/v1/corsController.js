@@ -6,7 +6,7 @@ const corsOptionsDelegate = (req, callback) =>
 {
     let corsOptions;
     
-    if(whitelist.indexOf("https://nutritiv-hy.herokuapp.com/") !== -1) 
+    if(whitelist.indexOf(req.header('Origin')) !== -1) 
         {
             corsOptions = 
             { 
@@ -24,7 +24,6 @@ const corsOptionsDelegate = (req, callback) =>
         }
     callback(null, corsOptions);
 };
-
 
 exports.cors = cors();
 exports.corsWithOptions = cors(corsOptionsDelegate);

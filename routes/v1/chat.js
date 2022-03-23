@@ -93,10 +93,9 @@ chat.verifyChatNotExist, async(req, res, next) =>
     const newChat = new Chat({members})
     const savedChat = await newChat.save();
 
-    res.status(201).json(savedChat);
+    res.status(201).json(savedChat, members);
 
   }catch(err) {next(err)}
-  
 })
 
 router.post("/message/:chatId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,

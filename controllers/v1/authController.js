@@ -423,7 +423,6 @@ exports.verifyNewPasswordSyntax = (req, res, next) =>
 };
 
 // VERIFY EMAIL SENDING
-
 exports.verifyEmailToken = (req, res, next) => 
 {
     passport.authenticate('email_jwt', { session: false }, (err, user, info) => 

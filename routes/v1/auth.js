@@ -50,8 +50,8 @@ router.get("/new_register_email", auth.verifyNewEmail, mailer.sendVerifyAccountM
     }catch(err){next(err)}
 });
 
-//FORGOT PASSWORD
-router.get("/verify-email", auth.verifyEmailToken, async(req, res, next) =>
+//USER VERIFICATION
+router.get("/verify_email", auth.verifyEmailToken, async(req, res, next) =>
 {
     const user = req.user;
     try
@@ -59,11 +59,7 @@ router.get("/verify-email", auth.verifyEmailToken, async(req, res, next) =>
         user.isVerified = true;
         await user.save(() => 
                 {
-                    res.status(200).json(
-                        {
-                            success: true, 
-                            status: 'User Verification Successfull!'
-                        });
+                    res.redirect(301, "http://localhost:3001/v1/chats/create")
                 })
     }catch(err){next(err)}
 });

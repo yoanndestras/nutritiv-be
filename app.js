@@ -13,13 +13,13 @@ dotenv.config(); // INITIALIZE ENVIRONNEMENT VARIABLE FILE ".env"
 //SOCKET IO BACK-END CONFIGURATION
 const http = require('http').createServer(express);
 const port = (process.env.PORT || 5000); // BACK-END PORT
-const frontAdress = process.env.REACT_APP_ADDRESS;
+const frontAddress = process.env.REACT_APP_ADDRESS;
 
 const io = require("socket.io")(http,
     {
         cors: 
         {
-            origin: frontAdress,
+            origin: frontAddress,
             methods: ["GET", "POST"],
             credentials: true
         },

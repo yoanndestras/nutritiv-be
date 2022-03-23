@@ -34,15 +34,15 @@ router.get("/", cors.corsWithOptions, async(req, res, next) =>
         
         if(queryNew) 
         {
-            products = await Product.find().sort({_id:-1}).limit(1);
+            products = await Product.find().sort({_id:-1}).limit(1).lean();
         }
         else if(queryTags)
         {
-            products = await Product.find({tags:{$in: [queryTags]}});
+            products = await Product.find({tags:{$in: [queryTags]}}).lean();
         }
         else if(queryLimit)
         {
-            products = await Product.find().sort({_id:-1}).limit(queryLimit);
+            products = await Product.find().sort({_id:-1}).limit(queryLimit).lean();
         }
         else if(queryStart !== null && queryEnd !== null && queryStart < queryEnd)
         {
@@ -72,7 +72,7 @@ router.get("/findById/:productId", cors.corsWithOptions, async(req, res, next) =
 {
     try
     {
-        const product = await Product.findById(req.params.productId)
+        const product = await Product.findById(req.params.productId).lean();
         if(product)
         {
             res.status(200).json(
@@ -99,7 +99,7 @@ router.get("/findByTitle/:productTitle", cors.corsWithOptions, async(req, res, n
     try
     {
         const title = req.params.productTitle;
-        const product = await Product.find({title : title})
+        const product = await Product.find({title : title}).lean();
 
         if(product.length > 0)
         {
@@ -126,7 +126,7 @@ router.get("/length", cors.corsWithOptions, async(req, res, next) =>
 {
     try
     {
-        let products = await Product.find();
+        let products = await Product.find().lean();
         let length = products.length;
 
         res.status(200).json(
@@ -156,7 +156,7 @@ router.get('/tags', cors.corsWithOptions, async (req, res, next) =>
 {
     try
     {
-        let products = await Product.find();
+        let products = await Product.find().lean();
         let tags = products.map((product) => product.tags).flat();
         let uniqueTags = [...new Set(tags)]
         

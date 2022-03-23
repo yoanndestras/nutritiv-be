@@ -45,11 +45,28 @@ mongoose
     });
 
 const app = express(); // EXPRESS APPLICATION
+
 app.use(express.json()); // APP LEARN TO READ JSON    
 app.use(express.urlencoded({extended: true})); // APP LEARN TO READ JSON    
 app.use(passport.initialize()); // INITIALIZE PASSPORT JS
 app.use(cookieParser()); // INITIALIZE COOKIES
 app.use(cors()); // INITIALIZE CORS  "app.options('*', cors());"
+const trimmer = (req, res, next) =>
+{
+    console.log(req.body);
+    
+    if(req.method === 'POST' || req.method === 'PUT') 
+    {
+        for(const [key, value] of Object.entries(req.body)) 
+        {
+            if(typeof(value) === 'string')
+                req.body[key] = value.trim();
+        }
+        console.log(req.body);
+    }
+    next();
+} // FUNCTION THAT REMOVE WHITESPACE
+app.use(trimmer); // CALL TRIMMER
 app.use(routes); // CALL V1 & V2 ROUTES FROM ROUTER FOLDER
 app.use( 
     limitter(

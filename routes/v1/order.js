@@ -19,7 +19,7 @@ auth.verifyAuthorization, async (req, res, next) =>
 {
     try
     {
-        const orders = await Order.find({userId: req.params.userId})
+        const orders = await Order.find({userId: req.params.userId}).lean();
         res.status(200).json(orders);
     }catch(err){next(err)}
 });
@@ -30,7 +30,7 @@ async (req, res, next) =>
 {
     try
     {
-        const orders = await Order.find();
+        const orders = await Order.find().lean();
         res.status(200).json(orders);
     }catch(err){next(err)}
 

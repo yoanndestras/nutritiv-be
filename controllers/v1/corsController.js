@@ -9,7 +9,9 @@ const corsOptionsDelegate = (req, callback) =>
 {
     let corsOptions;
     console.log(req.header('Origin'));
+    
     console.log(whitelist);
+    console.log(whitelist.indexOf(req.header('Origin')));
     if(whitelist.indexOf(req.header('Origin')) !== -1) 
         {
             

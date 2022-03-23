@@ -20,7 +20,6 @@ async(req, res, next) =>
     const userId = req.user._id;
     const chats = await Chat.find({members: {$in: [userId]}},).sort({updatedAt:-1});
     const messagesQty = parseInt(req.query.messagesQty);
-    
     if(!messagesQty && chats && chats.length > 0){res.status(200).json(chats)}
     else if(chats && chats.length > 0)
     {
@@ -29,7 +28,7 @@ async(req, res, next) =>
       chats.map((chat) => 
       {
         chat._doc.messages = chat._doc.messages.slice(0, messagesQty);
-        const {members, type, version, createdAt, __v, ...message} = chat._doc;
+        const { type, version, createdAt, __v, ...message} = chat._doc;
         messagesArray.push(message)
       });
       res.status(200).json(messagesArray);

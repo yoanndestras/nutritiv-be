@@ -25,12 +25,24 @@ const io = require("socket.io")(http,
         },
     });
 
+// io.use((socket, next) => 
+// {
+//     if(isValid(socket.request)) 
+//     {
+//         next();
+//     } 
+//     else 
+//     {
+//         next(new Error("invalid"));
+//     }
+// });
+
 io.on("connection", (socket) =>
 {   
     console.log("An user is connected to the socket.io chat!");
-    socket.on('message', (newMessage) =>
+    socket.on('message', (newMessage, senderId) =>
     {
-        io.emit("message", (newMessage));
+        io.emit("message", (newMessage, senderId));
     })
 })
 http.listen(4000, function () {console.log("Socket.io listening on port 4000!");})

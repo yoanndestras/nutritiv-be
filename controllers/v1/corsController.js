@@ -8,9 +8,9 @@ whitelist.push(process.env.SERVER_ADDRESS);
 const corsOptionsDelegate = (req, callback) => 
 {
     let corsOptions;
+    console.log(req.header('Origin'));
     if(whitelist.indexOf(req.header('Origin')) !== -1) 
         {
-            console.log(whitelist);
             
             corsOptions = 
             { 
@@ -20,7 +20,6 @@ const corsOptionsDelegate = (req, callback) =>
                 allowedHeaders: ['X-Requested-With', 'X-HTTP-Method-Override', 'Content-Type', 'Accept', 'access_token', 'refresh_token']
             };
             console.log(corsOptions);
-        
         }
     else 
         {
@@ -29,7 +28,6 @@ const corsOptionsDelegate = (req, callback) =>
         }
     callback(null, corsOptions);
 };
-
 
 exports.cors = cors();
 exports.corsWithOptions = cors(corsOptionsDelegate);

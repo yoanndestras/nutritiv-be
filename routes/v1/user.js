@@ -1,6 +1,6 @@
 const User = require("../../models/User");
 const router = require("express").Router();
-
+const Chat = require("../../models/Chat");
 const aws = require('aws-sdk');
 
 // CONTROLLERS
@@ -78,7 +78,9 @@ async(req, res, next) =>
         const user =  await User.findOne({_id: req.user._id});
         let avatar =  process.env.AWS_BUCKET_LINK + user.avatar;
         const { username, _id, email, isAdmin, isVerified, addressDetails} = req.user;
-
+        const chatExist = await Chat.findOne({members: {$in: [req.user._id]}})
+        let chat;
+        !chatExist ? chat = false : chat = true;
         res.status(200).json(
             {
                 loggedIn: true,
@@ -89,6 +91,7 @@ async(req, res, next) =>
                 isAdmin,
                 isVerified,
                 addressDetails,
+                chat,
                 status: "User connected"
             });
     }catch(err){next(err)}

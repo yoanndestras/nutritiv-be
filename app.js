@@ -33,7 +33,7 @@ io.on("connection", (socket) =>
         io.emit("message", (newMessage));
     })
 })
-http.listen(4000, function () {console.log("Listening on port 4000!");})
+http.listen(4000, function () {console.log("Socket.io listening on port 4000!");})
 
 // DATABASE ACCESS
 mongoose

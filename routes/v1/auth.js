@@ -59,7 +59,11 @@ router.get("/verify_email", auth.verifyEmailToken, async(req, res, next) =>
         user.isVerified = true;
         await user.save(() => 
                 {
-                    res.redirect(301, "http://localhost:3001/v1/chats/create")
+                    res.status(200).json(
+                        {
+                            success: true, 
+                            status: 'User Verification Successfull!'
+                        });
                 })
     }catch(err){next(err)}
 });

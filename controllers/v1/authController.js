@@ -441,6 +441,18 @@ exports.verifyEmailToken = (req, res, next) =>
     })(req, res, next); 
 };
 
+exports.userVerification = async(req, res, next) =>
+{
+    const user = req.user;
+    try
+    {
+        user.isVerified = true;
+        await user.save(() => 
+                {
+                    next();
+                })
+    }catch(err){next(err)}
+}
 exports.verifyNewEmail = (req, res, next) =>
 {
     User.findOne({email: req.body.email}, (err, user) =>

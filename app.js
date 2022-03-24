@@ -32,11 +32,17 @@ io.use((socket, next) =>
     {
         jwt.verify(socket.handshake.token, process.env.REF_JWT_SEC, (err, decoded) =>
         {
-            if(err || (decoded._id !== socket.handshake.token)) 
+            // if(err || (decoded._id !== socket.handshake.token)) 
+            // {
+            //     console.log(`decoded._id = `, decoded._id)
+            //     console.log(`socket.handshake.token = `, socket.handshake.token)
+
+            //     let err = new Error('Authentication error')
+            //     err.statusCode = 401;
+            //     return next(err);
+            // }
+            if(err) 
             {
-                console.log(`decoded._id = `, decoded._id)
-                console.log(`socket.handshake.token = `, socket.handshake.token)
-                
                 let err = new Error('Authentication error')
                 err.statusCode = 401;
                 return next(err);

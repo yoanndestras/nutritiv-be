@@ -49,8 +49,6 @@ io.use((socket, next) =>
                 return next(err);
             }
             console.log(`decoded = `, decoded)
-            console.log(`decoded._id = `, decoded._id)
-            socket.decoded._id = decoded._id;
             socket.decoded = decoded;
             next();
         });
@@ -65,12 +63,10 @@ io.use((socket, next) =>
 .on("connection", (socket) =>
 {
     console.log("An user is connected to the socket.io chat!");
-    sender = socket.decoded._id;
-    console.log(`sender = `, sender)
     socket.on('message', (text, id) =>
     {
         
-        io.emit("message", (text, id, sender));
+        io.emit("message", (text, id, socket.decoded._id));
     })
 })
 

@@ -32,7 +32,15 @@ io.use((socket, next) =>
     {
         jwt.verify(socket.handshake.token, process.env.REF_JWT_SEC, (err, decoded) =>
         {
-            if(err) return next(new Error('Authentication error'));
+            if(err || (decoded._id !== socket.handshake.token)) 
+            {
+                console.log(`decoded._id = `, decoded._id)
+                console.log(`socket.handshake.token = `, socket.handshake.token)
+                
+                let err = new Error('Authentication error')
+                err.statusCode = 401;
+                return next(err);
+            }
             socket.decoded = decoded;
             next();
         });
@@ -47,10 +55,10 @@ io.use((socket, next) =>
 .on("connection", (socket) =>
 {
     console.log("An user is connected to the socket.io chat!");
-    socket.on('message', (text) =>
+    socket.on('message', (text, id) =>
     {
         sender = socket.decoded._id;
-        io.emit("message", (text, sender));
+        io.emit("message", (text, id, sender));
     })
 })
 

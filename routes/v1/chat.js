@@ -122,8 +122,11 @@ chat.verifyChatExist, async(req, res, next) =>
       {new: true});
     
     const savedMessage = await newMessage.save();
-
-    res.status(201).send(savedMessage);
+    let messages = [];
+    await savedMessage.messages.map((message) => {if((message.sender.toString()) === sender.toString()){messages.push(message)}});
+    let message = messages.reverse();
+    let lastMessage = message[0];
+    res.status(201).send(lastMessage);
   
   }catch(err){next(err)}
 })

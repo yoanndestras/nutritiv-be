@@ -118,12 +118,13 @@ chat.verifyChatExist, async(req, res, next) =>
             id : new ObjectId()
           }
         }
-      });
-
+      },
+      {new: true});
+    
     const savedMessage = await newMessage.save();
 
     res.status(201).send(savedMessage);
-
+  
   }catch(err){next(err)}
 })
 

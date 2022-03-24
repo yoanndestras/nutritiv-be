@@ -7,6 +7,8 @@ const passport = require('passport'); // PASSPORT FOR AUTH
 const cookieParser = require("cookie-parser"); //COOKIES
 const cors = require('cors'); // CORS POLICY
 const routes = require("./router") // CALL V1 & V2 ROUTES FROM ROUTER FOLDER
+const socketioJwt = require('socketio-jwt');
+const jwt = require('jsonwebtoken');
 
 dotenv.config(); // INITIALIZE ENVIRONNEMENT VARIABLE FILE ".env"
 
@@ -25,16 +27,11 @@ const io = require("socket.io")(http,
         },
     });
 
+
 // io.use((socket, next) => 
 // {
-//     if(isValid(socket.request)) 
-//     {
-//         next();
-//     } 
-//     else 
-//     {
-//         next(new Error("invalid"));
-//     }
+    
+
 // });
 
 io.on("connection", (socket) =>

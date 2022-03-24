@@ -65,10 +65,11 @@ io.use((socket, next) =>
 .on("connection", (socket) =>
 {
     console.log("An user is connected to the socket.io chat!");
+    sender = socket.decoded._id;
+    console.log(`sender = `, sender)
     socket.on('message', (text, id) =>
     {
-        sender = socket.decoded._id;
-        console.log(`sender = `, sender)
+        
         io.emit("message", (text, id, sender));
     })
 })

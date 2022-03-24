@@ -28,6 +28,7 @@ const io = require("socket.io")(http,
 
 io.use((socket, next) => 
 {
+    console.log(`socket.handshake.query = `, socket.handshake.query)
     console.log(`socket.handshake.query.refreshToken = `, socket.handshake.query.refreshToken)
     
     if(socket.handshake.query && socket.handshake.query.refreshToken)

@@ -28,8 +28,10 @@ const io = require("socket.io")(http,
 
 io.use((socket, next) => 
 {
+    console.log("EEEEEEEEEEEEE");
     if(socket.handshake && socket.handshake.token)
     {
+        console.log("AAAAAAAAA");
         jwt.verify(socket.handshake.token, process.env.REF_JWT_SEC, (err, decoded) =>
         {
             // if(err || (decoded._id !== socket.handshake.token)) 

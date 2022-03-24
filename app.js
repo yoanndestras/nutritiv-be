@@ -48,7 +48,7 @@ io.use((socket, next) =>
                 err.statusCode = 401;
                 return next(err);
             }
-            console.log(decoded);
+            console.log(`decoded = `, decoded)
             socket.decoded = decoded;
             next();
         });

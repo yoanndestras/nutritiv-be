@@ -75,7 +75,7 @@ async(req, res, next) =>
 {
     try
     {
-        const user =  await User.findOne({_id: req.user._id}).lean();
+        const user =  await User.findOne({_id: req.user._id});
         let avatar =  process.env.AWS_BUCKET_LINK + user.avatar;
         const { username, _id, email, isAdmin, isVerified, addressDetails} = req.user;
         const chatExist = await Chat.findOne({members: {$in: [req.user._id]}})
@@ -137,7 +137,7 @@ auth.verifyAuthorization, async (req, res, next) =>
 {
     try
     {
-        const user = await User.findById(req.params.userId).lean();
+        const user = await User.findById(req.params.userId);
         if(user)
         {
             let avatar = process.env.AWS_BUCKET_LINK + user.avatar;

@@ -27,10 +27,13 @@ async(req, res, next) =>
       
       chats.map((chat) => 
       {
+        chat._doc.messages = chat._doc.messages.reverse();
         chat._doc.messages = chat._doc.messages.slice(0, messagesQty);
+        chat._doc.messages = chat._doc.messages.reverse();
         const { type, version, createdAt, __v, ...message} = chat._doc;
         messagesArray.push(message)
       });
+      
       res.status(200).json(messagesArray);
     }
     else

@@ -28,12 +28,12 @@ const io = require("socket.io")(http,
 
 io.use((socket, next) => 
 {
-    console.log(`socket.handshake.refreshToken = `, socket.handshake)
+    console.log(`socket.handshake.query.refreshToken = `, socket.handshake.query.refreshToken)
     
-    if(socket && socket.token)
+    if(socket.handshake.query && socket.handshake.query.refreshToken)
     {
         console.log("AAAAAAAAA");
-        jwt.verify(socket.handshake.token, process.env.REF_JWT_SEC, (err, decoded) =>
+        jwt.verify(socket.handshake.query.refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
         {
             // if(err || (decoded._id !== socket.handshake.token)) 
             // {

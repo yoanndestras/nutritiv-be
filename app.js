@@ -66,7 +66,7 @@ io.use((socket, next) =>
     socket.on('message', (text, id) =>
     {
         
-        io.emit("message", (text, id, socket.decoded._id));
+        io.emit("message", (text, id));
     })
 })
 

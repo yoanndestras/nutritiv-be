@@ -26,32 +26,31 @@ const io = require("socket.io")(http,
         },
     });
 
-io.use((socket, next) => 
+// io.use((socket, next) => 
+// {
+//     if(socket.handshake.query && socket.handshake.query.token)
+//     {
+//         jwt.verify(socket.handshake.query.token, process.env.REF_JWT_SEC, (err, decoded) =>
+//         {
+//             if(err) return next(new Error('Authentication error'));
+//             socket.decoded = decoded;
+//             next();
+//         });
+//     }
+//     else
+//     {
+//         let err = new Error('Authentication error')
+//         err.statusCode = 401;
+//         next(err);
+//     }
+// })
+io.on("connection", (socket) =>
 {
-    if(socket.handshake.query && socket.handshake.query.token)
-    {
-        jwt.verify(socket.handshake.query.token, process.env.REF_JWT_SEC, (err, decoded) =>
-        {
-            if(err) return next(new Error('Authentication error'));
-            socket.decoded = decoded;
-            
-            next();
-        });
-    }
-    else
-    {
-        let err = new Error('Authentication error')
-        err.statusCode = 401;
-        next(err);
-    }    
-})
-.on("connection", (socket) =>
-{   
     console.log("An user is connected to the socket.io chat!");
     socket.on('message', (newMessage) =>
     {
-        senderId = socket.decoded._id;
-        io.emit("message", (newMessage, senderId));
+        // senderId = socket.decoded._id;
+        io.emit("message", (newMessage));
     })
 })
 

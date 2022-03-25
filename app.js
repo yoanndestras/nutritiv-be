@@ -53,6 +53,7 @@ io.use((socket, next) =>
 .on("connection", (socket) =>
 {
     sender = socket._id;
+    console.log(`sender = `, sender)
     console.log("An user is connected to the socket.io chat!");
     socket.on('message', ({text, id}) =>
     {

@@ -40,7 +40,7 @@ io.use((socket, next) =>
                 return next(err);
             }
             socket.decoded._id = decoded._id;
-            console.log(`socket._id = `, socket._id)
+            console.log(`socket.decoded._id = `, socket.decoded._id)
             next();
         });
     }

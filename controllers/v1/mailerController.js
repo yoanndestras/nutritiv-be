@@ -141,8 +141,10 @@ exports.sendNewOrder = async(req, res, next) =>
 {
     try
     {   
-        const order = await Order.find({userId: req.user._id});
-        
+        const orders = await Order.find({userId: req.user._id}).sort({updatedAt: -1});
+        console.log(orders);
+        let order = orders[0];
+
         req.order = order;
         
         sgMail.setApiKey(process.env.SENDGRID_API_KEY);

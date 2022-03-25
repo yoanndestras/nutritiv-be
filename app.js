@@ -62,9 +62,9 @@ io.use((socket, next) =>
 .on("connection", (socket) =>
 {
     console.log("An user is connected to the socket.io chat!");
-    socket.on('message', (text, id, refreshToken) =>
+    socket.on('message', (text, id) =>
     {
-        io.emit("message", (text, id, refreshToken));
+        io.emit("message", (text, id));
     })
 })
 

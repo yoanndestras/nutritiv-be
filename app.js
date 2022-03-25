@@ -39,7 +39,8 @@ io.use((socket, next) =>
                 err.statusCode = 401;
                 return next(err);
             }
-            socket._id = decoded._id;;
+            socket._id = decoded._id;
+            console.log(`socket._id = `, socket._id)
             next();
         });
     }

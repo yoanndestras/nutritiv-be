@@ -78,10 +78,14 @@ async (req, res, next) =>
 
 // CREATE ORDER
 router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
-order.newOrder, mailer.sendNewOrder, mailer.orderShipping, mailer.orderDelivered, async (req, res, next) =>
+order.newOrder, async (req, res, next) =>
 {    
     try
     {
+        setTimeout(() => {mailer.sendNewOrder(req, res, next);}, 5000);
+        setTimeout(() => {mailer.orderShipping(req, res, next);}, 15000);
+        setTimeout(() => {mailer.orderDelivered(req, res, next);}, 25000);
+
         if(req.cart === true)
         {
             res.status(200).json(

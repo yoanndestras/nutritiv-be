@@ -14,7 +14,6 @@ exports.sendVerifyAccountMail = async(req, res, next) =>
         sgMail.setApiKey(process.env.SENDGRID_API_KEY);
         
         const imgPath = path.resolve("public/images/Nutritiv.png")
-        console.log(imgPath);
         const email = req.body.email;
         const mailContent = 
         {
@@ -142,9 +141,7 @@ exports.sendNewOrder = async(req, res, next) =>
     try
     {   
         const orders = await Order.find({userId: req.user._id}).sort({updatedAt: -1});
-        console.log(orders);
         let order = orders[0];
-
         req.order = order;
         
         sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -180,8 +177,7 @@ exports.sendNewOrder = async(req, res, next) =>
             </div>
             `
         }   
-        
-        await sgMail.send(mailContent);
+        await sgMail.send(mailContent)
         next();
     }catch(err){next(err)}
 }
@@ -221,8 +217,7 @@ exports.orderShipping = async(req, res, next) =>
             </div>
             `
         }   
-        
-        await sgMail.send(mailContent);
+        await sgMail.send(mailContent)
         next();
     }catch(err){next(err)}
 }
@@ -263,8 +258,7 @@ exports.orderDelivered = async(req, res, next) =>
             </div>
             `
         }   
-        
-        await sgMail.send(mailContent);
+        await sgMail.send(mailContent)
         next();
     }catch(err){next(err)}
 }

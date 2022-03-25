@@ -117,7 +117,7 @@ app.listen(port, () =>{console.log(`Backend server is running on port : ${port}`
 app.use((err, req, res, next) =>
 {
     let message = err.message ? err.message : "Unsuccessfull request!"
-    
+
     !err.statusCode 
     ? res.status(500).json(
         {

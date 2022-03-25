@@ -20,7 +20,19 @@ async(req, res, next) =>
     const userId = req.user._id;
     const chats = await Chat.find({members: {$in: [userId]}},).sort({updatedAt:-1});
     const messagesQty = parseInt(req.query.messagesQty);
-    if(!messagesQty && chats && chats.length > 0){res.status(200).json(chats)}
+    
+    if(!messagesQty && chats && chats.length > 0)
+    {
+      let messagesArray = [];
+      
+      chats.map((chat) => 
+      {
+        const { type, version, createdAt, updatedAt, __v, messages, ...members} = chat._doc;
+        messagesArray.push(members)
+      });
+      
+      res.status(200).json(messagesArray);
+    }
     else if(chats && chats.length > 0)
     {
       let messagesArray = [];
@@ -30,7 +42,7 @@ async(req, res, next) =>
         chat._doc.messages = chat._doc.messages.reverse();
         chat._doc.messages = chat._doc.messages.slice(0, messagesQty);
         chat._doc.messages = chat._doc.messages.reverse();
-        const { type, version, createdAt, __v, ...message} = chat._doc;
+        const { type, version, createdAt, __v, updatedAt, ...message} = chat._doc;
         messagesArray.push(message)
       });
       
@@ -79,13 +91,27 @@ async(req, res, next) =>
   }catch(err){next(err)}
 })
 
+router.get("/single/:chatId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+async(req, res, next) =>
+{
+  try
+  {
+    const chat = await Chat.findOne({_id : req.params.chatId});
+    
+    const { type, version, __v, createdAt, updatedAt, ...message} = chat._doc;
+  
+    res.status(200).json(message);
+  
+  }catch(err){next(err)}
+})
+
 router.post("/create", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
 chat.verifyChatNotExist, async(req, res, next) => 
 {
   try
   {
     const admins = await User.find({isAdmin: true});
-    
+
     let members = admins.map((admin) =>{return admin._id});
     if(members.some(member => member.toString() === req.user.id) === false)
     {
@@ -95,9 +121,9 @@ chat.verifyChatNotExist, async(req, res, next) =>
     const newChat = new Chat({members})
     const savedChat = await newChat.save();
     
-    res.status(201).json(savedChat, members);
-
-  }catch(err) {next(err)}
+    res.status(201).json(savedChat);
+    
+  }catch(err){next(err)}
 })
 
 router.post("/message/:chatId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
@@ -118,7 +144,8 @@ chat.verifyChatExist, async(req, res, next) =>
           {
             sender,
             text,
-            id : new ObjectId()
+            id : new ObjectId(),
+            createdAt: new Date()
           }
         }
       },

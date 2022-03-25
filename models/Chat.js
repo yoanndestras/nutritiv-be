@@ -38,6 +38,11 @@ const ChatSchema = new Schema
         {
             type: mongoose.Schema.Types.ObjectId,
             required: true
+        },
+        createdAt:
+        {
+            type: mongoose.Schema.Types.Date,
+            required: true
         }
         // replyTo:
         // {

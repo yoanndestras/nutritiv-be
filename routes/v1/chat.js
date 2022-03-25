@@ -96,7 +96,8 @@ async(req, res, next) =>
 {
   try
   {
-    const chat = await Chat.findOne({_id : req.params.chatId});
+    const chatId = req.params.chatId, userId = req.user._id;
+    const chat = await Chat.findOne({_id : chatId, members: {$in: [userId]}});
     
     const { type, version, __v, createdAt, updatedAt, ...message} = chat._doc;
   

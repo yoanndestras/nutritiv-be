@@ -34,14 +34,10 @@ io.use((socket, next) =>
         {
             if(err) 
             {
-                console.log(`decoded._id = `, decoded._id)
-                console.log(`socket.handshake.query.refreshToken = `, socket.handshake.query.refreshToken)
-                
                 let err = new Error('Authentication error')
                 err.statusCode = 401;
                 return next(err);
             }
-            console.log(`decoded._id = `, decoded._id)
             socket._id = decoded._id;;
             next();
         });
@@ -55,9 +51,7 @@ io.use((socket, next) =>
 })
 .on("connection", (socket) =>
 {
-    console.log(`socket._id in "on" = `, socket._id)
     sender = socket._id;
-    
     console.log("An user is connected to the socket.io chat!");
     socket.on('message', ({text, id}) =>
     {

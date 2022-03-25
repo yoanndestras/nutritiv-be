@@ -39,7 +39,7 @@ io.use((socket, next) =>
                 err.statusCode = 401;
                 return next(err);
             }
-            socket._id = decoded._id;
+            socket.decoded._id = decoded._id;
             console.log(`socket._id = `, socket._id)
             next();
         });
@@ -53,7 +53,7 @@ io.use((socket, next) =>
 })
 .on("connection", (socket) =>
 {
-    sender = socket._id;
+    sender = socket.decoded._id;
     console.log(`sender = `, sender)
     console.log("An user is connected to the socket.io chat!");
     socket.on('message', ({text, id}) =>

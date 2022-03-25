@@ -78,7 +78,7 @@ async (req, res, next) =>
 
 // CREATE ORDER
 router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
-order.newOrder, mailer.sendNewOrder, async (req, res, next) =>
+order.newOrder, mailer.sendNewOrder, mailer.orderShipping, mailer.orderDelivered, async (req, res, next) =>
 {    
     try
     {

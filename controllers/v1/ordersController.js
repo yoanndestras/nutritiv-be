@@ -17,9 +17,9 @@ exports.newOrder = async(req, res, next) =>
   try
   {
     const userId = req.user.id, cart = await Cart.findOne({userId : userId});
-    let countInStock = order.countInStock(userId);
+    let countInStock = await order.countInStock(userId);
     
-    let err = await countInStock && (await countInStock).err ? (await countInStock).err : null;
+    let err =  countInStock && countInStock.err ? countInStock.err : null;
     if(err){return next(err);}
     
     if(cart)
@@ -50,9 +50,9 @@ exports.newOrder = async(req, res, next) =>
         req.cart = true;
         next();
       }
-      else{req.cart = false;next();}
+      else{req.cart = false;next()}
     }
-    else{req.cart = false;next();}
+    else{req.cart = false;next()}
   }catch(err){next(err)}
 }
 
@@ -104,6 +104,7 @@ exports.countInStock = async(userId) =>
         }
       )
     }
-  }catch(err){next(err)}
+  }
+  catch(err){return {err}}
   
 }

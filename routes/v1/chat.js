@@ -75,7 +75,7 @@ async(req, res, next) =>
       err.statusCode = 404;
       next(err);
     }
-
+  
   }catch(err){next(err)}
 })
 
@@ -94,7 +94,7 @@ chat.verifyChatNotExist, async(req, res, next) =>
     
     const newChat = new Chat({members})
     const savedChat = await newChat.save();
-
+    
     res.status(201).json(savedChat, members);
 
   }catch(err) {next(err)}

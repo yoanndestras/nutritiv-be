@@ -141,11 +141,13 @@ exports.sendNewOrder = async(req, res, next) =>
 {
     try
     {   
-        const user = await User.findOne({_id: req.user._id});
-        const order = await Order.findOne({userId: req.user._id})
-        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+        const order = await Order.find({userId: req.user._id});
         
-        const email = user.email, username = user.username;
+        req.order = order;
+        
+        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+        const email = req.user.email, username = req.user.username;
         const mailContent = 
         {
             to: email,
@@ -162,8 +164,93 @@ exports.sendNewOrder = async(req, res, next) =>
                     <hr>
                     <p>Hello, ${username}</p>
                     <p>Thank you for your order, your order is being prepared for delivery<br><br>
+                    <hr>
+                    <p>Command number: ${order._id}</p>
                     ${order.products}<br><br>
                     We will send you an email when the order has been shipped<br>
+                    Thanks,<br>
+                    </p>
+                
+                    <p>Nutritiv</p>
+                    <hr>
+                    <p style="font-size: 0.75em; color: #88B4D6">Nutritiv, 245 Rue du Tilleul, Paris, France</p>
+                </div>
+            </div>
+            `
+        }   
+        
+        await sgMail.send(mailContent);
+        next();
+    }catch(err){next(err)}
+}
+
+exports.orderShipping = async(req, res, next) =>
+{
+    try
+    {   
+        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+        const email = req.user.email, username = req.user.username, order = req.order;
+        const mailContent = 
+        {
+            to: email,
+            from: {
+                email: "nutritivshop@gmail.com",
+                name : "Nutritiv"
+            },
+            subject:"Your order has been shipped!",
+            html : `
+            <div style="width: 100%; background-color: #F6F9FC; font-size: 15px ;font-family: -apple-system, 
+                BlinkMacSystemFont,'Segoe UI', Roboto, 'Helvetica Neue', Ubuntu, sans-serif; color: rgb(82, 95, 127) !important">
+                <div style="max-width: 500px;margin: auto; padding: 50px; background-color:white">
+                    <h1 style="font-size:2em; color: #00A8F3">Nutritiv</h1>
+                    <hr>
+                    <p>Hello, ${username}</p>
+                    <p>Thank you for your order, your order has been successfully shipped by "Shipping Company"<br><br>
+                    <hr>
+                    Your command : ${order._id} has been shipped !<br>
+                    Thanks,<br>
+                    </p>
+                
+                    <p>Nutritiv</p>
+                    <hr>
+                    <p style="font-size: 0.75em; color: #88B4D6">Nutritiv, 245 Rue du Tilleul, Paris, France</p>
+                </div>
+            </div>
+            `
+        }   
+        
+        await sgMail.send(mailContent);
+        next();
+    }catch(err){next(err)}
+}
+
+exports.orderDelivered = async(req, res, next) =>
+{
+    try
+    {   
+        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+        
+        const email = req.user.email, username = req.user.username, order = req.order;
+        const mailContent = 
+        {
+            to: email,
+            from: {
+                email: "nutritivshop@gmail.com",
+                name : "Nutritiv"
+            },
+            subject:"Your order has been delivered!",
+            html : `
+            <div style="width: 100%; background-color: #F6F9FC; font-size: 15px ;font-family: -apple-system, 
+                BlinkMacSystemFont,'Segoe UI', Roboto, 'Helvetica Neue', Ubuntu, sans-serif; color: rgb(82, 95, 127) !important">
+                <div style="max-width: 500px;margin: auto; padding: 50px; background-color:white">
+                    <h1 style="font-size:2em; color: #00A8F3">Nutritiv</h1>
+                    <hr>
+                    <p>Hello, ${username}</p>
+                    <p>Thank you for your order, your order ${order._id} has been successfully delivered by "Shipping Company"<br><br>
+                    <p>Delivered at : ${order.orderDetails}</p>
+                    <p>The time you received is : ${new Date()}</p>
+                    <hr>
                     Thanks,<br>
                     </p>
                 

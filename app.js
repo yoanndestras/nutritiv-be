@@ -30,7 +30,6 @@ io.use((socket, next) =>
 {
     if(socket.handshake.query && socket.handshake.query.refreshToken)
     {
-        console.log("AAAAAAAAA");
         jwt.verify(socket.handshake.query.refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
         {
             // if(err || (decoded._id !== socket.handshake.token)) 
@@ -48,7 +47,7 @@ io.use((socket, next) =>
                 err.statusCode = 401;
                 return next(err);
             }
-            console.log(`decoded = `, decoded)
+            console.log(`decoded._id = `, decoded._id)
             socket.decoded = decoded;
             next();
         });
@@ -65,7 +64,6 @@ io.use((socket, next) =>
     console.log("An user is connected to the socket.io chat!");
     socket.on('message', (text, id) =>
     {
-        
         io.emit("message", (text, id));
     })
 })

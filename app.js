@@ -27,12 +27,11 @@ const io = require("socket.io")(http,
     });
 
 io.use((socket, next) => 
-{
-    console.log("I AM HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-    if(socket.handshake.query.refreshToken)
+{    
+    if(socket.handshake?.query?.refreshToken)
     {
-        console.log(`socket.handshake.query.refreshToken = `, socket.handshake.query.refreshToken)
-        jwt.verify(socket.handshake.query.refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
+        console.log(`refreshToken = `, socket.handshake?.query?.refreshToken)
+        jwt.verify(socket.handshake?.query?.refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
         {
             if(err) 
             {
@@ -41,8 +40,7 @@ io.use((socket, next) =>
                 return next(err);
             }
         
-            socket.decoded = decoded._id;
-            console.log(`socket.decoded._id = `, socket.decoded)
+            socket.decoded._id = decoded._id;
             next();
         });
     }
@@ -55,13 +53,13 @@ io.use((socket, next) =>
 })
 .on("connection", (socket) =>
 {
-    // sender = socket.decoded;
-    // console.log(`sender = `, sender)
+    sender = socket.decoded._id;
+    
     console.log("An user is connected to the socket.io chat!");
     socket.on('message', ({text, id}) =>
     {
         // io.emit("message", ({text, id, sender}));
-        io.emit("message", ({text, id}));
+        io.emit("message", ({text, id, sender}));
     })
 })
 

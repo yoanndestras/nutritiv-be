@@ -55,7 +55,8 @@ io.on("connection", (socket) =>
             err.statusCode = 401;
             next(err);
         }
-    }).on('message', ({text, id}) =>
+    })
+    io.on('message', ({text, id}) =>
     {
 
         sender = socket.decoded._id;

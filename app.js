@@ -26,43 +26,44 @@ const io = require("socket.io")(http,
         },
     });
 
-io.on("connection", (socket) =>
+io.use((socket, next) => 
 {
+    console.log("I AM HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    // if(socket.handshake.query && socket.handshake.query.refreshToken)
+    // {
+    //     console.log(`socket.handshake.query.refreshToken = `, socket.handshake.query.refreshToken)
+    //     jwt.verify(socket.handshake.query.refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
+    //     {
+    //         if(err) 
+    //         {
+    //             let err = new Error('Authentication error')
+    //             err.statusCode = 401;
+    //             return next(err);
+    //         }
+        
+    //         socket.decoded._id = decoded._id;
+    //         console.log(`socket.decoded._id = `, socket.decoded._id)
+    //         next();
+    //     });
+    //     console.log("I AM HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    // }
+    // else
+    // {
+    //     let err = new Error('Authentication error')
+    //     err.statusCode = 401;
+    //     next(err);
+    // }
+    next();
+})
+.on("connection", (socket) =>
+{
+    // sender = socket.decoded._id;
+    // console.log(`sender = `, sender)
     console.log("An user is connected to the socket.io chat!");
-    
-    socket.use((socket, next) => 
+    socket.on('message', ({text, id}) =>
     {
-        if(socket.handshake.query && socket.handshake.query.refreshToken)
-        {
-            console.log(`socket.handshake.query.refreshToken = `, socket.handshake.query.refreshToken)
-            jwt.verify(socket.handshake.query.refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
-            {
-                if(err) 
-                {
-                    let err = new Error('Authentication error')
-                    err.statusCode = 401;
-                    return next(err);
-                }
-            
-                socket.decoded._id = decoded._id;
-                console.log(`socket.decoded._id = `, socket.decoded._id)
-                next();
-            });
-        }
-        else
-        {
-            let err = new Error('Authentication error')
-            err.statusCode = 401;
-            next(err);
-        }
-    })
-    io.on('message', ({text, id}) =>
-    {
-
-        sender = socket.decoded._id;
-        console.log(`sender = `, sender)
         // io.emit("message", ({text, id, sender}));
-        io.emit("message", ({text, id, sender}));
+        io.emit("message", ({text, id}));
     })
 })
 

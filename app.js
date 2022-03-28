@@ -41,13 +41,6 @@ io.on("connection", (socket, next) =>
                 return next(err);
             }
             console.log("An user is connected to the socket.io chat!");
-            io.on('message', ({text, id}) =>
-            {
-                sender = decoded._id;
-                console.log(`sender = `, sender)
-                // io.emit("message", ({text, id, sender}));
-                io.emit("message", ({text, id, sender}));
-            })
         });
     }
     else
@@ -56,6 +49,14 @@ io.on("connection", (socket, next) =>
         err.statusCode = 401;
         next(err);
     }
+    
+    io.on('message', ({text, id}) =>
+    {
+        sender = decoded._id;
+        console.log(`sender = `, sender)
+        // io.emit("message", ({text, id, sender}));
+        io.emit("message", ({text, id, sender}));
+    })
 })
 
 

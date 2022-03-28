@@ -143,8 +143,47 @@ exports.sendNewOrder = async(req, res, next) =>
         const orders = await Order.find({userId: req.user._id}).sort({updatedAt: -1});
         let order = orders[0];
         req.order = order;
-        
+        console.log(`order.products = `, order.products)
         sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+        
+        
+        let col = [];
+
+        for(let i = 0; i < order.products.length; i++) 
+        {
+            for(let key in order.products[i]) 
+            {
+                if(col.indexOf(key) === -1) 
+                {
+                    col.push(key);
+                }
+            }
+        }
+        
+        let table = document.createElement("table"), tr = table.insertRow(-1);
+        
+        for (let i = 0; i < col.length; i++) 
+        {
+            let th = document.createElement("th");
+            th.innerHTML = col[i];
+            tr.appendChild(th);
+        }
+        
+        for (let i = 0; i < order.products.length; i++) 
+        {
+            tr = table.insertRow(-1);
+
+            for (let j = 0; j < col.length; j++) 
+            {
+                let tabCell = tr.insertCell(-1);
+                tabCell.innerHTML = order.products[i][col[j]];
+            }
+        }
+        
+        // Now, add the newly created table with json data, to a container.
+        let divShowData = document.getElementById('showData');
+        divShowData.innerHTML = "";
+        divShowData.appendChild(table);
 
         const email = req.user.email, username = req.user.username;
         const mailContent = 
@@ -165,7 +204,12 @@ exports.sendNewOrder = async(req, res, next) =>
                     <p>Thank you for your order, your order is being prepared for delivery<br><br>
                     <hr>
                     <p>Command number: ${order._id}</p>
+                    <p>${new Date(Y,M,D)}</p><br>
+
+                    <p id=showData}></p>
+                    
                     ${order.products}<br><br>
+                    
                     We will send you an email when the order has been shipped<br>
                     Thanks,<br>
                     </p>

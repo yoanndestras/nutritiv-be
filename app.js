@@ -57,7 +57,7 @@ io.on("connection", (socket) =>
     
     socket.on('message', ({text, id, refreshToken}) =>
     {
-        console.log(refreshToken);
+
         let userId = jwt.verify(refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
         {
             return decoded._id;

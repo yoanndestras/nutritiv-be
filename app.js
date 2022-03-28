@@ -26,9 +26,9 @@ const io = require("socket.io")(http,
         },
     });
 
-io.use((socket, next) => 
-{  
-    
+
+io.on("connection", (socket, next) => 
+{
     if(socket.handshake?.query?.refreshToken)
     {
         console.log(`refreshToken = `, socket.handshake?.query?.refreshToken)
@@ -40,8 +40,14 @@ io.use((socket, next) =>
                 err.statusCode = 401;
                 return next(err);
             }
-        
-            socket.decoded = decoded._id;
+            console.log("An user is connected to the socket.io chat!");
+            io.on('message', ({text, id}) =>
+            {
+                sender = decoded._id;
+                console.log(`sender = `, sender)
+                // io.emit("message", ({text, id, sender}));
+                io.emit("message", ({text, id, sender}));
+            })
             next();
         });
     }
@@ -52,17 +58,7 @@ io.use((socket, next) =>
         next(err);
     }
 })
-.on("connection", (socket) =>
-{
-    console.log("An user is connected to the socket.io chat!");
-})
-.on('message', (socket, {text, id}) =>
-{
-    sender = socket.decoded;
-    console.log(`sender = `, sender)
-    // io.emit("message", ({text, id, sender}));
-    io.emit("message", ({text, id, sender}));
-})
+
 
 http.listen(4000, () => {console.log("Socket.io listening on port 4000!");})
 

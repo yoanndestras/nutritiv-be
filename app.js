@@ -55,40 +55,18 @@ io.on("connection", (socket) =>
 {
     console.log("An user is connected to the socket.io chat!");
     
-    socket.use((socket, next) => 
-    {  
-        if(socket.handshake?.query?.refreshToken)
-        {
-            jwt.verify(socket.handshake?.query?.refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
-            {
-                if(err) 
-                {
-                    let err = new Error('Authentication error')
-                    err.statusCode = 401;
-                    return next(err);
-                }
-            
-                socket.decoded = decoded._id;
-                next();
-            });
-        }
-        else
-        {
-            let err = new Error('Authentication error')
-            err.statusCode = 401;
-            next(err);
-        }
-    })
-    .on('message', ({text, id}) =>
+    socket.on('message', ({text, id, token}) =>
     {
         
-        // let userId = jwt.verify(token, process.env.REF_JWT_SEC, (err, decoded) =>
-        // {
-        //     return decoded._id;
-        // });
-        // console.log(`sender = `, userId)
-        // const sender = userId;
-        const sender = socket.decoded;
+        let userId = jwt.verify(token, process.env.REF_JWT_SEC, (err, decoded) =>
+        {
+            return decoded._id;
+        });
+        
+        
+        console.log(`sender = `, userId)
+        const sender = userId;
+        // io.emit("message", ({text, id, sender}));
         io.emit("message", ({text, id, sender}));
     })
 })

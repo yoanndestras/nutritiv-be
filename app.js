@@ -30,7 +30,7 @@ io.on("connection", (socket) =>
 {
     console.log("An user is connected to the socket.io chat!");
     
-    socket.use((socket, next) => 
+    io.use((socket, next) => 
     {
         if(socket.handshake.query && socket.handshake.query.refreshToken)
         {
@@ -55,14 +55,11 @@ io.on("connection", (socket) =>
             err.statusCode = 401;
             next(err);
         }
-        next();
-    })
-
-    sender = socket.decoded._id;
-    console.log(`sender = `, sender)
-    
-    socket.on('message', ({text, id}) =>
+    }).on('message', ({text, id}) =>
     {
+
+        sender = socket.decoded._id;
+        console.log(`sender = `, sender)
         // io.emit("message", ({text, id, sender}));
         io.emit("message", ({text, id, sender}));
     })

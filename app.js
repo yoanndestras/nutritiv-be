@@ -57,18 +57,27 @@ io.on("connection", (socket) =>
     
     socket.use((socket, next) => 
     {  
-        jwt.verify(socket.handshake?.query?.refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
+        if(socket.handshake?.query?.refreshToken)
         {
-            if(err) 
+            jwt.verify(socket.handshake?.query?.refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
             {
-                let err = new Error('Authentication error')
-                err.statusCode = 401;
-                return next(err);
-            }
-        
-            socket.decoded = decoded._id;
-            next();
-        });
+                if(err) 
+                {
+                    let err = new Error('Authentication error')
+                    err.statusCode = 401;
+                    return next(err);
+                }
+            
+                socket.decoded = decoded._id;
+                next();
+            });
+        }
+        else
+        {
+            let err = new Error('Authentication error')
+            err.statusCode = 401;
+            next(err);
+        }
     })
     .on('message', ({text, id}) =>
     {

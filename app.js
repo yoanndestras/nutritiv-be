@@ -56,7 +56,7 @@ io.use((socket, next) =>
 {
     console.log("An user is connected to the socket.io chat!");
 })
-.on('message', ({text, id}) =>
+.on('message', (socket, {text, id}) =>
 {
     sender = socket.decoded;
     console.log(`sender = `, sender)

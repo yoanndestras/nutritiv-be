@@ -40,7 +40,7 @@ io.use((socket, next) =>
                 return next(err);
             }
         
-            socket.decoded._id = decoded._id;
+            socket.decoded = decoded._id;
             next();
         });
     }
@@ -53,7 +53,7 @@ io.use((socket, next) =>
 })
 .on("connection", (socket) =>
 {
-    sender = socket.decoded._id;
+    sender = socket.decoded;
     
     console.log("An user is connected to the socket.io chat!");
     socket.on('message', ({text, id}) =>

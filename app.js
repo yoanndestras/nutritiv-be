@@ -26,34 +26,46 @@ const io = require("socket.io")(http,
         },
     });
 
-
-io.on("connection", (socket, next) => 
+// io.use((socket, next) => 
+// {  
+    // if(socket.handshake?.query?.refreshToken)
+    // {
+    //     jwt.verify(socket.handshake?.query?.refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
+    //     {
+    //         if(err) 
+    //         {
+    //             let err = new Error('Authentication error')
+    //             err.statusCode = 401;
+    //             return next(err);
+    //         }
+        
+    //         socket.decoded = decoded._id;
+    //         next();
+    //     });
+    // }
+    // else
+    // {
+    //     let err = new Error('Authentication error')
+    //     err.statusCode = 401;
+    //     next(err);
+    // }
+//     next();
+// })
+io.on("connection", (socket) =>
 {
-    if(socket.handshake?.query?.refreshToken)
-    {
-        console.log(`refreshToken = `, socket.handshake?.query?.refreshToken)
-        jwt.verify(socket.handshake?.query?.refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
-        {
-            if(err) 
-            {
-                let err = new Error('Authentication error')
-                err.statusCode = 401;
-                return next(err);
-            }
-            console.log("An user is connected to the socket.io chat!");
-        });
-    }
-    else
-    {
-        let err = new Error('Authentication error')
-        err.statusCode = 401;
-        next(err);
-    }
+    console.log("An user is connected to the socket.io chat!");
     
-    io.on('message', ({text, id}) =>
+    socket.on('message', ({text, id, token}) =>
     {
-        sender = decoded._id;
-        console.log(`sender = `, sender)
+        
+        let userId = jwt.verify(token, process.env.REF_JWT_SEC, (err, decoded) =>
+        {
+            return decoded._id;
+        });
+        
+        
+        console.log(`sender = `, userId)
+        const sender = userId;
         // io.emit("message", ({text, id, sender}));
         io.emit("message", ({text, id, sender}));
     })

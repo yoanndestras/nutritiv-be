@@ -30,7 +30,7 @@ io.on("connection", (socket) =>
 {
     console.log("An user is connected to the socket.io chat!");
     
-    io.use((socket, next) => 
+    socket.use((socket, next) => 
     {
         if(socket.handshake.query && socket.handshake.query.refreshToken)
         {

@@ -48,7 +48,6 @@ io.on("connection", (socket, next) =>
                 // io.emit("message", ({text, id, sender}));
                 io.emit("message", ({text, id, sender}));
             })
-            next();
         });
     }
     else

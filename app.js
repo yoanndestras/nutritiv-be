@@ -35,18 +35,16 @@ io.use((socket, next) =>
         {
             if(err) 
             {
-                console.log(`err.message = `, err.message)
                 let err = new Error('Authentication error')
                 err.statusCode = 401;
                 return next(err);
             }
-            else
-            {
-                socket.decoded._id = decoded._id;
-                console.log(`socket.decoded._id = `, socket.decoded._id)
-                next();
-            }
+        
+            socket.decoded._id = decoded._id;
+            console.log(`socket.decoded._id = `, socket.decoded._id)
+            next();
         });
+        console.log("I AM HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     }
     else
     {

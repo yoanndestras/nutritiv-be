@@ -29,31 +29,29 @@ const io = require("socket.io")(http,
 io.use((socket, next) => 
 {
     console.log("I AM HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-    // if(socket.handshake.query && socket.handshake.query.refreshToken)
-    // {
-    //     console.log(`socket.handshake.query.refreshToken = `, socket.handshake.query.refreshToken)
-    //     jwt.verify(socket.handshake.query.refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
-    //     {
-    //         if(err) 
-    //         {
-    //             let err = new Error('Authentication error')
-    //             err.statusCode = 401;
-    //             return next(err);
-    //         }
+    if(socket.handshake.query && socket.handshake.query.refreshToken)
+    {
+        console.log(`socket.handshake.query.refreshToken = `, socket.handshake.query.refreshToken)
+        jwt.verify(socket.handshake.query.refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
+        {
+            if(err) 
+            {
+                let err = new Error('Authentication error')
+                err.statusCode = 401;
+                return next(err);
+            }
         
-    //         socket.decoded._id = decoded._id;
-    //         console.log(`socket.decoded._id = `, socket.decoded._id)
-    //         next();
-    //     });
-    //     console.log("I AM HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-    // }
-    // else
-    // {
-    //     let err = new Error('Authentication error')
-    //     err.statusCode = 401;
-    //     next(err);
-    // }
-    next();
+            socket.decoded._id = decoded._id;
+            console.log(`socket.decoded._id = `, socket.decoded._id)
+        });
+        console.log("I AM HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    }
+    else
+    {
+        let err = new Error('Authentication error')
+        err.statusCode = 401;
+        next(err);
+    }
 })
 .on("connection", (socket) =>
 {

@@ -55,10 +55,10 @@ io.on("connection", (socket) =>
 {
     console.log("An user is connected to the socket.io chat!");
     
-    socket.on('message', ({text, id, token}) =>
+    socket.on('message', ({text, id, refreshToken}) =>
     {
-        console.log(token);
-        let userId = jwt.verify(token, process.env.REF_JWT_SEC, (err, decoded) =>
+        console.log(refreshToken);
+        let userId = jwt.verify(refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
         {
             return decoded._id;
         });

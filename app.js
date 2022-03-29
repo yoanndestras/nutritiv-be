@@ -59,7 +59,7 @@ io.on("connection", (socket) =>
     {
         jwt.verify(refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
         {
-            if(decoded._id)
+            if(decoded?._id)
             {
                 console.log(`decoded._id = `, decoded._id)
                 let sender = decoded._id;

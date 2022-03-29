@@ -54,24 +54,30 @@ const io = require("socket.io")(http,
 io.on("connection", (socket) =>
 {
     console.log("An user is connected to the socket.io chat!");
-    
-    socket.on('message', ({text, id, refreshToken}) =>
+
+    socket.use((socket, next) => 
     {
-        jwt.verify(refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
+        let sender = jwt.verify(refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
         {
             if(decoded?._id)
             {
                 console.log(`decoded._id = `, decoded._id)
-                let sender = decoded._id;
-                io.emit("message", ({text, id, sender}));
+                return decoded._id;
             }
             else
             {
                 let err  = new Error('authentication_error!');
                 err.data = { content : 'refreshToken error!' };
-                io.emit('error', err);
+                return next(err)
             }
         });
+        socket.decoded = sender
+        next();
+    })
+    .on('message', ({text, id}) =>
+    {
+        let sender = socket.decoded;
+        io.emit("message", ({text, id, sender}));
     })
 })
 

@@ -28,30 +28,20 @@ const io = require("socket.io")(http,
 
 io.use((socket, next) => 
 {  
-    if(socket.handshake?.query?.refreshToken)
+    jwt.verify(socket.handshake?.query?.refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
     {
-        jwt.verify(socket.handshake?.query?.refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
+        if(decoded?._id) 
         {
-            if(decoded?._id) 
-            {
-                socket.decoded = decoded._id;
-                return next();
-            }
-            else
-            {
-                let err = new Error('authentication_error')
-                err.data = { content : 'refreshToken error!' };
-                return next(err);
-            }
-        });
-
-    }
-    else
-    {
-        let err = new Error('authentication_error')
-        err.data = { content : 'no refreshToken found!' };
-        next(err);
-    }
+            socket.decoded = decoded._id;
+            return next();
+        }
+        else
+        {
+            let err = new Error('authentication_error')
+            err.data = { content : 'refreshToken error!' };
+            return next(err);
+        }
+    });
 })
 io.on("connection", (socket) =>
 {

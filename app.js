@@ -67,7 +67,7 @@ io.on("connection", (socket) =>
     })
 
     socket.on("disconnect", (reason) => {
-        console.log(`reason = `, reason)
+        console.log("I AM DISCONNECTED !!!!!!!!!!!!!!!!!")
     });
 })
 

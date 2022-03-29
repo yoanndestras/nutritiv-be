@@ -28,7 +28,6 @@ const io = require("socket.io")(http,
 
 io.use((socket, next) => 
 {  
-    console.log(socket.handshake?.query?.refreshToken);
     if(socket.handshake?.query?.refreshToken)
     {
         jwt.verify(socket.handshake?.query?.refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
@@ -36,7 +35,7 @@ io.use((socket, next) =>
             if(decoded?._id) 
             {
                 socket.decoded = decoded._id;
-                next();
+                return next();
             }
             else
             {
@@ -45,6 +44,7 @@ io.use((socket, next) =>
                 return next(err);
             }
         });
+
     }
     else
     {
@@ -53,7 +53,7 @@ io.use((socket, next) =>
         next(err);
     }
 })
-.on("connection", (socket) =>
+io.on("connection", (socket) =>
 {
     console.log("An user with _id "+ socket.decoded +" is connected to the socket.io chat!");
     

@@ -51,7 +51,7 @@ const io = require("socket.io")(http,
     // }
 //     next();
 // })
-io.on("connection", (socket, next) =>
+io.on("connection", (socket) =>
 {
     console.log("An user is connected to the socket.io chat!");
     
@@ -63,7 +63,7 @@ io.on("connection", (socket, next) =>
             {
                 let err  = new Error('authentication_error!');
                 err.data = { content : 'refreshToken error!' };
-                return next(err);
+                return io.emit('error', err);
             }
             return decoded._id;
         });

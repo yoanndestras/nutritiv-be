@@ -55,7 +55,7 @@ io.on("connection", (socket) =>
 {
     console.log("An user is connected to the socket.io chat!");
     
-    socket.on('message', ({text, id, refreshToken}) =>
+    socket.on('message', ({text, id, refreshToken}, next) =>
     {
         let sender = jwt.verify(refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
         {
@@ -63,7 +63,7 @@ io.on("connection", (socket) =>
             {
                 let err  = new Error('authentication_error!');
                 err.data = { content : 'refreshToken error!' };
-                io.emit(err);
+                next(err);
             }
             return decoded._id;
         });

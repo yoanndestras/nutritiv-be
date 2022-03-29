@@ -57,7 +57,8 @@ io.on("connection", (socket) =>
 
     socket.use((socket, next) => 
     {
-        let refreshToken = socket.handshake.query.refreshToken;
+        let refreshToken = socket.handshake?.query?.refreshToken;
+        console.log(socket.handshake?.query?.refreshToken);
         let sender = jwt.verify(refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
         {
             if(decoded?._id)

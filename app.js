@@ -28,7 +28,7 @@ const io = require("socket.io")(http,
 
 io.use((socket, next) => 
 {  
-    let jwt = jwt.verify(socket.handshake?.query?.refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
+    jwt.verify(socket.handshake?.query?.refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
     {
         if(decoded?._id) 
         {
@@ -43,7 +43,8 @@ io.use((socket, next) =>
         }
     });
 })
-.on("connection", (socket) =>
+
+io.on("connection", (socket) =>
 {
     console.log("An user with _id "+ socket.decoded +" is connected to the socket.io chat!");
     

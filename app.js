@@ -57,16 +57,17 @@ io.on("connection", (socket) =>
     
     socket.on('message', ({text, id, refreshToken}) =>
     {
-
-        let userId = jwt.verify(refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
+        let sender = jwt.verify(refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
         {
+            if(err)
+            {
+                let err  = new Error('authentication_error!');
+                err.data = { content : 'refreshToken error!' };
+                io.emit(err);
+            }
             return decoded._id;
         });
         
-        
-        console.log(`sender = `, userId)
-        const sender = userId;
-        // io.emit("message", ({text, id, sender}));
         io.emit("message", ({text, id, sender}));
     })
 })

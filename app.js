@@ -9,12 +9,13 @@ const path = require('path'); // ACCESS TO FOLDERS PATHS
 const cors = require('cors'); // CORS POLICY
 const http = require('http').createServer(express);
 
-const io = require("./socketIo/socketIo") // CALL SOCKETIO
+const {socketConnection} = require("./socketIo/socketIo") // CALL SOCKETIO
 const routes = require("./routes/index") // CALL V1 & V2 ROUTES FROM ROUTER FOLDER
 
 dotenv.config(); // INITIALIZE ENVIRONNEMENT VARIABLE FILE ".env"
 const port = (process.env.PORT || 5000); // BACK-END PORT
 
+socketConnection(http);
 http.listen(4000, () => {console.log("Socket.io listening on port 4000!");})
 
 // DATABASE ACCESS

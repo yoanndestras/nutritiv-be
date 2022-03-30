@@ -7,81 +7,84 @@ const Room = require("../models/Chat");
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
 
-const io = require("socket.io")(http,
-    {
-        cors: 
-        {
-            origin: frontAddress,
-            methods: ["GET", "POST"],
-            credentials: true
-        },
-    });
+let io;
 
-io.use((socket, next) => 
-{  
-    console.log(socket.handshake?.query?.refreshToken);
-    console.log(socket.handshake?.query);
-    
-    jwt.verify(socket.handshake?.query?.refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
-    {
-        if(decoded?._id && !err) 
-        {
-            socket.decoded = decoded._id;
-            return next();
-        }
-        else
-        {
-            let err = new Error('authentication_error')
-            err.data = { content : 'refreshToken error!' };
-            return next(err);
-        }
-    });
-});
-
-io.on("connection", (socket) =>
+exports.socketConnection = (http) =>
 {
-    console.log("An user is connected to the socket.io chat!");
-    
-    socket.on('message', ({text, id, refreshToken, room}) =>
-    {
-        const senderRoom = Room.findOne({_id: room})
-        
-        if(senderRoom)
+    io = require("socket.io")(http,
         {
-            jwt.verify(refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
+            cors: 
             {
-                if(decoded?._id && !err)
+                origin: frontAddress,
+                methods: ["GET", "POST"],
+                credentials: true
+            },
+        });
+    
+    io.use((socket, next) => 
+    {  
+        console.log(socket.handshake?.query?.refreshToken);
+        console.log(socket.handshake?.query);
+        
+        jwt.verify(socket.handshake?.query?.refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
+        {
+            if(decoded?._id && !err) 
+            {
+                socket.decoded = decoded._id;
+                return next();
+            }
+            else
+            {
+                let err = new Error('authentication_error')
+                err.data = { content : 'refreshToken error!' };
+                return next(err);
+            }
+        });
+    });
+    
+    io.on("connection", (socket) =>
+    {
+        console.log("An user is connected to the socket.io chat!");
+        
+        socket.on('message', ({text, id, refreshToken, room}) =>
+        {
+            const senderRoom = Room.findOne({_id: room})
+            
+            if(senderRoom)
+            {
+                jwt.verify(refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
                 {
-                    let sender = decoded._id;
-                    let roomMembers = senderRoom.members;
-
-                    if(roomMembers.includes(ObjectId(sender)))
+                    if(decoded?._id && !err)
                     {
-                        io.emit("message", ({text, id, sender, room}));
+                        let sender = decoded._id;
+                        let roomMembers = senderRoom.members;
+    
+                        if(roomMembers.includes(ObjectId(sender)))
+                        {
+                            io.emit("message", ({text, id, sender, room}));
+                        }
+                        else
+                        {
+                            let err  = new Error('authentication_error!');
+                            err.data = { content : 'user is not part of the room!' };
+                            io.emit('error', {err, room});
+                        }
                     }
                     else
                     {
                         let err  = new Error('authentication_error!');
-                        err.data = { content : 'user is not part of the room!' };
+                        err.data = { content : 'refreshToken error!' };
                         io.emit('error', {err, room});
                     }
-                }
-                else
-                {
-                    let err  = new Error('authentication_error!');
-                    err.data = { content : 'refreshToken error!' };
-                    io.emit('error', {err, room});
-                }
-            });
-        }
-        else
-        {
-            let err  = new Error('authentication_error!');
-            err.data = { content : 'room not found!' };
-            io.emit('error', {err, room});
-        }
-        
+                });
+            }
+            else
+            {
+                let err  = new Error('authentication_error!');
+                err.data = { content : 'room not found!' };
+                io.emit('error', {err, room});
+            }
+            
+        })
     })
-})
-
-module.exports = io;
+}

@@ -15,8 +15,9 @@ const routes = require("./routes/index") // CALL V1 & V2 ROUTES FROM ROUTER FOLD
 dotenv.config(); // INITIALIZE ENVIRONNEMENT VARIABLE FILE ".env"
 const port = (process.env.PORT || 5000); // BACK-END PORT
 
-socketConnection(http);
 http.listen(4000, () => {console.log("Socket.io listening on port 4000!");})
+
+socketConnection(http);
 
 // DATABASE ACCESS
 mongoose

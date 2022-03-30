@@ -7,11 +7,9 @@ const Room = require("../models/Chat");
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
 
-let io;
-
 exports.socketConnection = (http) =>
 {
-    io = require("socket.io")(http,
+    const io = require("socket.io")(http,
         {
             cors: 
             {
@@ -61,7 +59,7 @@ exports.socketConnection = (http) =>
     
                         if(roomMembers.includes(ObjectId(sender)))
                         {
-                            io.emit("message", ({text, id, sender, room}));
+                            io.to(room).emit("message", ({text, id, sender}));
                         }
                         else
                         {

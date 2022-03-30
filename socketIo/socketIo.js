@@ -38,12 +38,11 @@ exports.socketConnection = async(io) =>
 
             socket.on('createRoom', ({token}) =>
             {   
-                
                 jwt.verify(token, process.env.REF_JWT_SEC, async(err, decoded) =>
                 {
                     if(decoded?._id && !err)
                     {
-                        let userId = decoded._id;                        
+                        let userId = ObjectId(decoded._id);                       
                         const senderRooms = await Room.find({members: {$in: [userId]}},).sort({updatedAt:-1});
                         
                         if(senderRooms && senderRooms.length > 0)
@@ -81,7 +80,7 @@ exports.socketConnection = async(io) =>
                 {
                     if(decoded?._id && !err)
                     {
-                        let sender = decoded._id;                        
+                        let sender = ObjectId(decoded._id);                        
                         const senderRooms = await Room.find({members: {$in: [sender]}},).sort({updatedAt:-1});
                         
                         if(senderRooms && senderRooms.length > 0)

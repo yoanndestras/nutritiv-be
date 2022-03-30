@@ -48,7 +48,7 @@ exports.socketConnection = async(io) =>
                         {
                             let sender = decoded._id;
                             let roomMembers = senderRoom.members;
-        
+                            console.log(roomMembers.includes(ObjectId(sender)));
                             if(roomMembers.includes(ObjectId(sender)))
                             {
                                 console.log("All verification ok!");

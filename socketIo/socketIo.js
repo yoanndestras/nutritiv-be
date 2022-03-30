@@ -19,6 +19,9 @@ const io = require("socket.io")(http,
 
 io.use((socket, next) => 
 {  
+    console.log(socket.handshake?.query?.refreshToken);
+    console.log(socket.handshake?.query);
+    
     jwt.verify(socket.handshake?.query?.refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
     {
         if(decoded?._id && !err) 

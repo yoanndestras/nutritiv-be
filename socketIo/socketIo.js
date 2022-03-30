@@ -42,7 +42,6 @@ exports.socketConnection = async(io) =>
                 console.log(`token = `, token)
                 const senderRoom = await Room.findOne({_id: roomId});
                 
-                console.log(`senderRoom = `, senderRoom)
                 if(senderRoom)
                 {
                     jwt.verify(token, process.env.REF_JWT_SEC, (err, decoded) =>

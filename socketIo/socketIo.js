@@ -38,6 +38,7 @@ exports.socketConnection = async(io) =>
             
             socket.on('createRoom', async({roomId, token}) =>
             {
+                console.log(roomId);
                 const senderRoom = await Room.findOne({_id: roomId});
                 
                 if(senderRoom)
@@ -79,6 +80,7 @@ exports.socketConnection = async(io) =>
             
             socket.on('message', async({text, id, token, roomId}) =>
             {
+                console.log(roomId);
                 const senderRoom = await Room.findOne({_id: roomId})
                 let err  = new Error('authentication_error!');
 
@@ -94,7 +96,7 @@ exports.socketConnection = async(io) =>
                             if(roomMembers.includes(ObjectId(sender)))
                             {
                                 console.log("All verification ok for message!");
-                                
+
                                 socket.join(roomId);
                                 socket.to(roomId).emit("message", ({text, id, sender}));
                             }

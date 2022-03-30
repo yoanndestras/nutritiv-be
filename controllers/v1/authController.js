@@ -357,7 +357,11 @@ exports.verifyPasswordSyntax = (req, res, next) =>
 
 exports.verifyUsername = (req, res, next) =>
 {
-    User.findOne({username: req.body.username}, (err, user) =>
+    const format = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
+    console.log(format.test(req.body.username));
+    if(!format.test(req.body.username))
+    {
+        User.findOne({username: req.body.username}, (err, user) =>
         {
             if(user !== null)
             {
@@ -370,6 +374,14 @@ exports.verifyUsername = (req, res, next) =>
                 next();
             }
         })
+    }
+    else
+    {
+        let err = new Error('Your username syntax is wrong!');
+        err.statusCode = 400;
+        next(err);
+    }
+    
 };
 
 exports.verifyEmail = (req, res, next) =>

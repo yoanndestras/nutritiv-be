@@ -143,8 +143,7 @@ router.post("/login", cors.corsWithOptions, auth.verifyNoRefresh, async(req, res
         //passport.authenticate('local', { successRedirect: '/',failureRedirect: '/login' }));
         passport.authenticate('local', { session: false }, (err, user, info) => 
         {
-            
-            if(err || !user || user.isVerified === false) 
+            if(err || !user) 
             {
                 res.status(400).json(
                     {
@@ -153,6 +152,12 @@ router.post("/login", cors.corsWithOptions, auth.verifyNoRefresh, async(req, res
                         err: err,
                         info: info
                     });
+            }
+            else if(user.isVerified === false)
+            {
+                let err = new Error('Your account is not verified!');
+                err.statusCode = 400;
+                return next(err);
             }
             else
             {

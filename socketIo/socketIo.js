@@ -36,93 +36,78 @@ exports.socketConnection = async(io) =>
         {
             console.log("An user is connected to the socket.io chat!");
             
-            socket.on('createRoom', async({roomId, token}) =>
-            {
-                console.log(`createRoom roomId = `, roomId)
-                console.log(`token = `, token)
-                const senderRoom = await Room.findOne({_id: roomId});
-                
-                if(senderRoom)
-                {
-                    jwt.verify(token, process.env.REF_JWT_SEC, (err, decoded) =>
-                    {
-                        if(decoded?._id && !err)
-                        {
-                            let sender = decoded._id;
-                            let roomMembers = senderRoom.members;
-                            
-                            if(roomMembers.includes(ObjectId(sender)))
-                            {
-                                console.log("All verification ok for createRoom!");
 
-                                socket.join(roomId);
-                                let roomCreated = true;
-                                socket.to(roomId).emit('createRoom', roomCreated);
-                            }
-                            else
-                            {
-                                let roomCreated = false;
-                                socket.to(roomId).emit('createRoom', roomCreated);
-                            }
+            socket.on('createRoom', ({token}) =>
+            {   
+                let err  = new Error('createRoom_error!');
+                
+                jwt.verify(token, process.env.REF_JWT_SEC, async(err, decoded) =>
+                {
+                    if(decoded?._id && !err)
+                    {
+                        let userId = decoded._id;                        
+                        const senderRooms = await Room.find({members: {$in: [userId]}},).sort({updatedAt:-1});
+                        
+                        if(senderRooms && senderRooms.length > 0)
+                        {
+                            console.log("All verification ok for createRoom!");
+                            
+                            senderRooms.forEach(senderRoom => 
+                                {
+                                    let roomCreated = true;
+                                    socket.join("senderRoom:" + senderRoom._id);
+                                    socket.to(senderRoom._id).emit('createRoom', roomCreated);
+                                });
                         }
                         else
                         {
                             let roomCreated = false;
-                            socket.to(roomId).emit('createRoom', roomCreated);
+                            err.data = { content : 'No room found for user ' + userId + '!' };
+                            socket.emit('createRoom', {err, roomCreated});
                         }
-                    });
-                }
-                else
-                {
-                    let roomCreated = false;
-                    socket.to(roomId).emit('createRoom', roomCreated);
-                }
+                    }
+                    else
+                    {
+                        let roomCreated = false;
+                        err.data = { content : 'token error!' };
+                        socket.emit('createRoom', {err, roomCreated});
+                    }
+                });
             });
             
-            socket.on('chatting', async({text, id, token, roomId}) =>
+            socket.on('chatting', ({text, id, token}) =>
             {
-                console.log(`chatting roomId = `, roomId)
-                console.log(`token = `, token)
-
-                const senderRoom = await Room.findOne({_id: roomId})
-
                 let err  = new Error('authentication_error!');
 
-                if(senderRoom)
+                jwt.verify(token, process.env.REF_JWT_SEC, async(err, decoded) =>
                 {
-                    jwt.verify(token, process.env.REF_JWT_SEC, (err, decoded) =>
+                    if(decoded?._id && !err)
                     {
-                        if(decoded?._id && !err)
+                        let userId = decoded._id;                        
+                        const senderRooms = await Room.find({members: {$in: [userId]}},).sort({updatedAt:-1});
+                        
+                        if(senderRooms && senderRooms.length > 0)
                         {
-                            let sender = decoded._id;
-                            let roomMembers = senderRoom.members;
-
-                            if(roomMembers.includes(ObjectId(sender)))
-                            {
-                                console.log("All verification ok for message!");
-
-                                socket.join(roomId);
-                                socket.to(roomId).emit("chatting", ({text, id, sender}));
-                            }
-                            else
-                            {
-                                err.data = { content : 'user is not part of the room!' };
-                                socket.emit('error', {err, roomId});
-                            }
+                            console.log("All verification ok for message!");
+                            
+                            senderRooms.forEach(senderRoom => 
+                                {
+                                    socket.join(roomId);
+                                    socket.to(roomId).emit("chatting", ({text, id, sender}));
+                                });
                         }
                         else
                         {
-                            err.data = { content : 'refreshToken error!' };
-                            socket.emit('error', {err, roomId});
+                            err.data = { content : 'No room found for user ' + userId + '!' };
+                            socket.emit('error', err);
                         }
-                    });
-                }
-                else
-                {
-                    err.data = { content : 'room not found!' };
-                    socket.emit('error', {err, roomId});
-                }
-                
+                    }
+                    else
+                    {
+                        err.data = { content : 'token error!' };
+                        socket.emit('error', err);
+                    }
+                });
             });
         })
     }catch(err){console.log(err)}

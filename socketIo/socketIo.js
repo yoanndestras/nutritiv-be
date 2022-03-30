@@ -52,9 +52,9 @@ exports.socketConnection = async(io) =>
                             senderRooms.forEach(senderRoom => 
                                 {
                                     let roomCreated = true;
-                                    senderRoom._id = senderRoom._id.toString();;
-                                    socket.join("senderRoom:" + senderRoom._id);
-                                    socket.to(senderRoom._id).emit('createRoom', roomCreated);
+                                    let senderRoomId = (senderRoom._id).toString();
+                                    socket.join("senderRoomId:" + senderRoomId);
+                                    socket.to(senderRoomId).emit('createRoom', roomCreated);
                                 });
                         }
                         else
@@ -90,10 +90,10 @@ exports.socketConnection = async(io) =>
                             
                             senderRooms.forEach(senderRoom => 
                                 {
-                                    senderRoom._id = senderRoom._id.toString();
-                                    socket.join("senderRoom:" + senderRoom._id);
-                                    console.log(`senderRoom._id = `, senderRoom._id)
-                                    socket.to(senderRoom._id).emit("chatting", ({text, id, sender}));
+                                    let senderRoomId = (senderRoom._id).toString();
+                                    socket.join("senderRoom:" + senderRoomId);
+                                    console.log(`senderRoomId = `, senderRoomId)
+                                    socket.to(senderRoomId).emit("chatting", ({text, id, sender}));
                                 });
                         }
                         else

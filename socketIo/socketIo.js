@@ -7,9 +7,10 @@ const Room = require("../models/Chat");
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
 
+let io;
 exports.socketConnection = (http) =>
 {
-    const io = require("socket.io")(http,
+    io = require("socket.io")(http,
         {
             cors: 
             {
@@ -23,7 +24,7 @@ exports.socketConnection = (http) =>
     {  
         console.log(socket.handshake?.query?.refreshToken);
         console.log(socket.handshake?.query);
-        
+        console.log(socket.handshake);
         jwt.verify(socket.handshake?.query?.refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
         {
             if(decoded?._id && !err) 

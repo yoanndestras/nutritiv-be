@@ -5,7 +5,6 @@ const Room = require("../models/Chat");
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
 
-let io;
 exports.socketConnection = async(io) =>
 {   
     try
@@ -82,12 +81,12 @@ exports.socketConnection = async(io) =>
                     {
                         const senderRoom = await Room.findOne({_id: roomId});
                         let sender = decoded._id;
-                        
+
                         if(senderRoom && sender)
                         {
                             console.log("All verification ok for message!");
                             socket.join(roomId); // JOIN
-                            socket.to(roomId).emit("chatting", ({text, id, sender})); // EMIT
+                            socket.to(roomId).emit("chatting", ({text, id, sender, roomId})); // EMIT
                         }
                         else
                         {

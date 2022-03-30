@@ -167,11 +167,10 @@ exports.sendNewOrder = async(req, res, next) =>
                     <p>Command number: ${order._id}</p>
                     <p>${new Date(Y,M,D)}</p><br>
                     
-                    
                     We will send you an email when the order has been shipped<br>
                     Thanks,<br>
                     </p>
-                
+
                     <p>Nutritiv</p>
                     <hr>
                     <p style="font-size: 0.75em; color: #88B4D6">Nutritiv, 245 Rue du Tilleul, Paris, France</p>

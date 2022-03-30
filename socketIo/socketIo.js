@@ -1,6 +1,5 @@
 //SOCKET IO BACK-END CONFIGURATION
 const express = require("express"); // EXPRESS FRAMEWORK
-const http = require('http').createServer(express);
 const frontAddress = process.env.REACT_APP_ADDRESS;
 const jwt = require('jsonwebtoken');
 const Room = require("../models/Chat");
@@ -8,38 +7,28 @@ const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
 
 let io;
-exports.socketConnection = (http) =>
-{
-    io = require("socket.io")(http,
-        {
-            cors: 
-            {
-                origin: frontAddress,
-                methods: ["GET", "POST"],
-                credentials: true
-            },
-        });
-    
-    io.use((socket, next) => 
-    {  
-        console.log(socket.handshake?.query?.refreshToken);
-        console.log(socket.handshake?.query);
-        console.log(socket.handshake);
-        jwt.verify(socket.handshake?.query?.refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
-        {
-            if(decoded?._id && !err) 
-            {
-                socket.decoded = decoded._id;
-                return next();
-            }
-            else
-            {
-                let err = new Error('authentication_error')
-                err.data = { content : 'refreshToken error!' };
-                return next(err);
-            }
-        });
-    });
+exports.socketConnection = (io) =>
+{   
+    // io.use((socket, next) => 
+    // {  
+    //     console.log(socket.handshake?.query?.refreshToken);
+    //     console.log(socket.handshake?.query);
+    //     console.log(socket.handshake);
+    //     jwt.verify(socket.handshake?.query?.refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
+    //     {
+    //         if(decoded?._id && !err) 
+    //         {
+    //             socket.decoded = decoded._id;
+    //             return next();
+    //         }
+    //         else
+    //         {
+    //             let err = new Error('authentication_error')
+    //             err.data = { content : 'refreshToken error!' };
+    //             return next(err);
+    //         }
+    //     });
+    // });
     
     io.on("connection", (socket) =>
     {

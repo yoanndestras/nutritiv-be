@@ -2,7 +2,6 @@ const router = require("express").Router();
 const User = require("../../models/User");
 
 // CONTROLLERS
-
 const passport = require("passport");
 const cors = require('../../controllers/v1/corsController');
 const auth = require("../../controllers/v1/authController");

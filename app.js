@@ -1,73 +1,18 @@
-const express = require("express"); // EXPRESS FRAMEWORK
 const mongoose = require("mongoose"); // MONGODB OBJECT MODELING
+const express = require("express"); // EXPRESS FRAMEWORK
+
 const limitter = require('express-rate-limit'); // SPAM LIMITTER
-const path = require('path'); // ACCESS TO FOLDERS PATHS
-const dotenv = require("dotenv"); // ENV FILES
-const passport = require('passport'); // PASSPORT FOR AUTH
 const cookieParser = require("cookie-parser"); //COOKIES
+const passport = require('passport'); // PASSPORT FOR AUTH
+const dotenv = require("dotenv"); // ENV FILES
+const path = require('path'); // ACCESS TO FOLDERS PATHS
 const cors = require('cors'); // CORS POLICY
-const routes = require("./router") // CALL V1 & V2 ROUTES FROM ROUTER FOLDER
-const jwt = require('jsonwebtoken');
+
+const {io, http} = require("./socketIo/socketIo") // CALL SOCKETIO
+const routes = require("./routes/index") // CALL V1 & V2 ROUTES FROM ROUTER FOLDER
 
 dotenv.config(); // INITIALIZE ENVIRONNEMENT VARIABLE FILE ".env"
-
-//SOCKET IO BACK-END CONFIGURATION
-const http = require('http').createServer(express);
 const port = (process.env.PORT || 5000); // BACK-END PORT
-const frontAddress = process.env.REACT_APP_ADDRESS;
-
-const io = require("socket.io")(http,
-    {
-        cors: 
-        {
-            origin: frontAddress,
-            methods: ["GET", "POST"],
-            credentials: true
-        },
-    });
-
-io.use((socket, next) => 
-{  
-    jwt.verify(socket.handshake?.query?.refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
-    {
-        if(decoded?._id && !err) 
-        {
-            socket.decoded = decoded._id;
-            return next();
-        }
-        else
-        {
-            let err = new Error('authentication_error')
-            err.data = { content : 'refreshToken error!' };
-            return next(err);
-        }
-    });
-});
-
-io.on("connection", (socket) =>
-{
-    console.log("An user with _id "+ socket.decoded +" is connected to the socket.io chat!");
-    
-    socket.on('message', ({text, id, refreshToken, room}) =>
-    {
-        jwt.verify(refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
-        {
-            if(decoded?._id && !err)
-            {
-                let sender = decoded._id;
-                io.emit("message", ({text, id, sender, room}));
-            }
-            else
-            {
-                let err  = new Error('authentication_error!');
-                err.data = { content : 'refreshToken error!' };
-                io.emit('error', {err, room});
-            }
-        });
-    })
-})
-
-http.listen(4000, () => {console.log("Socket.io listening on port 4000!");})
 
 // DATABASE ACCESS
 mongoose
@@ -85,19 +30,6 @@ app.use(express.urlencoded({extended: true})); // APP LEARN TO READ JSON
 app.use(passport.initialize()); // INITIALIZE PASSPORT JS
 app.use(cookieParser()); // INITIALIZE COOKIES
 app.use(cors()); // INITIALIZE CORS  "app.options('*', cors());"
-const trimmer = (req, res, next) =>
-{    
-    if(req.method === 'POST' || req.method === 'PUT') 
-    {
-        for(const [key, value] of Object.entries(req.body)) 
-        {
-            if(typeof(value) === 'string')
-                req.body[key] = value.trim();
-        }
-    }
-    next();
-} // FUNCTION THAT REMOVE WHITESPACE
-app.use(trimmer); // CALL TRIMMER
 app.use(routes); // CALL V1 & V2 ROUTES FROM ROUTER FOLDER
 app.use( 
     limitter(
@@ -134,28 +66,3 @@ app.use((err, req, res, next) =>
 }); //ERROR HANDLING "(catch(err){next(err)})""
 
 module.exports = app;
-
-
-// io.use((socket, next) => 
-// {  
-//     const token = socket.handshake?.query?.refreshToken
-//     token && verifyToken(token)
-// })
-
-// verifyToken = (token) =>
-// {
-//     jwt.verify(token, process.env.REF_JWT_SEC, (err, decoded) =>
-//     {
-//         if(decoded?._id) 
-//         {
-//             socket.decoded = decoded._id;
-//             return next();
-//         }
-//         else
-//         {
-//             let err = new Error('authentication_error')
-//             err.data = { content : 'refreshToken error!' };
-//             return next(err);
-//         }
-//     });
-// }

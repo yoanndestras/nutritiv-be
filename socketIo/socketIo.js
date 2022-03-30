@@ -51,20 +51,22 @@ exports.socketConnection = async(io) =>
         
                             if(roomMembers.includes(ObjectId(sender)))
                             {
-                                io.to(room).emit("message", ({text, id, sender}));
+                                console.log("All verification ok!");
+                                socket.join(room);
+                                socket.to(room).emit("message", ({text, id, sender}));
                             }
                             else
                             {
                                 let err  = new Error('authentication_error!');
                                 err.data = { content : 'user is not part of the room!' };
-                                io.emit('error', {err, room});
+                                socket.emit('error', {err, room});
                             }
                         }
                         else
                         {
                             let err  = new Error('authentication_error!');
                             err.data = { content : 'refreshToken error!' };
-                            io.emit('error', {err, room});
+                            socket.emit('error', {err, room});
                         }
                     });
                 }
@@ -72,7 +74,7 @@ exports.socketConnection = async(io) =>
                 {
                     let err  = new Error('authentication_error!');
                     err.data = { content : 'room not found!' };
-                    io.emit('error', {err, room});
+                    socket.emit('error', {err, room});
                 }
                 
             })

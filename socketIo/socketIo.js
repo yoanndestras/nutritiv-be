@@ -48,13 +48,13 @@ exports.socketConnection = async(io) =>
                         if(senderRooms && senderRooms.length > 0)
                         {
                             console.log("All verification ok for createRoom!");
-                            
+                            console.log(senderRooms);
                             senderRooms.forEach(senderRoom => 
                                 {
                                     let roomCreated = true;
                                     let senderRoomId = (senderRoom._id).toString();
-                                    socket.join("senderRoomId:" + senderRoomId);
-                                    socket.to(senderRoomId).emit('createRoom', roomCreated);
+                                    socket.join(senderRoomId); // JOIN
+                                    socket.to(senderRoomId).emit('createRoom', roomCreated); // EMIT
                                 });
                         }
                         else
@@ -91,9 +91,8 @@ exports.socketConnection = async(io) =>
                             senderRooms.forEach(senderRoom => 
                                 {
                                     let senderRoomId = (senderRoom._id).toString();
-                                    socket.join("senderRoom:" + senderRoomId);
-                                    console.log(`senderRoomId = `, senderRoomId)
-                                    socket.to(senderRoomId).emit("chatting", ({text, id, sender}));
+                                    socket.join(senderRoomId); // JOIN
+                                    socket.to(senderRoomId).emit("chatting", ({text, id, sender})); // EMIT
                                 });
                         }
                         else

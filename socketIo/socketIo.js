@@ -84,6 +84,4 @@ io.on("connection", (socket) =>
     })
 })
 
-http.listen(4000, () => {console.log("Socket.io listening on port 4000!");})
-
-module.exports = {io, http};
+module.exports = io;

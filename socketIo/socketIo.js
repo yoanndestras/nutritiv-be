@@ -48,14 +48,13 @@ exports.socketConnection = async(io) =>
                         if(senderRooms && senderRooms.length > 0)
                         {
                             console.log("All verification ok for createRoom!");
-                            console.log(senderRooms);
                             senderRooms.forEach(senderRoom => 
                                 {
-                                    let roomCreated = true;
                                     let senderRoomId = (senderRoom._id).toString();
                                     socket.join(senderRoomId); // JOIN
-                                    socket.to(senderRoomId).emit('createRoom', roomCreated); // EMIT
                                 });
+                            let roomCreated = true;
+                            socket.emit('createRoom', roomCreated); // EMIT
                         }
                         else
                         {
@@ -75,30 +74,24 @@ exports.socketConnection = async(io) =>
                 });
             });
             
-            socket.on('chatting', ({text, id, token}) =>
+            socket.on('chatting', ({text, id, token, roomId}) =>
             {
                 jwt.verify(token, process.env.REF_JWT_SEC, async(err, decoded) =>
                 {
                     if(decoded?._id && !err)
                     {
-                        let sender = ObjectId(decoded._id);                        
-                        const senderRooms = await Room.find({members: {$in: [sender]}},).sort({updatedAt:-1});
+                        const senderRoom = await Room.findOne({_id: roomId});
                         
-                        if(senderRooms && senderRooms.length > 0)
+                        if(senderRoom)
                         {
                             console.log("All verification ok for message!");
-                            
-                            senderRooms.forEach(senderRoom => 
-                                {
-                                    let senderRoomId = (senderRoom._id).toString();
-                                    socket.join(senderRoomId); // JOIN
-                                    socket.to(senderRoomId).emit("chatting", ({text, id, sender})); // EMIT
-                                });
+                            socket.join(roomId); // JOIN
+                            socket.to(roomId).emit("chatting", ({text, id, sender})); // EMIT
                         }
                         else
                         {
                             let err  = new Error('authentication_error!');
-                            err.data = { content : 'No room found for user ' + sender + '!' };
+                            err.data = { content : 'No room with _id '+ roomId +' found for user ' + sender + '!' };
                             socket.emit('error', err);
                         }
                     }

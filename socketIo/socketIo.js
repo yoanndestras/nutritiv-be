@@ -38,9 +38,11 @@ exports.socketConnection = async(io) =>
             
             socket.on('createRoom', async({roomId, token}) =>
             {
-                console.log(roomId);
+                console.log(`roomId = `, roomId)
+                console.log(`token = `, token)
                 const senderRoom = await Room.findOne({_id: roomId});
                 
+                console.log(`senderRoom = `, senderRoom)
                 if(senderRoom)
                 {
                     jwt.verify(token, process.env.REF_JWT_SEC, (err, decoded) =>
@@ -76,12 +78,16 @@ exports.socketConnection = async(io) =>
                     let roomCreated = false;
                     socket.emit('createRoom', roomCreated);
                 }
-            })
+            });
             
-            socket.on('message', async({text, id, token, roomId}) =>
+            socket.on('chatting', async({text, id, token, roomId}) =>
             {
-                console.log(roomId);
+                console.log(`roomId = `, roomId)
+                console.log(`token = `, token)
+
                 const senderRoom = await Room.findOne({_id: roomId})
+
+                console.log(`senderRoom = `, senderRoom)
                 let err  = new Error('authentication_error!');
 
                 if(senderRoom)
@@ -119,7 +125,7 @@ exports.socketConnection = async(io) =>
                     socket.emit('error', {err, roomId});
                 }
                 
-            })
+            });
         })
     }catch(err){console.log(err)}
     

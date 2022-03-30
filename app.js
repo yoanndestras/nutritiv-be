@@ -30,7 +30,7 @@ io.use((socket, next) =>
 {  
     jwt.verify(socket.handshake?.query?.refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
     {
-        if(decoded?._id) 
+        if(decoded?._id && !err) 
         {
             socket.decoded = decoded._id;
             return next();
@@ -42,35 +42,30 @@ io.use((socket, next) =>
             return next(err);
         }
     });
-})
+});
 
 io.on("connection", (socket) =>
 {
     console.log("An user with _id "+ socket.decoded +" is connected to the socket.io chat!");
     
-    socket.on('message', ({text, id, refreshToken}) =>
+    socket.on('message', ({text, id, refreshToken, room}) =>
     {
         jwt.verify(refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
         {
-            if(decoded?._id)
+            if(decoded?._id && !err)
             {
                 let sender = decoded._id;
-                io.emit("message", ({text, id, sender}));
+                io.emit("message", ({text, id, sender, room}));
             }
             else
             {
                 let err  = new Error('authentication_error!');
                 err.data = { content : 'refreshToken error!' };
-                io.emit('error', err);
+                io.emit('error', {err, room});
             }
         });
     })
-
-    socket.on("disconnect", (reason) => {
-        console.log("I AM DISCONNECTED !!!!!!!!!!!!!!!!!")
-    });
 })
-
 
 http.listen(4000, () => {console.log("Socket.io listening on port 4000!");})
 
@@ -139,3 +134,28 @@ app.use((err, req, res, next) =>
 }); //ERROR HANDLING "(catch(err){next(err)})""
 
 module.exports = app;
+
+
+// io.use((socket, next) => 
+// {  
+//     const token = socket.handshake?.query?.refreshToken
+//     token && verifyToken(token)
+// })
+
+// verifyToken = (token) =>
+// {
+//     jwt.verify(token, process.env.REF_JWT_SEC, (err, decoded) =>
+//     {
+//         if(decoded?._id) 
+//         {
+//             socket.decoded = decoded._id;
+//             return next();
+//         }
+//         else
+//         {
+//             let err = new Error('authentication_error')
+//             err.data = { content : 'refreshToken error!' };
+//             return next(err);
+//         }
+//     });
+// }

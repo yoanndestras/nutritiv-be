@@ -337,7 +337,7 @@ exports.verifyEmailSyntax = (req, res, next) =>
     if(valid_email === true) next();
     else
     {
-        let err = new Error('You Email syntax is wrong!');
+        let err = new Error('Your Email syntax is wrong!');
         err.statusCode = 400;
         next(err);
     }
@@ -349,7 +349,7 @@ exports.verifyPasswordSyntax = (req, res, next) =>
     {next();}
     else
     {
-        let err = new Error('You password syntax is wrong!');
+        let err = new Error('Your password syntax is wrong!');
         err.statusCode = 400;
         next(err);
     }

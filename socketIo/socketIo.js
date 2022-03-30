@@ -83,8 +83,8 @@ exports.socketConnection = async(io) =>
                 {
                     if(decoded?._id && !err)
                     {
-                        let userId = decoded._id;                        
-                        const senderRooms = await Room.find({members: {$in: [userId]}},).sort({updatedAt:-1});
+                        let sender = decoded._id;                        
+                        const senderRooms = await Room.find({members: {$in: [sender]}},).sort({updatedAt:-1});
                         
                         if(senderRooms && senderRooms.length > 0)
                         {
@@ -92,13 +92,13 @@ exports.socketConnection = async(io) =>
                             
                             senderRooms.forEach(senderRoom => 
                                 {
-                                    socket.join(roomId);
-                                    socket.to(roomId).emit("chatting", ({text, id, sender}));
+                                    socket.join("senderRoom:" + senderRoom._id);
+                                    socket.to(senderRoom._id).emit("chatting", ({text, id, sender}));
                                 });
                         }
                         else
                         {
-                            err.data = { content : 'No room found for user ' + userId + '!' };
+                            err.data = { content : 'No room found for user ' + sender + '!' };
                             socket.emit('error', err);
                         }
                     }

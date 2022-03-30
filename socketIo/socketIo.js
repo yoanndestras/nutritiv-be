@@ -81,8 +81,9 @@ exports.socketConnection = async(io) =>
                     if(decoded?._id && !err)
                     {
                         const senderRoom = await Room.findOne({_id: roomId});
+                        let sender = decoded._id;
                         
-                        if(senderRoom)
+                        if(senderRoom && sender)
                         {
                             console.log("All verification ok for message!");
                             socket.join(roomId); // JOIN

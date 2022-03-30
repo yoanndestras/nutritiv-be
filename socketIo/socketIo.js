@@ -36,45 +36,85 @@ exports.socketConnection = async(io) =>
         {
             console.log("An user is connected to the socket.io chat!");
             
-            socket.on('message', async({text, id, refreshToken, room}) =>
+            socket.on('createRoom', async({roomId, token}) =>
             {
-                const senderRoom = await Room.findOne({_id: room})
+                const senderRoom = await Room.findOne({_id: roomId});
                 
                 if(senderRoom)
                 {
-                    jwt.verify(refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
+                    jwt.verify(token, process.env.REF_JWT_SEC, (err, decoded) =>
                     {
                         if(decoded?._id && !err)
                         {
                             let sender = decoded._id;
                             let roomMembers = senderRoom.members;
-                            console.log(roomMembers.includes(ObjectId(sender)));
+
                             if(roomMembers.includes(ObjectId(sender)))
                             {
-                                console.log("All verification ok!");
-                                socket.join(room);
-                                socket.to(room).emit("message", ({text, id, sender}));
+                                console.log("All verification ok for createRoom!");
+
+                                socket.join(roomId);
+                                let roomCreated = true;
+                                socket.emit('createRoom', roomCreated);
                             }
                             else
                             {
-                                let err  = new Error('authentication_error!');
-                                err.data = { content : 'user is not part of the room!' };
-                                socket.emit('error', {err, room});
+                                let roomCreated = false;
+                                socket.emit('createRoom', roomCreated);
                             }
                         }
                         else
                         {
-                            let err  = new Error('authentication_error!');
-                            err.data = { content : 'refreshToken error!' };
-                            socket.emit('error', {err, room});
+                            let roomCreated = false;
+                            socket.emit('createRoom', roomCreated);
                         }
                     });
                 }
                 else
                 {
-                    let err  = new Error('authentication_error!');
+                    let roomCreated = false;
+                    socket.emit('createRoom', roomCreated);
+                }
+            })
+            
+            socket.on('message', async({text, id, token, roomId}) =>
+            {
+                const senderRoom = await Room.findOne({_id: roomId})
+                let err  = new Error('authentication_error!');
+
+                if(senderRoom)
+                {
+                    jwt.verify(token, process.env.REF_JWT_SEC, (err, decoded) =>
+                    {
+                        if(decoded?._id && !err)
+                        {
+                            let sender = decoded._id;
+                            let roomMembers = senderRoom.members;
+
+                            if(roomMembers.includes(ObjectId(sender)))
+                            {
+                                console.log("All verification ok for message!");
+                                
+                                socket.join(roomId);
+                                socket.to(roomId).emit("message", ({text, id, sender}));
+                            }
+                            else
+                            {
+                                err.data = { content : 'user is not part of the room!' };
+                                socket.emit('error', {err, roomId});
+                            }
+                        }
+                        else
+                        {
+                            err.data = { content : 'refreshToken error!' };
+                            socket.emit('error', {err, roomId});
+                        }
+                    });
+                }
+                else
+                {
                     err.data = { content : 'room not found!' };
-                    socket.emit('error', {err, room});
+                    socket.emit('error', {err, roomId});
                 }
                 
             })

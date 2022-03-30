@@ -86,7 +86,6 @@ exports.socketConnection = async(io) =>
 
                 const senderRoom = await Room.findOne({_id: roomId})
 
-                console.log(`senderRoom = `, senderRoom)
                 let err  = new Error('authentication_error!');
 
                 if(senderRoom)

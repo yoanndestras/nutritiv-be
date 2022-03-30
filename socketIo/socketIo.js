@@ -1,6 +1,5 @@
 //SOCKET IO BACK-END CONFIGURATION
 const express = require("express"); // EXPRESS FRAMEWORK
-const frontAddress = process.env.REACT_APP_ADDRESS;
 const jwt = require('jsonwebtoken');
 const Room = require("../models/Chat");
 const mongoose = require('mongoose');
@@ -9,6 +8,7 @@ const ObjectId = mongoose.Types.ObjectId;
 let io;
 exports.socketConnection = (io) =>
 {   
+    console.log("socketConnection entered");
     // io.use((socket, next) => 
     // {  
     //     console.log(socket.handshake?.query?.refreshToken);

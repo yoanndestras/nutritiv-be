@@ -49,7 +49,7 @@ exports.socketConnection = async(io) =>
                         {
                             let sender = decoded._id;
                             let roomMembers = senderRoom.members;
-
+                            
                             if(roomMembers.includes(ObjectId(sender)))
                             {
                                 console.log("All verification ok for createRoom!");

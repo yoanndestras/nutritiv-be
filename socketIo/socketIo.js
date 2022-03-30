@@ -57,25 +57,25 @@ exports.socketConnection = async(io) =>
 
                                 socket.join(roomId);
                                 let roomCreated = true;
-                                socket.emit('createRoom', roomCreated);
+                                socket.to(roomId).emit('createRoom', roomCreated);
                             }
                             else
                             {
                                 let roomCreated = false;
-                                socket.emit('createRoom', roomCreated);
+                                socket.to(roomId).emit('createRoom', roomCreated);
                             }
                         }
                         else
                         {
                             let roomCreated = false;
-                            socket.emit('createRoom', roomCreated);
+                            socket.to(roomId).emit('createRoom', roomCreated);
                         }
                     });
                 }
                 else
                 {
                     let roomCreated = false;
-                    socket.emit('createRoom', roomCreated);
+                    socket.to(roomId).emit('createRoom', roomCreated);
                 }
             });
             

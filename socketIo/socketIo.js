@@ -102,7 +102,7 @@ exports.socketConnection = async(io) =>
                                 console.log("All verification ok for message!");
 
                                 socket.join(roomId);
-                                socket.to(roomId).emit("message", ({text, id, sender}));
+                                socket.to(roomId).emit("chatting", ({text, id, sender}));
                             }
                             else
                             {

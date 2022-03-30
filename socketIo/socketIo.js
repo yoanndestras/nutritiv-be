@@ -52,6 +52,7 @@ exports.socketConnection = async(io) =>
                             senderRooms.forEach(senderRoom => 
                                 {
                                     let roomCreated = true;
+                                    senderRoom._id = toString(senderRoom._id);
                                     socket.join("senderRoom:" + senderRoom._id);
                                     socket.to(senderRoom._id).emit('createRoom', roomCreated);
                                 });
@@ -89,6 +90,7 @@ exports.socketConnection = async(io) =>
                             
                             senderRooms.forEach(senderRoom => 
                                 {
+                                    senderRoom._id = toString(senderRoom._id);
                                     socket.join("senderRoom:" + senderRoom._id);
                                     console.log(`senderRoom._id = `, senderRoom._id)
                                     socket.to(senderRoom._id).emit("chatting", ({text, id, sender}));

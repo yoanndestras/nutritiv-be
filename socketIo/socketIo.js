@@ -35,11 +35,9 @@ exports.socketConnection = async(io) =>
         io.on("connection", (socket) =>
         {
             console.log("An user is connected to the socket.io chat!");
-            
 
             socket.on('createRoom', ({token}) =>
             {   
-                let err  = new Error('createRoom_error!');
                 
                 jwt.verify(token, process.env.REF_JWT_SEC, async(err, decoded) =>
                 {
@@ -62,6 +60,7 @@ exports.socketConnection = async(io) =>
                         else
                         {
                             let roomCreated = false;
+                            let err  = new Error('createRoom_error!');
                             err.data = { content : 'No room found for user ' + userId + '!' };
                             socket.emit('createRoom', {err, roomCreated});
                         }
@@ -69,6 +68,7 @@ exports.socketConnection = async(io) =>
                     else
                     {
                         let roomCreated = false;
+                        let err  = new Error('createRoom_error!');
                         err.data = { content : 'token error!' };
                         socket.emit('createRoom', {err, roomCreated});
                     }
@@ -77,8 +77,6 @@ exports.socketConnection = async(io) =>
             
             socket.on('chatting', ({text, id, token}) =>
             {
-                let err  = new Error('authentication_error!');
-
                 jwt.verify(token, process.env.REF_JWT_SEC, async(err, decoded) =>
                 {
                     if(decoded?._id && !err)
@@ -98,12 +96,14 @@ exports.socketConnection = async(io) =>
                         }
                         else
                         {
+                            let err  = new Error('authentication_error!');
                             err.data = { content : 'No room found for user ' + sender + '!' };
                             socket.emit('error', err);
                         }
                     }
                     else
-                    {
+                    {                
+                        let err  = new Error('authentication_error!');
                         err.data = { content : 'token error!' };
                         socket.emit('error', err);
                     }

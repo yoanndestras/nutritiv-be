@@ -90,6 +90,7 @@ exports.socketConnection = async(io) =>
                             senderRooms.forEach(senderRoom => 
                                 {
                                     socket.join("senderRoom:" + senderRoom._id);
+                                    console.log(`senderRoom._id = `, senderRoom._id)
                                     socket.to(senderRoom._id).emit("chatting", ({text, id, sender}));
                                 });
                         }

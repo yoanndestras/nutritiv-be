@@ -38,7 +38,7 @@ exports.socketConnection = async(io) =>
             
             socket.on('createRoom', async({roomId, token}) =>
             {
-                console.log(`roomId = `, roomId)
+                console.log(`createRoom roomId = `, roomId)
                 console.log(`token = `, token)
                 const senderRoom = await Room.findOne({_id: roomId});
                 
@@ -81,7 +81,7 @@ exports.socketConnection = async(io) =>
             
             socket.on('chatting', async({text, id, token, roomId}) =>
             {
-                console.log(`roomId = `, roomId)
+                console.log(`chatting roomId = `, roomId)
                 console.log(`token = `, token)
 
                 const senderRoom = await Room.findOne({_id: roomId})

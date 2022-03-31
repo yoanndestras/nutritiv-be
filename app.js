@@ -17,11 +17,10 @@ const port = (process.env.PORT || 5000); // BACK-END PORT
 
 let whitelist = process.env.CORS_WHITELIST.split(' ');
 
-http.listen(4000, () => {console.log("Socket.io listening on port 4000!");})
+// http.listen(4000, () => {console.log("Socket.io listening on port 4000!");})
 
-console.log(`http = `, http)
 
-const io = require("socket.io")(http,
+const io = require("socket.io")(HTTP_SOCKET_ADDRESS,
     {
         allowRequest: (req, callback) => 
         {
@@ -37,7 +36,6 @@ const io = require("socket.io")(http,
         },
     });
 
-console.log(`io = `, io)
 socketConnection(io);
 
 // DATABASE ACCESS

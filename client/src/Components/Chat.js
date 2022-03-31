@@ -7,7 +7,7 @@ import { addMessage, getLastMessageOfRoom } from '../Redux/reducers/messages';
 const token = localStorage.getItem('refresh_token');
 // const token = "ThisIsSomeIncorrectToken"
 const socket = io(
-  process.env.REACT_APP_API_ADDRESS_SOCKET,
+  process.env.HTTP_SOCKET_ADDRESS,
   {
     query: { token },
     // transports: ['websocket']

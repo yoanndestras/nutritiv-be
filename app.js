@@ -24,6 +24,7 @@ const io = require("socket.io")(http,
             req.headers.origin = req.headers?.host;
             console.log(http);
             const originWhitelist = whitelist.some((origin) => origin === req.headers.origin);
+            console.log(originWhitelist);
             callback(null, originWhitelist);
         },
         cors: 

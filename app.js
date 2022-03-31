@@ -9,27 +9,30 @@ const path = require('path'); // ACCESS TO FOLDERS PATHS
 const cors = require('cors'); // CORS POLICY
 const {socketConnection} = require("./utils/socketIo") // CALL SOCKETIO
 const routes = require("./routes/index") // CALL V1 & V2 ROUTES FROM ROUTER FOLDER
-const http = require('http').createServer(express);
 
 dotenv.config(); // INITIALIZE ENVIRONNEMENT VARIABLE FILE ".env"
-const port = (process.env.PORT || 5000); // BACK-END PORT
 
 let whitelist = process.env.CORS_WHITELIST.split(' ');
 
-http.listen(4000, () => {console.log("Socket.io listening on port 4000!");})
+const app = express(); // EXPRESS APPLICATION
+
+const http = require('http').createServer(app);
+
+const port = (process.env.PORT || 5000); // BACK-END PORT
+http.listen(port, () => {console.log("Socket.io listening on port 4000!");})
+// app.listen(port, () =>{console.log(`Backend server is running on port : ${port}`);})
 
 const io = require("socket.io")(http,
     {
-        // allowRequest: (req, callback) => 
-        // {
-        //     req.headers.origin = req.headers?.host;
-        //     console.log(`req.headers.origin = `, req.headers.origin)
-        //     const originWhitelist = whitelist.some((origin) => origin === req.headers.origin);
-        //     callback(null, originWhitelist);
-        // },
+        allowRequest: (req, callback) => 
+        {
+            req.headers.origin = req.headers?.host;
+            console.log(`req.headers.origin = `, req.headers.origin)
+            const originWhitelist = whitelist.some((origin) => origin === req.headers.origin);
+            callback(null, originWhitelist);
+        },
         cors: 
         {
-            origin: "*",
             methods: ["GET", "POST"],
             credentials: true
         },
@@ -45,8 +48,6 @@ mongoose
     {
         console.log(err);
     });
-
-const app = express(); // EXPRESS APPLICATION
 
 app.use(express.json()); // APP LEARN TO READ JSON    
 app.use(express.urlencoded({extended: true})); // APP LEARN TO READ JSON    
@@ -69,7 +70,6 @@ app.use(express.static(path.join(__dirname, 'public'))); // USE STATIC FILES ON 
 app.use(express.static(path.join(__dirname, "/client/build/"))); // STATIC FILES FOR FRONT-END APP
 app.get("*", (req, res) =>{res.sendFile(path.join(__dirname, "/client/build/", "index.html"))});
 
-app.listen(port, () =>{console.log(`Backend server is running on port : ${port}`);})
 
 app.use((err, req, res, next) =>
 {

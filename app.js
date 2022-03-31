@@ -16,7 +16,6 @@ dotenv.config(); // INITIALIZE ENVIRONNEMENT VARIABLE FILE ".env"
 const port = (process.env.PORT || 5000); // BACK-END PORT
 
 let whitelist = process.env.CORS_WHITELIST.split(' ');
-whitelist.push(process.env.SERVER_ADDRESS);
 
 const io = require("socket.io")(http,
     {

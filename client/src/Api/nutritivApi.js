@@ -15,7 +15,7 @@ const apiVersion = process.env.REACT_APP_API_VERSION
 const apiAddress = process.env.REACT_APP_API_ADDRESS
 
 const nutritivApi = axios.create({
-  baseURL: `${apiAddress}/${apiVersion}`,
+  baseURL: `${apiVersion}`,
 })
 
 // # INTERCEPTORS #

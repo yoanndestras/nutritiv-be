@@ -7,8 +7,6 @@ const passport = require('passport'); // PASSPORT FOR AUTH
 const dotenv = require("dotenv"); // ENV FILES
 const path = require('path'); // ACCESS TO FOLDERS PATHS
 const cors = require('cors'); // CORS POLICY
-const http = require('http').createServer(express);
-
 const {socketConnection} = require("./utils/socketIo") // CALL SOCKETIO
 const routes = require("./routes/index") // CALL V1 & V2 ROUTES FROM ROUTER FOLDER
 
@@ -19,8 +17,10 @@ let whitelist = process.env.CORS_WHITELIST.split(' ');
 
 // http.listen(4000, () => {console.log("Socket.io listening on port 4000!");})
 
+const app = express(); // EXPRESS APPLICATION
+const server = require('http').createServer(app);
 
-const io = require("socket.io")(HTTP_SOCKET_ADDRESS,
+const io = require("socket.io")(
     {
         allowRequest: (req, callback) => 
         {
@@ -34,7 +34,9 @@ const io = require("socket.io")(HTTP_SOCKET_ADDRESS,
             methods: ["GET", "POST"],
             credentials: true
         },
-    });
+    }).listen(server, () => {console.log("Socket.io listening")});
+
+server.listen(port, () => {console.log("Socket.io listening on port 4000!");})
 
 socketConnection(io);
 
@@ -46,8 +48,6 @@ mongoose
     {
         console.log(err);
     });
-
-const app = express(); // EXPRESS APPLICATION
 
 app.use(express.json()); // APP LEARN TO READ JSON    
 app.use(express.urlencoded({extended: true})); // APP LEARN TO READ JSON    

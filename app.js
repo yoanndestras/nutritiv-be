@@ -20,15 +20,16 @@ http.listen(4000, () => {console.log("Socket.io listening on port 4000!");})
 
 const io = require("socket.io")(http,
     {
-        allowRequest: (req, callback) => 
-        {
-            req.headers.origin = req.headers?.host;
-            console.log(`req.headers.origin = `, req.headers.origin)
-            const originWhitelist = whitelist.some((origin) => origin === req.headers.origin);
-            callback(null, originWhitelist);
-        },
+        // allowRequest: (req, callback) => 
+        // {
+        //     req.headers.origin = req.headers?.host;
+        //     console.log(`req.headers.origin = `, req.headers.origin)
+        //     const originWhitelist = whitelist.some((origin) => origin === req.headers.origin);
+        //     callback(null, originWhitelist);
+        // },
         cors: 
         {
+            origin: "*",
             methods: ["GET", "POST"],
             credentials: true
         },

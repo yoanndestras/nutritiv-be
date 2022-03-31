@@ -19,7 +19,7 @@ auth.verifyAuthorization, async (req, res, next) =>
 {
     try
     {
-        const orders = await Order.find({userId: req.params.userId})
+        const orders = await Order.find({userId: req.params.userId}).lean();
         res.status(200).json(orders);
     }catch(err){next(err)}
 });
@@ -30,7 +30,7 @@ async (req, res, next) =>
 {
     try
     {
-        const orders = await Order.find();
+        const orders = await Order.find().lean();
         res.status(200).json(orders);
     }catch(err){next(err)}
 
@@ -78,10 +78,14 @@ async (req, res, next) =>
 
 // CREATE ORDER
 router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
-order.newOrder, mailer.sendNewOrder, async (req, res, next) =>
+order.newOrder, async (req, res, next) =>
 {    
     try
     {
+        setTimeout(() => {mailer.sendNewOrder(req, res, next);}, 5000);
+        setTimeout(() => {mailer.orderShipping(req, res, next);}, 15000);
+        setTimeout(() => {mailer.orderDelivered(req, res, next);}, 25000);
+
         if(req.cart === true)
         {
             res.status(200).json(

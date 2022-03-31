@@ -1,6 +1,6 @@
 const User = require("../../models/User");
 const router = require("express").Router();
-
+const Chat = require("../../models/Chat");
 const aws = require('aws-sdk');
 
 // CONTROLLERS
@@ -26,8 +26,8 @@ auth.verifyAdmin, async (req, res, next) =>
         
         //limit value = the number of last users in res
         const users = query 
-            ? await User.find().sort({_id:-1}).limit(5) 
-            : await User.find();
+            ? await User.find().sort({_id:-1}).limit(5).lean()
+            : await User.find().lean()
         res.status(200).json(users);
     }catch(err){next(err)}
 })
@@ -76,9 +76,11 @@ async(req, res, next) =>
     try
     {
         const user =  await User.findOne({_id: req.user._id});
-        let avatar =  process.env.AWS_BUCKET_LINK + user.avatar;
+        let avatar = user.avatar ? process.env.AWS_BUCKET_LINK + user.avatar : null;
         const { username, _id, email, isAdmin, isVerified, addressDetails} = req.user;
-
+        const chatExist = await Chat.findOne({members: {$in: [req.user._id]}})
+        let chat;
+        !chatExist ? chat = false : chat = true;
         res.status(200).json(
             {
                 loggedIn: true,
@@ -89,6 +91,7 @@ async(req, res, next) =>
                 isAdmin,
                 isVerified,
                 addressDetails,
+                chat,
                 status: "User connected"
             });
     }catch(err){next(err)}
@@ -100,7 +103,7 @@ async(req, res, next) =>
 {
     try
     {
-        const user =  await User.findOne({_id: req.user._id});
+        const user =  await User.findOne({_id: req.user._id}).lean();
         const addressDetails = user.addressDetails;
         
         res.status(200).json(
@@ -134,7 +137,7 @@ auth.verifyAuthorization, async (req, res, next) =>
 {
     try
     {
-        const user = await User.findById(req.params.userId).lean();
+        const user = await User.findById(req.params.userId);
         if(user)
         {
             let avatar = process.env.AWS_BUCKET_LINK + user.avatar;

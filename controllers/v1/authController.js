@@ -337,7 +337,7 @@ exports.verifyEmailSyntax = (req, res, next) =>
     if(valid_email === true) next();
     else
     {
-        let err = new Error('You Email syntax is wrong!');
+        let err = new Error('Your Email syntax is wrong!');
         err.statusCode = 400;
         next(err);
     }
@@ -349,7 +349,7 @@ exports.verifyPasswordSyntax = (req, res, next) =>
     {next();}
     else
     {
-        let err = new Error('You password syntax is wrong!');
+        let err = new Error('Your password syntax is wrong!');
         err.statusCode = 400;
         next(err);
     }
@@ -357,7 +357,11 @@ exports.verifyPasswordSyntax = (req, res, next) =>
 
 exports.verifyUsername = (req, res, next) =>
 {
-    User.findOne({username: req.body.username}, (err, user) =>
+    const format = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
+    console.log(format.test(req.body.username));
+    if(!format.test(req.body.username))
+    {
+        User.findOne({username: req.body.username}, (err, user) =>
         {
             if(user !== null)
             {
@@ -370,6 +374,14 @@ exports.verifyUsername = (req, res, next) =>
                 next();
             }
         })
+    }
+    else
+    {
+        let err = new Error('Your username syntax is wrong!');
+        err.statusCode = 400;
+        next(err);
+    }
+    
 };
 
 exports.verifyEmail = (req, res, next) =>
@@ -423,7 +435,6 @@ exports.verifyNewPasswordSyntax = (req, res, next) =>
 };
 
 // VERIFY EMAIL SENDING
-
 exports.verifyEmailToken = (req, res, next) => 
 {
     passport.authenticate('email_jwt', { session: false }, (err, user, info) => 
@@ -442,6 +453,18 @@ exports.verifyEmailToken = (req, res, next) =>
     })(req, res, next); 
 };
 
+exports.userVerification = async(req, res, next) =>
+{
+    const user = req.user;
+    try
+    {
+        user.isVerified = true;
+        await user.save(() => 
+                {
+                    next();
+                })
+    }catch(err){next(err)}
+}
 exports.verifyNewEmail = (req, res, next) =>
 {
     User.findOne({email: req.body.email}, (err, user) =>

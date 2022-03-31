@@ -1,13 +1,16 @@
 const cors = require('cors');
+const dotenv = require("dotenv"); // ENV FILES
+dotenv.config(); // INITIALIZE ENVIRONNEMENT VARIABLE FILE ".env"
 
-const whitelist = ['http://localhost:9000', process.env.SERVER_ADDRESS, 'https://localhost:3001', 'http://192.168.1.23:3000', '0.0.0.0:3000', 'localhost:3001']; //'https://DESKTOP-DBB3L91:3001'
+let whitelist = process.env.CORS_WHITELIST.split(' '); //'https://DESKTOP-DBB3L91:3001'
+whitelist.push(process.env.SERVER_ADDRESS);
 
 const corsOptionsDelegate = (req, callback) => 
 {
     let corsOptions;
-    
     if(whitelist.indexOf(req.header('Origin')) !== -1) 
         {
+            
             corsOptions = 
             { 
                 origin: true, 
@@ -15,7 +18,7 @@ const corsOptionsDelegate = (req, callback) =>
                 exposedHeaders: ['access_token', 'refresh_token'], 
                 allowedHeaders: ['X-Requested-With', 'X-HTTP-Method-Override', 'Content-Type', 'Accept', 'access_token', 'refresh_token']
             };
-            console.log(corsOptions);
+            console.log({ origin: true });
         }
     else 
         {

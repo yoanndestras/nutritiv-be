@@ -1,30 +1,42 @@
-const express = require("express");
-const mongoose = require("mongoose");
+const mongoose = require("mongoose"); // MONGODB OBJECT MODELING
+const express = require("express"); // EXPRESS FRAMEWORK
 
-const limitter = require('express-rate-limit');
-const path = require('path');
-const dotenv = require("dotenv");
-const passport = require('passport');
-const cookieParser = require("cookie-parser");
-const cors = require('cors');
-const routes = require("./router")
+const limitter = require('express-rate-limit'); // SPAM LIMITTER
+const cookieParser = require("cookie-parser"); //COOKIES
+const passport = require('passport'); // PASSPORT FOR AUTH
+const dotenv = require("dotenv"); // ENV FILES
+const path = require('path'); // ACCESS TO FOLDERS PATHS
+const cors = require('cors'); // CORS POLICY
+const http = require('http').createServer(express);
 
-dotenv.config();
+const {socketConnection} = require("./utils/socketIo") // CALL SOCKETIO
+const routes = require("./routes/index") // CALL V1 & V2 ROUTES FROM ROUTER FOLDER
 
-const io = require("socket.io")(8900, 
+dotenv.config(); // INITIALIZE ENVIRONNEMENT VARIABLE FILE ".env"
+const port = (process.env.PORT || 5000); // BACK-END PORT
+
+let whitelist = process.env.CORS_WHITELIST.split(' ');
+whitelist.push(process.env.SERVER_ADDRESS);
+
+const io = require("socket.io")(http,
     {
-        cors:
+        allowRequest: (req, callback) => 
         {
-            origin: "http://localhost:3001"
-        }
+            const originWhitelist = whitelist.some((origin) => origin === req.headers.origin);
+            callback(null, originWhitelist);
+        },
+        cors: 
+        {
+            methods: ["GET", "POST"],
+            credentials: true
+        },
     });
 
-io.on("connection", (socket) =>
-{
-    console.log("a user connected");
-    io.emit("welcome", "hello this is socket server!");
-})
+socketConnection(io);
 
+http.listen(4000, () => {console.log("Socket.io listening on port 4000!");})
+
+// DATABASE ACCESS
 mongoose
     .connect(process.env.MONGO_URL)
     .then(() => console.log("Connected to MongoDB"))
@@ -33,20 +45,14 @@ mongoose
         console.log(err);
     });
 
-const app = express();
+const app = express(); // EXPRESS APPLICATION
 
-
-app.use(express.json()); // to read JSON    
-app.use(express.urlencoded({extended: true}));
-
-app.use(passport.initialize());
-app.use(cookieParser());
-
-app.use(cors()); // apply simple cors on all routes
-// app.options('*', cors());
-
-app.use(routes); // V1 & V2
-
+app.use(express.json()); // APP LEARN TO READ JSON    
+app.use(express.urlencoded({extended: true})); // APP LEARN TO READ JSON    
+app.use(passport.initialize()); // INITIALIZE PASSPORT JS
+app.use(cookieParser()); // INITIALIZE COOKIES
+app.use(cors()); // INITIALIZE CORS  "app.options('*', cors());"
+app.use(routes); // CALL V1 & V2 ROUTES FROM ROUTER FOLDER
 app.use( 
     limitter(
         {
@@ -57,30 +63,17 @@ app.use(
                 message: "Too many requests"
             }
         })
-    )
+    ) // LIMIT SPAM REQUESTS TO MAX PER MILLISECONDS
+app.use(express.static(path.join(__dirname, 'public'))); // USE STATIC FILES ON PUBLIC FOLDER
+app.use(express.static(path.join(__dirname, "/client/build/"))); // STATIC FILES FOR FRONT-END APP
+app.get("*", (req, res) =>{res.sendFile(path.join(__dirname, "/client/build/", "index.html"))});
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.listen(port, () =>{console.log(`Backend server is running on port : ${port}`);})
 
-
-app.use(express.static(path.join(__dirname, "/client/build/")));
-
-app.get("*", (req, res) =>
-{
-    res.sendFile(path.join(__dirname, "/client/build/", "index.html"))
-});
-
-// process.env.PORT = value PORT in .env file
-const port = (process.env.PORT || 5000);
-app.listen(port, () =>
-{
-    console.log(`Backend server is running on port : ${port}`);
-})
-
-//ERROR HANDLING
 app.use((err, req, res, next) =>
 {
     let message = err.message ? err.message : "Unsuccessfull request!"
-    
+
     !err.statusCode 
     ? res.status(500).json(
         {
@@ -92,6 +85,6 @@ app.use((err, req, res, next) =>
             success: false, 
             err: message
         })
-});
+}); //ERROR HANDLING "(catch(err){next(err)})""
 
 module.exports = app;

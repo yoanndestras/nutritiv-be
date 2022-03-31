@@ -33,7 +33,8 @@ const UserSchema = new Schema
     },
     avatar:
     {
-        type: String
+        type: String,
+        default: 'PrPhdefaultAvatar.jpg'
     },
     addressDetails:
     [

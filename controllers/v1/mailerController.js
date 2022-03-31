@@ -14,7 +14,6 @@ exports.sendVerifyAccountMail = async(req, res, next) =>
         sgMail.setApiKey(process.env.SENDGRID_API_KEY);
         
         const imgPath = path.resolve("public/images/Nutritiv.png")
-        console.log(imgPath);
         const email = req.body.email;
         const mailContent = 
         {
@@ -141,11 +140,14 @@ exports.sendNewOrder = async(req, res, next) =>
 {
     try
     {   
-        const user = await User.findOne({_id: req.user._id});
-        const order = await Order.findOne({userId: req.user._id})
+        const orders = await Order.find({userId: req.user._id}).sort({updatedAt: -1});
+        let order = orders[0];
+        req.order = order;
+        console.log(`order.products = `, order.products)
         sgMail.setApiKey(process.env.SENDGRID_API_KEY);
         
-        const email = user.email, username = user.username;
+        const total = parseFloat(order.amount.value) + 4.95;
+        const email = req.user.email, username = req.user.username;
         const mailContent = 
         {
             to: email,
@@ -153,7 +155,34 @@ exports.sendNewOrder = async(req, res, next) =>
                 email: "nutritivshop@gmail.com",
                 name : "Nutritiv"
             },
-            subject:"Thank you for your order!",
+            templateId: 'd-671ec15432884fa1ac0d5bc5cd85491d',
+            dynamicTemplateData: {
+                "order" : order,
+                "username": username,
+                "email" : email,
+                "total" : total
+            },
+        }   
+        await sgMail.send(mailContent)
+        next();
+    }catch(err){next(err)}
+}
+
+exports.orderShipping = async(req, res, next) =>
+{
+    try
+    {   
+        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+        const email = req.user.email, username = req.user.username, order = req.order;
+        const mailContent = 
+        {
+            to: email,
+            from: {
+                email: "nutritivshop@gmail.com",
+                name : "Nutritiv"
+            },
+            subject:"Your order has been shipped!",
             html : `
             <div style="width: 100%; background-color: #F6F9FC; font-size: 15px ;font-family: -apple-system, 
                 BlinkMacSystemFont,'Segoe UI', Roboto, 'Helvetica Neue', Ubuntu, sans-serif; color: rgb(82, 95, 127) !important">
@@ -161,9 +190,9 @@ exports.sendNewOrder = async(req, res, next) =>
                     <h1 style="font-size:2em; color: #00A8F3">Nutritiv</h1>
                     <hr>
                     <p>Hello, ${username}</p>
-                    <p>Thank you for your order, your order is being prepared for delivery<br><br>
-                    ${order.products}<br><br>
-                    We will send you an email when the order has been shipped<br>
+                    <p>Thank you for your order, your order has been successfully shipped by "Shipping Company"<br><br>
+                    <hr>
+                    Your command : ${order._id} has been shipped !<br>
                     Thanks,<br>
                     </p>
                 
@@ -174,8 +203,48 @@ exports.sendNewOrder = async(req, res, next) =>
             </div>
             `
         }   
+        await sgMail.send(mailContent)
+        next();
+    }catch(err){next(err)}
+}
+
+exports.orderDelivered = async(req, res, next) =>
+{
+    try
+    {   
+        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
         
-        await sgMail.send(mailContent);
+        const email = req.user.email, username = req.user.username, order = req.order;
+        const mailContent = 
+        {
+            to: email,
+            from: {
+                email: "nutritivshop@gmail.com",
+                name : "Nutritiv"
+            },
+            subject:"Your order has been delivered!",
+            html : `
+            <div style="width: 100%; background-color: #F6F9FC; font-size: 15px ;font-family: -apple-system, 
+                BlinkMacSystemFont,'Segoe UI', Roboto, 'Helvetica Neue', Ubuntu, sans-serif; color: rgb(82, 95, 127) !important">
+                <div style="max-width: 500px;margin: auto; padding: 50px; background-color:white">
+                    <h1 style="font-size:2em; color: #00A8F3">Nutritiv</h1>
+                    <hr>
+                    <p>Hello, ${username}</p>
+                    <p>Thank you for your order, your order ${order._id} has been successfully delivered by "Shipping Company"<br><br>
+                    <p>Delivered at : ${order.orderDetails}</p>
+                    <p>The time you received is : ${new Date()}</p>
+                    <hr>
+                    Thanks,<br>
+                    </p>
+                
+                    <p>Nutritiv</p>
+                    <hr>
+                    <p style="font-size: 0.75em; color: #88B4D6">Nutritiv, 245 Rue du Tilleul, Paris, France</p>
+                </div>
+            </div>
+            `
+        }   
+        await sgMail.send(mailContent)
         next();
     }catch(err){next(err)}
 }

@@ -2,7 +2,6 @@ const router = require("express").Router();
 const User = require("../../models/User");
 
 // CONTROLLERS
-
 const passport = require("passport");
 const cors = require('../../controllers/v1/corsController');
 const auth = require("../../controllers/v1/authController");
@@ -50,8 +49,8 @@ router.get("/new_register_email", auth.verifyNewEmail, mailer.sendVerifyAccountM
     }catch(err){next(err)}
 });
 
-//FORGOT PASSWORD
-router.get("/verify-email", auth.verifyEmailToken, async(req, res, next) =>
+//USER VERIFICATION
+router.get("/verify_email", auth.verifyEmailToken, async(req, res, next) =>
 {
     const user = req.user;
     try
@@ -144,8 +143,7 @@ router.post("/login", cors.corsWithOptions, auth.verifyNoRefresh, async(req, res
         //passport.authenticate('local', { successRedirect: '/',failureRedirect: '/login' }));
         passport.authenticate('local', { session: false }, (err, user, info) => 
         {
-            
-            if(err || !user || user.isVerified === false) 
+            if(err || !user) 
             {
                 res.status(400).json(
                     {
@@ -154,6 +152,12 @@ router.post("/login", cors.corsWithOptions, auth.verifyNoRefresh, async(req, res
                         err: err,
                         info: info
                     });
+            }
+            else if(user.isVerified === false)
+            {
+                let err = new Error('Your account is not verified!');
+                err.statusCode = 400;
+                return next(err);
             }
             else
             {

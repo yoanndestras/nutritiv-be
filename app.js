@@ -17,9 +17,14 @@ let whitelist = process.env.CORS_WHITELIST.split(' ');
 const app = express(); // EXPRESS APPLICATION
 
 const http = require('http').createServer(app);
-
 const port = (process.env.PORT || 5000); // BACK-END PORT
-http.listen(port, () => {console.log("Socket.io listening on port 4000!");})
+
+http.listen(port, () => 
+{
+    const host = http.address().address
+    const port = http.address().port
+    console.log(`App listening at http:// ${host}, ${port}`)
+})
 // app.listen(port, () =>{console.log(`Backend server is running on port : ${port}`);})
 
 const io = require("socket.io")(http,

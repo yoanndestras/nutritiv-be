@@ -22,7 +22,7 @@ const io = require("socket.io")(http,
         allowRequest: (req, callback) => 
         {
             req.headers.origin = req.headers?.host;
-            console.log(req.headers.origin);
+            console.log(http);
             const originWhitelist = whitelist.some((origin) => origin === req.headers.origin);
             callback(null, originWhitelist);
         },

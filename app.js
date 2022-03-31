@@ -20,7 +20,7 @@ let whitelist = process.env.CORS_WHITELIST.split(' ');
 const app = express(); // EXPRESS APPLICATION
 const server = require('http').createServer(app);
 
-const io = require("socket.io")(
+const io = require("socket.io")(server,
     {
         allowRequest: (req, callback) => 
         {

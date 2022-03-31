@@ -9,18 +9,16 @@ const path = require('path'); // ACCESS TO FOLDERS PATHS
 const cors = require('cors'); // CORS POLICY
 const {socketConnection} = require("./utils/socketIo") // CALL SOCKETIO
 const routes = require("./routes/index") // CALL V1 & V2 ROUTES FROM ROUTER FOLDER
+const http = require('http').createServer(express);
 
 dotenv.config(); // INITIALIZE ENVIRONNEMENT VARIABLE FILE ".env"
 const port = (process.env.PORT || 5000); // BACK-END PORT
 
 let whitelist = process.env.CORS_WHITELIST.split(' ');
 
-// http.listen(4000, () => {console.log("Socket.io listening on port 4000!");})
+http.listen(4000, () => {console.log("Socket.io listening on port 4000!");})
 
-const app = express(); // EXPRESS APPLICATION
-const server = require('http').createServer(app);
-
-const io = require("socket.io")(server,
+const io = require("socket.io")(http,
     {
         allowRequest: (req, callback) => 
         {
@@ -36,8 +34,6 @@ const io = require("socket.io")(server,
         },
     });
 
-server.listen(4000, () => {console.log("Socket.io listening on port 4000!");})
-
 socketConnection(io);
 
 // DATABASE ACCESS
@@ -48,6 +44,8 @@ mongoose
     {
         console.log(err);
     });
+
+const app = express(); // EXPRESS APPLICATION
 
 app.use(express.json()); // APP LEARN TO READ JSON    
 app.use(express.urlencoded({extended: true})); // APP LEARN TO READ JSON    

@@ -7,6 +7,8 @@ let whitelist = process.env.CORS_WHITELIST.split(' '); //'https://DESKTOP-DBB3L9
 const corsOptionsDelegate = (req, callback) => 
 {
     let corsOptions;
+    req.headers.origin = req.headers?.host;
+    console.log(req.headers.origin);
     if(whitelist.indexOf(req.headers.origin) !== -1) 
         {
             

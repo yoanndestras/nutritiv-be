@@ -36,7 +36,7 @@ const io = require("socket.io")(
         },
     }).listen(server, () => {console.log("Socket.io listening")});
 
-server.listen(port, () => {console.log("Socket.io listening on port 4000!");})
+server.listen(4000, () => {console.log("Socket.io listening on port 4000!");})
 
 socketConnection(io);
 

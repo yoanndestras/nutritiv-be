@@ -19,6 +19,8 @@ let whitelist = process.env.CORS_WHITELIST.split(' ');
 
 http.listen(4000, () => {console.log("Socket.io listening on port 4000!");})
 
+console.log(`http = `, http)
+
 const io = require("socket.io")(http,
     {
         allowRequest: (req, callback) => 
@@ -35,9 +37,8 @@ const io = require("socket.io")(http,
         },
     });
 
+console.log(`io = `, io)
 socketConnection(io);
-
-
 
 // DATABASE ACCESS
 mongoose

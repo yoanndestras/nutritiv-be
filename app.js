@@ -9,18 +9,24 @@ const path = require('path'); // ACCESS TO FOLDERS PATHS
 const cors = require('cors'); // CORS POLICY
 const http = require('http').createServer(express);
 
-const {socketConnection} = require("./socketIo/socketIo") // CALL SOCKETIO
+const {socketConnection} = require("./utils/socketIo") // CALL SOCKETIO
 const routes = require("./routes/index") // CALL V1 & V2 ROUTES FROM ROUTER FOLDER
 
 dotenv.config(); // INITIALIZE ENVIRONNEMENT VARIABLE FILE ".env"
 const port = (process.env.PORT || 5000); // BACK-END PORT
-const frontAddress = process.env.REACT_APP_ADDRESS;
+
+let whitelist = process.env.CORS_WHITELIST.split(' ');
+whitelist.push(process.env.SERVER_ADDRESS);
 
 const io = require("socket.io")(http,
     {
+        allowRequest: (req, callback) => 
+        {
+            const originWhitelist = whitelist.some((origin) => origin === req.headers.origin);
+            callback(null, originWhitelist);
+        },
         cors: 
         {
-            origin: frontAddress,
             methods: ["GET", "POST"],
             credentials: true
         },

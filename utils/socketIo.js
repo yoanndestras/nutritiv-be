@@ -37,6 +37,7 @@ exports.socketConnection = async(io) =>
 
             socket.on('createRoom', ({token}) =>
             {   
+                console.log("Entered createRoom");
                 jwt.verify(token, process.env.REF_JWT_SEC, async(err, decoded) =>
                 {
                     if(decoded?._id && !err)
@@ -75,6 +76,7 @@ exports.socketConnection = async(io) =>
             
             socket.on('chatting', ({text, id, token, roomId}) =>
             {
+                console.log("Entered chatting");
                 jwt.verify(token, process.env.REF_JWT_SEC, async(err, decoded) =>
                 {
                     if(decoded?._id && !err)

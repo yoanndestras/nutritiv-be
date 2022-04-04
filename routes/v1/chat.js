@@ -102,16 +102,16 @@ async(req, res, next) =>
 
     if(!messagesQty && chat)
     {
-      const { type, version, __v, createdAt, updatedAt, ...message} = chat._doc;
-      res.status(200).json(message);
+      const { type, version, __v, createdAt, updatedAt, messages, ...singleChat} = chat._doc;
+      res.status(200).json(singleChat);
     }
     else if(chat)
     {
       chat._doc.messages = chat._doc.messages.reverse();
       chat._doc.messages = chat._doc.messages.slice(0, messagesQty);
       chat._doc.messages = chat._doc.messages.reverse();
-      const { type, version, createdAt, __v, updatedAt, ...message} = chat._doc;
-      res.status(200).json(message);
+      const { type, version, createdAt, __v, updatedAt, ...singleChat} = chat._doc;
+      res.status(200).json(singleChat);
     }
     else
     {

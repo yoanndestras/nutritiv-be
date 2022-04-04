@@ -10,26 +10,24 @@ exports.socketConnection = async(io) =>
     try
     {
         console.log("socketConnection entered");
-        // io.use((socket, next) => 
-        // {  
-        //     console.log(socket.handshake?.query?.refreshToken);
-        //     console.log(socket.handshake?.query);
-        //     console.log(socket.handshake);
-        //     jwt.verify(socket.handshake?.query?.refreshToken, process.env.REF_JWT_SEC, (err, decoded) =>
-        //     {
-        //         if(decoded?._id && !err) 
-        //         {
-        //             socket.decoded = decoded._id;
-        //             return next();
-        //         }
-        //         else
-        //         {
-        //             let err = new Error('authentication_error')
-        //             err.data = { content : 'refreshToken error!' };
-        //             return next(err);
-        //         }
-        //     });
-        // });
+        io.use((socket, next) => 
+        {  
+            jwt.verify(socket.handshake?.query?.token, process.env.REF_JWT_SEC, (err, decoded) =>
+            {
+                if(decoded?._id && !err) 
+                {
+                    socket.decoded = decoded._id;
+                    console.log("token verification successful");
+                    return next();
+                }
+                else
+                {
+                    let err = new Error('authentication_error')
+                    err.data = { content : 'token error!' };
+                    socket.emit('error', err);
+                }
+            });
+        });
         
         io.on("connection", (socket) =>
         {

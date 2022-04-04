@@ -8,7 +8,6 @@ const corsOptionsDelegate = (req, callback) =>
 {
     let corsOptions;
     req.headers.origin = req.headers?.host;
-
     if(whitelist.indexOf(req.headers.origin) !== -1) 
         {
             

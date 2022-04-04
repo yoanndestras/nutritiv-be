@@ -21,9 +21,9 @@ const port = (process.env.PORT || 5000); // BACK-END PORT
 
 http.listen(port, () => 
 {
-    const host = http.address().address
+    // const host = http.address().address
     const port = http.address().port
-    console.log(`App listening at http:// ${host}, ${port}`)
+    {console.log(`Backend server is running on port : ${port}`);}
 })
 // app.listen(port, () =>{console.log(`Backend server is running on port : ${port}`);})
 
@@ -32,7 +32,6 @@ const io = require("socket.io")(http,
         allowRequest: (req, callback) => 
         {
             req.headers.origin = req.headers?.host;
-            console.log(`req.headers.origin = `, req.headers.origin)
             const originWhitelist = whitelist.some((origin) => origin === req.headers.origin);
             callback(null, originWhitelist);
         },
@@ -75,11 +74,10 @@ app.use(express.static(path.join(__dirname, 'public'))); // USE STATIC FILES ON 
 app.use(express.static(path.join(__dirname, "/client/build/"))); // STATIC FILES FOR FRONT-END APP
 app.get("*", (req, res) =>{res.sendFile(path.join(__dirname, "/client/build/", "index.html"))});
 
-
 app.use((err, req, res, next) =>
 {
     let message = err.message ? err.message : "Unsuccessfull request!"
-
+    
     !err.statusCode 
     ? res.status(500).json(
         {

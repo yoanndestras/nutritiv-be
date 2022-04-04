@@ -98,10 +98,27 @@ async(req, res, next) =>
   {
     const chatId = req.params.chatId, userId = req.user._id;
     const chat = await Chat.findOne({_id : chatId, members: {$in: [userId]}});
-    
-    const { type, version, __v, createdAt, updatedAt, ...message} = chat._doc;
-  
-    res.status(200).json(message);
+    const messagesQty = parseInt(req.query.messagesQty);
+
+    if(!messagesQty && chat)
+    {
+      const { type, version, __v, createdAt, updatedAt, ...message} = chat._doc;
+      res.status(200).json(message);
+    }
+    else if(chat)
+    {
+      chat._doc.messages = chat._doc.messages.reverse();
+      chat._doc.messages = chat._doc.messages.slice(0, messagesQty);
+      chat._doc.messages = chat._doc.messages.reverse();
+      const { type, version, createdAt, __v, updatedAt, ...message} = chat._doc;
+      res.status(200).json(message);
+    }
+    else
+    {
+      let err = new Error("No chat found for user " + req.user.username);
+      err.statusCode = 404;
+      next(err);
+    }
   
   }catch(err){next(err)}
 })

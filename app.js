@@ -9,6 +9,8 @@ const path = require('path'); // ACCESS TO FOLDERS PATHS
 const cors = require('cors'); // CORS POLICY
 const {socketConnection} = require("./utils/socketIo") // CALL SOCKETIO
 const routes = require("./routes/index") // CALL V1 & V2 ROUTES FROM ROUTER FOLDER
+const cron = require('node-cron');
+const {backupMongoDB} = require("./utils/db_backup") // CALL SOCKETIO
 
 dotenv.config(); // INITIALIZE ENVIRONNEMENT VARIABLE FILE ".env"
 
@@ -53,8 +55,13 @@ mongoose
         console.log(err);
     });
 
-app.use(express.json()); // APP LEARN TO READ JSON    
-app.use(express.urlencoded({extended: true})); // APP LEARN TO READ JSON    
+const DB_NAME = process.env.DB_NAME;
+const currentDay = new Date().toLocaleDateString('pt-PT').replace(/\//g,'-');
+const ARCHIVE_PATH = path.join(__dirname, 'db_backups', `${currentDay}_${DB_NAME}.gzip`);
+cron.schedule('* 1 * * *', () => backupMongoDB(DB_NAME, ARCHIVE_PATH)); // SAVE A DB BACKUP EVERYDAY AT 1 AM
+
+app.use(express.json()); // APP LEARN TO READ JSON
+app.use(express.urlencoded({extended: true})); // APP LEARN TO READ JSON  
 app.use(passport.initialize()); // INITIALIZE PASSPORT JS
 app.use(cookieParser()); // INITIALIZE COOKIES
 app.use(cors()); // INITIALIZE CORS  "app.options('*', cors());"

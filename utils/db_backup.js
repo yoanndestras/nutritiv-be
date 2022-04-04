@@ -28,9 +28,11 @@ exports.backupMongoDB = async(DB_NAME, ARCHIVE_PATH) =>
   {
     const db_backups_folder = path.join(__dirname, '../db_backups');
   
-    fs.readdir(db_backups_folder, (err, files) => 
+    fs.readdir(db_backups_folder, async(err, files) => 
     {
-      files.some(file => 
+      try
+      {
+        files.some(file => 
         {
           let D1 = file.substring(0, 10);
           let D2 = new Date().toLocaleDateString('pt-PT').replace(/\//g,'-');
@@ -41,6 +43,7 @@ exports.backupMongoDB = async(DB_NAME, ARCHIVE_PATH) =>
             fs.unlinkSync(path.join(__dirname, '../db_backups', file))
           } 
         });
+      }catch(err){console.log(err);}
     });
     
     const DB_HOST = process.env.DB_HOST;
@@ -72,7 +75,7 @@ exports.backupMongoDB = async(DB_NAME, ARCHIVE_PATH) =>
     {
       console.log('error:\n', error);
     });
-    
+
     child.on('exit', (code, signal) =>
     {
       if (code) console.log('Process exit with code:', code);
@@ -80,7 +83,7 @@ exports.backupMongoDB = async(DB_NAME, ARCHIVE_PATH) =>
       else console.log('Backup is successfull ✅');
     });
   }
-  catch (error) 
+  catch(error) 
   {
     console.log(error);
   }

@@ -83,8 +83,5 @@ exports.backupMongoDB = async(DB_NAME, ARCHIVE_PATH) =>
       else console.log('Backup is successfull ✅');
     });
   }
-  catch(error) 
-  {
-    console.log(error);
-  }
+  catch(error) {console.log(error);}
 }

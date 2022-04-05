@@ -136,7 +136,7 @@ router.post("/new_password", auth.verifyNewPasswordSyntax, auth.verifyNewPasswor
 });
 
 //LOGIN
-router.post("/login", cors.corsWithOptions, auth.verifyNoRefresh, async(req, res, next)=>
+router.post("/login", cors.corsWithOptions, async(req, res, next)=>
 {
     try
     {

@@ -8,14 +8,13 @@ const corsOptionsDelegate = (req, callback) =>
 {
     let corsOptions;
     req.headers.origin = req.headers?.host;
-    console.log(req.headers.origin);
-    console.log(req.header('Origin'));
     if(whitelist.indexOf(req.headers.origin) !== -1) 
         {
             corsOptions = 
             { 
                 origin: true, 
                 credentials: true, 
+                methods: ["GET", "POST", "PUT", "DELETE"],
                 exposedHeaders: ['access_token', 'refresh_token'], 
                 allowedHeaders: ['X-Requested-With', 'X-HTTP-Method-Override', 'Content-Type', 'Accept', 'access_token', 'refresh_token']
             };

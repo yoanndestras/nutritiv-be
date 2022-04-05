@@ -55,10 +55,10 @@ mongoose
         console.log(err);
     });
 
-const DB_NAME = process.env.DB_NAME;
-const currentDay = new Date().toLocaleDateString('pt-PT').replace(/\//g,'-');
-const ARCHIVE_PATH = path.join(__dirname, 'db_backups', `${currentDay}_${DB_NAME}.gzip`);
-cron.schedule('* 16 * * *', () => backupMongoDB(DB_NAME, ARCHIVE_PATH)); // SAVE A DB BACKUP EVERYDAY AT 1 AM
+// const DB_NAME = process.env.DB_NAME;
+// const currentDay = new Date().toLocaleDateString('pt-PT').replace(/\//g,'-');
+// const ARCHIVE_PATH = path.join(__dirname, 'db_backups', `${currentDay}_${DB_NAME}.gzip`);
+// cron.schedule('* 16 * * *', () => backupMongoDB(DB_NAME, ARCHIVE_PATH)); // SAVE A DB BACKUP EVERYDAY AT 1 AM
 
 app.use(express.json()); // APP LEARN TO READ JSON
 app.use(express.urlencoded({extended: true})); // APP LEARN TO READ JSON  

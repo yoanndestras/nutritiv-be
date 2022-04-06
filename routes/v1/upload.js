@@ -34,42 +34,62 @@ const imageFileFilter = (req, file, cb) =>
     }
 };
 
+const htmlFileFilter = (req, file, cb) => 
+{    
+    
+    if(file.mimetype.startsWith('text/html')) 
+    {
+        cb(null, true);
+    }
+    else
+    {
+        return cb(new Error('You can upload only html files!'), false);
+    }
+};
+
 const upload = multer(
     { 
         storage: storage, 
         fileFilter: imageFileFilter,
     });
 
-uploadRouterV1.route('/')
-.options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
-.get(cors.cors, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, (req, res) => 
-{
-    res.status(403).json(
-        {
-            status: 'GET operation not supported on /imageUpload', 
-        });
-})
-//imageFile is the name of the input button to upload image
-.post(cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, upload.single('imageFile'), (req, res) => 
-{
-    res.status(200).json(
-        {
-            file : req.file 
-        });
-})
-.put(cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, (req, res) => 
-{
-    res.status(403).json(
-        {
-            status: 'PUT operation not supported on /imageUpload', 
-        });
-})
-.delete(cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, (req, res) => 
-{
-    res.status(403).json(
-        {
-            status: 'DELETE operation not supported on /imageUpload', 
-        });
-});
+const uploadHtml = multer(
+    { 
+        fileFilter: htmlFileFilter,
+    });
 
-module.exports = {uploadRouterV1, upload};
+uploadRouterV1.route('/')
+
+module.exports = {uploadRouterV1, upload, uploadHtml};
+
+// .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+// .get(cors.cors, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, (req, res) => 
+// {
+//     res.status(403).json(
+//         {
+//             status: 'GET operation not supported on /imageUpload', 
+//         });
+// })
+// //imageFile is the name of the input button to upload image
+// .post(cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, upload.single('imageFile'), (req, res) => 
+// {
+//     res.status(200).json(
+//         {
+//             file : req.file 
+//         });
+// })
+// .put(cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, (req, res) => 
+// {
+//     res.status(403).json(
+//         {
+//             status: 'PUT operation not supported on /imageUpload', 
+//         });
+// })
+// .delete(cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, (req, res) => 
+// {
+//     res.status(403).json(
+//         {
+//             status: 'DELETE operation not supported on /imageUpload', 
+//         });
+// });
+

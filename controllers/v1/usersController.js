@@ -193,7 +193,7 @@ exports.verifyUsername = (req, res, next) =>
         {
             if(user !== null)
             {
-                let err = new Error('An account with your username already exists!');
+                let err = new Error('An account with this username already exists!');
                 err.statusCode = 400;
                 return next(err);
             }
@@ -219,6 +219,45 @@ exports.updateUsername = async(req, res, next) =>
       }
     )
     await updateUsername.save();
+    next();
+  
+  }catch(err){next(err);}
+}
+
+
+exports.verifyEmail = (req, res, next) =>
+{
+    User.findOne({email: req.body.email}, (err, user) =>
+        {
+            if(user !== null)
+            {
+                let err = new Error('An account with this email already exists!');
+                err.statusCode = 400;
+                return next(err);
+            }
+            else
+            {
+                next();
+            }
+        })
+};
+
+
+exports.updateEmail = async(req, res, next) =>
+{
+  try
+  {
+    const email = req.body.email;  
+    let updateEmail = await User.findOneAndUpdate(
+      {_id: req.user._id},
+      {
+        $set: 
+        {
+          email: email
+        }
+      }
+    )
+    await updateEmail.save();
     next();
   
   }catch(err){next(err);}

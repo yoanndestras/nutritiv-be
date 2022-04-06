@@ -1,5 +1,5 @@
-const User = require("../../models/User");
 const router = require("express").Router();
+const User = require("../../models/User");
 const Chat = require("../../models/Chat");
 const aws = require('aws-sdk');
 
@@ -154,9 +154,26 @@ auth.verifyAuthorization, async (req, res, next) =>
     }catch(err){next(err)}
 })
 
+
 //UPDATE USERNAME
 router.put('/updateUsername', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
 user.verifyUsername, user.updateUsername, mailer.sendUpdateUsername, async (req, res, next) =>
+{
+    try
+    {
+        const user = await User.findOne({_id: req.user._id});
+        
+        res.status(201).json(
+            {
+                success: true, 
+                status: user
+            });
+    }catch(err){next(err)}
+})
+
+//UPDATE EMAIL ADDRESS
+router.put('/updateEmail', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+user.verifyEmail, user.updateEmail, mailer.sendUpdateEmail, async (req, res, next) =>
 {
     try
     {

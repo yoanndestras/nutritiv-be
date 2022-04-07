@@ -202,7 +202,7 @@ auth.verifyAdmin, async(req, res, next) =>
                     desc : randomDesc,
                     shape : randomShape,
                     tags : [randomTag],
-                    imgs: ["images/productsImgs/RtNaMultivitamines_powder.png"],
+                    imgs: ["CDimMultivitamines_powder.png"],
                     productItems: [
                     {
                         load : randomLoad,

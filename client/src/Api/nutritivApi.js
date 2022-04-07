@@ -12,7 +12,7 @@ export const injectStore = _store => {
 
 // # API INSTANCE #
 const apiVersion = process.env.REACT_APP_API_VERSION
-// const apiAddress = process.env.REACT_APP_API_ADDRESS_FULL
+const apiAddress = process.env.REACT_APP_API_ADDRESS_FULL
 
 const nutritivApi = axios.create({
   baseURL: `${apiVersion}`,
@@ -46,7 +46,7 @@ nutritivApi.interceptors.response.use(res => {
   }
   if(res.data.loggedIn) {
     store.dispatch(
-      updateUser({loggedIn: res.data.loggedIn})
+      updateUser(res.data)
     )
   }
   console.log("# Interceptor res :", res);

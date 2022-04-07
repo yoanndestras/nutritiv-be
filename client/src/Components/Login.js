@@ -17,12 +17,9 @@ export default function LoginPage() {
   const [login, setLogin] = useState({
     username: "",
     password: "",
-    usernameError: false,
-    passwordError: false,
     loading: false,
     error: "",
   })
-  const [invalidLogin, setInvalidLogin] = useState("")
   const loginData = {
     username: login.username,
     password: login.password,
@@ -43,8 +40,8 @@ export default function LoginPage() {
       ...login,
       usernameError,
       passwordError,
+      error: ""
     })
-    setInvalidLogin(false)
     
     // returns true only if both are true
     return !usernameError && !passwordError
@@ -94,6 +91,10 @@ export default function LoginPage() {
 
       } catch (err) {
         console.log('# loginData err :', err)
+        setLogin({
+          ...login,
+          error: "Incorrect credentials"
+        })
       }
     }
   }
@@ -134,6 +135,9 @@ export default function LoginPage() {
             )
           }
         </label>
+        <div>
+          <button type="submit">Submit</button>
+        </div>
         {
           login.loading && (
             <p>
@@ -141,13 +145,10 @@ export default function LoginPage() {
             </p>
           )
         }
-        <div>
-          <button type="submit">Submit</button>
-        </div>
         {
-          invalidLogin && (
+          login.error && (
             <p style={{color: "red"}}>
-              {invalidLogin}
+              {login.error}
             </p>
           )
         }

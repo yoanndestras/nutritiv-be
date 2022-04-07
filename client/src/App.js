@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   // useSelector, 
   useDispatch,
@@ -40,61 +40,73 @@ function App() {
   const loggedIn = useSelector(state => state.user.loggedIn)
   
   // ON LOAD
-  // Get user-self info & update store
+  // Fetch user-self info
   useEffect(() => {
     let isSubscribed = true;
-    const checkUserAuth = async () => {
-      try {
-        const { data } = await nutritivApi.get(
-          '/users/self'
-        );
-        if(isSubscribed) {
-          console.log('# /users/self res :', data)
-          dispatch(updateUser(data))
+    
+    if(isSubscribed) {
+      const method = "get"
+      const requestsUrl = ['/users/self', '/carts/self']
+      const requests = requestsUrl.map(url => {
+        return { url, method }
+      })
+      const fetchUserInfo = async () => {
+        function useNull() {
+          return null;
         }
-      } catch(err) {
-        console.error('# /users/self :', err)
+        try {
+          await Promise.all([
+            nutritivApi.request(requests[0]).catch(useNull),
+            nutritivApi.request(requests[1]).catch(useNull),
+          ]).then(function([userSelf, cartSelf]) {
+            dispatch(
+              updateUser(userSelf.data)
+            )
+            dispatch(
+              updateUserCartQuantity(cartSelf.data.cart?.totalQuantity)
+            )
+          }).catch(function([userSelf, cartSelf]) {
+            console.log('# /users/self err :', userSelf)
+            console.log('# /carts/self err :', cartSelf)
+          })
+        } catch(err) {
+          console.log("Could not fetch user info on App initialization")
+        }
       }
-    };
-    checkUserAuth();
+      fetchUserInfo();
+    }
     return () => { isSubscribed = false }
   }, [dispatch]);
   
-  // Get user-self cart
-  useEffect(() => {
-    const checkSelfCartQuantity = async () => {
-      try {
-        const { data } = await nutritivApi.get(
-          `/carts/self`,
-        );
-        dispatch(updateUserCartQuantity(data.cart?.totalQuantity))
-        console.log('# checkSelfCartQuantity data :', data)
-      } catch(err) {
-        console.error('# err', err)
-      }
-    }
-    checkSelfCartQuantity();
-  }, [dispatch])
-  
   // RESTRICTED ROUTES
-  const GuestRoutes = () => {
+  const Restricted = ({ type }) => {
     const isLogged = () => {
-      const user = { loggedIn }
-      return user.loggedIn;
+      console.log('# loggedIn :', loggedIn)
+      return loggedIn;
     }
-    return isLogged() ? (
-      <Navigate replace to="/" /> 
-    ) : <Outlet />;
-  }
-  const UserRoutes = () => {
-    const isLogged = () => {
-      const user = { loggedIn }
-      return user.loggedIn;
+    if(loggedIn !== null) {
+      if(type === "guest") {
+        return isLogged() ? (
+          <Navigate replace to="/" /> 
+        ) : <Outlet />;
+      } else if(type === "user") {
+        return isLogged() ? (
+          <Outlet /> 
+        ) : <Navigate replace to="/" />;
+      }
+    } else {
+      return <h2>Loading...</h2>
     }
-    return isLogged() ? (
-      <Outlet /> 
-    ) : <Navigate replace to="/" />;
   }
+  // const Restricted = () => {
+  //   const isLogged = () => {
+  //     const user = { loggedIn }
+  //     return user.loggedIn;
+  //   }
+  //   return isLogged() ? (
+  //     <Outlet /> 
+  //   ) : <Navigate replace to="/" />;
+  // }
   
   return (
     <BrowserRouter>
@@ -116,13 +128,13 @@ function App() {
             <Route path="/success" element={<CheckoutSuccess/>} />
             <Route path="/page-not-found" element={<PageNotFound/>} />
             {/* PRIVATE */}
-            <Route path="/profile" element={<Profile/>} />
             {/* RESTRICTED - LOGGED */}
-            <Route element={<UserRoutes />}>
+            <Route element={<Restricted type="user" />}>
+              <Route path="/profile" element={<Profile/>} />
               <Route path="/cart" element={<Cart/>} />
             </Route>
             {/* RESTRICTED - NOT LOGGED */}
-            <Route element={<GuestRoutes />}>
+            <Route element={<Restricted type="guest" />}>
               <Route path="login" element={<Login/>} />
               <Route path="register" element={<Register/>} />
             </Route>
@@ -131,6 +143,23 @@ function App() {
       </Elements>
     </BrowserRouter>
   );
+}
+
+// RESTRICTED ROUTES
+const Restricted = ({ type, loggedIn }) => {
+  const isLogged = () => {
+    console.log('# loggedIn :', loggedIn)
+    return loggedIn;
+  }
+  if(type === "guest") {
+    return isLogged() ? (
+      <Navigate replace to="/" /> 
+    ) : <Outlet />;
+  } else if(type === "user") {
+    return isLogged() ? (
+      <Outlet /> 
+    ) : <Navigate replace to="/" />;
+  }
 }
 
 export default App;

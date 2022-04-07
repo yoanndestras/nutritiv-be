@@ -9,7 +9,7 @@ export const ChatConnection = () => {
     let fetchApi = async () => {
       try {
         await nutritivApi.get(
-          `/chats/?messagesQty=${1}`
+          `/chats/`
         )
         setChatCreated(true)
         console.log('# Chatroom created :', chatCreated)

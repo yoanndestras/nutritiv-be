@@ -10,7 +10,7 @@ export const Products = () => {
   
   const [allProducts, setAllProducts] = useState([])
   const [allFilteredProducts, setAllFilteredProducts] = useState([])
-  const [productsToDisplay, setProductsToDisplay] = useState(0)
+  const [productsToDisplay, setProductsToDisplay] = useState(null)
   
   const [page, setPage] = useState(1)
   const [numberOfPages, setNumberOfPages] = useState(10)

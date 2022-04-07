@@ -2,12 +2,14 @@ import React, {
   useEffect, 
   useState 
 } from 'react'
-import { useDispatch } from 'react-redux'
-import { useParams } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate, useParams } from 'react-router-dom'
 import nutritivApi from '../Api/nutritivApi';
 import { updateUserCartQuantity } from '../Redux/reducers/user';
 
 export const ProductPage = () => {
+  const loggedIn = useSelector(state => state.user.loggedIn)
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { productTitle } = useParams();
   const [product, setProduct] = useState({
@@ -88,17 +90,21 @@ export const ProductPage = () => {
   
   // HANDLE ADD TO CART
   const handleAddToCart = async () => {
-    try {
-      const { data } = await nutritivApi.post(
-        `carts/addToCart`,
-        selectedItem
-      );
-      dispatch(
-        updateUserCartQuantity(data.cart.totalQuantity)
-      )
-      setAddedToCart(!addedToCart);
-    } catch (err) {
-      console.log('# apiAddToCart err :', err)
+    if(loggedIn) {
+      try {
+        const { data } = await nutritivApi.post(
+          `carts/addToCart`,
+          selectedItem
+        );
+        dispatch(
+          updateUserCartQuantity(data.cart.totalQuantity)
+        )
+        setAddedToCart(!addedToCart);
+      } catch (err) {
+        console.log('# apiAddToCart err :', err)
+      }
+    } else {
+      navigate('/login')
     }
   }
   

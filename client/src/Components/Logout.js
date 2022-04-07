@@ -17,7 +17,6 @@ export const Logout = () => {
       dispatch(logoutUser())
       localStorage.removeItem(storageKeys.accessToken)
       localStorage.removeItem(storageKeys.refreshToken)
-      navigate('/', { replace: true })
     } catch(err) {
       console.error(':', err)
     }

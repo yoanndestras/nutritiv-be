@@ -5,7 +5,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addMessage, getLastMessageOfRoom } from '../Redux/reducers/messages';
 
 const token = localStorage.getItem('refresh_token');
-// const token = "ThisIsSomeIncorrectToken"
 const socket = io(
   process.env.REACT_APP_API_ADDRESS_HOST,
   {
@@ -17,7 +16,7 @@ export const Chat = () => {
   const dispatch = useDispatch();
   const userId = useSelector(state => state.user._id)
   
-  const [messageToAdd, setMessageToAdd] = useState(null)
+  const [allUsers, setAllUsers] = useState(null)
   
   const [socketError, setSocketError] = useState(false)
   
@@ -27,6 +26,7 @@ export const Chat = () => {
   
   // CHATS CONTENT
   const [chat, setChat] = useState(null)
+  const [messageToAdd, setMessageToAdd] = useState(null)
   const [messageToBeSent, setMessageToBeSent] = useState("")
   const [tempMessageId, setTempMessageId] = useState(0)
   
@@ -110,21 +110,38 @@ export const Chat = () => {
   useEffect(() => {
     let fetchApi = async () => {
       try {
-        const { data } = await nutritivApi.get(
-          `/chats/`
-        )
-        console.log('# get /chats/ :', data)
-        setChatsInfo(data)
-        setActiveChatId(data[0]._id)
-        chatboxBottomRef.current?.scrollIntoView()
+        function useNull() {
+          return null;
+        }
+        const method = "get"
+        const requestsUrl = ['/chats/', '/users/']
+        const requests = requestsUrl.map(url => {
+          return { url, method }
+        })
+        
+        await Promise.all([
+          nutritivApi.request(requests[0]).catch(useNull),
+          nutritivApi.request(requests[1]).catch(useNull),
+        ]).then(function([chats, users]) {
+          setAllUsers(users.data)
+          setChatsInfo(chats.data)
+          setActiveChatId(chats.data[0]._id)
+          chatboxBottomRef.current?.scrollIntoView()
+        }).catch(function([chats, users]) {
+          console.log('# get /users/ err :', users)
+          console.log('# get /chats/ err :', chats)
+        })
+        
       } catch(err) {
         console.error(
-          'get /chats/:', err
+          'GET CHATS INFO err:', err
         )
       }
     }
     fetchApi();
   }, []);
+  
+  console.log('# allUsersNames :', allUsers)
 
   // ACTIVE CHAT
   useEffect(() => {
@@ -212,15 +229,11 @@ export const Chat = () => {
       console.error(':', err)
     }
   }
-  
-  console.log('# chat :', chat)
-  console.log('# userId :', userId)
 
+  console.log('# chat :', chat)
+  
   return (
     <div>
-      {
-        socketError && <h2 style={{color: 'red'}}>A SOCKET ERROR OCCURED</h2>
-      } 
       {
         chatsInfos.map(chatInfo => (
           <React.Fragment key={chatInfo._id}>
@@ -292,9 +305,13 @@ export const Chat = () => {
                         key={message.id}
                         style={{width: "100%"}}
                       >
-                        <span style={{fontWeight: "bold", textAlign: "end"}}>
-                          {message.sender}:
-                        </span>
+                        {
+                          allUsers.filter(user => user._id === message.sender).map(user => (
+                            <span style={{fontWeight: "bold"}}>
+                              {user.username}
+                            </span>
+                          ))
+                        }
                         <br />
                         {message.text}
                       </p>

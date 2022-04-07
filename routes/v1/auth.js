@@ -258,6 +258,14 @@ router.post("/login", cors.corsWithOptions, async(req, res, next)=>
                 err.statusCode = 400;
                 return next(err);
             }
+            else if(user.secret)
+            {
+                res.status(200).json(
+                    {
+                        success: true,
+                        
+                    })
+            }
             else
             {
                 req.login(user, { session: false }, async(err) => 

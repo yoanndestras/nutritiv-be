@@ -77,7 +77,6 @@ exports.RFJwtPassport = passport.use("jwt_rt", new JwtStrategy(opts_ref, (jwtPay
 }));
 
 const Email_token = function(req) 
-
 {
     let token = null;
     if (req && req.query) token = req.query.token;
@@ -91,6 +90,30 @@ opts_email.secretOrKey = process.env.JWT_EMAIL;
 exports.jwtPassport = passport.use("email_jwt", new JwtStrategy(opts_email, (jwtPayload, done) =>
 {
     User.findOne({email: jwtPayload.email}, (err, user) =>
+        {                
+            if(err)
+            {
+                return done(err, false);
+            }
+            else if(user)
+            {
+                return done(null, user);
+            }
+            else
+            {
+                return done(null, false);
+            }
+        })
+}));
+
+const opts_2af = {}; //json web token and key
+opts_2af.jwtFromRequest = ExtractJwt.fromHeader("twoaf_token");
+opts_2af.secretOrKey = process.env.REF_2AF_TOKEN;
+
+exports.TwoAFjwtPassport = passport.use("2af_jwt", new JwtStrategy(opts_2af, (jwtPayload, done) =>
+{
+    console.log(opts_2af);
+    User.findOne({_id: jwtPayload._id}, (err, user) =>
         {                
             if(err)
             {
@@ -141,6 +164,29 @@ exports.verifyAuthorization = async(req, res, next) =>
     }catch(err){next(err)}
 };
 
+exports.verifyUser2AF = async(req, res, next) =>
+{
+    passport.authenticate("2af_jwt", { session: false }, (err, user, info) => 
+    {
+        if (err || !user) 
+        {               
+            let err = new Error('You are not authorized to perform this operation!');
+            err.statusCode = 401;
+            return next(err);
+        }
+        else if (user.isVerified === false)
+        {
+            let err = new Error('You account has not been verified. Please check your email to verify your account');
+            err.statusCode = 401;
+            return next(err);
+        }
+        else
+        {
+            req.user = user;
+            return next();
+        }
+    })(req, res, next); 
+}
 exports.verifyUser = (req, res, next) => 
 {
     passport.authenticate('jwt', { session: false }, (err, user, info) => 
@@ -294,6 +340,16 @@ exports.GenerateAccessToken = function(_id)
         _id, 
         process.env.JWT_SEC, 
         {expiresIn: "1800s"} // expires in 15 minutes
+    );
+};
+
+exports.Generate2AFToken = function(_id) 
+{
+    return jwt.sign
+    (
+        _id, 
+        process.env.REF_2AF_TOKEN, 
+        {expiresIn: "1200s"} // expires in 2 minutes
     );
 };
 

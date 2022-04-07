@@ -205,14 +205,14 @@ async(req, res, next) =>
 // })
 
 //CREATE TOKEN FROM TOTP SECRET
-router.post('/totpValidate', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
+router.post('/totpValidate', cors.corsWithOptions, auth.verifyNoRefresh, auth.verifyUser2AF, 
 async(req, res, next) => 
 {
     try
     {
         const user = await User.findOne({_id: req.user._id});
 
-        const secret = user.secret;
+        const secret = user.secret.toString();
         const token = req.body.token;
         
         const valid = speakeasy.totp.verify(
@@ -223,13 +223,50 @@ async(req, res, next) =>
                 window: 0
             }
         )
-        
-        res.status(200).json(
-            {
-                success: true, 
-                valid
-            });
 
+        console.log(valid);
+        if(valid === true)
+        {
+            req.login(user, { session: false }, async(err) => 
+            {
+                if(err)
+                {
+                    res.status(400).json(
+                        {
+                            success: false, 
+                            status: 'Login Unsuccessful!', 
+                            err: err
+                        });
+                }
+                else
+                {
+                    const accessToken = auth.GenerateAccessToken({_id: req.user._id});
+                    const refreshToken = auth.GenerateRefreshToken({_id: req.user._id});
+                    
+                    res.header('access_token', accessToken)
+                        .header('refresh_token', refreshToken)
+                        .cookie("refresh_token", refreshToken, 
+                        {
+                            httpOnly: true,
+                            secure: process.env.REF_JWT_SEC_COOKIE === "production"
+                        })
+                        .status(200).json(
+                            {
+                                success: true,
+                                loggedIn: true,
+                                isAdmin: req.user.isAdmin,
+                                status: 'Login Successful!'
+                            });
+                }
+            });
+        }
+        else
+        {
+            let err = new Error('The token is invalid or expired!');
+            err.statusCode = 401;
+            return next(err);
+        }
+    
     }catch(err){next(err)}
 })
 
@@ -258,14 +295,6 @@ router.post("/login", cors.corsWithOptions, async(req, res, next)=>
                 err.statusCode = 400;
                 return next(err);
             }
-            else if(user.secret)
-            {
-                res.status(200).json(
-                    {
-                        success: true,
-                        
-                    })
-            }
             else
             {
                 req.login(user, { session: false }, async(err) => 
@@ -278,6 +307,18 @@ router.post("/login", cors.corsWithOptions, async(req, res, next)=>
                                 status: 'Login Unsuccessful!', 
                                 err: err
                             });
+                    }
+                    else if(user.secret)
+                    {
+                        console.log(user._id);
+                        const twoAFToken = auth.Generate2AFToken({_id: user._id});
+                        
+                        res.header('twoaf_token', twoAFToken)
+                            .status(200).json(
+                            {
+                                success: true, 
+                                twoAF: true // refirect to /totpValidate
+                            })
                     }
                     else
                     {
@@ -295,6 +336,7 @@ router.post("/login", cors.corsWithOptions, async(req, res, next)=>
                                 {
                                     success: true,
                                     loggedIn: true,
+                                    twoAF: false,
                                     isAdmin: req.user.isAdmin,
                                     status: 'Login Successful!'
                                 });

@@ -8,32 +8,10 @@ const   limitter = require('express-rate-limit'), // SPAM LIMITTER
         path = require('path'), // ACCESS TO FOLDERS PATHS
         cors = require('cors'), // CORS POLICY
         {socketConnection} = require("./utils/socketIo"), // CALL SOCKETIO
-        speakeasy = require("speakeasy"),
-        qrcode = require("qrcode"),
         routes = require("./routes/index") // CALL V1 & V2 ROUTES FROM ROUTER FOLDER
 
 // const cron = require('node-cron');
 // const {backupMongoDB} = require("./utils/db_backup") // CALL SOCKETIO
-
-// const secret = speakeasy.generateSecret(
-//     {
-//         name: "testYO"
-//     }
-// )
-// qrcode.toDataURL(secret.otpauth_url, (err, data) =>
-// {
-//     console.log(data);
-// })
-
-// const verified = speakeasy.totp.verify(
-//     {
-//         secret: '(k#:xI9rq0aJDdXNBl>a9Fh}xcBBrQ4R',
-//         encoding: 'ascii',
-//         token: ''
-//     }
-// )
-
-// console.log(verified);
 
 dotenv.config(); // INITIALIZE ENVIRONNEMENT VARIABLE FILE ".env"
 

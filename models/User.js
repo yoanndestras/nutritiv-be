@@ -20,6 +20,10 @@ const UserSchema = new Schema
     {
         type: String
     },
+    secret:
+    {
+        type: String
+    },
     isAdmin: 
     {
         type: Boolean,

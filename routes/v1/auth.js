@@ -139,63 +139,91 @@ router.post("/new_password", auth.verifyNewPasswordSyntax, auth.verifyNewPasswor
 });
 
 //CREATE SECRET TOTP
-router.post('/totpSecret', async(req, res, next) => 
+router.post('/totpSecret', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
+async(req, res, next) => 
 {
     try
     {
         const secret = speakeasy.generateSecret(
             {
+                name: "Nutritiv",
                 length: 20
             })
         
-        res.status(200).json(
+        const secretAscii = secret.ascii;
+        
+        const user = await User.findOneAndUpdate({_id: req.user._id},
             {
-                success: true, 
-                secret: secret
-            });
+                $set:
+                {
+                    "secret": secretAscii
+                }
+            })
+        await user.save();
+
+        qrcode.toDataURL(secret.otpauth_url, (err, data) =>
+        {
+            // res.setHeader("Content-Type", "text/html");
+            // res.write(`<img src='${data}'>`);
             
+            // res.send();
+            
+            res.status(200).json(data)
+
+        })
+        
+        // res.status(200).json(
+        //     {
+        //         success: true, 
+        //         secret: secret,
+        //         qrcodeData
+        //     });
+        
     }catch(err){next(err)}
 })
 
 //CREATE TOKEN FROM TOTP SECRET
-router.post('/totpGenerate', async(req, res, next) => 
-{
-    try
-    {
-        const secret = req.body.secret;
-        const token = speakeasy.totp(
-            {
-                secret: secret,
-                encoding: 'base32'
-            })
+// router.post('/totpGenerate', async(req, res, next) => 
+// {
+//     try
+//     {
+//         const secret = req.body.secret;
+//         const token = speakeasy.totp(
+//             {
+//                 secret: secret,
+//                 encoding: 'base32'
+//             })
         
             
-        res.status(200).json(
-            {
-                success: true, 
-                token
-            });
+//         res.status(200).json(
+//             {
+//                 success: true, 
+//                 token
+//             });
 
-    }catch(err){next(err)}
-})
+//     }catch(err){next(err)}
+// })
 
 //CREATE TOKEN FROM TOTP SECRET
-router.post('/totpValidate', async(req, res, next) => 
+router.post('/totpValidate', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
+async(req, res, next) => 
 {
     try
     {
-        const secret = req.body.secret;
+        const user = await User.findOne({_id: req.user._id});
+
+        const secret = user.secret;
         const token = req.body.token;
         
         const valid = speakeasy.totp.verify(
             {
                 secret: secret,
-                encoding: 'base32',
+                encoding: 'ascii',
                 token: token,
                 window: 0
             }
         )
-
+        
         res.status(200).json(
             {
                 success: true, 

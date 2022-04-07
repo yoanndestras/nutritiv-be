@@ -107,8 +107,6 @@ exports.jwtPassport = passport.use("email_jwt", new JwtStrategy(opts_email, (jwt
         })
 }));
 
-
-
 // VERIFY PRIVILEGES
 exports.verifyAdmin = function(req, res, next)
 {

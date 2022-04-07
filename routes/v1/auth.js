@@ -1,6 +1,9 @@
 const router = require("express").Router();
 const User = require("../../models/User");
 
+const   speakeasy = require("speakeasy"),
+        qrcode = require("qrcode");
+
 // CONTROLLERS
 const passport = require("passport");
 const cors = require('../../controllers/v1/corsController');
@@ -134,6 +137,73 @@ router.post("/new_password", auth.verifyNewPasswordSyntax, auth.verifyNewPasswor
         }
     }catch(err){next(err)}
 });
+
+//CREATE SECRET TOTP
+router.post('/totpSecret', async(req, res, next) => 
+{
+    try
+    {
+        const secret = speakeasy.generateSecret(
+            {
+                length: 20
+            })
+        
+        res.status(200).json(
+            {
+                success: true, 
+                secret: secret
+            });
+            
+    }catch(err){next(err)}
+})
+
+//CREATE TOKEN FROM TOTP SECRET
+router.post('/totpGenerate', async(req, res, next) => 
+{
+    try
+    {
+        const secret = req.body.secret;
+        const token = speakeasy.totp(
+            {
+                secret: secret,
+                encoding: 'base32'
+            })
+        
+            
+        res.status(200).json(
+            {
+                success: true, 
+                token
+            });
+
+    }catch(err){next(err)}
+})
+
+//CREATE TOKEN FROM TOTP SECRET
+router.post('/totpValidate', async(req, res, next) => 
+{
+    try
+    {
+        const secret = req.body.secret;
+        const token = req.body.token;
+        
+        const valid = speakeasy.totp.verify(
+            {
+                secret: secret,
+                encoding: 'base32',
+                token: token,
+                window: 0
+            }
+        )
+
+        res.status(200).json(
+            {
+                success: true, 
+                valid
+            });
+
+    }catch(err){next(err)}
+})
 
 //LOGIN
 router.post("/login", cors.corsWithOptions, async(req, res, next)=>

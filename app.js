@@ -1,16 +1,39 @@
-const mongoose = require("mongoose"); // MONGODB OBJECT MODELING
-const express = require("express"); // EXPRESS FRAMEWORK
+const   mongoose = require("mongoose"), // MONGODB OBJECT MODELING
+        express = require("express"); // EXPRESS FRAMEWORK
 
-const limitter = require('express-rate-limit'); // SPAM LIMITTER
-const cookieParser = require("cookie-parser"); //COOKIES
-const passport = require('passport'); // PASSPORT FOR AUTH
-const dotenv = require("dotenv"); // ENV FILES
-const path = require('path'); // ACCESS TO FOLDERS PATHS
-const cors = require('cors'); // CORS POLICY
-const {socketConnection} = require("./utils/socketIo") // CALL SOCKETIO
-const routes = require("./routes/index") // CALL V1 & V2 ROUTES FROM ROUTER FOLDER
-const cron = require('node-cron');
-const {backupMongoDB} = require("./utils/db_backup") // CALL SOCKETIO
+const   limitter = require('express-rate-limit'), // SPAM LIMITTER
+        cookieParser = require("cookie-parser"), //COOKIES
+        passport = require('passport'), // PASSPORT FOR AUTH
+        dotenv = require("dotenv"), // ENV FILES
+        path = require('path'), // ACCESS TO FOLDERS PATHS
+        cors = require('cors'), // CORS POLICY
+        {socketConnection} = require("./utils/socketIo"), // CALL SOCKETIO
+        speakeasy = require("speakeasy"),
+        qrcode = require("qrcode"),
+        routes = require("./routes/index") // CALL V1 & V2 ROUTES FROM ROUTER FOLDER
+
+// const cron = require('node-cron');
+// const {backupMongoDB} = require("./utils/db_backup") // CALL SOCKETIO
+
+// const secret = speakeasy.generateSecret(
+//     {
+//         name: "testYO"
+//     }
+// )
+// qrcode.toDataURL(secret.otpauth_url, (err, data) =>
+// {
+//     console.log(data);
+// })
+
+// const verified = speakeasy.totp.verify(
+//     {
+//         secret: '(k#:xI9rq0aJDdXNBl>a9Fh}xcBBrQ4R',
+//         encoding: 'ascii',
+//         token: ''
+//     }
+// )
+
+// console.log(verified);
 
 dotenv.config(); // INITIALIZE ENVIRONNEMENT VARIABLE FILE ".env"
 
@@ -18,8 +41,8 @@ let whitelist = process.env.CORS_WHITELIST.split(' ');
 
 const app = express(); // EXPRESS APPLICATION
 
-const http = require('http').createServer(app);
-const port = (process.env.PORT || 5000); // BACK-END PORT
+const   http = require('http').createServer(app),
+        port = (process.env.PORT || 5000); // BACK-END PORT
 
 http.listen(port, () => 
 {

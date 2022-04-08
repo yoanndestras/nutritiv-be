@@ -34,7 +34,7 @@ router.get("/self", cors.corsWithOptions, auth.verifyUserCart, auth.verifyRefres
             res.status(200).json(
                 {
                     success: true,
-                    status: "No cart has been found for user "+ req.user.username +"!"
+                    status: "No cart has been found!"
                 });
         }
     }catch(err){next(err)}

@@ -181,7 +181,7 @@ chat.verifyChatExist, async(req, res, next) =>
 
 
 router.delete("/single/:chatId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
-auth.verifyAdmin, async(req, res, next) =>
+auth.verifyAdmin, chat.verifyChatExist, async(req, res, next) =>
 {
   try
   {
@@ -193,6 +193,36 @@ auth.verifyAdmin, async(req, res, next) =>
       {
         success : true, 
         message : "Chat deleted"
+      });
+  }catch(err) {next(err)}
+  
+})
+
+
+router.delete("/messages/:chatId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+chat.verifyChatExist, async(req, res, next) =>
+{
+  try
+  {
+    const chatId = req.params.chatId;
+    const chat = await Chat.findOneAndUpdate({_id: chatId},
+    {
+      $set:
+      {
+        "messages": []
+      }
+    },
+    {
+      new: true
+    });
+    await chat.save();
+    
+    
+    res.status(200).json(
+      {
+        success : true, 
+        message : "Messages from this chat deleted successfully",
+        chat: chat
       });
   }catch(err) {next(err)}
   

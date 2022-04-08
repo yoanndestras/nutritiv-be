@@ -50,9 +50,7 @@ exports.socketConnection = async(io) =>
                         if(senderRooms && senderRooms.length > 0)
                         {
                             console.log("All verification ok for createRoom!");
-
-                            // cron.schedule('*/5 * * * *', () => chat.removeMessages(DB_NAME, ARCHIVE_PATH, next)); // SAVE A DB BACKUP EVERYDAY AT 1 AM
-                            
+                                                        
                             senderRooms.forEach(senderRoom => 
                                 {
                                     let senderRoomId = (senderRoom._id).toString();

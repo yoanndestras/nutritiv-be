@@ -53,7 +53,7 @@ exports.addUserAvatar = async(req, res, next) =>
   {
     let file = req.file;
     file = path.join(file.destination,'usersAvatar', file.filename)
-
+    
     const filePath = file;
     const fileName = req.file.filename
     const fileType = req.file.mimetype;

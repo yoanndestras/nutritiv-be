@@ -26,25 +26,26 @@ exports.backupMongoDB = async(DB_NAME, ARCHIVE_PATH) =>
 {
   try
   {
-    const db_backups_folder = path.join(__dirname, '../db_backups');
+    // const db_backups_folder = path.join(__dirname, '../db_backups');
   
-    fs.readdir(db_backups_folder, async(err, files) => 
-    {
-      try
-      {
-        files.some(file => 
-        {
-          let D1 = file.substring(0, 10);
-          let D2 = new Date().toLocaleDateString('pt-PT').replace(/\//g,'-');
-          let oldDate = new Date(D2).getTime() - (30 * 24 * 60 * 60 * 1000);
+    // fs.readdir(db_backups_folder, async(err, files) => 
+    // {
+    //   try
+    //   {
+    //     files.some(file => 
+    //     {
+    //       let D1 = file.substring(0, 10);
+    //       let D2 = new Date().toLocaleDateString('pt-PT').replace(/\//g,'-');
+    //       let oldDate = new Date(D2).getTime() - (30 * 24 * 60 * 60 * 1000);
   
-          if ((new Date(D1).getTime()) <= oldDate) 
-          {
-            fs.unlinkSync(path.join(__dirname, '../db_backups', file))
-          } 
-        });
-      }catch(err){console.log(err);}
-    });
+    //       if ((new Date(D1).getTime()) <= oldDate) 
+    //       {
+    //         fs.unlinkSync(path.join(__dirname, '../db_backups', file))
+    //       } 
+    //     });
+    //   }catch(err){console.log(err);}
+    // });
+    
     
     const DB_HOST = process.env.DB_HOST;
     const DB_PASSWORD = process.env.DB_PASSWORD;

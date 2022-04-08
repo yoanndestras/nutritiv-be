@@ -2,10 +2,10 @@ const router = require("express").Router();
 const User = require("../../models/User");
 
 const   speakeasy = require("speakeasy"),
-        qrcode = require("qrcode");
+        qrcode = require("qrcode"),
+        passport = require("passport");
 
 // CONTROLLERS
-const passport = require("passport");
 const cors = require('../../controllers/v1/corsController');
 const auth = require("../../controllers/v1/authController");
 const mailer = require("../../controllers/v1/mailerController");
@@ -160,7 +160,7 @@ async(req, res, next) =>
                 }
             })
         await user.save();
-
+        
         qrcode.toDataURL(secret.otpauth_url, (err, data) =>
         {
             // res.setHeader("Content-Type", "text/html");
@@ -205,7 +205,7 @@ async(req, res, next) =>
 // })
 
 //CREATE TOKEN FROM TOTP SECRET
-router.post('/totpValidate', cors.corsWithOptions, auth.verifyNoRefresh, auth.verifyUser2AF, 
+router.post('/totpValidate', cors.corsWithOptions, auth.verifyNoRefresh, auth.verifyUser2FA, 
 async(req, res, next) => 
 {
     try
@@ -224,7 +224,6 @@ async(req, res, next) =>
             }
         )
 
-        console.log(valid);
         if(valid === true)
         {
             req.login(user, { session: false }, async(err) => 
@@ -311,13 +310,13 @@ router.post("/login", cors.corsWithOptions, async(req, res, next)=>
                     else if(user.secret)
                     {
                         console.log(user._id);
-                        const twoAFToken = auth.Generate2AFToken({_id: user._id});
+                        const twoFAToken = auth.Generate2AFToken({_id: user._id});
                         
-                        res.header('twoaf_token', twoAFToken)
+                        res.header('twofa_token', twoFAToken)
                             .status(200).json(
                             {
                                 success: true, 
-                                twoAF: true // refirect to /totpValidate
+                                twoFA: true // refirect to /totpValidate
                             })
                     }
                     else
@@ -336,7 +335,7 @@ router.post("/login", cors.corsWithOptions, async(req, res, next)=>
                                 {
                                     success: true,
                                     loggedIn: true,
-                                    twoAF: false,
+                                    twoFA: false,
                                     isAdmin: req.user.isAdmin,
                                     status: 'Login Successful!'
                                 });

@@ -1,6 +1,6 @@
 const Cart = require("../../models/Cart");
 const router = require("express").Router();
-const mongoose = require('mongoose');
+// const mongoose = require('mongoose');
 
 // CONTROLLERS
 const cors = require('../../controllers/v1/corsController');
@@ -13,7 +13,7 @@ const {upload} = require('./upload');
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
 // GET USER CART
-router.get("/self", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async (req, res, next) =>
+router.get("/self", cors.corsWithOptions, auth.verifyUserCart, auth.verifyRefresh, async (req, res, next) =>
 {
     try
     {

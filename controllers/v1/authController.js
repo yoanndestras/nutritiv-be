@@ -106,13 +106,12 @@ exports.jwtPassport = passport.use("email_jwt", new JwtStrategy(opts_email, (jwt
         })
 }));
 
-const opts_2af = {}; //json web token and key
-opts_2af.jwtFromRequest = ExtractJwt.fromHeader("twoaf_token");
-opts_2af.secretOrKey = process.env.REF_2AF_TOKEN;
+const opts_2fa = {}; //json web token and key
+opts_2fa.jwtFromRequest = ExtractJwt.fromHeader("twofa_token");
+opts_2fa.secretOrKey = process.env.REF_2AF_TOKEN;
 
-exports.TwoAFjwtPassport = passport.use("2af_jwt", new JwtStrategy(opts_2af, (jwtPayload, done) =>
+exports.TwoFAjwtPassport = passport.use("2fa_jwt", new JwtStrategy(opts_2fa, (jwtPayload, done) =>
 {
-    console.log(opts_2af);
     User.findOne({_id: jwtPayload._id}, (err, user) =>
         {                
             if(err)
@@ -133,16 +132,16 @@ exports.TwoAFjwtPassport = passport.use("2af_jwt", new JwtStrategy(opts_2af, (jw
 // VERIFY PRIVILEGES
 exports.verifyAdmin = function(req, res, next)
 {
-        if(req.user.isAdmin == true)
-        {
-            next();
-        }
-        else
-        {
-            let err = new Error('You are not authorized to perform this operation!');
-            err.statusCode = 403;
-            return next(err);
-        }
+    if(req.user.isAdmin == true)
+    {
+        next();
+    }
+    else
+    {
+        let err = new Error('You are not authorized to perform this operation!');
+        err.statusCode = 403;
+        return next(err);
+    }
 };
 
 exports.verifyAuthorization = async(req, res, next) =>
@@ -164,9 +163,9 @@ exports.verifyAuthorization = async(req, res, next) =>
     }catch(err){next(err)}
 };
 
-exports.verifyUser2AF = async(req, res, next) =>
+exports.verifyUser2FA = async(req, res, next) =>
 {
-    passport.authenticate("2af_jwt", { session: false }, (err, user, info) => 
+    passport.authenticate("2fa_jwt", { session: false }, (err, user, info) => 
     {
         if (err || !user) 
         {               
@@ -349,7 +348,7 @@ exports.Generate2AFToken = function(_id)
     (
         _id, 
         process.env.REF_2AF_TOKEN, 
-        {expiresIn: "1200s"} // expires in 2 minutes
+        {expiresIn: "120s"} // expires in 2 minutes
     );
 };
 

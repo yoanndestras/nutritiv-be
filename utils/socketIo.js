@@ -4,6 +4,10 @@ const jwt = require('jsonwebtoken');
 const Room = require("../models/Chat");
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
+const cron = require('node-cron');
+
+// CONTROLLERS
+const chat = require('../controllers/v1/chatController');
 
 exports.socketConnection = async(io) =>
 {   
@@ -29,7 +33,7 @@ exports.socketConnection = async(io) =>
             });
         });
         
-        io.on("connection", (socket) =>
+        io.on("connection", (socket, next) =>
         {
             console.log("An user is connected to the socket.io chat!");
 
@@ -46,10 +50,12 @@ exports.socketConnection = async(io) =>
                         if(senderRooms && senderRooms.length > 0)
                         {
                             console.log("All verification ok for createRoom!");
+
+                            // cron.schedule('*/5 * * * *', () => chat.removeMessages(DB_NAME, ARCHIVE_PATH, next)); // SAVE A DB BACKUP EVERYDAY AT 1 AM
+                            
                             senderRooms.forEach(senderRoom => 
                                 {
                                     let senderRoomId = (senderRoom._id).toString();
-                                    console.log(`senderRoomId = `, senderRoomId)
                                     socket.join(senderRoomId); // JOIN
                                 });
                             let roomCreated = true;

@@ -105,3 +105,22 @@ exports.verifyChatExist = async(req, res, next) =>
   
   }catch(err){next(err)}
 }
+
+exports.removeMessages = async(req, res, next) =>
+{
+  try
+  {
+    const userId = req.user._id;
+    const chats = await Chat.findOne({members: {$in: [userId]}},);
+    if(chats && req.user.isAdmin === false)
+    {
+      let err = new Error("You are already part of a chat, chatId is : " + chats._id);
+      err.statusCode = 400;
+      next(err);
+    }
+    else
+    {
+      next();
+    }
+  }catch(err){next(err)}
+}

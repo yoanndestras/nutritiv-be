@@ -120,7 +120,7 @@ async(req, res, next) =>
     try
     {
         const user =  await User.findOne({_id: req.user._id});
-        let avatar = process.env.AWS_BUCKET_LINK + user.avatar;
+        let avatar = process.env.AWS_BUCKET_LINK + "usersAvatar/" + user.avatar;
         // const readStream = fileUpload.getFileStream(avatar)
         
         res.status(200).json(

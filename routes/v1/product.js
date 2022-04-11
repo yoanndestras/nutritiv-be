@@ -328,4 +328,26 @@ async (req, res, next) =>
     }catch(err){next(err)}
 
 })
+
+// router.get("/rename", async (req, res, next) =>
+// {
+//     try
+//     {
+//         const products = await Product.updateMany({createdAt:{$gte:new Date("2022-02-28").toISOString(),$lt: new Date("2022-02-29").toISOString()}},
+//         {
+//             $set:
+//             {
+//                 "imgs": ["CDimMultivitamines_powder.png"],
+//             }
+//         },
+//         {multi: true});
+
+//         res.status(200).json(
+//         {
+//             success: true,
+//             products
+//         });
+//     }catch(err) {next(err)}
+// })
+
 module.exports = router;

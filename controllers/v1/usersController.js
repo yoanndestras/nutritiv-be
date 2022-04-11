@@ -27,7 +27,8 @@ exports.resizeUserAvatar = async(req, res, next) =>
       let err = new Error('File not found!')
       next(err);
     }
-    let avatar = user.avatar;
+    let avatar = "usersAvatar/" + user.avatar;
+
     avatar ? fileUpload.deleteFile(avatar) : null;
     
     let fileArray = [req.file];
@@ -55,12 +56,12 @@ exports.addUserAvatar = async(req, res, next) =>
     file = path.join(file.destination,'usersAvatar', file.filename)
     
     const filePath = file;
-    const fileName = req.file.filename
+    const fileName = "usersAvatar/" + req.file.filename
     const fileType = req.file.mimetype;
     const result = await fileUpload.uploadFile(filePath, fileName, fileType);
     let key = result.Key; 
 
-    fs.unlinkSync(path.join("public/images/usersAvatar", fileName))
+    fs.unlinkSync(path.join("public/images/usersAvatar", req.file.filename))
         
     const user = await User.findOneAndUpdate({_id: req.user._id},
       {

@@ -228,8 +228,8 @@ exports.removeImgs = async(req, res, next) =>
     try
     {
         const product = await Product.findOne({_id : req.params.productId})
-
-        let imgs = product ? product.imgs : null;
+        
+        let imgs = product ? "productsImgs/" + product.imgs : null;
         imgs ? 
         await Promise.all
         (
@@ -332,7 +332,7 @@ exports.addProductImgs = async(req, res, next) =>
                 {
                     
                     let file =  path.join(img.destination,'productsImgs', img.filename)
-                    let filePath = file, fileName = img.filename, fileType = img.mimetype;
+                    let filePath = file, fileName = "productsImgs/" + img.filename, fileType = img.mimetype;
                     
                     let result = await fileUpload.uploadFile(filePath, fileName, fileType);
                     key.push(result.Key); 

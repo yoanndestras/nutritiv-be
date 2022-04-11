@@ -2,6 +2,10 @@ const { spawn } = require('child_process'); // DATABASE BACKUP
 const fs = require('fs');
 const path = require('path'); // ACCESS TO FOLDERS PATHS
 
+// CONTROLLERS
+const fileUpload = require('../controllers/v1/fileUploadController');
+const backup = require("./dbBackups") // CALL SOCKETIO
+
 /* 
 Basic mongo dump and restore commands, they contain more options you can have a look at man page for both of them.
 1. mongodump --db=rbac_tutorial --archive=./rbac.gzip --gzip
@@ -22,31 +26,23 @@ Using mongorestore - without any args:
 // Scheduling the backup every 5 seconds (using node-cron)
 // cron.schedule('*/5 * * * * *', () => backupMongoDB());
 
+exports.storeOnAWS = async(ARCHIVE_PATH) =>
+{
+  try 
+  {
+    const filePath = ARCHIVE_PATH;
+    const fileName = "dbBackups/" + path.basename(ARCHIVE_PATH);
+    const fileType = path.extname(ARCHIVE_PATH);
+    await fileUpload.uploadFile(filePath, fileName, fileType); // Upload dbBackups on s3
+  
+    fs.unlinkSync(ARCHIVE_PATH); // Delete dbBackups from static folder
+
+  }catch(error){console.log(error);}
+}
 exports.backupMongoDB = async(DB_NAME, ARCHIVE_PATH) =>
 {
   try
   {
-    // const db_backups_folder = path.join(__dirname, '../db_backups');
-  
-    // fs.readdir(db_backups_folder, async(err, files) => 
-    // {
-    //   try
-    //   {
-    //     files.some(file => 
-    //     {
-    //       let D1 = file.substring(0, 10);
-    //       let D2 = new Date().toLocaleDateString('pt-PT').replace(/\//g,'-');
-    //       let oldDate = new Date(D2).getTime() - (30 * 24 * 60 * 60 * 1000);
-  
-    //       if ((new Date(D1).getTime()) <= oldDate) 
-    //       {
-    //         fs.unlinkSync(path.join(__dirname, '../db_backups', file))
-    //       } 
-    //     });
-    //   }catch(err){console.log(err);}
-    // });
-    
-    
     const DB_HOST = process.env.DB_HOST;
     const DB_PASSWORD = process.env.DB_PASSWORD;
     const DB_USER = process.env.DB_USER;
@@ -61,6 +57,7 @@ exports.backupMongoDB = async(DB_NAME, ARCHIVE_PATH) =>
       `--archive=${ARCHIVE_PATH}`,
       '--gzip',
     ]);
+
     // 
     child.stdout.on('data', (data) => 
     {
@@ -81,7 +78,11 @@ exports.backupMongoDB = async(DB_NAME, ARCHIVE_PATH) =>
     {
       if (code) console.log('Process exit with code:', code);
       else if (signal) console.log('Process killed with signal:', signal);
-      else console.log('Backup is successfull ✅');
+      else 
+      {
+        backup.storeOnAWS(ARCHIVE_PATH);
+        console.log('Backup is successfull ✅');
+      }
     });
   }
   catch(error) {console.log(error);}

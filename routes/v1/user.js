@@ -16,8 +16,7 @@ router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); }
 
 
 // GET ALL USERS
-router.get("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
-auth.verifyAdmin, async (req, res, next) =>
+router.get("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async (req, res, next) =>
 {
     try
     {

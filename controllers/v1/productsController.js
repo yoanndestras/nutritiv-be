@@ -335,7 +335,8 @@ exports.addProductImgs = async(req, res, next) =>
                     let filePath = file, fileName = "productsImgs/" + img.filename, fileType = img.mimetype;
                     
                     let result = await fileUpload.uploadFile(filePath, fileName, fileType);
-                    key.push(result.Key); 
+
+                    key.push(img.filename); 
                     fs.unlinkSync(path.join("public/images/productsImgs", fileName))
                 
                 })

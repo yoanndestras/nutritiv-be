@@ -167,7 +167,11 @@ exports.verifyUser2FA = async(req, res, next) =>
 {
     passport.authenticate("2fa_jwt", { session: false }, (err, user, info) => 
     {
-        if (err || !user) 
+        if(err)
+        {
+            return next(err);
+        }
+        else if (!user) 
         {               
             let err = new Error('You are not authorized to perform this operation!');
             err.statusCode = 401;

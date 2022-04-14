@@ -76,7 +76,7 @@ async(req, res, next) =>
     try
     {
         const user =  await User.findOne({_id: req.user._id});
-        let avatar = user.avatar ? process.env.AWS_BUCKET_LINK + user.avatar : null;
+        let avatar = user.avatar ? process.env.AWS_BUCKET_LINK + "productsImgs/" + user.avatar : null;
         const { username, _id, email, isAdmin, isVerified, addressDetails} = req.user;
         const chatExist = await Chat.findOne({members: {$in: [req.user._id]}})
         let chat;

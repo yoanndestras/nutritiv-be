@@ -76,7 +76,7 @@ async(req, res, next) =>
     try
     {
         const user =  await User.findOne({_id: req.user._id});
-        let avatar = user.avatar ? process.env.AWS_BUCKET_LINK + user.avatar : null;
+        let avatar = user.avatar ? process.env.AWS_BUCKET_LINK +"usersAvatar/"+ user.avatar : null;
         const { username, _id, email, isAdmin, isVerified, addressDetails} = req.user;
         const chatExist = await Chat.findOne({members: {$in: [req.user._id]}})
         let chat;
@@ -244,7 +244,7 @@ upload.single('imageFile'), user.resizeUserAvatar, user.addUserAvatar, async (re
         const user = await User.findOne({_id: req.user._id});
         user.save();
         
-        let avatar = process.env.AWS_BUCKET_LINK + user.avatar;
+        let avatar = process.env.AWS_BUCKET_LINK + "usersAvatar/" + user.avatar;
         
         res.status(201).json(
             {

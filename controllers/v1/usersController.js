@@ -59,6 +59,7 @@ exports.addUserAvatar = async(req, res, next) =>
     const fileName = "usersAvatar/" + req.file.filename
     const fileType = req.file.mimetype;
     const result = await fileUpload.uploadFile(filePath, fileName, fileType);
+
     let key = result.Key; 
 
     fs.unlinkSync(path.join("public/images/usersAvatar", req.file.filename))
@@ -67,7 +68,7 @@ exports.addUserAvatar = async(req, res, next) =>
       {
         $set:
         {
-          avatar: key
+          avatar: req.file.filename
         }
       });
       

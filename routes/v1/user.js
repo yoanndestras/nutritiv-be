@@ -139,7 +139,7 @@ auth.verifyAuthorization, async (req, res, next) =>
         const user = await User.findById(req.params.userId);
         if(user)
         {
-            let avatar = process.env.AWS_BUCKET_LINK + user.avatar;
+            let avatar = process.env.AWS_BUCKET_LINK + "usersAvatar/" + user.avatar;
             const {email, ...public} = user._doc;
             
             res.status(200).json({success: true, user: public, avatar});
@@ -153,6 +153,49 @@ auth.verifyAuthorization, async (req, res, next) =>
     }catch(err){next(err)}
 })
 
+// GET USERS 
+router.get("/findUsers", cors.corsWithOptions, async (req, res, next) =>
+{
+    try
+    {
+        const usersArray = req.body?.users;
+        if(usersArray)
+        {
+            let users = [];
+
+            for (let i = 0; i < usersArray.length; i++)
+            {
+                const user = await User.findById(usersArray[i]);
+                if(user)
+                {
+                    let avatar = process.env.AWS_BUCKET_LINK + "usersAvatar/" + user.avatar;
+                
+                    let username = user.username;
+                    let userId = user._id
+                    
+                    let userInfos = {userId, username, avatar}
+                    
+                    users.push(userInfos)
+                }
+                else
+                {
+                    let err = new Error("This id do not exist : " + usersArray[i])
+                    err.statusCode = 400;
+                    next(err)
+                }
+                
+            }
+
+            res.status(200).json({success: true, users});
+        }
+        else
+        {
+            let err = new Error("Pls enter an array of userId!")
+            err.statusCode = 400;
+            next(err)
+        }
+    }catch(err){next(err)}
+})
 
 //UPDATE USERNAME
 router.put('/updateUsername', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 

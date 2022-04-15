@@ -25,9 +25,22 @@ router.get("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async
         
         //limit value = the number of last users in res
         const users = query 
-            ? await User.find().sort({_id:-1}).limit(5).lean()
-            : await User.find().lean()
-        res.status(200).json(users);
+            ? await User.find().sort({_id:-1}).limit(5)
+            : await User.find()
+        
+        let newUsersArray = [];
+        users.map((user) =>
+        {
+            let avatar = process.env.AWS_BUCKET_LINK + "usersAvatar/" + user.avatar;
+            let username = user.username;
+            let userId = user._id;
+
+            let userInfos = {userId, username, avatar}
+
+            newUsersArray.push(userInfos) 
+        })
+        
+        res.status(200).json(newUsersArray);
     }catch(err){next(err)}
 })
 

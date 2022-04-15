@@ -261,7 +261,7 @@ async(req, res, next) =>
         }
         else
         {
-            let err = new Error('The token is invalid or expired!');
+            let err = new Error('The code is invalid or expired!');
             err.statusCode = 401;
             return next(err);
         }

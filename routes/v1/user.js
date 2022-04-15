@@ -185,7 +185,7 @@ router.get("/findUsers", cors.corsWithOptions, async (req, res, next) =>
                 }
                 
             }
-
+            
             res.status(200).json({success: true, users});
         }
         else

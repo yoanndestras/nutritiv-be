@@ -34,9 +34,9 @@ router.get("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async
             let avatar = process.env.AWS_BUCKET_LINK + "usersAvatar/" + user.avatar;
             let username = user.username;
             let userId = user._id;
-
+            
             let userInfos = {userId, username, avatar}
-
+            
             newUsersArray.push(userInfos) 
         })
         

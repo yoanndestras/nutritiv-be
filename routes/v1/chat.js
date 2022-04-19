@@ -80,6 +80,7 @@ async(req, res, next) =>
       let messages = chat[0].messages.reverse();
       messages = messages.slice(start, end).reverse();
       res.status(200).json(messages);
+    
     }
     else
     {

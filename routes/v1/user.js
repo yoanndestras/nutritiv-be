@@ -16,8 +16,7 @@ router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); }
 
 
 // GET ALL USERS
-router.get("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
-auth.verifyAdmin, async (req, res, next) =>
+router.get("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async (req, res, next) =>
 {
     try
     {
@@ -26,9 +25,22 @@ auth.verifyAdmin, async (req, res, next) =>
         
         //limit value = the number of last users in res
         const users = query 
-            ? await User.find().sort({_id:-1}).limit(5).lean()
-            : await User.find().lean()
-        res.status(200).json(users);
+            ? await User.find().sort({_id:-1}).limit(5)
+            : await User.find()
+        
+        let newUsersArray = [];
+        users.map((user) =>
+        {
+            let avatar = process.env.AWS_BUCKET_LINK + "usersAvatar/" + user.avatar;
+            let username = user.username;
+            let userId = user._id;
+            
+            let userInfos = {userId, username, avatar}
+            
+            newUsersArray.push(userInfos) 
+        })
+        
+        res.status(200).json(newUsersArray);
     }catch(err){next(err)}
 })
 
@@ -76,7 +88,7 @@ async(req, res, next) =>
     try
     {
         const user =  await User.findOne({_id: req.user._id});
-        let avatar = user.avatar ? process.env.AWS_BUCKET_LINK + user.avatar : null;
+        let avatar = user.avatar ? process.env.AWS_BUCKET_LINK +"usersAvatar/"+ user.avatar : null;
         const { username, _id, email, isAdmin, isVerified, addressDetails} = req.user;
         const chatExist = await Chat.findOne({members: {$in: [req.user._id]}})
         let chat;
@@ -140,7 +152,7 @@ auth.verifyAuthorization, async (req, res, next) =>
         const user = await User.findById(req.params.userId);
         if(user)
         {
-            let avatar = process.env.AWS_BUCKET_LINK + user.avatar;
+            let avatar = process.env.AWS_BUCKET_LINK + "usersAvatar/" + user.avatar;
             const {email, ...public} = user._doc;
             
             res.status(200).json({success: true, user: public, avatar});
@@ -154,6 +166,49 @@ auth.verifyAuthorization, async (req, res, next) =>
     }catch(err){next(err)}
 })
 
+// GET USERS 
+router.get("/findUsers", cors.corsWithOptions, async (req, res, next) =>
+{
+    try
+    {
+        const usersArray = req.body?.users;
+        if(usersArray)
+        {
+            let users = [];
+
+            for (let i = 0; i < usersArray.length; i++)
+            {
+                const user = await User.findById(usersArray[i]);
+                if(user)
+                {
+                    let avatar = process.env.AWS_BUCKET_LINK + "usersAvatar/" + user.avatar;
+                
+                    let username = user.username;
+                    let userId = user._id
+                    
+                    let userInfos = {userId, username, avatar}
+                    
+                    users.push(userInfos)
+                }
+                else
+                {
+                    let err = new Error("This id do not exist : " + usersArray[i])
+                    err.statusCode = 400;
+                    next(err)
+                }
+                
+            }
+            
+            res.status(200).json({success: true, users});
+        }
+        else
+        {
+            let err = new Error("Pls enter an array of userId!")
+            err.statusCode = 400;
+            next(err)
+        }
+    }catch(err){next(err)}
+})
 
 //UPDATE USERNAME
 router.put('/updateUsername', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
@@ -244,7 +299,7 @@ upload.single('imageFile'), user.resizeUserAvatar, user.addUserAvatar, async (re
         const user = await User.findOne({_id: req.user._id});
         user.save();
         
-        let avatar = process.env.AWS_BUCKET_LINK + user.avatar;
+        let avatar = process.env.AWS_BUCKET_LINK + "usersAvatar/" + user.avatar;
         
         res.status(201).json(
             {

@@ -29,7 +29,6 @@ export const Products = () => {
   
   const [allTags, setAllTags] = useState([])
   
-  
   // API EFFECTS
   useEffect(() => {
     async function fetchApi() {

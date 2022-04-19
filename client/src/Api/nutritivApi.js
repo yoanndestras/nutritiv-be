@@ -14,8 +14,15 @@ export const injectStore = _store => {
 const apiVersion = process.env.REACT_APP_API_VERSION
 const apiAddress = process.env.REACT_APP_API_ADDRESS_FULL
 
+// const nutritivApi = axios.create({
+//   baseURL: `${apiAddress}/${apiVersion}`,
+// })
+
+const fullBaseUrl = `${apiAddress}${apiVersion}`
+console.log('# fullBaseUrl :', fullBaseUrl)
+
 const nutritivApi = axios.create({
-  baseURL: `${apiAddress}/${apiVersion}`,
+  baseURL: fullBaseUrl,
 })
 
 // # INTERCEPTORS #

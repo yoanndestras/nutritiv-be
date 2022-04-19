@@ -16,6 +16,10 @@ export default function Navbar() {
         PRODUCTS
       </Link>
       <span>----</span>
+      <Link to="/chat">
+        CHAT
+      </Link>
+      <span>----</span>
       {
         user.loggedIn ? (
           <>
@@ -23,17 +27,13 @@ export default function Navbar() {
               { user.username }
             </Link>
             <span>----</span>
-            <img 
-              alt="avatar" 
+            <img
+              alt="avatar"
               style={{
                 maxWidth: "30px",
               }}
-              src={user.avatar} 
+              src={user.avatar}
             />
-            <span>----</span>
-            <Link to="/chat">
-              CHAT
-            </Link>
             <span>----</span>
             <button onClick={() => navigate('/cart')}>
               Cart 

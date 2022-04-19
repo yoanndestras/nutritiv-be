@@ -1,9 +1,15 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 import nutritivApi from '../Api/nutritivApi'
+import { updateUser } from '../Redux/reducers/user'
 import { Chat } from './Chat'
 
 export const ChatConnection = () => {
-  const [chatCreated, setChatCreated] = useState(false)
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const loggedIn = useSelector(state => state.user.loggedIn)
+  const hasChat = useSelector(state => state.user.hasChat)
   
   useEffect(() => {
     let fetchApi = async () => {
@@ -11,27 +17,38 @@ export const ChatConnection = () => {
         await nutritivApi.get(
           `/chats/`
         )
-        setChatCreated(true)
-        console.log('# Chatroom created :', chatCreated)
-        console.log('setConnected(true)')
+        dispatch(
+          updateUser({ hasChat: true })
+        )
       } catch(err) {
-        console.error(
+        console.log(
           '/chats/?messagesQty=1', err
         )
       }
     }
-    !chatCreated && fetchApi();
+    !hasChat && fetchApi();
   });
   
   const handleConnectToChat = async () => {
-    try {
-      const { data } = await nutritivApi.post(
-        `/chats/create`,
-      )
-      setChatCreated(true)
-      console.log('# post /chats/create :', data)
-    } catch(err) {
-      console.error('/chats/create:', err)
+    if(loggedIn) {
+      try {
+        const { data } = await nutritivApi.post(
+          `/chats/create`,
+        )
+        dispatch(
+          updateUser({ hasChat: true })
+        )
+        console.log('# post /chats/create :', data)
+      } catch(err) {
+        console.log('/chats/create:', err)
+      }
+    } else {
+      navigate(
+        '/login',
+        { state: 
+          { msg: "Please login and start a conversation right away!" }
+        }
+      );
     }
   }
   
@@ -40,7 +57,7 @@ export const ChatConnection = () => {
       <h2>
         Chats
       </h2>
-      {chatCreated ? (
+      {hasChat ? (
         <Chat />
       ) : (
         <button onClick={handleConnectToChat}>

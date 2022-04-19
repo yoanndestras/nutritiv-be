@@ -13,16 +13,10 @@ export const injectStore = _store => {
 // # API INSTANCE #
 const apiVersion = process.env.REACT_APP_API_VERSION
 const apiAddress = process.env.REACT_APP_API_ADDRESS_FULL
-
-// const nutritivApi = axios.create({
-//   baseURL: `${apiAddress}/${apiVersion}`,
-// })
-
-const fullBaseUrl = `${apiAddress}${apiVersion}`
-console.log('# fullBaseUrl :', fullBaseUrl)
+const baseURL = `${apiAddress}${apiVersion}`
 
 const nutritivApi = axios.create({
-  baseURL: fullBaseUrl,
+  baseURL,
 })
 
 // # INTERCEPTORS #
@@ -51,7 +45,13 @@ nutritivApi.interceptors.response.use(res => {
       res.headers.refresh_token
     )
   }
-  if(res.data.loggedIn) {
+  if(res.headers.twofa_token) {
+    localStorage.setItem(
+      'twofa_token',
+      res.headers.twofa_token
+    )
+  }
+  if(res.data.loggedIn === false) {
     store.dispatch(
       updateUser(res.data)
     )

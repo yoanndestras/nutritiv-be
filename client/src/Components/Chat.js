@@ -134,7 +134,7 @@ export const Chat = () => {
         
       } catch(err) {
         console.error(
-          'GET CHATS INFO err:', err
+          '# GET CHATS INFO err:', err
         )
       }
     }
@@ -200,9 +200,6 @@ export const Chat = () => {
           text: messageToBeSent
         }
       )
-      const { text, id } = data;
-      let roomId = activeChatId;
-      socket.emit('chatting', {text, id, token, roomId})
       setChat({
         ...chat,
         "messages": [
@@ -210,7 +207,9 @@ export const Chat = () => {
           {...data, loading: false}
         ]
       })
-      console.log('# /chats/message/ :', data)
+      const { text, id } = data;
+      let roomId = activeChatId;
+      socket.emit('chatting', {text, id, token, roomId})
     } catch(err) {
       console.error('/chats/message/:', err)
     }
@@ -292,8 +291,8 @@ export const Chat = () => {
                         style={{width: "100%"}}
                       >
                         {
-                          allUsers.filter(user => user._id === message.sender).map(user => (
-                            <span style={{fontWeight: "bold"}}>
+                          allUsers.filter(user => user._id === message.sender).map((user, i) => (
+                            <span key={i} style={{fontWeight: "bold"}}>
                               {user.username}
                             </span>
                           ))

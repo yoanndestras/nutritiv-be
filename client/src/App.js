@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { 
   // useSelector, 
   useDispatch,
@@ -10,6 +10,7 @@ import {
   Route,
   Navigate,
   Outlet,
+  useLocation,
 } from 'react-router-dom';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
@@ -38,7 +39,7 @@ const stripePromise = loadStripe(
 function App() {
   const dispatch = useDispatch();
   const loggedIn = useSelector(state => state.user.loggedIn)
-  
+
   // ON LOAD
   // Fetch user-self info
   useEffect(() => {
@@ -80,15 +81,29 @@ function App() {
   
   // RESTRICTED ROUTES
   const Restricted = ({ type }) => {
+    const location = useLocation();
+    const cartSelection = location.state?.cartSelection;
+    console.log('# APP.JS - cartSelection :', cartSelection)
     const isLogged = () => {
       console.log('# loggedIn :', loggedIn)
       return loggedIn;
     }
     if(loggedIn !== null) {
       if(type === "guest") {
-        return isLogged() ? (
-          <Navigate replace to="/" /> 
-        ) : <Outlet />;
+        if(isLogged()){
+          if(location.state?.from) {
+            return <Navigate 
+              replace 
+              to={location.state.from}
+              state={{cartSelection: cartSelection}} // temp
+              // how to add object "{ cartSelection: ... }" inside of state ?
+            />
+          } else {
+            return <Navigate replace to="/" />
+          }
+        } else {
+          return <Outlet />;
+        }
       } else if(type === "user") {
         return isLogged() ? (
           <Outlet /> 

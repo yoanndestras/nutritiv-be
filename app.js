@@ -80,9 +80,8 @@ app.use(
     ) // LIMIT SPAM REQUESTS TO MAX PER MILLISECONDS
 app.use(express.static(path.join(__dirname, 'public'))); // USE STATIC FILES ON PUBLIC FOLDER
 app.use(express.static(path.join(__dirname, "/client/build"))); // STATIC FILES FOR FRONT-END APP
-app.get("/*", (req, res) =>{res.sendFile(path.join(__dirname, "/client/build", "index.html"))});
+app.get("*", (req, res) =>{res.sendFile(path.join(__dirname, "/client/build", "index.html"))});
 
-console.log(path.join(__dirname, "/client/build", "index.html"));
 app.use((err, req, res, next) =>
 {
     let message = err.message ? err.message : "Unsuccessfull request!"

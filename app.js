@@ -10,8 +10,8 @@ const   limitter = require('express-rate-limit'), // SPAM LIMITTER
         {socketConnection} = require("./utils/socketIo"), // CALL SOCKETIO
         routes = require("./routes/index") // CALL V1 & V2 ROUTES FROM ROUTER FOLDER
 
-// const cron = require('node-cron');
-// const {backupMongoDB} = require("./utils/dbBackups") // CALL SOCKETIO
+const cron = require('node-cron');
+const {backupMongoDB} = require("./utils/dbBackups") // CALL SOCKETIO
 
 dotenv.config(); // INITIALIZE ENVIRONNEMENT VARIABLE FILE ".env"
 
@@ -56,10 +56,10 @@ mongoose
         console.log(err);
     });
 
-// const DB_NAME = process.env.DB_NAME;
-// const currentDay = new Date().toLocaleDateString('pt-PT').replace(/\//g,'-');
-// const ARCHIVE_PATH = path.join(__dirname, 'public/dbBackups', `${currentDay}_${DB_NAME}.gzip`);
-// cron.schedule('0 6 * * *', () => backupMongoDB(DB_NAME, ARCHIVE_PATH)); // SAVE A DB BACKUP EVERYDAY AT 5 AM
+const DB_NAME = process.env.DB_NAME;
+const currentDay = new Date().toLocaleDateString('pt-PT').replace(/\//g,'-');
+const ARCHIVE_PATH = path.join(__dirname, 'public/dbBackups', `${currentDay}_${DB_NAME}.gzip`);
+cron.schedule('0 6 * * *', () => backupMongoDB(DB_NAME, ARCHIVE_PATH)); // SAVE A DB BACKUP EVERYDAY AT 5 AM
 
 app.use(express.json()); // APP LEARN TO READ JSON
 app.use(express.urlencoded({extended: true})); // APP LEARN TO READ JSON  

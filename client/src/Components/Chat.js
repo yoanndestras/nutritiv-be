@@ -291,7 +291,7 @@ export const Chat = () => {
                         style={{width: "100%"}}
                       >
                         {
-                          allUsers.filter(user => user._id === message.sender).map((user, i) => (
+                          allUsers.filter(user => user.userId === message.sender).map((user, i) => (
                             <span key={i} style={{fontWeight: "bold"}}>
                               {user.username}
                             </span>

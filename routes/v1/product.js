@@ -222,7 +222,7 @@ auth.verifyAdmin, async(req, res, next) =>
             {
                 newProducts
             });
-
+    
     }catch(err){next(err)}
     
 })

@@ -1,8 +1,5 @@
 const mongoose = require("mongoose")
 const Schema = mongoose.Schema;
-require('mongoose-currency').loadType(mongoose);
-const Currency = mongoose.Types.Currency;
-
 
 const ProductSchema = new Schema
 ({
@@ -29,9 +26,8 @@ const ProductSchema = new Schema
     },
     imgs: 
     {
-        type: String,
         type: Array,
-        required: true
+        default: [],
     },
     productItems: 
     {

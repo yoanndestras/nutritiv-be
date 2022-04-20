@@ -58,21 +58,21 @@ exports.newProduct = async(req, res, next) =>
             const { title, desc, countInStock } = req.body;
             req.title = title;
     
-            const newProduct = await new Product(
+            Product.create(
                 {
                     title,
                     desc,
                     shape,
                     tags : tagsArr,
                     productItems: product,
-                    countInStock
-                },
-                {new: true}
-            );
-            await newProduct.save();
+                    countInStock,
+                }, (err) =>
+                {
+                    if(err) return next(err);
+                });
         }
         
-
+        
         next();
     }catch(err){next(err)}
 }
@@ -325,7 +325,7 @@ exports.addProductImgs = async(req, res, next) =>
     try
     {
         let filesArr = req.files;
-        let key = [];
+        let imgs = [];
         await Promise.all
         (
             filesArr.map(async(img) => 
@@ -336,28 +336,22 @@ exports.addProductImgs = async(req, res, next) =>
                     
                     let result = await fileUpload.uploadFile(filePath, fileName, fileType);
 
-                    key.push(img.filename); 
-                    fs.unlinkSync(path.join("public/images/productsImgs", fileName))
+                    imgs.push(img.filename); 
+                    fs.unlinkSync(path.join("public/images/", fileName))
                 
                 })
         );
         const newProduct = await Product.findOne({title : req.title})
+        const existingProduct = await Product.findOne({_id: req.params.productId});
+
+        !newProduct 
+        ? existingProduct.imgs = imgs
+        : newProduct.imgs = imgs;
         
-        const product = !newProduct ? await Product.findOneAndUpdate({_id: req.params.productId},
-            {
-                $set:
-                {
-                    imgs: key
-                }
-            }) : await Product.findOneAndUpdate({title : req.title},
-            {
-                $set:
-                {
-                    imgs: key
-                }
-            });
-        
-        await product.save();
+        !newProduct 
+        ? await existingProduct.save()
+        : await newProduct.save();
+
         next();
     }catch(err){next(err)}
 }

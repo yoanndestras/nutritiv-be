@@ -29,7 +29,7 @@ exports.resizeUserAvatar = async(req, res, next) =>
     }
     let avatar = "usersAvatar/" + user.avatar;
 
-    avatar ? fileUpload.deleteFile(avatar) : null;
+    avatar && user.avatar !== "PrPhdefaultAvatar.jpg" ? fileUpload.deleteFile(avatar) : null;
     
     let fileArray = [req.file];
     await Promise.all
@@ -39,10 +39,12 @@ exports.resizeUserAvatar = async(req, res, next) =>
                 await sharp(file.path)
                 .resize(200, 200)
                 .toFile(path.resolve(file.destination,'usersAvatar', file.filename))
+
+                fs.unlinkSync(path.join("public/images/", req.file.filename))
             })
     );
     // if(avatar){fs.unlinkSync(path.join("public/images/usersAvatar/", avatar))}
-    fs.unlinkSync(path.join("public/images/", req.file.filename))
+    
     next();
   }catch(err) {next(err);}
   

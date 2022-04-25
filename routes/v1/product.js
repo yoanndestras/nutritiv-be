@@ -243,7 +243,6 @@ upload.any('imageFile'), product.resizeProductImage, product.newProduct, product
     }catch(err){next(err)}
 });
 
-
 // UPDATE PRODUCT //TODO:  form adaptability 
 router.post("/updateImgs/:productId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
 auth.verifyAdmin, product.verifyProductId, upload.any('imageFile'), product.removeImgs, 

@@ -51,7 +51,7 @@ async(req, res, next) =>
     else
     {
       let err = new Error("No chat found for user " + req.user.username);
-      err.statusCode = 404;
+      err.statusCode = 200;
       next(err);
     }
     

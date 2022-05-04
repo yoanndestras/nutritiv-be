@@ -3,6 +3,7 @@ const authenticate = require("./authController");
 const express = require('express');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
+const googleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../../models/User');
 const email_validator = require("email-validator");
 
@@ -129,6 +130,20 @@ exports.TwoFAjwtPassport = passport.use("2fa_jwt", new JwtStrategy(opts_2fa, (jw
         })
 }));
 
+exports.googlePassport = passport.use(new googleStrategy(
+    {
+        clientID: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: GOOGLE_CLIENT_SECRET,
+        callbackURL: ""
+    },
+    (accessToken, refreshToken, profile, cb) =>
+    {
+        User.findOrCreate({ googleId: profile.id}, (err, user) =>
+        {
+            return cb(err, user);
+        })
+    }
+))
 // VERIFY PRIVILEGES
 exports.verifyAdmin = function(req, res, next)
 {

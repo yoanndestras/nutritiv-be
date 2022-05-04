@@ -38,7 +38,7 @@ const io = require("socket.io")(http,
             const originWhitelist = whitelist.some((origin) => origin === req.headers.origin);
             callback(null, originWhitelist);
         },
-        cors: 
+        cors:
         {
             methods: ["GET", "POST"],
             credentials: true

@@ -13,6 +13,32 @@ const mailer = require("../../controllers/v1/mailerController");
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
+//GOOGLE AUTH
+router.get('/google', (req, res, next) => 
+{
+    passport.authenticate('google', 
+    { 
+        session: false,
+        scope: [ 'email', 'profile' ] 
+    })(req, res, next);
+});
+
+//GOOGLE AUTH CALLBACK
+router.get('/google/callback', auth.verifyProviderUser, (req, res, next) => {});
+
+//FACEBOOK AUTH
+router.get('/facebook', (req, res, next) => 
+{
+    passport.authenticate('facebook', 
+    { 
+        session: false,
+        scope : ['email']
+    })(req, res, next);
+});
+
+//FACEBOOK AUTH CALLBACK
+router.get('/facebook/callback', auth.verifyProviderUser, (req, res, next) => {});
+
 //FORGET PASSWORD EMAIL
 router.get("/forget_pwd", auth.verifyEmailExist, mailer.sendForgetPassword, async(req, res, next) =>
 {
@@ -309,7 +335,6 @@ router.post("/login", cors.corsWithOptions, async(req, res, next)=>
                     }
                     else if(user.secret)
                     {
-                        console.log(user._id);
                         const twoFAToken = auth.Generate2AFToken({_id: user._id});
                         
                         res.header('twofa_token', twoFAToken)

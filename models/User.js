@@ -39,6 +39,18 @@ const UserSchema = new Schema
         type: String,
         default: 'PrPhdefaultAvatar.jpg'
     },
+    provider:
+    {
+        type: String,
+    },
+    facebook: 
+    {
+        type: Object,
+    },
+    google: 
+    {
+        type: Object,
+    },
     addressDetails:
     [
         {
@@ -68,7 +80,7 @@ const UserSchema = new Schema
     {
         type: Number,
         immutable: true,
-        default: 1,
+        default: 2,
     },
 },
 {

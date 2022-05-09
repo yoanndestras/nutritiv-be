@@ -3,7 +3,8 @@ const authenticate = require("./authController");
 const express = require('express');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
-const googleStrategy = require('passport-google-oauth20').Strategy;
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const FacebookStrategy = require('passport-facebook').Strategy;
 const User = require('../../models/User');
 const email_validator = require("email-validator");
 
@@ -130,20 +131,171 @@ exports.TwoFAjwtPassport = passport.use("2fa_jwt", new JwtStrategy(opts_2fa, (jw
         })
 }));
 
-exports.googlePassport = passport.use(new googleStrategy(
+const opts_google = {};
+opts_google.clientID = process.env.GOOGLE_CLIENT_ID;
+opts_google.clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+opts_google.callbackURL = "http://localhost:3001/v1/auth/google/callback";
+
+exports.GooglePassport = passport.use("google", new GoogleStrategy(opts_google, 
+    (accessToken, refreshToken, profile, done) =>
     {
-        clientID: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: GOOGLE_CLIENT_SECRET,
-        callbackURL: ""
-    },
-    (accessToken, refreshToken, profile, cb) =>
-    {
-        User.findOrCreate({ googleId: profile.id}, (err, user) =>
+        User.findOne({ email: profile.emails[0].value}, (err, user) =>
         {
-            return cb(err, user);
+            if(err)
+            {
+                return done(err, false, false);
+            }
+            else if(user)
+            {
+                return done(null, user, false);
+            }
+            else
+            {
+                return done(null, null, profile);
+            }
         })
     }
 ))
+
+const opts_facebook = {};
+opts_facebook.clientID = process.env.FACEBOOK_APP_ID;
+opts_facebook.clientSecret = process.env.FACEBOOK_APP_SECRET;
+opts_facebook.callbackURL = "http://localhost:3001/v1/auth/facebook/callback";
+opts_facebook.profileFields = ['emails', 'name','displayName','photos'];
+
+exports.FacebookPassport = passport.use("facebook", new FacebookStrategy(opts_facebook, 
+    (accessToken, refreshToken, profile, done) =>
+    {        
+        User.findOne({ email: profile.emails[0].value}, (err, user) =>
+        {
+            if(err)
+            {
+                return done(err, false, false);
+            }
+            else if(user)
+            {
+                return done(null, user, false);
+            }
+            else
+            {
+                return done(null, false, profile);
+            }
+        })
+    }
+))
+
+// VERIFY GOOGLE USER
+exports.verifyProviderUser = async(req, res, next) =>
+{
+    try
+    {
+        let provider, scope = [];
+
+        if((req.url.includes('google')))
+        {
+            provider = "google";
+            scope.push('email');
+            scope.push('profile');
+        }
+        else if((req.url.includes('facebook')))
+        {
+            provider = "facebook";
+            scope.push('email');
+        }
+        
+        passport.authenticate(provider, 
+        { 
+            session: false,
+            scope: scope
+        }, (err, user, profile) => 
+        {
+            if(err) 
+            {
+                return next(err);
+            }
+            else if(!user)
+            {
+                user =  new User(
+                    {
+                        username: profile.displayName, 
+                        isVerified: true,
+                        avatar: profile.photos[0].value,
+                        email:  profile.emails[0].value,
+                        provider: provider,
+                        google: profile._json
+                    })
+                    
+                user.save((err) => 
+                {
+                    if(err)
+                    {
+                        return res.status(500).json(
+                            {
+                                success: false, 
+                                status: 'Registration Failed! Please try again later!', 
+                                err: err
+                            });
+                    }
+                    else
+                    {
+                        return res.status(201).json(
+                            {
+                                success: true, 
+                                status: 'Registration Successfull!'
+                            });
+                    }
+                })
+            }
+            else
+            {
+                req.login(user, { session: false }, async(err) => 
+                {
+                    if(err)
+                    {
+                        let err = new Error('Login Unsuccessfull!')
+                        err.statusCode = 400;
+                        return next(err);
+                    }
+                    else if(user.secret)
+                    {
+                        const twoFAToken = authenticate.Generate2AFToken({_id: user._id});
+                        
+                        res.header('twofa_token', twoFAToken)
+                            .status(200).json(
+                            {
+                                success: true, 
+                                twoFA: true // refirect to /totpValidate
+                            })
+                    }
+                    else
+                    {
+                        const accessToken = authenticate.GenerateAccessToken({_id: req.user._id});
+                        const refreshToken = authenticate.GenerateRefreshToken({_id: req.user._id});
+                        
+                        res.header('access_token', accessToken)
+                            .header('refresh_token', refreshToken)
+                            .cookie("refresh_token", refreshToken, 
+                            {
+                                httpOnly: true,
+                                secure: process.env.REF_JWT_SEC_COOKIE === "production"
+                            })
+                            .status(200).json(
+                                {
+                                    success: true,
+                                    loggedIn: true,
+                                    twoFA: false,
+                                    isAdmin: req.user.isAdmin,
+                                    status: 'Login Successful!'
+                                });
+                    }
+                })
+            }
+            
+        })(req, res, next);
+    }catch(err){next(err)}
+    
+}
+
 // VERIFY PRIVILEGES
 exports.verifyAdmin = function(req, res, next)
 {

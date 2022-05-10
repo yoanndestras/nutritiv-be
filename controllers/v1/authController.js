@@ -139,7 +139,7 @@ opts_google.callbackURL = "http://localhost:3001/v1/auth/google/callback";
 exports.GooglePassport = passport.use("google", new GoogleStrategy(opts_google, 
     (accessToken, refreshToken, profile, done) =>
     {
-        User.findOne({ email: profile.emails[0].value}, (err, user) =>
+        User.findOne({ email: profile?.emails[0]?.value}, (err, user) =>
         {
             if(err)
             {
@@ -147,11 +147,11 @@ exports.GooglePassport = passport.use("google", new GoogleStrategy(opts_google,
             }
             else if(user)
             {
-                return done(null, user, false);
+                return done(null, user, profile);
             }
             else
             {
-                return done(null, null, profile);
+                return done(null, false, profile);
             }
         })
     }
@@ -166,7 +166,7 @@ opts_facebook.profileFields = ['emails', 'name','displayName','photos'];
 exports.FacebookPassport = passport.use("facebook", new FacebookStrategy(opts_facebook, 
     (accessToken, refreshToken, profile, done) =>
     {        
-        User.findOne({ email: profile.emails[0].value}, (err, user) =>
+        User.findOne({ email: profile?.emails[0]?.value}, (err, user) =>
         {
             if(err)
             {
@@ -174,7 +174,7 @@ exports.FacebookPassport = passport.use("facebook", new FacebookStrategy(opts_fa
             }
             else if(user)
             {
-                return done(null, user, false);
+                return done(null, user, profile);
             }
             else
             {
@@ -207,23 +207,35 @@ exports.verifyProviderUser = async(req, res, next) =>
         { 
             session: false,
             scope: scope
-        }, (err, user, profile) => 
-        {
-            if(err) 
-            {
-                return next(err);
-            }
+        }, async(err, user, profile) => 
+        {            
+            if(err) {return next(err);}
             else if(!user)
             {
-                user =  new User(
-                    {
-                        username: profile.displayName, 
-                        isVerified: true,
-                        avatar: profile.photos[0].value,
-                        email:  profile.emails[0].value,
-                        provider: provider,
-                        google: profile._json
-                    })
+                if(!profile?.emails[0]?.value)
+                {
+                    let email = profile.name.familyName + profile.name.givenName + '@' + provider + '.com';
+                    user =  await new User(
+                        {
+                            username: profile.displayName, 
+                            isVerified: true,
+                            avatar: profile.photos[0].value,
+                            email:  email,
+                            provider: provider,
+                        })
+                }
+                else
+                {
+                    user =  await new User(
+                        {
+                            username: profile.displayName, 
+                            isVerified: true,
+                            avatar: profile.photos[0].value,
+                            email:  profile.emails[0].value,
+                            provider: provider,
+                        })
+                }
+                
                     
                 user.save((err) => 
                 {
@@ -246,51 +258,48 @@ exports.verifyProviderUser = async(req, res, next) =>
                     }
                 })
             }
-            else
+            else if(user)
             {
-                req.login(user, { session: false }, async(err) => 
+                if(user.provider)
                 {
-                    if(err)
+                    req.login(user, { session: false }, async(err) => 
                     {
-                        let err = new Error('Login Unsuccessfull!')
-                        err.statusCode = 400;
-                        return next(err);
-                    }
-                    else if(user.secret)
-                    {
-                        const twoFAToken = authenticate.Generate2AFToken({_id: user._id});
-                        
-                        res.header('twofa_token', twoFAToken)
-                            .status(200).json(
-                            {
-                                success: true, 
-                                twoFA: true // refirect to /totpValidate
-                            })
-                    }
-                    else
-                    {
-                        const accessToken = authenticate.GenerateAccessToken({_id: req.user._id});
-                        const refreshToken = authenticate.GenerateRefreshToken({_id: req.user._id});
-                        
-                        res.header('access_token', accessToken)
-                            .header('refresh_token', refreshToken)
-                            .cookie("refresh_token", refreshToken, 
-                            {
-                                httpOnly: true,
-                                secure: process.env.REF_JWT_SEC_COOKIE === "production"
-                            })
-                            .status(200).json(
+                        if(err)
+                        {
+                            let err = new Error('Login Unsuccessfull!')
+                            err.statusCode = 400;
+                            return next(err);
+                        }
+                        else
+                        {
+                            const accessToken = authenticate.GenerateAccessToken({_id: req.user._id});
+                            const refreshToken = authenticate.GenerateRefreshToken({_id: req.user._id});
+                            
+                            res.header('access_token', accessToken)
+                                .header('refresh_token', refreshToken)
+                                .cookie("refresh_token", refreshToken, 
                                 {
-                                    success: true,
-                                    loggedIn: true,
-                                    twoFA: false,
-                                    isAdmin: req.user.isAdmin,
-                                    status: 'Login Successful!'
-                                });
-                    }
-                })
+                                    httpOnly: true,
+                                    secure: process.env.REF_JWT_SEC_COOKIE === "production"
+                                })
+                                .status(200).json(
+                                    {
+                                        success: true,
+                                        loggedIn: true,
+                                        twoFA: false,
+                                        isAdmin: req.user.isAdmin,
+                                        status: 'Login Successful!'
+                                    });
+                        }
+                    })
+                }
+                else
+                {
+                    let err = new Error('An account with your mail address already exists without '+ provider)
+                    err.statusCode = 400;
+                    return next(err);
+                }
             }
-            
         })(req, res, next);
     }catch(err){next(err)}
     

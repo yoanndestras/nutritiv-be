@@ -43,14 +43,6 @@ const UserSchema = new Schema
     {
         type: String,
     },
-    facebook: 
-    {
-        type: Object,
-    },
-    google: 
-    {
-        type: Object,
-    },
     addressDetails:
     [
         {

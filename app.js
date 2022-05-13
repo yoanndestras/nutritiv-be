@@ -100,3 +100,9 @@ app.use((err, req, res, next) =>
 }); //ERROR HANDLING "(catch(err){next(err)})""
 
 module.exports = app;
+
+
+// categories : 
+// [
+//     muscles, growing, resistance, unique
+// ]

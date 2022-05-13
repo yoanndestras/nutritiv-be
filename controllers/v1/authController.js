@@ -147,7 +147,7 @@ exports.GooglePassport = passport.use("google", new GoogleStrategy(opts_google,
             }
             else if(user)
             {
-                return done(null, user, profile);
+                return done(null, user, false);
             }
             else
             {
@@ -174,7 +174,7 @@ exports.FacebookPassport = passport.use("facebook", new FacebookStrategy(opts_fa
             }
             else if(user)
             {
-                return done(null, user, profile);
+                return done(null, user, false);
             }
             else
             {
@@ -189,19 +189,10 @@ exports.verifyProviderUser = async(req, res, next) =>
 {
     try
     {
-        let provider, scope = [];
-
-        if((req.url.includes('google')))
-        {
-            provider = "google";
-            scope.push('email');
-            scope.push('profile');
-        }
-        else if((req.url.includes('facebook')))
-        {
-            provider = "facebook";
-            scope.push('email');
-        }
+        let provider, scope;
+        
+        req.url.includes('google') ? provider = "google" : provider = "facebook";
+        req.url.includes('google') ? scope = [ 'email', 'profile' ] : scope = [ 'email'];
         
         passport.authenticate(provider, 
         { 
@@ -212,41 +203,27 @@ exports.verifyProviderUser = async(req, res, next) =>
             if(err) {return next(err);}
             else if(!user)
             {
-                if(!profile?.emails[0]?.value)
-                {
-                    let email = profile.name.familyName + profile.name.givenName + '@' + provider + '.com';
-                    user =  await new User(
-                        {
-                            username: profile.displayName, 
-                            isVerified: true,
-                            avatar: profile.photos[0].value,
-                            email:  email,
-                            provider: provider,
-                        })
-                }
-                else
-                {
-                    user =  await new User(
-                        {
-                            username: profile.displayName, 
-                            isVerified: true,
-                            avatar: profile.photos[0].value,
-                            email:  profile.emails[0].value,
-                            provider: provider,
-                        })
-                }
+                let email;
                 
-                    
+                !profile?.emails[0]?.value
+                ? email = profile.name.familyName + profile.name.givenName + '@' + provider + '.com'
+                : email = profile.emails[0].value;
+                
+                user =  await new User(
+                    {
+                        username: profile.displayName, 
+                        isVerified: true,
+                        avatar: profile.photos[0].value,
+                        email:  email,
+                        provider: provider,
+                    })
+
                 user.save((err) => 
                 {
                     if(err)
                     {
-                        return res.status(500).json(
-                            {
-                                success: false, 
-                                status: 'Registration Failed! Please try again later!', 
-                                err: err
-                            });
+                        err.message = 'Registration Failed! Please try again later!';
+                        return next(err)
                     }
                     else
                     {
@@ -266,8 +243,7 @@ exports.verifyProviderUser = async(req, res, next) =>
                     {
                         if(err)
                         {
-                            let err = new Error('Login Unsuccessfull!')
-                            err.statusCode = 400;
+                            err.message = 'Login Unsuccessfull!', err.statusCode = 400;
                             return next(err);
                         }
                         else
@@ -287,6 +263,7 @@ exports.verifyProviderUser = async(req, res, next) =>
                                         success: true,
                                         loggedIn: true,
                                         twoFA: false,
+                                        provider: provider,
                                         isAdmin: req.user.isAdmin,
                                         status: 'Login Successful!'
                                     });
@@ -295,7 +272,7 @@ exports.verifyProviderUser = async(req, res, next) =>
                 }
                 else
                 {
-                    let err = new Error('An account with your mail address already exists without '+ provider)
+                    let err = new Error('An account with your mail address already exists without '+ provider +" please login with your nNutritiv account")
                     err.statusCode = 400;
                     return next(err);
                 }

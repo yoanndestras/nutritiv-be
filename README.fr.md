@@ -49,8 +49,12 @@ Grâce aux middlewares, les fonctionnalités de nos applications gèrent les cas
 - Les cookies *(cookieParser).*
 - Les clés secrètes *(dotenv).*
 - Les fichiers statiques *(path, fs, multer, sharp, nanoid).*
+- Le stockage de fichier sur un service web *(aws-sdk).*
+- La création et le stockage récurrent d'un fichier backup de la BDD *(cron, aws-sdk, child_process, mongodump & mongorestore).*
 - L'inscription, connexion... *(passport, passport-local, passport-jwt, jsonwebtoken).*
-- L'envoi de mails *(sgMail, mailer, email_validator)*
+- La connexion à double facteur *(speakeasy, qrcode).*
+- La connexion via Google et Facebook *(passport-facebook, passport-google-oauth20).*
+- L'envoi de mails *(sgMail, mailer, email_validator).*
 - Les procédures de paiement *(stripe).*
 
 Pour installer un nouveau middleware, il faut entrer dans le terminal : 

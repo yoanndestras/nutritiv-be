@@ -175,9 +175,9 @@ exports.sendNewOrder = async(req, res, next) =>
         const orderDetails = order.orderDetails[0];
         sgMail.setApiKey(process.env.SENDGRID_API_KEY);
         
-        const total = parseFloat(order.amount.value) + 4.95;
+        const total = parseFloat(order.amount.value + 4.95) ;
         const email = req.user.email, username = req.user.username;
-
+        
         const mailContent = 
         {
             to: email,
@@ -246,37 +246,26 @@ exports.orderDelivered = async(req, res, next) =>
     try
     {   
         sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-        
-        const email = req.user.email, username = req.user.username, order = req.order;
+        const email = req.user.email, username = req.user.username, order = req.order,  date = new Date();
+
         const mailContent = 
         {
             to: email,
-            from: {
+            from: 
+            {
                 email: "nutritivshop@gmail.com",
                 name : "Nutritiv"
             },
-            subject:"Your order has been delivered!",
-            html : `
-            <div style="width: 100%; background-color: #F6F9FC; font-size: 15px ;font-family: -apple-system, 
-                BlinkMacSystemFont,'Segoe UI', Roboto, 'Helvetica Neue', Ubuntu, sans-serif; color: rgb(82, 95, 127) !important">
-                <div style="max-width: 500px;margin: auto; padding: 50px; background-color:white">
-                    <h1 style="font-size:2em; color: #00A8F3">Nutritiv</h1>
-                    <hr>
-                    <p>Hello, ${username}</p>
-                    <p>Thank you for your order, your order ${order._id} has been successfully delivered by "Shipping Company"<br><br>
-                    <p>Delivered at : ${order.orderDetails}</p>
-                    <p>The time you received is : ${new Date()}</p>
-                    <hr>
-                    Thanks,<br>
-                    </p>
-                
-                    <p>Nutritiv</p>
-                    <hr>
-                    <p style="font-size: 0.75em; color: #88B4D6">Nutritiv, 245 Rue du Tilleul, Paris, France</p>
-                </div>
-            </div>
-            `
+            templateId: 'd-1d060cd5e94843abacf710623dbe9d7a',
+            dynamicTemplateData: 
+            {
+                "order" : order,
+                "username" : username,
+                "email" : email,
+                "date": date
+            },
         }   
+        
         await sgMail.send(mailContent)
         next();
     }catch(err){next(err)}

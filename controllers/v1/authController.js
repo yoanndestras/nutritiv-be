@@ -295,8 +295,9 @@ exports.verifyProviderUser = async(req, res, next) =>
                         '/?status=failed' +
                         '&message=An account with your mail address already exists without '+
                         provider +
-                        'please login with your Nutritiv account' +
-                        '&statusCode=400'
+                        ' please login with your Nutritiv account' +
+                        '&statusCode=400' +
+                        '&username=' + user.username
                         )
                 }
             }

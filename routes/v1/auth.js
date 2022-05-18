@@ -51,7 +51,7 @@ router.get('/login/failed', (req, res, next) =>
 })
 
 // LOGIN SUCCESS WITH PROVIDER
-router.get('/login/validateOauth', auth.verifyUserQuery, (req, res, next) =>
+router.get('/login/validateOauth', cors.corsWithOptions, auth.verifyUserQuery, (req, res, next) =>
 {
     
     const accessToken = auth.GenerateAccessToken({_id: req.user._id});

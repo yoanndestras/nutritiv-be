@@ -274,7 +274,9 @@ exports.verifyProviderUser = async(req, res, next) =>
                         {
                             const accessToken = authenticate.GenerateAccessToken({_id: req.user._id});                            
                             
-                            res.redirect(process.env.SERVER_ADDRESS + '/v1/auth/login/success/?accessToken=' + accessToken);
+                            // res.redirect(process.env.SERVER_ADDRESS + '/v1/auth/login/success/?accessToken=' + accessToken);
+                            res.redirect(process.env.SERVER_ADDRESS)
+                            
                         }
                     })
                 }

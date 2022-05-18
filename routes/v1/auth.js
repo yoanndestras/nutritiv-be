@@ -56,16 +56,11 @@ router.get('/login/success', auth.verifyUserQuery, (req, res, next) =>
 
     const accessToken = auth.GenerateAccessToken({_id: req.user._id});
     const refreshToken = auth.GenerateRefreshToken({_id: req.user._id});
-
+    
     if(req.user)
     {
         res.header('access_token', accessToken)
         .header('refresh_token', refreshToken)
-        // .cookie("refresh_token", refreshToken, 
-        // {
-        //     httpOnly: true,
-        //     secure: process.env.REF_JWT_SEC_COOKIE === "production"
-        // })
         .status(200).json(
             {
                 success: true,

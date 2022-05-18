@@ -13,7 +13,6 @@ async(req, res, next)  =>
   try
   {
     const userId = req.user._id;
-    const userEmail = req.user.email;
     const cart = await Cart.findOne({userId : userId});
 
     if(cart)

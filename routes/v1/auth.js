@@ -19,7 +19,7 @@ router.get('/google', (req, res, next) =>
     passport.authenticate('google', 
     { 
         session: false,
-        scope: [ 'email', 'profile' ] 
+        scope: [ 'email', 'profile' ]
     })(req, res, next);
 });
 
@@ -38,6 +38,54 @@ router.get('/facebook', (req, res, next) =>
 
 //FACEBOOK AUTH CALLBACK
 router.get('/facebook/callback', auth.verifyProviderUser, (req, res, next) => {});
+
+
+// LOGIN FAIL WITH PROVIDER
+router.get('/login/failed', (req, res, next) =>
+{
+    res.status(401).json(
+        {
+            success : false,
+            status : 'Authentication failed'
+        });
+})
+
+// LOGIN SUCCESS WITH PROVIDER
+router.get('/login/success', auth.verifyUserQuery, (req, res, next) =>
+{
+
+    const accessToken = auth.GenerateAccessToken({_id: req.user._id});
+    const refreshToken = auth.GenerateRefreshToken({_id: req.user._id});
+
+    if(req.user)
+    {
+        res.header('access_token', accessToken)
+        .header('refresh_token', refreshToken)
+        // .cookie("refresh_token", refreshToken, 
+        // {
+        //     httpOnly: true,
+        //     secure: process.env.REF_JWT_SEC_COOKIE === "production"
+        // })
+        .status(200).json(
+            {
+                success: true,
+                loggedIn: true,
+                twoFA: false,
+                isAdmin: req.user.isAdmin,
+                status: 'Login Successful!'
+            });
+    }
+    else
+    {
+        res.status(500).json(
+            {
+                success : false,
+                status : 'Authentication failed'
+            });
+    }
+    
+
+})
 
 //FORGET PASSWORD EMAIL
 router.get("/forget_pwd", auth.verifyEmailExist, mailer.sendForgetPassword, async(req, res, next) =>

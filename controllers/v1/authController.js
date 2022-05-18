@@ -46,6 +46,29 @@ exports.jwtPassport = passport.use("jwt", new JwtStrategy(opts, (jwtPayload, don
         })
 }));
 
+const opts_query = {}; //json web token and key
+opts_query.jwtFromRequest = ExtractJwt.fromUrlQueryParameter("accessToken");
+opts_query.secretOrKey = process.env.JWT_SEC;
+
+exports.jwtPassport = passport.use("jwt_query", new JwtStrategy(opts_query, (jwtPayload, done) =>
+{
+    User.findOne({_id: jwtPayload._id}, (err, user) =>
+        {                
+            if(err)
+            {
+                return done(err, false);
+            }
+            else if(user)
+            {
+                return done(null, user);
+            }
+            else
+            {
+                return done(null, false);
+            }
+        })
+}));
+
 const cookieExtractor = function(req) 
 {
     let token = null;
@@ -197,7 +220,8 @@ exports.verifyProviderUser = async(req, res, next) =>
         passport.authenticate(provider, 
         { 
             session: false,
-            scope: scope
+            scope: scope,
+            failureRedirect: '/login/failed'
         }, async(err, user, profile) => 
         {            
             if(err) {return next(err);}
@@ -217,7 +241,7 @@ exports.verifyProviderUser = async(req, res, next) =>
                         email:  email,
                         provider: provider,
                     })
-
+                
                 user.save((err) => 
                 {
                     if(err)
@@ -248,25 +272,9 @@ exports.verifyProviderUser = async(req, res, next) =>
                         }
                         else
                         {
-                            const accessToken = authenticate.GenerateAccessToken({_id: req.user._id});
-                            const refreshToken = authenticate.GenerateRefreshToken({_id: req.user._id});
+                            const accessToken = authenticate.GenerateAccessToken({_id: req.user._id});                            
                             
-                            res.header('access_token', accessToken)
-                                .header('refresh_token', refreshToken)
-                                .cookie("refresh_token", refreshToken, 
-                                {
-                                    httpOnly: true,
-                                    secure: process.env.REF_JWT_SEC_COOKIE === "production"
-                                })
-                                .status(200).json(
-                                    {
-                                        success: true,
-                                        loggedIn: true,
-                                        twoFA: false,
-                                        provider: provider,
-                                        isAdmin: req.user.isAdmin,
-                                        status: 'Login Successful!'
-                                    });
+                            res.redirect(process.env.SERVER_ADDRESS + '/v1/auth/login/success/?accessToken=' + accessToken);
                         }
                     })
                 }
@@ -367,6 +375,30 @@ exports.verifyUser = (req, res, next) =>
     })(req, res, next); 
 };
 
+exports.verifyUserQuery = (req, res, next) => 
+{
+    passport.authenticate('jwt_query', { session: false }, (err, user, info) => 
+    {
+        if (err || !user) 
+        {               
+            req.statusCode = 401;
+            req.user = "error";
+            return next();
+        }
+        else if (user.isVerified === false)
+        {
+            let err = new Error('You account has not been verified. Please check your email to verify your account');
+            err.statusCode = 401;
+            return next(err);
+        }
+        else
+        {
+            req.user = user;
+            return next();
+        }
+    })(req, res, next); 
+};
+
 exports.verifyUserCart = (req, res, next) => 
 {
     
@@ -413,12 +445,12 @@ exports.verifyRefresh = (req, res, next) =>
                 res
                     .header('access_token', accessToken)
                     .header('refresh_token', refreshToken)
-                    .cookie("refresh_token", refreshToken, 
-                        {
-                            httpOnly: true,
-                            secure: process.env.REF_JWT_SEC_COOKIE === "prod"
-                            //sameSite: "Lax"
-                        })
+                    // .cookie("refresh_token", refreshToken, 
+                    //     {
+                    //         httpOnly: true,
+                    //         secure: process.env.REF_JWT_SEC_COOKIE === "prod"
+                    //         //sameSite: "Lax"
+                    //     })
                 
                 req.user = user;
                 next();

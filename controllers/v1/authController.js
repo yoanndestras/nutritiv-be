@@ -247,16 +247,16 @@ exports.verifyProviderUser = async(req, res, next) =>
                     {
                         res.redirect(process.env.SERVER_ADDRESS + 
                             '/?success=false' +
-                            '/?message=Registration Failed! Please try again later!'+
-                            '/?statusCode=500'
+                            '&message=Registration Failed! Please try again later!'+
+                            '&statusCode=500'
                             )
                     }
                     else
                     {
                         res.redirect(process.env.SERVER_ADDRESS + 
                             '/?success=true' +
-                            '/?message=Registration Successfull!'+
-                            '/?statusCode=201'
+                            '&message=Registration Successfull!'+
+                            '&statusCode=201'
                             )
                     }
                 })
@@ -271,8 +271,8 @@ exports.verifyProviderUser = async(req, res, next) =>
                         {
                             res.redirect(process.env.SERVER_ADDRESS + 
                                 '/?success=false' +
-                                '/?message=Login Unsuccessfull!'+
-                                '/?statusCode=400'
+                                '&message=Login Unsuccessfull!'+
+                                '&statusCode=400'
                                 )
                         }
                         else
@@ -282,7 +282,7 @@ exports.verifyProviderUser = async(req, res, next) =>
                             // res.redirect(process.env.SERVER_ADDRESS + '/v1/auth/login/success/?accessToken=' + accessToken);
                             res.redirect(process.env.SERVER_ADDRESS + 
                                 '/?success=true' + 
-                                '/?accessToken=' + accessToken)
+                                '&accessToken=' + accessToken)
                             
                         }
                     })
@@ -291,10 +291,10 @@ exports.verifyProviderUser = async(req, res, next) =>
                 {
                     res.redirect(process.env.SERVER_ADDRESS + 
                         '/?success=false' +
-                        '/?message=An account with your mail address already exists without '+
+                        '&message=An account with your mail address already exists without '+
                         provider +
                         'please login with your Nutritiv account' +
-                        '/?statusCode=400'
+                        '&statusCode=400'
                         )
                 }
             }

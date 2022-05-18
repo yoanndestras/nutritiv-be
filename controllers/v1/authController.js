@@ -274,7 +274,7 @@ exports.verifyProviderUser = async(req, res, next) =>
                             res.redirect(process.env.SERVER_ADDRESS + 
                                 '/?status=failed' +
                                 '&message=Login Unsuccessfull!'+
-                                '&statusCode=400'
+                                '&statusCode=500'
                                 )
                         }
                         else
@@ -304,7 +304,7 @@ exports.verifyProviderUser = async(req, res, next) =>
     }catch(err)
     {
         res.redirect(process.env.SERVER_ADDRESS + 
-            '/?success=false' +
+            '/?status=failed' +
             '/?message=Registration Failed! Please try again later!'+
             '/?statusCode=500'
             )

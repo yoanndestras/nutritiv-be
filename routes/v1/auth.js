@@ -40,16 +40,6 @@ router.get('/facebook', (req, res, next) =>
 router.get('/facebook/callback', auth.verifyProviderUser, (req, res, next) => {});
 
 
-// LOGIN FAIL WITH PROVIDER
-router.get('/login/failed', (req, res, next) =>
-{
-    res.status(401).json(
-        {
-            success : false,
-            status : 'Authentication failed'
-        });
-})
-
 // LOGIN SUCCESS WITH PROVIDER
 router.get('/login/validateOauth', cors.corsWithOptions, auth.verifyUserQuery, (req, res, next) =>
 {

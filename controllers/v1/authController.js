@@ -220,8 +220,7 @@ exports.verifyProviderUser = async(req, res, next) =>
         passport.authenticate(provider, 
         { 
             session: false,
-            scope: scope,
-            failureRedirect: '/login/failed'
+            scope: scope
         }, async(err, user, profile) => 
         {            
             if(err) {return next(err);}
@@ -246,16 +245,19 @@ exports.verifyProviderUser = async(req, res, next) =>
                 {
                     if(err)
                     {
-                        err.message = 'Registration Failed! Please try again later!';
-                        return next(err)
+                        res.redirect(process.env.SERVER_ADDRESS + 
+                            '/?success=false' +
+                            '/?message=Registration Failed! Please try again later!'+
+                            '/?statusCode=500'
+                            )
                     }
                     else
                     {
-                        return res.status(201).json(
-                            {
-                                success: true, 
-                                status: 'Registration Successfull!'
-                            });
+                        res.redirect(process.env.SERVER_ADDRESS + 
+                            '/?success=true' +
+                            '/?message=Registration Successfull!'+
+                            '/?statusCode=201'
+                            )
                     }
                 })
             }
@@ -267,28 +269,44 @@ exports.verifyProviderUser = async(req, res, next) =>
                     {
                         if(err)
                         {
-                            err.message = 'Login Unsuccessfull!', err.statusCode = 400;
-                            return next(err);
+                            res.redirect(process.env.SERVER_ADDRESS + 
+                                '/?success=false' +
+                                '/?message=Login Unsuccessfull!'+
+                                '/?statusCode=400'
+                                )
                         }
                         else
                         {
                             const accessToken = authenticate.GenerateAccessToken({_id: req.user._id});                            
                             
                             // res.redirect(process.env.SERVER_ADDRESS + '/v1/auth/login/success/?accessToken=' + accessToken);
-                            res.redirect(process.env.SERVER_ADDRESS)
+                            res.redirect(process.env.SERVER_ADDRESS + 
+                                '/?success=true' + 
+                                '/?accessToken=' + accessToken)
                             
                         }
                     })
                 }
                 else
                 {
-                    let err = new Error('An account with your mail address already exists without '+ provider +" please login with your nNutritiv account")
-                    err.statusCode = 400;
-                    return next(err);
+                    res.redirect(process.env.SERVER_ADDRESS + 
+                        '/?success=false' +
+                        '/?message=An account with your mail address already exists without '+
+                        provider +
+                        'please login with your Nutritiv account' +
+                        '/?statusCode=400'
+                        )
                 }
             }
         })(req, res, next);
-    }catch(err){next(err)}
+    }catch(err)
+    {
+        res.redirect(process.env.SERVER_ADDRESS + 
+            '/?success=false' +
+            '/?message=Registration Failed! Please try again later!'+
+            '/?statusCode=500'
+            )
+    }
     
 }
 

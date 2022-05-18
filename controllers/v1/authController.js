@@ -246,16 +246,18 @@ exports.verifyProviderUser = async(req, res, next) =>
                     if(err)
                     {
                         res.redirect(process.env.SERVER_ADDRESS + 
-                            '/?success=false' +
+                            '/?status=failed' +
                             '&message=Registration Failed! Please try again later!'+
                             '&statusCode=500'
                             )
                     }
                     else
                     {
+                        const accessToken = authenticate.GenerateAccessToken({_id: user._id});                            
+                        
                         res.redirect(process.env.SERVER_ADDRESS + 
-                            '/?success=true' +
-                            '&message=Registration Successfull!'+
+                            '/?status=successRegistration' + 
+                            '&accessToken=' + accessToken + 
                             '&statusCode=201'
                             )
                     }
@@ -270,7 +272,7 @@ exports.verifyProviderUser = async(req, res, next) =>
                         if(err)
                         {
                             res.redirect(process.env.SERVER_ADDRESS + 
-                                '/?success=false' +
+                                '/?status=failed' +
                                 '&message=Login Unsuccessfull!'+
                                 '&statusCode=400'
                                 )
@@ -279,18 +281,18 @@ exports.verifyProviderUser = async(req, res, next) =>
                         {
                             const accessToken = authenticate.GenerateAccessToken({_id: req.user._id});                            
                             
-                            // res.redirect(process.env.SERVER_ADDRESS + '/v1/auth/login/success/?accessToken=' + accessToken);
                             res.redirect(process.env.SERVER_ADDRESS + 
-                                '/?success=true' + 
-                                '&accessToken=' + accessToken)
-                            
+                                '/?status=successLogin' + 
+                                '&accessToken=' + accessToken + 
+                                '&statusCode=200'
+                            )
                         }
                     })
                 }
                 else
                 {
                     res.redirect(process.env.SERVER_ADDRESS + 
-                        '/?success=false' +
+                        '/?status=failed' +
                         '&message=An account with your mail address already exists without '+
                         provider +
                         'please login with your Nutritiv account' +

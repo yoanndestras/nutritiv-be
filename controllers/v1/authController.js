@@ -189,6 +189,9 @@ opts_facebook.profileFields = ['emails', 'name','displayName','photos'];
 exports.FacebookPassport = passport.use("facebook", new FacebookStrategy(opts_facebook, 
     (accessToken, refreshToken, profile, done) =>
     {        
+        let picture = profile?.photos[0]?.value ? `https://graph.facebook.com/${profile.id}/picture?width=200&height=200` : null;
+        profile.photos[0].value = picture ? picture : 'PrPhdefaultAvatar.jpg';
+        
         User.findOne({ email: profile?.emails[0]?.value}, (err, user) =>
         {
             if(err)
@@ -267,6 +270,7 @@ exports.verifyProviderUser = async(req, res, next) =>
             {
                 if(user.provider)
                 {
+                    console.log(`profile = `, profile)
                     req.login(user, { session: false }, async(err) => 
                     {
                         if(err)

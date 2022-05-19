@@ -52,6 +52,10 @@ async(req, res, next)  =>
         mode: 'payment',
         success_url: process.env.SERVER_ADDRESS + '/success',
         cancel_url: process.env.SERVER_ADDRESS + '/cancel',
+        billing_address_collection: "required",
+        shipping_address_collection: {
+          allowed_countries: ['US', 'CA', 'FR', 'PT', 'ES']
+        },
       });
     
       res.status(200).json(

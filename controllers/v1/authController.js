@@ -191,7 +191,7 @@ exports.FacebookPassport = passport.use("facebook", new FacebookStrategy(opts_fa
     {        
         let picture = profile?.photos[0]?.value ? `https://graph.facebook.com/${profile.id}/picture?width=200&height=200`+ "&access_token=" + accessToken : null;
         profile.photos[0].value = picture ? picture : 'PrPhdefaultAvatar.jpg';
-        
+
         User.findOne({ email: profile?.emails[0]?.value}, (err, user) =>
         {
             if(err)
@@ -260,6 +260,7 @@ exports.verifyProviderUser = async(req, res, next) =>
                         
                         res.redirect(process.env.SERVER_ADDRESS + 
                             '/?status=successRegistration' + 
+                            '&message=Registration successfull! Connect to your new account!'+
                             '&accessToken=' + accessToken + 
                             '&statusCode=201'
                             )

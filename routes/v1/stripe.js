@@ -14,7 +14,7 @@ async(req, res, next)  =>
   {
     const userId = req.user._id;
     const cart = await Cart.findOne({userId : userId});
-    
+
     if(cart)
     {
       let line_items =  await Promise.all(cart.products.map(
@@ -50,8 +50,12 @@ async(req, res, next)  =>
       const session = await stripe.checkout.sessions.create({
         line_items,
         mode: 'payment',
-        success_url: 'http://192.168.1.23:3000/success',
-        cancel_url: 'http://192.168.1.23:3000/cancel',
+        success_url: process.env.SERVER_ADDRESS + '/success',
+        cancel_url: process.env.SERVER_ADDRESS + '/cancel',
+        billing_address_collection: "required",
+        shipping_address_collection: {
+          allowed_countries: ['US', 'CA', 'FR', 'PT', 'ES']
+        },
       });
     
       res.status(200).json(

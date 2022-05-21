@@ -38,7 +38,7 @@ const io = require("socket.io")(http,
             const originWhitelist = whitelist.some((origin) => origin === req.headers.origin);
             callback(null, originWhitelist);
         },
-        cors: 
+        cors:
         {
             methods: ["GET", "POST"],
             credentials: true
@@ -79,8 +79,8 @@ app.use(
         })
     ) // LIMIT SPAM REQUESTS TO MAX PER MILLISECONDS
 app.use(express.static(path.join(__dirname, 'public'))); // USE STATIC FILES ON PUBLIC FOLDER
-app.use(express.static(path.join(__dirname, "/client/build"))); // STATIC FILES FOR FRONT-END APP
-app.get("*", (req, res) =>{res.sendFile(path.join(__dirname, "/client/build", "index.html"))});
+// app.use(express.static(path.join(__dirname, "/client/build"))); // STATIC FILES FOR FRONT-END APP
+// app.get("*", (req, res) =>{res.sendFile(path.join(__dirname, "/client/build", "index.html"))});
 
 app.use((err, req, res, next) =>
 {
@@ -100,3 +100,9 @@ app.use((err, req, res, next) =>
 }); //ERROR HANDLING "(catch(err){next(err)})""
 
 module.exports = app;
+
+
+// categories : 
+// [
+//     muscles, growing, resistance, unique
+// ]

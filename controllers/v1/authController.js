@@ -3,6 +3,9 @@ const authenticate = require("./authController");
 const express = require('express');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const FacebookStrategy = require('passport-facebook').Strategy;
+const GitHubStrategy = require('passport-github').Strategy;
 const User = require('../../models/User');
 const email_validator = require("email-validator");
 
@@ -26,6 +29,29 @@ opts.jwtFromRequest = ExtractJwt.fromHeader("access_token");
 opts.secretOrKey = process.env.JWT_SEC;
 
 exports.jwtPassport = passport.use("jwt", new JwtStrategy(opts, (jwtPayload, done) =>
+{
+    User.findOne({_id: jwtPayload._id}, (err, user) =>
+        {                
+            if(err)
+            {
+                return done(err, false);
+            }
+            else if(user)
+            {
+                return done(null, user);
+            }
+            else
+            {
+                return done(null, false);
+            }
+        })
+}));
+
+const opts_query = {}; //json web token and key
+opts_query.jwtFromRequest = ExtractJwt.fromUrlQueryParameter("accessToken");
+opts_query.secretOrKey = process.env.JWT_SEC;
+
+exports.jwtPassport = passport.use("jwt_query", new JwtStrategy(opts_query, (jwtPayload, done) =>
 {
     User.findOne({_id: jwtPayload._id}, (err, user) =>
         {                
@@ -129,6 +155,208 @@ exports.TwoFAjwtPassport = passport.use("2fa_jwt", new JwtStrategy(opts_2fa, (jw
         })
 }));
 
+const opts_google = {};
+opts_google.clientID = process.env.GOOGLE_CLIENT_ID;
+opts_google.clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+opts_google.callbackURL = "http://localhost:3001/v1/auth/google/callback";
+
+exports.GooglePassport = passport.use("google", new GoogleStrategy(opts_google, 
+    (accessToken, refreshToken, profile, done) =>
+    {
+        User.findOne({ email: profile?.emails[0]?.value}, (err, user) =>
+        {
+            if(err)
+            {
+                return done(err, false, false);
+            }
+            else if(user)
+            {
+                return done(null, user, false);
+            }
+            else
+            {
+                return done(null, false, profile);
+            }
+        })
+    }
+))
+
+const opts_facebook = {};
+opts_facebook.clientID = process.env.FACEBOOK_APP_ID;
+opts_facebook.clientSecret = process.env.FACEBOOK_APP_SECRET;
+opts_facebook.callbackURL = "http://localhost:3001/v1/auth/facebook/callback";
+opts_facebook.profileFields = ['emails', 'name','displayName','photos'];
+
+exports.FacebookPassport = passport.use("facebook", new FacebookStrategy(opts_facebook, 
+    (accessToken, refreshToken, profile, done) =>
+    {        
+        let picture = profile?.photos[0]?.value ? `https://graph.facebook.com/${profile.id}/picture?width=200&height=200`+ "&access_token=" + accessToken : null;
+        profile.photos[0].value = picture ? picture : 'PrPhdefaultAvatar.jpg';
+
+        User.findOne({ email: profile?.emails[0]?.value}, (err, user) =>
+        {
+            if(err)
+            {
+                return done(err, false, false);
+            }
+            else if(user)
+            {
+                return done(null, user, false);
+            }
+            else
+            {
+                return done(null, false, profile);
+            }
+        })
+    }
+))
+
+const opts_github = {};
+opts_github.clientID = process.env.GITHUB_CLIENT_ID;
+opts_github.clientSecret = process.env.GITHUB_CLIENT_SECRET;
+opts_github.callbackURL = "http://localhost:3001/v1/auth/github/callback";
+
+exports.GithubPassport = passport.use("github", new GitHubStrategy(opts_github, 
+    (accessToken, refreshToken, profile, done) =>
+    {        
+        console.log(`profile = `, profile)
+        console.log(`profile.email = `, profile.emails)
+        
+        
+        User.findOne({ email: profile.emails}, (err, user) =>
+        {
+            if(err)
+            {
+                return done(err, false, false);
+            }
+            else if(user)
+            {
+                return done(null, user, false);
+            }
+            else
+            {
+                return done(null, false, profile);
+            }
+        })
+    }
+))
+
+// VERIFY GOOGLE USER
+exports.verifyProviderUser = async(req, res, next) =>
+{
+    try
+    {
+        let provider, scope;
+        
+        req.url.includes('google') 
+        ? provider = "google" 
+        : req.url.includes('facebook') 
+        ? provider = "facebook" 
+        : provider = "github";
+        
+        req.url.includes('google') 
+        ? scope = [ 'email', 'profile' ]
+        : req.url.includes('facebook') 
+        ? scope = [ 'email']
+        : scope = [ 'user:email'];
+        
+        passport.authenticate(provider, 
+        { 
+            session: false,
+            scope: scope
+        }, async(err, user, profile) => 
+        {            
+            if(err) {return next(err);}
+            else if(!user)
+            {
+                let email;
+                
+                !profile?.emails[0]?.value 
+                ? email = profile.name.familyName + profile.name.givenName + '@' + provider + '.com'
+                : email = profile.emails[0].value;
+                
+                user =  await new User(
+                    {
+                        username: profile.displayName, 
+                        isVerified: true,
+                        avatar: profile.photos[0].value,
+                        email:  email,
+                        provider: provider,
+                    })
+                
+                user.save((err) => 
+                {
+                    if(err)
+                    {
+                        res.redirect(process.env.SERVER_ADDRESS + 
+                            '/?status=failed' +
+                            '&message=Registration Failed! Please try again later!'+
+                            '&statusCode=500'
+                            )
+                    }
+                    else
+                    {
+                        const accessToken = authenticate.GenerateAccessToken({_id: user._id});                            
+                        
+                        res.redirect(process.env.SERVER_ADDRESS + 
+                            '/?status=successRegistration' + 
+                            '&message=Registration successfull! Connect to your new account!'+
+                            '&accessToken=' + accessToken + 
+                            '&statusCode=201'
+                            )
+                    }
+                })
+            }
+            else if(user)
+            {
+                if(user.provider)
+                {
+                    req.login(user, { session: false }, async(err) => 
+                    {
+                        if(err)
+                        {
+                            res.redirect(process.env.SERVER_ADDRESS + 
+                                '/?status=failed' +
+                                '&message=Login Unsuccessfull!'+
+                                '&statusCode=500'
+                                )
+                        }
+                        else
+                        {
+                            const accessToken = authenticate.GenerateAccessToken({_id: req.user._id});                            
+                            
+                            res.redirect(process.env.SERVER_ADDRESS + 
+                                '/?status=successLogin' + 
+                                '&accessToken=' + accessToken + 
+                                '&statusCode=200'
+                            )
+                        }
+                    })
+                }
+                else
+                {
+                    res.redirect(process.env.SERVER_ADDRESS + 
+                        '/?status=failed' +
+                        '&message=An account with your mail address already exists without '+
+                        provider +
+                        ' please login with your Nutritiv account' +
+                        '&statusCode=400' +
+                        '&username=' + user.username
+                        )
+                }
+            }
+        })(req, res, next);
+    }catch(err)
+    {
+        res.redirect(process.env.SERVER_ADDRESS + 
+            '/?status=failed' +
+            '/?message=Registration Failed! Please try again later!'+
+            '/?statusCode=500'
+            )
+    }
+    
+}
+
 // VERIFY PRIVILEGES
 exports.verifyAdmin = function(req, res, next)
 {
@@ -214,6 +442,30 @@ exports.verifyUser = (req, res, next) =>
     })(req, res, next); 
 };
 
+exports.verifyUserQuery = (req, res, next) => 
+{
+    passport.authenticate('jwt_query', { session: false }, (err, user, info) => 
+    {
+        if (err || !user) 
+        {               
+            req.statusCode = 401;
+            req.user = "error";
+            return next();
+        }
+        else if (user.isVerified === false)
+        {
+            let err = new Error('You account has not been verified. Please check your email to verify your account');
+            err.statusCode = 401;
+            return next(err);
+        }
+        else
+        {
+            req.user = user;
+            return next();
+        }
+    })(req, res, next); 
+};
+
 exports.verifyUserCart = (req, res, next) => 
 {
     
@@ -261,12 +513,12 @@ exports.verifyRefresh = (req, res, next) =>
                 res
                     .header('access_token', accessToken)
                     .header('refresh_token', refreshToken)
-                    .cookie("refresh_token", refreshToken, 
-                        {
-                            httpOnly: true,
-                            secure: process.env.REF_JWT_SEC_COOKIE === "prod"
-                            //sameSite: "Lax"
-                        })
+                    // .cookie("refresh_token", refreshToken, 
+                    //     {
+                    //         httpOnly: true,
+                    //         secure: process.env.REF_JWT_SEC_COOKIE === "prod"
+                    //         //sameSite: "Lax"
+                    //     })
                 
                 req.user = user;
                 next();

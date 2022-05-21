@@ -82,12 +82,16 @@ order.newOrder, async (req, res, next) =>
 {    
     try
     {
-        setTimeout(() => {mailer.sendNewOrder(req, res, next);}, 5000);
-        setTimeout(() => {mailer.orderShipping(req, res, next);}, 15000);
-        setTimeout(() => {mailer.orderDelivered(req, res, next);}, 25000);
-
         if(req.cart === true)
         {
+            setTimeout(() => {mailer.sendNewOrder(req, res, next);}, 5000);
+            setTimeout(() => {mailer.orderShipping(req, res, next);}, 15000);
+            setTimeout(() => {mailer.orderDelivered(req, res, next);}, 25000);
+            
+            const order = await Order.findById(req.order._id);
+            order.status = "delivered";
+            await order.save();
+
             res.status(200).json(
                 {
                     success: true,

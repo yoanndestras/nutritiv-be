@@ -28,17 +28,20 @@ const UserSchema = new Schema
     {
         type: Boolean,
         default: false,
-        required: true
     },
     isVerified:
     {
         type: Boolean,
-        default: false
+        default: false,
     },
     avatar:
     {
         type: String,
         default: 'PrPhdefaultAvatar.jpg'
+    },
+    provider:
+    {
+        type: String,
     },
     addressDetails:
     [
@@ -69,7 +72,7 @@ const UserSchema = new Schema
     {
         type: Number,
         immutable: true,
-        default: 1,
+        default: 2,
     },
 },
 {

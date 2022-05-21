@@ -47,8 +47,7 @@ exports.resizeUserAvatar = async(req, res, next) =>
     
     next();
   }catch(err) {next(err);}
-  
-};
+}
 
 exports.addUserAvatar = async(req, res, next) =>
 {

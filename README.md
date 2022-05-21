@@ -53,8 +53,12 @@ Thanks to middlewares, our application features handle differents scenario :
 - Cookies *(cookieParser).*
 - SecretKeys *(dotenv).*
 - Static files *(path, fs, multer, sharp, nanoid).*
+- File storage on a web service *(aws-sdk).*
+- BDD backup file recurrent storage and upload *(cron, aws-sdk, child_process, mongodump & mongorestore).*
 - Registration, authentification... *(passport, passport-local, passport-jwt, jsonwebtoken).*
-- Mails *(sgMail, mailer, email_validator)*
+- 2FA authentication *(speakeasy, qrcode).*
+- Google and Facebook authentication *(passport-facebook, passport-google-oauth20).*
+- Mails *(sgMail, mailer, email_validator).*
 - Payment *(stripe).*
 
 To install a new middleware go in terminal :

@@ -39,6 +39,18 @@ router.get('/facebook', (req, res, next) =>
 //FACEBOOK AUTH CALLBACK
 router.get('/facebook/callback', auth.verifyProviderUser, (req, res, next) => {});
 
+//GITHUB AUTH
+router.get('/github', (req, res, next) => 
+{
+    passport.authenticate('github', 
+    { 
+        session: false,
+        scope : ['user:email']
+    })(req, res, next);
+});
+
+//GITHUB AUTH CALLBACK
+router.get('/github/callback', auth.verifyProviderUser, (req, res, next) => {});
 
 // LOGIN SUCCESS WITH PROVIDER
 router.get('/login/validateOauth', cors.corsWithOptions, auth.verifyUserQuery, (req, res, next) =>

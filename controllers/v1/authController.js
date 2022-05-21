@@ -5,6 +5,7 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const FacebookStrategy = require('passport-facebook').Strategy;
+const GitHubStrategy = require('passport-github').Strategy;
 const User = require('../../models/User');
 const email_validator = require("email-validator");
 
@@ -210,6 +211,36 @@ exports.FacebookPassport = passport.use("facebook", new FacebookStrategy(opts_fa
     }
 ))
 
+const opts_github = {};
+opts_github.clientID = process.env.GITHUB_CLIENT_ID;
+opts_github.clientSecret = process.env.GITHUB_CLIENT_SECRET;
+opts_github.callbackURL = "http://localhost:3001/v1/auth/github/callback";
+
+exports.GithubPassport = passport.use("github", new GitHubStrategy(opts_github, 
+    (accessToken, refreshToken, profile, done) =>
+    {        
+        console.log(`profile = `, profile)
+        console.log(`profile.email = `, profile.emails)
+        
+        
+        User.findOne({ email: profile.emails}, (err, user) =>
+        {
+            if(err)
+            {
+                return done(err, false, false);
+            }
+            else if(user)
+            {
+                return done(null, user, false);
+            }
+            else
+            {
+                return done(null, false, profile);
+            }
+        })
+    }
+))
+
 // VERIFY GOOGLE USER
 exports.verifyProviderUser = async(req, res, next) =>
 {
@@ -217,8 +248,17 @@ exports.verifyProviderUser = async(req, res, next) =>
     {
         let provider, scope;
         
-        req.url.includes('google') ? provider = "google" : provider = "facebook";
-        req.url.includes('google') ? scope = [ 'email', 'profile' ] : scope = [ 'email'];
+        req.url.includes('google') 
+        ? provider = "google" 
+        : req.url.includes('facebook') 
+        ? provider = "facebook" 
+        : provider = "github";
+        
+        req.url.includes('google') 
+        ? scope = [ 'email', 'profile' ]
+        : req.url.includes('facebook') 
+        ? scope = [ 'email']
+        : scope = [ 'user:email'];
         
         passport.authenticate(provider, 
         { 
@@ -231,7 +271,7 @@ exports.verifyProviderUser = async(req, res, next) =>
             {
                 let email;
                 
-                !profile?.emails[0]?.value
+                !profile?.emails[0]?.value 
                 ? email = profile.name.familyName + profile.name.givenName + '@' + provider + '.com'
                 : email = profile.emails[0].value;
                 
@@ -271,7 +311,6 @@ exports.verifyProviderUser = async(req, res, next) =>
             {
                 if(user.provider)
                 {
-                    console.log(`profile = `, profile)
                     req.login(user, { session: false }, async(err) => 
                     {
                         if(err)

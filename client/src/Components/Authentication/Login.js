@@ -8,8 +8,9 @@ import React, {
 } from 'react';
 import { useDispatch } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
-import nutritivApi from '../Api/nutritivApi';
-import { updateUser, updateUserCartQuantity } from '../Redux/reducers/user';
+import nutritivApi from '../../Api/nutritivApi';
+import { updateUser, updateUserCartQuantity } from '../../Redux/reducers/user';
+import { GoogleAuth, OAuth } from './OAuth';
 
 export default function LoginPage() {
   console.log("##### LoginPage render #####");
@@ -30,8 +31,15 @@ export default function LoginPage() {
   }
   const [hasTwoFa, setHasTwoFa] = useState(false)
   
+  
   useEffect(() => {
     console.log('# location :', location)
+    if(location.state?.username) {
+      setLogin(prevState => ({
+        ...prevState, 
+        username: location.state.username
+      }))
+    }
   }, [location]);
 
   const handleChange = (e) => {
@@ -183,46 +191,53 @@ export default function LoginPage() {
           </form>
         </>
       ) : (
-        <form onSubmit={ handleSubmit }>
-          <label>
-            <p>Username</p>
-            <input 
-              name="username" 
-              onChange={ handleChange } 
-              placeholder="Username..."
-              type="text" 
-              value={login.username}
-            />
-            {
-              login.usernameError && (
-                <p style={{color: "red"}}>
-                  Please enter your username
-                </p>
-              )
-            }
-          </label>
-          <label>
-            <p>Password</p>
-            <input 
-              name="password" 
-              onChange={ handleChange }
-              placeholder="Password..." 
-              type="password"
-              value={login.password}
-            />
-            {
-              login.passwordError && (
-                <p style={{color: "red"}}>
-                  Please enter your password
-                </p>
-              )
-            }
-          </label>
-          <div>
-            <input value="Submit" type="submit" />
-          </div>
+        <>
+          <form onSubmit={ handleSubmit }>
+            <label>
+              <p>Username</p>
+              <input 
+                name="username" 
+                onChange={ handleChange } 
+                placeholder="Username..."
+                type="text" 
+                value={login.username}
+              />
+              {
+                login.usernameError && (
+                  <p style={{color: "red"}}>
+                    Please enter your username
+                  </p>
+                )
+              }
+            </label>
+            <label>
+              <p>Password</p>
+              <input 
+                name="password" 
+                onChange={ handleChange }
+                placeholder="Password..." 
+                type="password"
+                value={login.password}
+              />
+              {
+                login.passwordError && (
+                  <p style={{color: "red"}}>
+                    Please enter your password
+                  </p>
+                )
+              }
+            </label>
+            <div>
+              <input value="Submit" type="submit" />
+            </div>
+            <br />
+          </form>
+          <OAuth provider="google"/>
           <br />
-        </form>
+          <OAuth provider="facebook"/>
+          <br />
+          <OAuth provider="github"/>
+        </>
       )}
       {
         login.loading && (

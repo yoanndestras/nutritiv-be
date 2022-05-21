@@ -1,5 +1,5 @@
 import React, { useReducer } from 'react'
-import nutritivApi from '../Api/nutritivApi'
+import nutritivApi from '../../Api/nutritivApi'
 
 const reducer = (prevState, action) => {
   const { type, key, value } = action;

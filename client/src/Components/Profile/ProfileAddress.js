@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import nutritivApi, { 
-  } from '../Api/nutritivApi'
-import { updateUser } from '../Redux/reducers/user'
+  } from '../../Api/nutritivApi'
+import { updateUser } from '../../Redux/reducers/user'
 
 const fields = {
   street: "Street",

@@ -4,6 +4,7 @@ import App from './App';
 
 import { createStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
+import { BrowserRouter } from 'react-router-dom';
 import entities from './Redux/config/entities';
 import { injectStore } from './Api/nutritivApi';
 
@@ -22,7 +23,9 @@ injectStore(store);
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>
-      <App />
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
     </Provider>
   </React.StrictMode>,
   document.getElementById('root')

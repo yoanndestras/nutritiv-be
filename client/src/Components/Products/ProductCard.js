@@ -1,17 +1,26 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion';
 
-export const ProductCard = ({ product }) => {
+export const ProductCard = ({ product, index }) => {
   const navigate = useNavigate();
   
   const lowestItemPrice = product.productItems[0].price.value
   
   return (
-    <div
+    <motion.div
+      layout
       key={product._id}
       onClick={() => navigate(`/product/${product.title}`)}
       style={{
         background: "lightgray",
+      }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ 
+        duration: 0.32,
+        delay: index * 0.05
       }}
     >
       {/* GENERAL INFO */}
@@ -44,10 +53,10 @@ export const ProductCard = ({ product }) => {
       {
         product.tags && product.tags.map((tag, i) => (
           <span key={i}>
-             &nbsp;{tag} /
+            &nbsp;{tag} /
           </span>
         ))
       }
-    </div>
+    </motion.div>
   )
 }

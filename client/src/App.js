@@ -1,35 +1,23 @@
-import React, { useEffect } from 'react';
-import { 
-  // useSelector, 
-  useDispatch,
-  useSelector,
-} from "react-redux";
-import { 
-  BrowserRouter,
-  Routes,
-  Route,
-  Navigate,
-  Outlet,
-  useLocation,
-} from 'react-router-dom';
-import { Elements } from '@stripe/react-stripe-js';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from "react-redux";
+import { Routes, Route, useLocation, Navigate, Outlet, useSearchParams, useNavigate } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
-import {
-  updateUser, updateUserCartQuantity,
-} from './Redux/reducers/user';
+import { updateUser, updateUserCartQuantity } from './Redux/reducers/user';
 import nutritivApi from './Api/nutritivApi';
-import GeneralLayout from './Layouts/GeneralLayout.js';
-import Register from './Components/Register.js';
-import Login from './Components/Login.js';
-import Profile from './Components/Profile';
-import { Products } from './Components/Products';
-import { CheckoutSuccess } from './Components/CheckoutSuccess';
-import { CheckoutCancel } from './Components/CheckoutCancel';
-import { ProductPage } from './Components/ProductPage';
-import { Cart } from './Components/Cart';
+import { Elements } from '@stripe/react-stripe-js';
+import Register from './Components/Authentication/Register.js';
+import Login from './Components/Authentication/Login.js';
+import Profile from './Components/Profile/Profile';
+import { Products } from './Components/Products/Products';
+import { CheckoutSuccess } from './Components/Payment/CheckoutSuccess';
+import { CheckoutCancel } from './Components/Payment/CheckoutCancel';
+import { ProductPage } from './Components/Products/ProductPage';
+import { Cart } from './Components/Payment/Cart';
 import { Welcome } from './Components/Homepage';
 import { PageNotFound } from './Components/PageNotFound';
-import { ChatConnection } from './Components/ChatConnection';
+import { ChatConnection } from './Components/Chat/ChatConnection';
+import { AnimatePresence } from 'framer-motion';
+import Navbar from './Components/Navbar';
 
 // init stripe
 const stripePromise = loadStripe(
@@ -37,14 +25,24 @@ const stripePromise = loadStripe(
 );
 
 function App() {
+  const [gettingUserInfo, setGettingUserInfo] = useState(false);
   const dispatch = useDispatch();
   const loggedIn = useSelector(state => state.user.loggedIn)
-
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  const [searchParams] = useSearchParams();
+  const oAuthStatus = searchParams.get('status');
+  // const oAuthStatusCode = searchParams.get('statusCode');
+  const oAuthMessage = searchParams.get('message');
+  const oAuthUsername = searchParams.get('username')
+  const oAuthAccessToken = searchParams.get('accessToken');
+  
   // ON LOAD
   // Fetch user-self info
   useEffect(() => {
     let isSubscribed = true;
-    
+
     if(isSubscribed) {
       const method = "get"
       const requestsUrl = ['/users/self', '/carts/self']
@@ -77,11 +75,58 @@ function App() {
       fetchUserInfo();
     }
     return () => { isSubscribed = false }
-  }, [dispatch]);
+  }, [dispatch, gettingUserInfo]);
   
+  // Validate oAuth
+  useEffect(() => {
+    if(oAuthStatus === "successLogin") {
+      console.log("Condition success oAuth");
+      let fetchApi = async () => {
+        try {
+          await nutritivApi.get(
+            `/auth/login/validateOauth?accessToken=${oAuthAccessToken}`
+          )
+          setGettingUserInfo(prevState => !prevState)
+        } catch(err) {
+          console.error(
+            '/auth/login/validateOauth:', err
+          )
+        }
+      }
+      fetchApi();
+    } else if(oAuthStatus === "successRegistration") {
+      navigate(
+        '/login', 
+        { state: 
+          { 
+            msg: oAuthMessage, 
+            username: oAuthUsername 
+          } 
+        }
+      )
+    } else if(oAuthStatus === "failed") {
+      navigate(
+        '/login', 
+        { state: 
+          { 
+            msg: oAuthMessage, 
+            username: oAuthUsername 
+          } 
+        }
+      )
+    }
+  }, [
+    navigate, 
+    oAuthAccessToken, 
+    oAuthMessage, 
+    oAuthStatus, 
+    oAuthUsername
+  ]);
+
+  console.log('# gettingtUserInfo :', gettingUserInfo)
+
   // RESTRICTED ROUTES
   const Restricted = ({ type }) => {
-    const location = useLocation();
     const cartSelection = location.state?.cartSelection;
     console.log('# APP.JS - cartSelection :', cartSelection)
     const isLogged = () => {
@@ -95,8 +140,7 @@ function App() {
             return <Navigate 
               replace 
               to={location.state.from}
-              state={{cartSelection: cartSelection}} // temp
-              // how to add object "{ cartSelection: ... }" inside of state ?
+              state={{cartSelection: cartSelection}}
             />
           } else {
             return <Navigate replace to="/" />
@@ -110,29 +154,21 @@ function App() {
         ) : <Navigate replace to="/" />;
       }
     } else {
-      return <h2>Loading...</h2>
+      return <h2>Loading user data...</h2>
     }
   }
-  // const Restricted = () => {
-  //   const isLogged = () => {
-  //     const user = { loggedIn }
-  //     return user.loggedIn;
-  //   }
-  //   return isLogged() ? (
-  //     <Outlet /> 
-  //   ) : <Navigate replace to="/" />;
-  // }
   
   return (
-    <BrowserRouter>
-      <Elements
-        stripe={stripePromise}
-        // options={stripeOptions}
-      >
-        <Routes>
+    <Elements
+      stripe={stripePromise}
+      // options={stripeOptions}
+    >
+      <Navbar />
+      <AnimatePresence exitBeforeEnter>
+        <Routes location={location} key={location.pathname}>
           {/* PUBLIC */}
           {/* <Route path="*" element={<Navigate replace to="/page-not-found"/>} /> */}
-          <Route path="/" element={<GeneralLayout/>}>
+          {/* <Route path="/" element={<GeneralLayout/>}> */}
             <Route index element={<Welcome/>} />
             <Route path="/products" element={<Products/>} />
             <Route path="/product">
@@ -153,28 +189,11 @@ function App() {
               <Route path="login" element={<Login/>} />
               <Route path="register" element={<Register/>} />
             </Route>
-          </Route>
+          {/* </Route> */}
         </Routes>
-      </Elements>
-    </BrowserRouter>
+      </AnimatePresence>
+    </Elements>
   );
-}
-
-// RESTRICTED ROUTES
-const Restricted = ({ type, loggedIn }) => {
-  const isLogged = () => {
-    console.log('# loggedIn :', loggedIn)
-    return loggedIn;
-  }
-  if(type === "guest") {
-    return isLogged() ? (
-      <Navigate replace to="/" /> 
-    ) : <Outlet />;
-  } else if(type === "user") {
-    return isLogged() ? (
-      <Outlet /> 
-    ) : <Navigate replace to="/" />;
-  }
 }
 
 export default App;

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import nutritivApi from '../Api/nutritivApi';
+import nutritivApi from '../../Api/nutritivApi';
+import { OAuth } from './OAuth';
 
 export default function RegisterPage() {
   
@@ -70,6 +71,7 @@ export default function RegisterPage() {
   return (
     <div>
       <h2>Register page</h2>
+      <b>Register with your email:</b>
       <form onSubmit={ handleSubmit }>
         <label>
           <p>Username</p>
@@ -120,6 +122,15 @@ export default function RegisterPage() {
           <button type="submit">Submit</button>
         </div>
       </form>
+      <br />
+      <b>or register with a third party account:</b>
+      <br />
+      <br />
+      <OAuth provider="google"/>
+      <br />
+      <OAuth provider="facebook"/>
+      <br />
+      <OAuth provider="github"/>
     </div>
   )
 }

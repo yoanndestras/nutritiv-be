@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useDispatch } from 'react-redux';
-import nutritivApi from '../Api/nutritivApi';
-import { updateUser } from '../Redux/reducers/user';
+import nutritivApi from '../../Api/nutritivApi';
+import { updateUser } from '../../Redux/reducers/user';
 
 export const ProfileAvatar = ({ userInfo }) => {
   const dispatch = useDispatch();

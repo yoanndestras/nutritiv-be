@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { io } from "socket.io-client";
-import nutritivApi from '../Api/nutritivApi';
+import nutritivApi from '../../Api/nutritivApi';
 import { useDispatch, useSelector } from 'react-redux';
-import { addMessage, getLastMessageOfRoom } from '../Redux/reducers/messages';
+import { addMessage, getLastMessageOfRoom } from '../../Redux/reducers/messages';
 
 const token = localStorage.getItem('refresh_token');
 const socket = io(
@@ -140,8 +140,6 @@ export const Chat = () => {
     }
     fetchApi();
   }, []);
-  
-  console.log('# allUsersNames :', allUsers)
 
   // ACTIVE CHAT
   useEffect(() => {
@@ -217,11 +215,12 @@ export const Chat = () => {
   const handleMessageToBeSent = (e) => {
     setMessageToBeSent(e.target.value)
   }
-
-  console.log('# chat :', chat)
   
   return (
     <div>
+      {
+        socketError && <p style={{color: "red"}}>There was an error with socket.io</p>
+      }
       {
         chatsInfos.map(chatInfo => (
           <React.Fragment key={chatInfo._id}>

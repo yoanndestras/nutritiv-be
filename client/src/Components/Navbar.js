@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import { Logout } from './Logout';
+import { Logout } from './Authentication/Logout';
 
 export default function Navbar() {
   const user = useSelector(state => state.user)
-  
   const navigate = useNavigate();
   
   return (

@@ -1,9 +1,10 @@
 /* eslint-disable no-unused-vars */ // Temp
 import React, { useEffect, useState } from 'react'
 
-import nutritivApi from '../Api/nutritivApi';
+import nutritivApi from '../../Api/nutritivApi';
 import { ProductCard } from './ProductCard';
 import { Pagination } from '@mui/material';
+import { AnimatePresence, LayoutGroup, motion, Reorder } from 'framer-motion';
 
 export const Products = () => {  
   console.log("###########-Products-###########")
@@ -22,8 +23,8 @@ export const Products = () => {
   const [filterByTextInput, setFilterByTextInput] = useState("")
   const [filterByShapeInput, setFilterByShapeInput] = useState("")
   const [filterByTagsInput, setFilterByTagsInput] = useState([])
-  const [filterByPriceMinInput, setFilterByPriceMinInput] = useState(0)
-  const [filterByPriceMaxInput, setFilterByPriceMaxInput] = useState(0)
+  // const [filterByPriceMinInput, setFilterByPriceMinInput] = useState(0)
+  // const [filterByPriceMaxInput, setFilterByPriceMaxInput] = useState(0)
   const [sortedByPrice, setSortedByPrice] = useState("")
   const [sortedByPriceStatus, setSortedByPriceStatus] = useState("")
   
@@ -149,11 +150,13 @@ export const Products = () => {
     setFilterByTextInput(
       e.target.value.toLowerCase()
     )
+    setPage(1);
   }
   const handleFilterByShapeInput = (e) => {
     setFilterByShapeInput(
       e.target.value.toLowerCase()
     )
+    setPage(1);
   }
   const handleChangeActivePage = (e, val) => {
     setPage(val)
@@ -172,101 +175,133 @@ export const Products = () => {
         prevState.filter(tag => tag !== e.target.name)
       )
     ))
+    setPage(1);
   }
   const handleOrderByPrice = () => {
     sortedByPrice ? (
       sortedByPrice === "asc" ? setSortedByPrice("desc") : setSortedByPrice("")
     ) : setSortedByPrice("asc")
+    setPage(1);
   }
-
+  
   return (
-    <div id="products">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{
+        default: { duration: 0.5 },
+      }}
+      id="products"
+    >
       {
         loading ? (
           <h2>
             Loading products...
           </h2>
         ) : (
-          <>
-            <br />
-            {/* TITLE FILTER - TEXTBOX */}
-            <input 
-              onChange={handleProductsFilter}
-              placeholder="Search a product..."
-              type="text" 
-            />
-            {/* SHAPE FILTER - DROPDOWN */}
-            <form>
-              <select 
-                onChange={handleFilterByShapeInput}
-                name="shapeFilter"
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1 }}
+          >
+            <LayoutGroup>
+              <br />
+              {/* TITLE FILTER - TEXTBOX */}
+              <input 
+                onChange={handleProductsFilter}
+                placeholder="Search a product..."
+                type="text" 
+              />
+              {/* SHAPE FILTER - DROPDOWN */}
+              <form>
+                <select 
+                  onChange={handleFilterByShapeInput}
+                  name="shapeFilter"
+                >
+                  <option value="">Shape</option>
+                  <option value="capsules">Capsule</option>
+                  <option value="powder">Powder</option>
+                </select>
+              </form>
+              {/* PRICE SORTER - BUTTON */}
+              <button
+                onClick={handleOrderByPrice}
               >
-                <option value="">Shape</option>
-                <option value="capsules">Capsule</option>
-                <option value="powder">Powder</option>
-              </select>
-            </form>
-            {/* PRICE SORTER - BUTTON */}
-            <button
-              onClick={handleOrderByPrice}
-            >
-              Sorted by price
+                Sorted by price
+                {
+                  sortedByPrice && (sortedByPrice === "asc" ? (
+                    <span> ▲ </span>
+                  ) : (
+                    <span> ▼ </span>
+                  ))
+                }
+              </button>
+              {/* TAGS FILTER - CHECKBOXES */}
               {
-                sortedByPrice && (sortedByPrice === "asc" ? (
-                  <span> ▲ </span>
-                ) : (
-                  <span> ▼ </span>
+                allTags && allTags.map((tag, i) => (
+                  <div key={i}>
+                    <input 
+                      defaultChecked={false}
+                      name={tag}
+                      onClick={handleFilterByTags}
+                      type="checkbox"
+                    />
+                    <label htmlFor={tag}>
+                      {tag}
+                    </label>
+                  </div>
                 ))
               }
-            </button>
-            {/* TAGS FILTER - CHECKBOXES */}
-            {
-              allTags && allTags.map((tag, i) => (
-                <div key={i}>
-                  <input 
-                    defaultChecked={false}
-                    name={tag}
-                    onClick={handleFilterByTags}
-                    type="checkbox"
-                  />
-                  <label htmlFor={tag}>
-                    {tag}
-                  </label>
-                </div>
-              ))
-            }
-            {/* PRODUCTS - CARDS */}
-            {
-              productsToDisplay && productsToDisplay.map(product => (
-                <ProductCard
-                  key={product._id}
-                  product={product}
+              {/* PRODUCTS - CARDS */}
+              {/* <motion.div layout> */}
+              <AnimatePresence>
+                {
+                  productsToDisplay?.length > 0 ? (
+                    productsToDisplay.map((product, i) => (
+                      <ProductCard
+                        index={i}
+                        key={product._id}
+                        product={product}
+                      />
+                    ))
+                  ) : (
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                    >
+                      No product(s) found.
+                    </motion.p>
+                  )
+                }
+              </AnimatePresence>
+              <motion.div layout>
+                {/* </motion.div>  */}
+                <Pagination
+                  count={numberOfPages}
+                  page={page}
+                  onChange={handleChangeActivePage}
                 />
-              ))
-            }
-            <Pagination
-              count={numberOfPages}
-              page={page}
-              onChange={handleChangeActivePage}
-            />
-            {/* PRODUCTS PER PAGE - DROPDOWN */}
-            <form>
-              <label htmlFor="productsPerPage">
-                Products per page: 
-              </label>
-              <select 
-                onChange={handleChangeProductsPerPage}
-                id="selectProductsPerPage"
-                name="productsPerPage" 
-              >
-                <option value="5">5</option>
-                <option value="15">15</option>
-                <option value="30">30</option>
-              </select>
-            </form>
-          </>
+                {/* PRODUCTS PER PAGE - DROPDOWN */}
+                <form>
+                  <label htmlFor="productsPerPage">
+                    Products per page: 
+                  </label>
+                  <select 
+                    onChange={handleChangeProductsPerPage}
+                    id="selectProductsPerPage"
+                    name="productsPerPage" 
+                  >
+                    <option value="5">5</option>
+                    <option value="15">15</option>
+                    <option value="30">30</option>
+                  </select>
+                </form>
+              </motion.div>
+            </LayoutGroup>
+          </motion.div>
         )
       }
-    </div>
+    </motion.div>
   )
 }

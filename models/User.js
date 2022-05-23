@@ -14,7 +14,7 @@ const UserSchema = new Schema
     {
         type: String,
         required: true,
-        unique: true
+        unique: false
     },
     password:
     {
@@ -42,6 +42,7 @@ const UserSchema = new Schema
     provider:
     {
         type: String,
+        default: 'local',
     },
     addressDetails:
     [

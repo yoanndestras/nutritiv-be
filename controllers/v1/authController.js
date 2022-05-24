@@ -308,7 +308,7 @@ exports.verifyProviderUser = async(req, res, next) =>
                         
                         res.redirect(process.env.SERVER_ADDRESS + 
                             '/?status=successRegistration' + 
-                            '&message=Registration successfull! Connect to your new account!'+
+                            '&message=Registration successfull!'+
                             '&accessToken=' + accessToken + 
                             '&statusCode=201'
                             )

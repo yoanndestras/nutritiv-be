@@ -217,7 +217,7 @@ async(req, res, next) =>
     {
         const secret = speakeasy.generateSecret(
             {
-                name: "Nutritiv",
+                name: `Nutritiv(${req.user.username})`,
                 length: 20
             })
         
@@ -240,7 +240,7 @@ async(req, res, next) =>
             // res.send();
             
             res.status(200).json(data)
-
+        
         })
         
         // res.status(200).json(
@@ -275,6 +275,71 @@ async(req, res, next) =>
 //     }catch(err){next(err)}
 // })
 
+//DISABLE 2FA
+router.post('/disable2FA', auth.verifyUser, auth.verifyRefresh, async(req, res, next) =>
+{
+    try
+    {
+        let user = req.user, password = req.body.password;
+
+        if(user.secret)
+        {
+            user.authenticate(password, async (err, user) => 
+                {
+                    if(err)
+                    {
+                        err.statusCode = 400;
+                        next(err);
+                    }
+                    else
+                    {
+                        console.log("password is correct");
+                        
+                        const secret = user.secret.toString();
+                        const token = req.body.token;
+                        
+                        const valid = speakeasy.totp.verify(
+                            {
+                                secret: secret,
+                                encoding: 'ascii',
+                                token: token,
+                                window: 0
+                            });
+                            
+                            if(valid === true)
+                            {
+                                const user = await User.findOneAndUpdate({_id: req.user._id},
+                                    {
+                                        $unset: {secret: ""}
+                                    });
+                                await user.save();
+                            
+                                res.status(200).json(
+                                    {
+                                        success: true, 
+                                        status: 'Your successfully disabled 2FA!',
+                                    });
+                            }
+                            else
+                            {
+                                let err = new Error('The code is invalid or expired!');
+                                err.statusCode = 401;
+                                return next(err);
+                            }
+                        
+                    }
+                })
+        }
+        else
+        {
+            res.status(400).json(
+                {
+                    success: true,
+                    status: "Your account do not have enable 2FA"
+                })
+        }
+    }catch(err){next(err)}
+})
 //CREATE TOKEN FROM TOTP SECRET
 router.post('/totpValidate', cors.corsWithOptions, auth.verifyNoRefresh, auth.verifyUser2FA, 
 async(req, res, next) => 

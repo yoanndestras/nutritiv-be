@@ -330,7 +330,7 @@ auth.verifyNewPasswordSyntax, auth.verifyNewPasswordEquality, async(req, res, ne
                         {
                             success: true, 
                             status: 'Password has been modified!', 
-                            user: user.user
+                            user: user
                         });
                 }
             });

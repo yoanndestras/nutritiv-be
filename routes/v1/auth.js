@@ -228,14 +228,14 @@ async(req, res, next) =>
             
             qrcode.toDataURL(secret.otpauth_url, (err, data) =>
             {
-                res .header('new_twofa_token', twoFAToken)
-                res.setHeader("Content-Type", "text/html");
-                res.write(`<img src='${data}'>`);
-                
-                res.send();
-                
                 // res .header('new_twofa_token', twoFAToken)
-                //     .status(200).json(data)
+                // res.setHeader("Content-Type", "text/html");
+                // res.write(`<img src='${data}'>`);
+                
+                // res.send();
+                
+                res .header('new_twofa_token', twoFAToken)
+                    .status(200).json(data)
                     
             
             })

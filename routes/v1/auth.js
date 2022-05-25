@@ -223,15 +223,6 @@ async(req, res, next) =>
         
         const secretAscii = secret.ascii;
         
-        const user = await User.findOneAndUpdate({_id: req.user._id},
-            {
-                $set:
-                {
-                    "secret": secretAscii
-                }
-            })
-        await user.save();
-        
         qrcode.toDataURL(secret.otpauth_url, (err, data) =>
         {
             // res.setHeader("Content-Type", "text/html");
@@ -299,7 +290,7 @@ router.post('/disable2FA', auth.verifyUser, auth.verifyRefresh, async(req, res, 
                     }
                     else
                     {
-                        console.log("password is correct");
+                        console.log("Password is correct!");
                         
                         const secret = user.secret.toString();
                         const token = req.body.token;
@@ -345,6 +336,81 @@ router.post('/disable2FA', auth.verifyUser, auth.verifyRefresh, async(req, res, 
         }
     }catch(err){next(err)}
 })
+
+//VERIFY 2FA
+router.post('/enable2FA', auth.verifyUser, auth.verifyRefresh, async(req, res, next) =>
+{
+    try
+    {
+        let user = req.user, password = req.body.password;
+        
+        if(!user.secret)
+        {
+            user.authenticate(password, async (err, user) => 
+                {
+                    if(err)
+                    {
+                        err.statusCode = 400;
+                        next(err);
+                    }
+                    else if(!user)
+                    {
+                        let err = new Error('Password is incorrect!');
+                        err.statusCode = 400;
+                        next(err);
+                    }
+                    else
+                    {
+                        console.log("Password is correct!");
+                        
+                        const secret = user.secret.toString();
+                        const token = req.body.token;
+                        
+                        const valid = speakeasy.totp.verify(
+                            {
+                                secret: secret,
+                                encoding: 'ascii',
+                                token: token,
+                                window: 0
+                            });
+                            
+                            if(valid === true)
+                            {
+                                const user = await User.findOneAndUpdate({_id: req.user._id},
+                                    {
+                                        $set:
+                                        {
+                                            "secret": secretAscii
+                                        }
+                                    })
+                                await user.save();
+
+                                res.status(200).json(
+                                    {
+                                        success: true, 
+                                        status: 'Your successfully enabled 2FA!',
+                                    });
+                            }
+                            else
+                            {
+                                let err = new Error('The code is invalid or expired!');
+                                err.statusCode = 401;
+                                return next(err);
+                            }
+                    }
+                })
+        }
+        else
+        {
+            res.status(400).json(
+                {
+                    success: true,
+                    status: "Your account already have 2FA enabled!"
+                })
+        }
+    }catch(err){next(err)}
+})
+
 //CREATE TOKEN FROM TOTP SECRET
 router.post('/totpValidate', cors.corsWithOptions, auth.verifyNoRefresh, auth.verifyUser2FA, 
 async(req, res, next) => 

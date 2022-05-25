@@ -215,24 +215,36 @@ async(req, res, next) =>
 {
     try
     {
-        const secret = speakeasy.generateSecret(
-            {
-                name: `Nutritiv(${req.user.username})`,
-                length: 20
-            })
-        
-        const secretAscii = secret.ascii;
-        
-        qrcode.toDataURL(secret.otpauth_url, (err, data) =>
+        if(!req.user.secret)
         {
-            // res.setHeader("Content-Type", "text/html");
-            // res.write(`<img src='${data}'>`);
+            const secret = speakeasy.generateSecret(
+                {
+                    name: `Nutritiv(${req.user.username})`,
+                    length: 20
+                })
             
-            // res.send();
+            // const secretAscii = secret.ascii;
             
-            res.status(200).json(data)
+            qrcode.toDataURL(secret.otpauth_url, (err, data) =>
+            {
+                // res.setHeader("Content-Type", "text/html");
+                // res.write(`<img src='${data}'>`);
+                
+                // res.send();
+                
+                res.status(200).json(data)
+            
+            })
+        }
+        else
+        {
+            res.status(400).json(
+                {
+                    success: true,
+                    status: "Your account already have 2FA enabled!"
+                })
+        }
         
-        })
         
         // res.status(200).json(
         //     {

@@ -91,9 +91,14 @@ async(req, res, next) =>
         const user =  await User.findOne({_id: req.user._id});
         let avatar = (user.avatar).substring(0, 4) === "http" ? user.avatar : process.env.AWS_BUCKET_LINK + "usersAvatar/" + user.avatar;
         const { username, _id, email, isAdmin, isVerified, addressDetails} = req.user;
-        const chatExist = await Chat.findOne({members: {$in: [req.user._id]}})
-        let chat;
-        !chatExist ? chat = false : chat = true;
+        const chatExist = await Chat.findOne({members: {$in: [req.user._id]}});
+
+        let hasChat;
+        !chatExist ? hasChat = false : hasChat = true;
+        
+        let has2FA;
+        !user.secret ? has2FA = false : has2FA = true;
+
         res.status(200).json(
             {
                 loggedIn: true,
@@ -104,7 +109,8 @@ async(req, res, next) =>
                 isAdmin,
                 isVerified,
                 addressDetails,
-                chat,
+                has2FA,
+                hasChat,
                 status: "User connected"
             });
     }catch(err){next(err)}

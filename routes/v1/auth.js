@@ -222,17 +222,21 @@ async(req, res, next) =>
                     name: `Nutritiv(${req.user.username})`,
                     length: 20
                 })
-            
+            const secretAscii = secret.ascii;
+            const twoFAToken = auth.GenerateNew2FAToken(req.user._id, secretAscii);
             // const secretAscii = secret.ascii;
             
             qrcode.toDataURL(secret.otpauth_url, (err, data) =>
             {
-                // res.setHeader("Content-Type", "text/html");
-                // res.write(`<img src='${data}'>`);
+                res .header('new_twofa_token', twoFAToken)
+                res.setHeader("Content-Type", "text/html");
+                res.write(`<img src='${data}'>`);
                 
-                // res.send();
+                res.send();
                 
-                res.status(200).json(data)
+                // res .header('new_twofa_token', twoFAToken)
+                //     .status(200).json(data)
+                    
             
             })
         }
@@ -284,7 +288,6 @@ router.post('/disable2FA', auth.verifyUser, auth.verifyRefresh, async(req, res, 
     try
     {
         let user = req.user, password = req.body.password;
-
         if(user.secret)
         {
             user.authenticate(password, async (err, user) => 
@@ -350,7 +353,7 @@ router.post('/disable2FA', auth.verifyUser, auth.verifyRefresh, async(req, res, 
 })
 
 //VERIFY 2FA
-router.post('/enable2FA', auth.verifyUser, auth.verifyRefresh, async(req, res, next) =>
+router.post('/enable2FA', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyUserNew2FA, async(req, res, next) =>
 {
     try
     {
@@ -375,7 +378,7 @@ router.post('/enable2FA', auth.verifyUser, auth.verifyRefresh, async(req, res, n
                     {
                         console.log("Password is correct!");
                         
-                        const secret = user.secret.toString();
+                        const secret = req.secret.toString();
                         const token = req.body.token;
                         
                         const valid = speakeasy.totp.verify(
@@ -385,14 +388,14 @@ router.post('/enable2FA', auth.verifyUser, auth.verifyRefresh, async(req, res, n
                                 token: token,
                                 window: 0
                             });
-                            
+
                             if(valid === true)
                             {
                                 const user = await User.findOneAndUpdate({_id: req.user._id},
                                     {
                                         $set:
                                         {
-                                            "secret": secretAscii
+                                            "secret": secret
                                         }
                                     })
                                 await user.save();

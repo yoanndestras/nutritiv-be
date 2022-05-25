@@ -291,6 +291,12 @@ router.post('/disable2FA', auth.verifyUser, auth.verifyRefresh, async(req, res, 
                         err.statusCode = 400;
                         next(err);
                     }
+                    else if(!user)
+                    {
+                        let err = new Error('Password is incorrect!');
+                        err.statusCode = 400;
+                        next(err);
+                    }
                     else
                     {
                         console.log("password is correct");

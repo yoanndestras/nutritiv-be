@@ -160,7 +160,7 @@ exports.TwoFAjwtPassport = passport.use("2fa_jwt", new JwtStrategy(opts_2fa, (jw
 const opts_google = {};
 opts_google.clientID = process.env.GOOGLE_CLIENT_ID;
 opts_google.clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-opts_google.callbackURL = "http://localhost:3001/v1/auth/google/callback";
+opts_google.callbackURL = `${process.env.SERVER_ADDRESS}v1/auth/google/callback`;
 
 exports.GooglePassport = passport.use("google", new GoogleStrategy(opts_google, 
     (accessToken, refreshToken, profile, done) =>
@@ -186,7 +186,7 @@ exports.GooglePassport = passport.use("google", new GoogleStrategy(opts_google,
 const opts_facebook = {};
 opts_facebook.clientID = process.env.FACEBOOK_APP_ID;
 opts_facebook.clientSecret = process.env.FACEBOOK_APP_SECRET;
-opts_facebook.callbackURL = "http://localhost:3001/v1/auth/facebook/callback";
+opts_facebook.callbackURL = `${process.env.SERVER_ADDRESS}v1/auth/facebook/callback`;
 opts_facebook.profileFields = ['emails', 'name','displayName','photos'];
 
 exports.FacebookPassport = passport.use("facebook", new FacebookStrategy(opts_facebook, 
@@ -216,7 +216,7 @@ exports.FacebookPassport = passport.use("facebook", new FacebookStrategy(opts_fa
 const opts_github = {};
 opts_github.clientID = process.env.GITHUB_CLIENT_ID;
 opts_github.clientSecret = process.env.GITHUB_CLIENT_SECRET;
-opts_github.callbackURL = "http://localhost:3001/v1/auth/github/callback";
+opts_github.callbackURL = `${process.env.SERVER_ADDRESS}v1/auth/github/callback`;
 opts_github.scope = ['user:email'];
 
 exports.GithubPassport = passport.use("github", new GitHubStrategy(opts_github, 
@@ -297,7 +297,7 @@ exports.verifyProviderUser = async(req, res, next) =>
                     if(err)
                     {
                         res.redirect(process.env.SERVER_ADDRESS + 
-                            '/?status=failed' +
+                            '?status=failed' +
                             '&message='+ err.message +
                             '&statusCode=500'
                             )
@@ -307,7 +307,7 @@ exports.verifyProviderUser = async(req, res, next) =>
                         const accessToken = authenticate.GenerateAccessToken({_id: user._id});                            
                         
                         res.redirect(process.env.SERVER_ADDRESS + 
-                            '/?status=successRegistration' + 
+                            '?status=successRegistration' + 
                             '&message=Registration successfull!'+
                             '&accessToken=' + accessToken + 
                             '&statusCode=201'
@@ -323,7 +323,7 @@ exports.verifyProviderUser = async(req, res, next) =>
                     if(err)
                     {
                         res.redirect(process.env.SERVER_ADDRESS + 
-                            '/?status=failed' +
+                            '?status=failed' +
                             '&message=Login Unsuccessfull!'+
                             '&statusCode=500'
                             )
@@ -333,7 +333,7 @@ exports.verifyProviderUser = async(req, res, next) =>
                         const accessToken = authenticate.GenerateAccessToken({_id: req.user._id});                            
                         
                         res.redirect(process.env.SERVER_ADDRESS + 
-                            '/?status=successLogin' + 
+                            '?status=successLogin' + 
                             '&accessToken=' + accessToken + 
                             '&statusCode=200'
                         )
@@ -342,7 +342,7 @@ exports.verifyProviderUser = async(req, res, next) =>
                 
 
                 //     res.redirect(process.env.SERVER_ADDRESS + 
-                //         '/?status=failed' +
+                //         '?status=failed' +
                 //         '&message=An account with your mail address already exists without '+
                 //         provider +
                 //         ' please login with your Nutritiv account' +
@@ -354,7 +354,7 @@ exports.verifyProviderUser = async(req, res, next) =>
     }catch(err)
     {
         res.redirect(process.env.SERVER_ADDRESS + 
-            '/?status=failed' +
+            '?status=failed' +
             '/?message=Registration Failed! Please try again later!'+
             '/?statusCode=500'
             )

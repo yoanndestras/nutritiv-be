@@ -332,7 +332,6 @@ router.post('/disable2FA', auth.verifyUser, auth.verifyRefresh, async(req, res, 
                                 err.statusCode = 401;
                                 return next(err);
                             }
-                        
                     }
                 })
         }

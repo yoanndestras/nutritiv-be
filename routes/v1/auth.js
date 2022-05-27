@@ -215,17 +215,26 @@ router.post('/TFARecovery', cors.corsWithOptions, auth.verifyUser, auth.verifyRe
 {
     try
     {
-        let sentenceArray = [];
-        
-        for(let i = 0; i < 12; i++)
+        if(req.user.TFASecret && !req.user.TFARecovery)
         {
-            sentenceArray.push(randomWords())
+            let sentenceArray = [];
+        
+            for(let i = 0; i < 12; i++)
+            {
+                sentenceArray.push(randomWords())
+            }
+            
+            res.status(201).json(
+                {
+                    sentenceArray
+                });
+        }
+        else
+        {
+
         }
         
-        res.status(200).json(
-            {
-                sentenceArray
-            });
+
     }catch(err){next(err);}
 })
 

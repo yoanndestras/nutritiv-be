@@ -349,10 +349,11 @@ auth.verifyAuthorization, async (req, res, next) =>
 {
     try
     {
+        let user = req.user;
         if((user.avatar).substring(0, 4) !== "http")
         {
             avatar = "usersAvatar/" + user.avatar;
-
+            
             user.avatar !== "PrPhdefaultAvatar.jpg" ? fileUpload.deleteFile(avatar) : null;
         }
         

@@ -10,7 +10,9 @@ const GitHubStrategy = require('passport-github2').Strategy;
 
 const User = require('../../models/User');
 const email_validator = require("email-validator");
-const {nanoid} = require("nanoid");
+const { customAlphabet } = require('nanoid');
+const alphabet = '0123456789';
+const nanoid = customAlphabet(alphabet, 12);
 
 require('dotenv').config();
 
@@ -298,12 +300,12 @@ exports.verifyProviderUser = async(req, res, next) =>
                 provider === "github" 
                 ? username = profile.username
                 : !profile.name.familyName 
-                ? username = profile.name.givenName
+                ? username = "user" + nanoid()
                 : username = profile.name.givenName + "_" + profile.name.familyName
                 
                 const usernameExist = await User.findOne({ username : username});
                 
-                usernameExist && (username = "user" + nanoid(8))
+                usernameExist && (username = "user" + nanoid())
                 
                 !profile?.emails[0]?.value 
                 ? email = "error"

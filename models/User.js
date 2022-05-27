@@ -20,9 +20,13 @@ const UserSchema = new Schema
     {
         type: String
     },
-    secret:
+    TFASecret:
     {
         type: String
+    },
+    TFARecovery:
+    {
+        type: Array
     },
     isAdmin: 
     {

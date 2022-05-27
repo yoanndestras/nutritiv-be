@@ -96,8 +96,8 @@ async(req, res, next) =>
         let hasChat;
         !chatExist ? hasChat = false : hasChat = true;
         
-        let has2FA;
-        !user.secret ? has2FA = false : has2FA = true;
+        let hasTFA;
+        !user.TFASecret ? hasTFA = false : hasTFA = true;
 
         res.status(200).json(
             {
@@ -109,7 +109,7 @@ async(req, res, next) =>
                 isAdmin,
                 isVerified,
                 addressDetails,
-                has2FA,
+                hasTFA,
                 hasChat,
                 status: "User connected"
             });
@@ -244,7 +244,7 @@ user.verifyEmail, user.updateEmail, mailer.sendUpdateEmail, async (req, res, nex
         res.status(201).json(
             {
                 success: true, 
-                status: user
+                status: user 
             });
     }catch(err){next(err)}
 })

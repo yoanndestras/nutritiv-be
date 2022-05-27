@@ -56,7 +56,7 @@ Thanks to middlewares, our application features handle differents scenario :
 - File storage on a web service *(aws-sdk).*
 - BDD backup file recurrent storage and upload *(cron, aws-sdk, child_process, mongodump & mongorestore).*
 - Registration, authentification... *(passport, passport-local, passport-jwt, jsonwebtoken).*
-- 2FA authentication *(speakeasy, qrcode).*
+- TFA authentication *(speakeasy, qrcode).*
 - Google and Facebook authentication *(passport-facebook, passport-google-oauth20).*
 - Mails *(sgMail, mailer, email_validator).*
 - Payment *(stripe).*

@@ -134,11 +134,11 @@ exports.jwtPassport = passport.use("email_jwt", new JwtStrategy(opts_email, (jwt
         })
 }));
 
-const opts_2fa = {}; //json web token and key
-opts_2fa.jwtFromRequest = ExtractJwt.fromHeader("twofa_token");
-opts_2fa.secretOrKey = process.env.REF_2AF_TOKEN;
+const opts_tfa = {}; //json web token and key
+opts_tfa.jwtFromRequest = ExtractJwt.fromHeader("twofa_token");
+opts_tfa.secretOrKey = process.env.REF_TFA_TOKEN;
 
-exports.TwoFAjwtPassport = passport.use("2fa_jwt", new JwtStrategy(opts_2fa, (jwtPayload, done) =>
+exports.TwoFAjwtPassport = passport.use("tfa_jwt", new JwtStrategy(opts_tfa, (jwtPayload, done) =>
 {
     User.findOne({_id: jwtPayload._id}, (err, user) =>
         {                
@@ -157,11 +157,11 @@ exports.TwoFAjwtPassport = passport.use("2fa_jwt", new JwtStrategy(opts_2fa, (jw
         })
 }));
 
-const opts_new_2fa = {}; //json web token and key
-opts_new_2fa.jwtFromRequest = ExtractJwt.fromHeader("new_twofa_token");
-opts_new_2fa.secretOrKey = process.env.NEW_2FA_TOKEN;
+const opts_new_tfa = {}; //json web token and key
+opts_new_tfa.jwtFromRequest = ExtractJwt.fromHeader("new_twofa_token");
+opts_new_tfa.secretOrKey = process.env.NEW_TFA_TOKEN;
 
-exports.NewTwoFAjwtPassport = passport.use("new_2fa_jwt", new JwtStrategy(opts_new_2fa, (jwtPayload, done) =>
+exports.NewTwoFAjwtPassport = passport.use("new_tfa_jwt", new JwtStrategy(opts_new_tfa, (jwtPayload, done) =>
 {
     let secret = jwtPayload.secret;
     User.findOne({_id: jwtPayload._id}, (err, user) =>
@@ -184,7 +184,7 @@ exports.NewTwoFAjwtPassport = passport.use("new_2fa_jwt", new JwtStrategy(opts_n
 const opts_google = {};
 opts_google.clientID = process.env.GOOGLE_CLIENT_ID;
 opts_google.clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-opts_google.callbackURL = `${process.env.SERVER_ADDRESS}v1/auth/google/callback`;
+opts_google.callbackURL = `${process.env.OAUTH_ADDRESS}v1/auth/google/callback`;
 
 exports.GooglePassport = passport.use("google", new GoogleStrategy(opts_google, 
     (accessToken, refreshToken, profile, done) =>
@@ -210,7 +210,7 @@ exports.GooglePassport = passport.use("google", new GoogleStrategy(opts_google,
 const opts_facebook = {};
 opts_facebook.clientID = process.env.FACEBOOK_APP_ID;
 opts_facebook.clientSecret = process.env.FACEBOOK_APP_SECRET;
-opts_facebook.callbackURL = `${process.env.SERVER_ADDRESS}v1/auth/facebook/callback`;
+opts_facebook.callbackURL = `${process.env.OAUTH_ADDRESS}v1/auth/facebook/callback`;
 opts_facebook.profileFields = ['emails', 'name','displayName','photos'];
 
 exports.FacebookPassport = passport.use("facebook", new FacebookStrategy(opts_facebook, 
@@ -240,7 +240,7 @@ exports.FacebookPassport = passport.use("facebook", new FacebookStrategy(opts_fa
 const opts_github = {};
 opts_github.clientID = process.env.GITHUB_CLIENT_ID;
 opts_github.clientSecret = process.env.GITHUB_CLIENT_SECRET;
-opts_github.callbackURL = `${process.env.SERVER_ADDRESS}v1/auth/github/callback`;
+opts_github.callbackURL = `${process.env.OAUTH_ADDRESS}v1/auth/github/callback`;
 opts_github.scope = ['user:email'];
 
 exports.GithubPassport = passport.use("github", new GitHubStrategy(opts_github, 
@@ -418,9 +418,9 @@ exports.verifyAuthorization = async(req, res, next) =>
     }catch(err){next(err)}
 };
 
-exports.verifyUser2FA = async(req, res, next) =>
+exports.verifyUserTFA = async(req, res, next) =>
 {
-    passport.authenticate("2fa_jwt", { session: false }, (err, user, info) => 
+    passport.authenticate("tfa_jwt", { session: false }, (err, user, info) => 
     {
         if(err)
         {
@@ -446,9 +446,9 @@ exports.verifyUser2FA = async(req, res, next) =>
     })(req, res, next); 
 }
 
-exports.verifyUserNew2FA = async(req, res, next) =>
+exports.verifyUserNewTFA = async(req, res, next) =>
 {
-    passport.authenticate("new_2fa_jwt", { session: false }, (err, user, secret) => 
+    passport.authenticate("new_tfa_jwt", { session: false }, (err, user, secret) => 
     {
         if(err)
         {
@@ -665,12 +665,12 @@ exports.Generate2AFToken = function(_id)
     );
 };
 
-exports.GenerateNew2FAToken = function(_id, secret) 
+exports.GenerateNewTFAToken = function(_id, secret) 
 {
     return jwt.sign
     (
         {_id, secret},  
-        process.env.NEW_2FA_TOKEN, 
+        process.env.NEW_TFA_TOKEN, 
         {expiresIn: "1800s"} // expires in 2 minutes
     );
 };

@@ -4,6 +4,7 @@ const User = require("../../models/User");
 const   speakeasy = require("speakeasy"),
         qrcode = require("qrcode"),
         passport = require("passport");
+        randomWords = require('random-words');
 
 // CONTROLLERS
 const cors = require('../../controllers/v1/corsController');
@@ -67,7 +68,7 @@ router.get('/login/validateOauth', cors.corsWithOptions, auth.verifyUserQuery, (
             {
                 success: true,
                 loggedIn: true,
-                twoFA: false,
+                hasTFA: false,
                 isAdmin: req.user.isAdmin,
                 status: 'Login Successful!'
             });
@@ -209,24 +210,43 @@ router.post("/new_password", auth.verifyNewPasswordSyntax, auth.verifyNewPasswor
     }catch(err){next(err)}
 });
 
+//GENERATE RANDOM WORDS
+router.post('/TFARecovery', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async (req, res, next) =>
+{
+    try
+    {
+        let sentenceArray = [];
+        
+        for(let i = 0; i < 12; i++)
+        {
+            sentenceArray.push(randomWords())
+        }
+        
+        res.status(200).json(
+            {
+                sentenceArray
+            });
+    }catch(err){next(err);}
+})
+
 //CREATE SECRET TOTP
-router.post('/totpSecret', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
+router.post('/TFASecret', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
 async(req, res, next) => 
 {
     try
     {
-        if(!req.user.secret)
+        if(!req.user.TFASecret)
         {
-            const secret = speakeasy.generateSecret(
+            const TFASecret = speakeasy.generateTFASecret(
                 {
                     name: `Nutritiv(${req.user.username})`,
                     length: 20
                 })
-            const secretAscii = secret.ascii;
-            const twoFAToken = auth.GenerateNew2FAToken(req.user._id, secretAscii);
-            // const secretAscii = secret.ascii;
+            const TFASecretAscii = TFASecret.ascii;
+            const twoFAToken = auth.GenerateNewTFAToken(req.user._id, TFASecretAscii);
+            // const TFASecretAscii = TFASecret.ascii;
             
-            qrcode.toDataURL(secret.otpauth_url, (err, data) =>
+            qrcode.toDataURL(TFASecret.otpauth_url, (err, data) =>
             {
                 // res .header('new_twofa_token', twoFAToken)
                 // res.setHeader("Content-Type", "text/html");
@@ -245,7 +265,7 @@ async(req, res, next) =>
             res.status(400).json(
                 {
                     success: true,
-                    status: "Your account already have 2FA enabled!"
+                    status: "Your account already have TFA enabled!"
                 })
         }
         
@@ -253,7 +273,7 @@ async(req, res, next) =>
         // res.status(200).json(
         //     {
         //         success: true, 
-        //         secret: secret,
+        //         TFASecret: TFASecret,
         //         qrcodeData
         //     });
         
@@ -265,10 +285,10 @@ async(req, res, next) =>
 // {
 //     try
 //     {
-//         const secret = req.body.secret;
+//         const TFASecret = req.body.TFASecret;
 //         const token = speakeasy.totp(
 //             {
-//                 secret: secret,
+//                 TFASecret: TFASecret,
 //                 encoding: 'base32'
 //             })
         
@@ -282,13 +302,13 @@ async(req, res, next) =>
 //     }catch(err){next(err)}
 // })
 
-//DISABLE 2FA
-router.post('/disable2FA', auth.verifyUser, auth.verifyRefresh, async(req, res, next) =>
+//DISABLE TFA
+router.post('/disableTFA', auth.verifyUser, auth.verifyRefresh, async(req, res, next) =>
 {
     try
     {
         let user = req.user, password = req.body.password;
-        if(user.secret)
+        if(user.TFASecret)
         {
             user.authenticate(password, async (err, user) => 
                 {
@@ -307,12 +327,12 @@ router.post('/disable2FA', auth.verifyUser, auth.verifyRefresh, async(req, res, 
                     {
                         console.log("Password is correct!");
                         
-                        const secret = user.secret.toString();
+                        const TFASecret = user.TFASecret.toString();
                         const token = req.body.token;
                         
                         const valid = speakeasy.totp.verify(
                             {
-                                secret: secret,
+                                TFASecret: TFASecret,
                                 encoding: 'ascii',
                                 token: token,
                                 window: 0
@@ -322,14 +342,14 @@ router.post('/disable2FA', auth.verifyUser, auth.verifyRefresh, async(req, res, 
                             {
                                 const user = await User.findOneAndUpdate({_id: req.user._id},
                                     {
-                                        $unset: {secret: ""}
+                                        $unset: {TFASecret: ""}
                                     });
                                 await user.save();
                             
                                 res.status(200).json(
                                     {
                                         success: true, 
-                                        status: 'Your successfully disabled 2FA!',
+                                        status: 'Your successfully disabled TFA!',
                                     });
                             }
                             else
@@ -346,20 +366,20 @@ router.post('/disable2FA', auth.verifyUser, auth.verifyRefresh, async(req, res, 
             res.status(400).json(
                 {
                     success: true,
-                    status: "Your account do not have enable 2FA"
+                    status: "Your account do not have enable TFA"
                 })
         }
     }catch(err){next(err)}
 })
 
-//VERIFY 2FA
-router.post('/enable2FA', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyUserNew2FA, async(req, res, next) =>
+//VERIFY TFA
+router.post('/enableTFA', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyUserNewTFA, async(req, res, next) =>
 {
     try
     {
         let user = req.user, password = req.body.password;
         
-        if(!user.secret)
+        if(!user.TFASecret)
         {
             user.authenticate(password, async (err, user) => 
                 {
@@ -378,12 +398,12 @@ router.post('/enable2FA', cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                     {
                         console.log("Password is correct!");
                         
-                        const secret = req.secret.toString();
+                        const TFASecret = req.TFASecret.toString();
                         const token = req.body.token;
                         
                         const valid = speakeasy.totp.verify(
                             {
-                                secret: secret,
+                                TFASecret: TFASecret,
                                 encoding: 'ascii',
                                 token: token,
                                 window: 0
@@ -391,11 +411,19 @@ router.post('/enable2FA', cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
 
                             if(valid === true)
                             {
+                                let sentenceArray = [];
+        
+                                for(let i = 0; i < 12; i++)
+                                {
+                                    sentenceArray.push(randomWords())
+                                }
+                                
                                 const user = await User.findOneAndUpdate({_id: req.user._id},
                                     {
                                         $set:
                                         {
-                                            "secret": secret
+                                            "TFASecret": TFASecret,
+                                            // "TFARecovery": TFARecovery
                                         }
                                     })
                                 await user.save();
@@ -403,7 +431,7 @@ router.post('/enable2FA', cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                                 res.status(200).json(
                                     {
                                         success: true, 
-                                        status: 'Your successfully enabled 2FA!',
+                                        status: 'Your successfully enabled TFA!',
                                     });
                             }
                             else
@@ -420,26 +448,51 @@ router.post('/enable2FA', cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
             res.status(400).json(
                 {
                     success: true,
-                    status: "Your account already have 2FA enabled!"
+                    status: "Your account already have TFA enabled!"
                 })
         }
     }catch(err){next(err)}
 })
 
+router.post('/tfa', async(req, res, next) =>
+{
+    const users = await User.find();
+    
+    users.map(async user => 
+        {
+            if(user.TFASecret)
+            {
+                const test = await User.findOneAndUpdate({_id: user._id},
+                    {
+                        $unset: {TFASecret: ""}
+                    });
+                    console.log(`test = `, test)
+                await test.save();
+                
+            }
+        }
+    )
+    res.status(200).json(
+        {
+            success: true,
+            users
+        })
+})
+
 //CREATE TOKEN FROM TOTP SECRET
-router.post('/totpValidate', cors.corsWithOptions, auth.verifyNoRefresh, auth.verifyUser2FA, 
+router.post('/TFAValidation', cors.corsWithOptions, auth.verifyNoRefresh, auth.verifyUserTFA, 
 async(req, res, next) => 
 {
     try
     {
         const user = await User.findOne({_id: req.user._id});
 
-        const secret = user.secret.toString();
+        const TFASecret = user.TFASecret.toString();
         const token = req.body.token;
         
         const valid = speakeasy.totp.verify(
             {
-                secret: secret,
+                TFASecret: TFASecret,
                 encoding: 'ascii',
                 token: token,
                 window: 0
@@ -529,7 +582,7 @@ router.post("/login", cors.corsWithOptions, async(req, res, next)=>
                                 err: err
                             });
                     }
-                    else if(user.secret)
+                    else if(user.TFASecret)
                     {
                         const twoFAToken = auth.Generate2AFToken({_id: user._id});
                         
@@ -537,7 +590,7 @@ router.post("/login", cors.corsWithOptions, async(req, res, next)=>
                             .status(200).json(
                             {
                                 success: true, 
-                                twoFA: true // refirect to /totpValidate
+                                hasTFA: true // refirect to /totpValidate
                             })
                     }
                     else
@@ -556,7 +609,7 @@ router.post("/login", cors.corsWithOptions, async(req, res, next)=>
                                 {
                                     success: true,
                                     loggedIn: true,
-                                    twoFA: false,
+                                    hasTFA: false,
                                     isAdmin: req.user.isAdmin,
                                     status: 'Login Successful!'
                                 });

@@ -297,15 +297,24 @@ exports.verifyProviderUser = async(req, res, next) =>
                 
                 provider === "github" 
                 ? username = profile.username
+                : !profile.name.familyName 
+                ? username = profile.name.givenName + "_" + nanoid(8)
                 : username = profile.name.givenName + "_" + profile.name.familyName
                 
                 const usernameExist = await User.findOne({ username : username});
                 
-                usernameExist ? username = profile.name.givenName + "_" + nanoid(8) : null;
+                usernameExist && (username = username + "_" + nanoid(8))
                 
                 !profile?.emails[0]?.value 
-                ? email = profile.name.familyName + profile.name.givenName + '@' + provider + '.com'
+                ? email = "error"
                 : email = profile.emails[0].value;
+                
+                if(email === "error")
+                {
+                    let err = new Error('Cannot access to your email address!');
+                    err.statusCode = 500;
+                    return next(err);
+                }
                 
                 user =  await new User(
                     {

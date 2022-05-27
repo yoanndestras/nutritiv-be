@@ -163,7 +163,7 @@ opts_new_tfa.secretOrKey = process.env.NEW_TFA_TOKEN;
 
 exports.NewTwoFAjwtPassport = passport.use("new_tfa_jwt", new JwtStrategy(opts_new_tfa, (jwtPayload, done) =>
 {
-    let secret = jwtPayload.secret;
+    let TFASecret = jwtPayload.TFASecret;
     User.findOne({_id: jwtPayload._id}, (err, user) =>
         {                
             if(err)
@@ -172,7 +172,7 @@ exports.NewTwoFAjwtPassport = passport.use("new_tfa_jwt", new JwtStrategy(opts_n
             }
             else if(user)
             {
-                return done(null, user, secret);
+                return done(null, user, TFASecret);
             }
             else
             {
@@ -448,7 +448,7 @@ exports.verifyUserTFA = async(req, res, next) =>
 
 exports.verifyUserNewTFA = async(req, res, next) =>
 {
-    passport.authenticate("new_tfa_jwt", { session: false }, (err, user, secret) => 
+    passport.authenticate("new_tfa_jwt", { session: false }, (err, user, TFASecret) => 
     {
         if(err)
         {
@@ -468,8 +468,9 @@ exports.verifyUserNewTFA = async(req, res, next) =>
         }
         else
         {
+            console.log(`TFASecret = `, TFASecret)
             req.user = user;
-            req.secret = secret;
+            req.TFASecret = TFASecret;
             return next();
         }
     })(req, res, next); 
@@ -665,11 +666,11 @@ exports.Generate2AFToken = function(_id)
     );
 };
 
-exports.GenerateNewTFAToken = function(_id, secret) 
+exports.GenerateNewTFAToken = function(_id, TFASecret) 
 {
     return jwt.sign
     (
-        {_id, secret},  
+        {_id, TFASecret},  
         process.env.NEW_TFA_TOKEN, 
         {expiresIn: "1800s"} // expires in 2 minutes
     );

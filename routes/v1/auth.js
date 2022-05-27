@@ -237,7 +237,7 @@ async(req, res, next) =>
     {
         if(!req.user.TFASecret)
         {
-            const TFASecret = speakeasy.generateTFASecret(
+            const TFASecret = speakeasy.generateSecret(
                 {
                     name: `Nutritiv(${req.user.username})`,
                     length: 20
@@ -328,7 +328,7 @@ router.post('/disableTFA', auth.verifyUser, auth.verifyRefresh, async(req, res, 
                         console.log("Password is correct!");
                         
                         const TFASecret = user.TFASecret.toString();
-                        const token = req.body.token;
+                        const token = req.body.code;
                         
                         const valid = speakeasy.totp.verify(
                             {
@@ -397,32 +397,31 @@ router.post('/enableTFA', cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                     else
                     {
                         console.log("Password is correct!");
-                        
+
                         const TFASecret = req.TFASecret.toString();
-                        const token = req.body.token;
-                        
+                        const token = req.body.code;
                         const valid = speakeasy.totp.verify(
                             {
-                                TFASecret: TFASecret,
+                                secret: TFASecret,
                                 encoding: 'ascii',
                                 token: token,
                                 window: 0
                             });
-
+                            
                             if(valid === true)
                             {
-                                let sentenceArray = [];
+                                // let sentenceArray = [];
         
-                                for(let i = 0; i < 12; i++)
-                                {
-                                    sentenceArray.push(randomWords())
-                                }
+                                // for(let i = 0; i < 12; i++)
+                                // {
+                                //     sentenceArray.push(randomWords())
+                                // }
                                 
                                 const user = await User.findOneAndUpdate({_id: req.user._id},
                                     {
                                         $set:
                                         {
-                                            "TFASecret": TFASecret,
+                                            "TFASecret": TFASecret
                                             // "TFARecovery": TFARecovery
                                         }
                                     })
@@ -488,7 +487,7 @@ async(req, res, next) =>
         const user = await User.findOne({_id: req.user._id});
 
         const TFASecret = user.TFASecret.toString();
-        const token = req.body.token;
+        const token = req.body.code;
         
         const valid = speakeasy.totp.verify(
             {

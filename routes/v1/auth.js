@@ -453,30 +453,30 @@ router.post('/enableTFA', cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
     }catch(err){next(err)}
 })
 
-router.post('/tfa', async(req, res, next) =>
-{
-    const users = await User.find();
+// router.post('/tfa', async(req, res, next) =>
+// {
+//     const users = await User.find();
     
-    users.map(async user => 
-        {
-            if(user.TFASecret)
-            {
-                const test = await User.findOneAndUpdate({_id: user._id},
-                    {
-                        $unset: {TFASecret: ""}
-                    });
-                    console.log(`test = `, test)
-                await test.save();
+//     users.map(async user => 
+//         {
+//             if(user.TFASecret)
+//             {
+//                 const test = await User.findOneAndUpdate({_id: user._id},
+//                     {
+//                         $unset: {TFASecret: ""}
+//                     });
+//                     console.log(`test = `, test)
+//                 await test.save();
                 
-            }
-        }
-    )
-    res.status(200).json(
-        {
-            success: true,
-            users
-        })
-})
+//             }
+//         }
+//     )
+//     res.status(200).json(
+//         {
+//             success: true,
+//             users
+//         })
+// })
 
 //CREATE TOKEN FROM TOTP SECRET
 router.post('/TFAValidation', cors.corsWithOptions, auth.verifyNoRefresh, auth.verifyUserTFA, 

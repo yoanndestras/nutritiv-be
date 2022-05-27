@@ -300,7 +300,7 @@ exports.verifyProviderUser = async(req, res, next) =>
                 provider === "github" 
                 ? username = profile.username
                 : !profile.name.familyName 
-                ? username = "user" + nanoid()
+                ? username = profile.name.givenName
                 : username = profile.name.givenName + "_" + profile.name.familyName
                 
                 const usernameExist = await User.findOne({ username : username});

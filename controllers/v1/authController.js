@@ -468,7 +468,6 @@ exports.verifyUserNewTFA = async(req, res, next) =>
         }
         else
         {
-            console.log(`TFASecret = `, TFASecret)
             req.user = user;
             req.TFASecret = TFASecret;
             return next();

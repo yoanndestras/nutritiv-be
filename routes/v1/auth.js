@@ -257,14 +257,13 @@ async(req, res, next) =>
                 res .header('new_twofa_token', twoFAToken)
                     .status(200).json(data)
                     
-            
             })
         }
         else
         {
             res.status(400).json(
                 {
-                    success: true,
+                    success: false,
                     status: "Your account already have TFA enabled!"
                 })
         }
@@ -332,7 +331,7 @@ router.post('/disableTFA', auth.verifyUser, auth.verifyRefresh, async(req, res, 
                         
                         const valid = speakeasy.totp.verify(
                             {
-                                TFASecret: TFASecret,
+                                secret: TFASecret,
                                 encoding: 'ascii',
                                 token: token,
                                 window: 0
@@ -346,7 +345,7 @@ router.post('/disableTFA', auth.verifyUser, auth.verifyRefresh, async(req, res, 
                                     });
                                 await user.save();
                             
-                                res.status(200).json(
+                                res.status(201).json(
                                     {
                                         success: true, 
                                         status: 'Your successfully disabled TFA!',
@@ -427,7 +426,7 @@ router.post('/enableTFA', cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                                     })
                                 await user.save();
 
-                                res.status(200).json(
+                                res.status(201).json(
                                     {
                                         success: true, 
                                         status: 'Your successfully enabled TFA!',

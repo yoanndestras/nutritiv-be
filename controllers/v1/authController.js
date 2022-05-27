@@ -303,7 +303,7 @@ exports.verifyProviderUser = async(req, res, next) =>
                 
                 const usernameExist = await User.findOne({ username : username});
                 
-                usernameExist && (username = username + "_" + nanoid(8))
+                usernameExist && (username = "user" + nanoid(8))
                 
                 !profile?.emails[0]?.value 
                 ? email = "error"

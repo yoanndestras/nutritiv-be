@@ -500,7 +500,7 @@ async(req, res, next) =>
         
         const valid = speakeasy.totp.verify(
             {
-                TFASecret: TFASecret,
+                secret: TFASecret,
                 encoding: 'ascii',
                 token: token,
                 window: 0

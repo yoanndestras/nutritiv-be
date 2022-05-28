@@ -210,31 +210,44 @@ router.post("/new_password", auth.verifyNewPasswordSyntax, auth.verifyNewPasswor
     }catch(err){next(err)}
 });
 
-//GENERATE RANDOM WORDS
-router.post('/TFARecovery', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async (req, res, next) =>
+//GENERATE RANDOM WORDS FOR TFA RECOVERY
+router.post('/TFARecovery', cors.corsWithOptions, auth.verifyUserTFA, async (req, res, next) =>
 {
     try
     {
-        if(req.user.TFASecret && !req.user.TFARecovery)
+        if(req.user.TFASecret && req.user.TFARecovery)
         {
-            let sentenceArray = [];
-        
-            for(let i = 0; i < 12; i++)
+            const TFARecoveryInitial = req.user.TFARecovery;
+            const TFARecoveryEntered = req.body.TFARecovery;
+            
+            if(JSON.stringify(TFARecoveryInitial) == JSON.stringify(TFARecoveryEntered))
             {
-                sentenceArray.push(randomWords())
+                let TFASecret = req.user.TFASecret;
+
+                res.status(200).json(
+                    {
+                        success: true,
+                        TFASecret
+                    });
+            }
+            else
+            {
+                res.status(401).json(
+                    {
+                        success: false,
+                        status: "Your recovery sentence is false!"
+                    })
             }
             
-            res.status(201).json(
-                {
-                    sentenceArray
-                });
         }
         else
         {
-
+            res.status(400).json(
+                {
+                    success: false,
+                    status: "Your account do not have TFA enabled!"
+                })
         }
-        
-
     }catch(err){next(err);}
 })
 
@@ -253,7 +266,6 @@ async(req, res, next) =>
                 })
             const TFASecretAscii = TFASecret.ascii;
             const twoFAToken = auth.GenerateNewTFAToken(req.user._id, TFASecretAscii);
-            // const TFASecretAscii = TFASecret.ascii;
             
             qrcode.toDataURL(TFASecret.otpauth_url, (err, data) =>
             {
@@ -276,14 +288,6 @@ async(req, res, next) =>
                     status: "Your account already have TFA enabled!"
                 })
         }
-        
-        
-        // res.status(200).json(
-        //     {
-        //         success: true, 
-        //         TFASecret: TFASecret,
-        //         qrcodeData
-        //     });
         
     }catch(err){next(err)}
 })
@@ -350,7 +354,7 @@ router.post('/disableTFA', auth.verifyUser, auth.verifyRefresh, async(req, res, 
                             {
                                 const user = await User.findOneAndUpdate({_id: req.user._id},
                                     {
-                                        $unset: {TFASecret: ""}
+                                        $unset: {"TFASecret": "", "TFARecovery": ""}
                                     });
                                 await user.save();
                             
@@ -418,19 +422,16 @@ router.post('/enableTFA', cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                             
                             if(valid === true)
                             {
-                                // let sentenceArray = [];
+                                let TFARecovery = [];
         
-                                // for(let i = 0; i < 12; i++)
-                                // {
-                                //     sentenceArray.push(randomWords())
-                                // }
-                                
+                                for(let i = 0; i < 12; i++){TFARecovery.push(randomWords())}
+                                                                
                                 const user = await User.findOneAndUpdate({_id: req.user._id},
                                     {
                                         $set:
                                         {
-                                            "TFASecret": TFASecret
-                                            // "TFARecovery": TFARecovery
+                                            "TFASecret": TFASecret,
+                                            "TFARecovery": TFARecovery
                                         }
                                     })
                                 await user.save();
@@ -591,13 +592,13 @@ router.post("/login", cors.corsWithOptions, async(req, res, next)=>
                     }
                     else if(user.TFASecret)
                     {
-                        const twoFAToken = auth.Generate2AFToken({_id: user._id});
-                        
+                        const twoFAToken = auth.GenerateTFAToken({_id: user._id});
+
                         res.header('twofa_token', twoFAToken)
                             .status(200).json(
                             {
                                 success: true, 
-                                hasTFA: true // refirect to /totpValidate
+                                hasTFA: true // refirect to /TFAValidation
                             })
                     }
                     else

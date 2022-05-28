@@ -666,12 +666,12 @@ exports.GenerateAccessToken = function(_id)
     );
 };
 
-exports.Generate2AFToken = function(_id) 
+exports.GenerateTFAToken = function(_id) 
 {
     return jwt.sign
     (
         _id, 
-        process.env.REF_2AF_TOKEN, 
+        process.env.REF_TFA_TOKEN, 
         {expiresIn: "120s"} // expires in 2 minutes
     );
 };

@@ -29,7 +29,7 @@ export const Products = () => {
   const [sortedByPriceStatus, setSortedByPriceStatus] = useState("")
   
   const [allTags, setAllTags] = useState([])
-  
+
   // API EFFECTS
   useEffect(() => {
     async function fetchApi() {
@@ -191,7 +191,6 @@ export const Products = () => {
       transition={{
         default: { duration: 0.5 },
       }}
-      id="products"
     >
       {
         loading ? (
@@ -253,7 +252,6 @@ export const Products = () => {
                 ))
               }
               {/* PRODUCTS - CARDS */}
-              {/* <motion.div layout> */}
               <AnimatePresence>
                 {
                   productsToDisplay?.length > 0 ? (
@@ -276,7 +274,6 @@ export const Products = () => {
                 }
               </AnimatePresence>
               <motion.div layout>
-                {/* </motion.div>  */}
                 <Pagination
                   count={numberOfPages}
                   page={page}

@@ -8,25 +8,32 @@ import { Chat } from './Chat'
 export const ChatConnection = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const isAdmin = useSelector(state => state.user.isAdmin)
   const loggedIn = useSelector(state => state.user.loggedIn)
   const hasChat = useSelector(state => state.user.hasChat)
   
   useEffect(() => {
     let fetchApi = async () => {
       try {
-        await nutritivApi.get(
+        const { data } = await nutritivApi.get(
           `/chats/`
         )
-        dispatch(
-          updateUser({ hasChat: true })
-        )
+        if(data.success) {
+          dispatch(
+            updateUser({ hasChat: true })
+          )
+        } else {
+          dispatch(
+            updateUser({ hasChat: false })
+          )
+        }
       } catch(err) {
         console.log(
           '/chats/?messagesQty=1', err
         )
       }
     }
-    !hasChat && fetchApi();
+    loggedIn && !hasChat && fetchApi();
   });
   
   const handleConnectToChat = async () => {
@@ -46,7 +53,10 @@ export const ChatConnection = () => {
       navigate(
         '/login',
         { state: 
-          { msg: "Please login and start a conversation right away!" }
+          { 
+            msg: "Please login and start a conversation right away!", 
+            from: `/chat`
+          }
         }
       );
     }
@@ -55,7 +65,7 @@ export const ChatConnection = () => {
   return (
     <div>
       <h2>
-        Chats
+        Chat(s)
       </h2>
       {hasChat ? (
         <Chat />

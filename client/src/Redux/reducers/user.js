@@ -7,6 +7,7 @@ const initialState = {
   email: "",
   isAdmin: false,
   isVerified: false,
+  hasTFA: false,
   cartQuantity: null,
   addresses: [],
   avatar: "",

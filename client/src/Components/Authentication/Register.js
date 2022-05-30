@@ -78,6 +78,7 @@ export default function RegisterPage() {
           <input 
             name="username" 
             onChange={ handleChange } 
+            placeholder="Username..."
             type="text" 
           />
         </label>
@@ -85,7 +86,8 @@ export default function RegisterPage() {
           <p>Email</p>
           <input 
             name="email" 
-            onChange={ handleChange } 
+            onChange={ handleChange }
+            placeholder="Email..." 
             type="text" 
           />
         </label>
@@ -93,7 +95,8 @@ export default function RegisterPage() {
           <p>Password</p>
           <input 
             name="password" 
-            onChange={ handleChange } 
+            onChange={ handleChange }
+            placeholder="Password..." 
             type="password"
           />
         </label>

@@ -6,7 +6,7 @@ export const OAuth = ({ provider }) => {
   const handleLogin = (e) => {
     e.preventDefault();
     window.open(`
-      ${baseURL}/v1/auth/${provider}`, 
+      ${baseURL}/auth/${provider}`, 
       "_self"
     )
   }

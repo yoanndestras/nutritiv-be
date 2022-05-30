@@ -3,14 +3,13 @@ import axios from 'axios';
 import React, { 
   useCallback,
   useEffect,
-  useState, 
-  // useEffect 
+  useState,
 } from 'react';
 import { useDispatch } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import nutritivApi from '../../Api/nutritivApi';
 import { updateUser, updateUserCartQuantity } from '../../Redux/reducers/user';
-import { GoogleAuth, OAuth } from './OAuth';
+import { OAuth } from './OAuth';
 
 export default function LoginPage() {
   console.log("##### LoginPage render #####");
@@ -141,9 +140,9 @@ export default function LoginPage() {
         error: "",
       })
       await nutritivApi.post(
-        `/auth/totpValidate`,
+        `/auth/TFAValidation`,
         {
-          token: login.twoFaCode
+          code: login.twoFaCode
         },
         {
           headers: {
@@ -174,7 +173,7 @@ export default function LoginPage() {
   
   return (
     <div>
-      <h2>Login page</h2>
+      <h1>Login page</h1>
       {
         location.state?.msg && <p style={{color: "orange"}}>{location.state.msg}</p>
       }
@@ -228,7 +227,7 @@ export default function LoginPage() {
               }
             </label>
             <div>
-              <input value="Submit" type="submit" />
+              <input value="Login" type="submit" />
             </div>
             <br />
           </form>

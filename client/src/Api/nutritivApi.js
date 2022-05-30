@@ -11,6 +11,10 @@ export const injectStore = _store => {
 }
 
 // # API INSTANCE #
+const s3Address = process.env.REACT_APP_S3_ADDRESS
+const s3Products = process.env.REACT_APP_S3_PRODUCTS
+export const s3URL = `${s3Address}${s3Products}`
+
 const apiVersion = process.env.REACT_APP_API_VERSION
 const apiAddress = process.env.REACT_APP_API_ADDRESS_FULL
 export const baseURL = `${apiAddress}${apiVersion}`
@@ -49,6 +53,12 @@ nutritivApi.interceptors.response.use(res => {
     localStorage.setItem(
       'twofa_token',
       res.headers.twofa_token
+    )
+  }
+  if(res.headers.new_twofa_token) {
+    localStorage.setItem(
+      'new_twofa_token',
+      res.headers.new_twofa_token
     )
   }
   if(res.data.loggedIn === false) {

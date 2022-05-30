@@ -7,6 +7,14 @@ export const ProductCard = ({ product, index }) => {
   
   const lowestItemPrice = product.productItems[0].price.value
   
+  const productCard = {
+    initial: { opacity: 0 },
+    animate: { 
+      opacity: 1, 
+    },
+    exit: { opacity: 0 }
+  }
+  
   return (
     <motion.div
       layout
@@ -15,13 +23,14 @@ export const ProductCard = ({ product, index }) => {
       style={{
         background: "lightgray",
       }}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ 
-        duration: 0.32,
-        delay: index * 0.05
-      }}
+      variants={productCard}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      // transition={{ 
+      //   duration: 0.32,
+      //   delay: index * 0.05
+      // }}
     >
       {/* GENERAL INFO */}
       <h2>

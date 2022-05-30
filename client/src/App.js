@@ -13,11 +13,11 @@ import { CheckoutSuccess } from './Components/Payment/CheckoutSuccess';
 import { CheckoutCancel } from './Components/Payment/CheckoutCancel';
 import { ProductPage } from './Components/Products/ProductPage';
 import { Cart } from './Components/Payment/Cart';
-import { Welcome } from './Components/Homepage';
-import { PageNotFound } from './Components/PageNotFound';
+import { Welcome } from './Components/Homepage/Homepage';
+import { PageNotFound } from './Components/PageNotFound/PageNotFound';
 import { ChatConnection } from './Components/Chat/ChatConnection';
 import { AnimatePresence } from 'framer-motion';
-import Navbar from './Components/Navbar';
+import Navbar from './Components/Navbar/Navbar';
 
 // init stripe
 const stripePromise = loadStripe(
@@ -31,12 +31,14 @@ function App() {
   const location = useLocation();
   const navigate = useNavigate();
   
+  console.log('# location.state :', location.state)
+  
   const [searchParams] = useSearchParams();
   const oAuthStatus = searchParams.get('status');
-  // const oAuthStatusCode = searchParams.get('statusCode');
   const oAuthMessage = searchParams.get('message');
   const oAuthUsername = searchParams.get('username')
   const oAuthAccessToken = searchParams.get('accessToken');
+  // const oAuthStatusCode = searchParams.get('statusCode');
   
   // ON LOAD
   // Fetch user-self info
@@ -79,7 +81,10 @@ function App() {
   
   // Validate oAuth
   useEffect(() => {
-    if(oAuthStatus === "successLogin") {
+    if(
+      oAuthStatus === "successLogin" ||
+      oAuthStatus === "successRegistration"
+    ) {
       console.log("Condition success oAuth");
       let fetchApi = async () => {
         try {
@@ -94,16 +99,7 @@ function App() {
         }
       }
       fetchApi();
-    } else if(oAuthStatus === "successRegistration") {
-      navigate(
-        '/login', 
-        { state: 
-          { 
-            msg: oAuthMessage, 
-            username: oAuthUsername 
-          } 
-        }
-      )
+      navigate('/')
     } else if(oAuthStatus === "failed") {
       navigate(
         '/login', 
@@ -122,9 +118,7 @@ function App() {
     oAuthStatus, 
     oAuthUsername
   ]);
-
-  console.log('# gettingtUserInfo :', gettingUserInfo)
-
+  
   // RESTRICTED ROUTES
   const Restricted = ({ type }) => {
     const cartSelection = location.state?.cartSelection;

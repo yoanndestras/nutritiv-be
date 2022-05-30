@@ -15,14 +15,17 @@ const socket = io(
 export const Chat = () => {
   const dispatch = useDispatch();
   const userId = useSelector(state => state.user._id)
+  const isAdmin = useSelector(state => state.user.isAdmin)
   
   const [allUsers, setAllUsers] = useState(null)
   
   const [socketError, setSocketError] = useState(false)
   
   // CHATS INFO
-  const [chatsInfos, setChatsInfo] = useState([])
+  const [chatsInfos, setChatsInfos] = useState([])
   const [activeChatId, setActiveChatId] = useState(null)
+  
+  console.log('# chatsInfos :', chatsInfos)
   
   // CHATS CONTENT
   const [chat, setChat] = useState(null)
@@ -56,7 +59,7 @@ export const Chat = () => {
     });
     // CREATE ROOM
     socket.on("createRoom", ({ roomCreated }) => {
-      console.log('# roomCreated :', roomCreated)
+      // console.log('# roomCreated :', roomCreated)
     })
     // AUTH ERROR
     socket.on("connect_error", err => {
@@ -124,7 +127,7 @@ export const Chat = () => {
           nutritivApi.request(requests[1]).catch(useNull),
         ]).then(function([chats, users]) {
           setAllUsers(users.data)
-          setChatsInfo(chats.data)
+          setChatsInfos(chats.data)
           setActiveChatId(chats.data[0]._id)
           chatboxBottomRef.current?.scrollIntoView()
         }).catch(function([chats, users]) {
@@ -209,39 +212,54 @@ export const Chat = () => {
       let roomId = activeChatId;
       socket.emit('chatting', {text, id, token, roomId})
     } catch(err) {
-      console.error('/chats/message/:', err)
+      console.error('/chats/message/ :', err)
     }
   }
   const handleMessageToBeSent = (e) => {
     setMessageToBeSent(e.target.value)
   }
   
+  const handleDeleteChat = async (e) => {
+    e.preventDefault();
+    try {
+      const { data } = await nutritivApi.delete(
+        `/chats/single/${e.target.id}`,
+      )
+      const newChats = chatsInfos.filter(chat => chat._id !== e.target.id)
+      setChatsInfos(newChats)
+      console.log('# /chats/single/ :', data)
+    } catch(err) {
+      console.error('/chats/single/ :', err)
+    }
+  }
+  
   return (
     <div>
-      {
-        socketError && <p style={{color: "red"}}>There was an error with socket.io</p>
-      }
-      {
-        chatsInfos.map(chatInfo => (
-          <React.Fragment key={chatInfo._id}>
-            <br />
-            <button
-              id={chatInfo._id} 
-              onClick={handleActiveChat}
-              style={chatInfo._id === activeChatId ? {color: "grey"} : undefined}
-            >
-              {chatInfo._id}
-            </button>
-            {
-              chatInfo._id === activeChatId && (
-                <span role="img" aria-label='active' >
-                  ◀
-                </span>
-              )
-            }
-          </React.Fragment>
-        ))
-      }
+      {socketError && (
+        <p style={{color: "red"}}>
+          There was an error with socket.io
+        </p>
+      )}
+      {isAdmin && chatsInfos && chatsInfos.map(chatInfo => (
+        <React.Fragment key={chatInfo._id}>
+          <br />
+          {isAdmin && (
+            <button id={chatInfo._id} onClick={handleDeleteChat}>X</button>
+          )}
+          <button
+            id={chatInfo._id} 
+            onClick={handleActiveChat}
+            style={chatInfo._id === activeChatId ? {color: "grey"} : undefined}
+          >
+            {chatInfo._id}
+          </button>
+          {chatInfo._id === activeChatId && (
+            <span role="img" aria-label='active' >
+              ◀
+            </span>
+          )}
+        </React.Fragment>
+      ))}
       <br />
       <br />
       
@@ -289,13 +307,11 @@ export const Chat = () => {
                         key={message.id}
                         style={{width: "100%"}}
                       >
-                        {
-                          allUsers.filter(user => user.userId === message.sender).map((user, i) => (
-                            <span key={i} style={{fontWeight: "bold"}}>
-                              {user.username}
-                            </span>
-                          ))
-                        }
+                        {allUsers.filter(user => user.userId === message.sender).map((user, i) => (
+                          <span key={i} style={{fontWeight: "bold"}}>
+                            {user.username}
+                          </span>
+                        ))}
                         <br />
                         {message.text}
                       </p>
@@ -317,7 +333,8 @@ export const Chat = () => {
         style={{display: 'flex'}}
       >
         <input 
-          onChange={handleMessageToBeSent} 
+          onChange={handleMessageToBeSent}
+          placeholder="Type something..." 
           style={{flexGrow: 1}}
           type="text" 
           value={messageToBeSent} 

@@ -4,8 +4,9 @@ import React, {
 } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
-import nutritivApi from '../../Api/nutritivApi';
+import nutritivApi, { s3URL } from '../../Api/nutritivApi';
 import { updateUserCartQuantity } from '../../Redux/reducers/user';
+import { motion } from 'framer-motion';
 
 export const ProductPage = () => {
   const loggedIn = useSelector(state => state.user.loggedIn)
@@ -30,8 +31,6 @@ export const ProductPage = () => {
   const [loadingAdding, setLoadingAdding] = useState(false)
   const [successAddedToCart, setSuccessAddedToCart] = useState(false)
   const [errorOutOfStock, setErrorOutOfStock] = useState(false)
-  
-  console.log('# location.state :', location.state)
   
   // HANDLE ADD TO CART
   const handleAddToCart = async (loc) => {
@@ -76,37 +75,44 @@ export const ProductPage = () => {
   }
   
   useEffect(() => {
-    if(location.state?.cartSelection?.productId) {
-      setCartSelection(location.state.cartSelection);
-      handleAddToCart({cartSelection: location.state.cartSelection});
+    let isMounted = true;
+    if(isMounted) {
+      if(location.state?.cartSelection?.productId) {
+        setCartSelection(location.state.cartSelection);
+        handleAddToCart({cartSelection: location.state.cartSelection});
+      }
     }
+    return () => { isMounted = false }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
   // GET PRODUCT (by title)
   useEffect(() => {
+    let isMounted = true;
     try {
       async function fetchApi() {
         const { data } = await nutritivApi.get(
           `/products/findByTitle/${productTitle}`
         )
-        
-        const fetchedProduct = data.Product[0]
-        setProduct(fetchedProduct);
-
-        if(location.state?.productId){
-          setCartSelection(location.state)
-        } else {
-          setCartSelection(prevState => ({
-            ...prevState,
-            productId: fetchedProduct._id
-          }))
+        if(isMounted){
+          const fetchedProduct = data.Product[0]
+          setProduct(fetchedProduct);
+          
+          if(location.state?.productId){
+            setCartSelection(location.state)
+          } else {
+            setCartSelection(prevState => ({
+              ...prevState,
+              productId: fetchedProduct._id
+            }))
+          }
         }
       }
       fetchApi();
     } catch (err) {
       console.log('# /products/findByTitle err :', err)
     }
+    return () => { isMounted = false }
   }, [productTitle, location.state])
   
   // HANDLE SELECTED ITEM
@@ -129,19 +135,23 @@ export const ProductPage = () => {
 
   // GET STOCK
   useEffect(() => {
+    let isMounted = true;
     if(product._id) {
       try {
         async function fetchApi() {
           const { data } = await nutritivApi.get(
             `/products/countInStock/${product._id}`
           );
-          setCountInStock(data.countInStock)
+          if(isMounted){
+            setCountInStock(data.countInStock)
+          }
         }
         fetchApi();
       } catch (err) {
         console.log('# apiGetCountInStock err :', err)
       }
     }
+    return () => { isMounted = false }
   }, [updateStock, product._id]);
   
   // HANDLE QUANTITY
@@ -154,15 +164,28 @@ export const ProductPage = () => {
     }
   }, [cartSelection.load, countInStock]);
 
-  console.log('# countInStock :', countInStock)
-
   return (
-    <>
+    <motion.div>
       <h2>
         { product.title }
       </h2>
+      {
+        product.imgs?.map((img, i) => (
+          <img
+            key={i}
+            src={
+              `${s3URL}${img}`
+            } 
+            alt={`product ${i}`} 
+          />
+        ))
+      }
       <div>
         {/* RADIO BUTTON */}
+        <b>
+          Load:
+        </b>
+        <br />
         {
           product.productItems.map((item, i) => (
             <React.Fragment key={i}>
@@ -185,9 +208,14 @@ export const ProductPage = () => {
         }
       </div>
       {
-        errorOutOfStock && <p style={{color: "red"}}>Out of stock</p>
+        errorOutOfStock && <p style={{color: "red"}}>Not enough stock</p>
       }
+      <br />
       {/* DROPDOWN */}
+      <b>
+        Quantity:
+      </b>
+      <br />
       {
         <select
           disabled={!availableQuantity}
@@ -209,6 +237,8 @@ export const ProductPage = () => {
           }
         </select>
       }
+      <br />
+      <br />
       {/* BUTTON */}
       <button
         disabled={!cartSelection.quantity}
@@ -228,6 +258,6 @@ export const ProductPage = () => {
       {
         loadingAdding && <p>Adding {productTitle} to cart...</p>
       }
-    </>
+    </motion.div>
   )
 }

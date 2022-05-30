@@ -202,8 +202,8 @@ auth.verifyAdmin, async(req, res, next) =>
                     desc : randomDesc,
                     shape : randomShape,
                     tags : [randomTag],
-                    imgs: ["CDimMultivitamines_powder.png"],
-                    productItems: [
+                    imgs : ["CDimMultivitamines_powder.png"],
+                    productItems : [
                     {
                         load : randomLoad,
                         price : 

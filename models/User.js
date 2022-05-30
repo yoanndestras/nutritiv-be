@@ -14,15 +14,19 @@ const UserSchema = new Schema
     {
         type: String,
         required: true,
-        unique: true
+        unique: false
     },
     password:
     {
         type: String
     },
-    secret:
+    TFASecret:
     {
         type: String
+    },
+    TFARecovery:
+    {
+        type: Array
     },
     isAdmin: 
     {
@@ -42,6 +46,7 @@ const UserSchema = new Schema
     provider:
     {
         type: String,
+        default: 'local',
     },
     addressDetails:
     [

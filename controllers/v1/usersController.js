@@ -1,5 +1,6 @@
 const express = require('express');
 const User = require("../../models/User");
+const Chat = require('../../models/Chat')
 
 const mongoose = require('mongoose');
 const fs = require('fs');
@@ -26,10 +27,15 @@ exports.resizeUserAvatar = async(req, res, next) =>
     {
       let err = new Error('File not found!')
       next(err);
-    }
-    let avatar = "usersAvatar/" + user.avatar;
+    };
 
-    avatar && user.avatar !== "PrPhdefaultAvatar.jpg" ? fileUpload.deleteFile(avatar) : null;
+    let avatar;
+    if((user.avatar).substring(0, 4) !== "http")
+    {
+      avatar = "usersAvatar/" + user.avatar;
+
+      user.avatar !== "PrPhdefaultAvatar.jpg" ? fileUpload.deleteFile(avatar) : null;
+    }
     
     let fileArray = [req.file];
     await Promise.all
@@ -66,13 +72,12 @@ exports.addUserAvatar = async(req, res, next) =>
     fs.unlinkSync(path.join("public/images/usersAvatar", req.file.filename))
         
     const user = await User.findOneAndUpdate({_id: req.user._id},
+    {
+      $set:
       {
-        $set:
-        {
-          avatar: req.file.filename
-        }
-      });
-      
+        avatar: req.file.filename
+      }
+    });
     
     await user.save();
     next();
@@ -222,6 +227,18 @@ exports.updateUsername = async(req, res, next) =>
       }
     )
     await updateUsername.save();
+
+    const userChat = await Chat.findOneAndUpdate(
+      {name : username},
+      {
+        $set:
+        {
+          name : username
+        }
+      });
+    
+    await userChat.save();
+
     next();
   
   }catch(err){next(err);}

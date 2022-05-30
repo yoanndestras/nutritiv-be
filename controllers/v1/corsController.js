@@ -17,8 +17,8 @@ const corsOptionsDelegate = (req, callback) =>
             { 
                 origin: true, 
                 credentials: true, 
-                exposedHeaders: ['access_token', 'refresh_token', 'twofa_token'], 
-                allowedHeaders: ['X-Requested-With', 'X-HTTP-Method-Override', 'Content-Type', 'Accept', 'Content-Length', 'X-Foo', 'X-Bar', 'access_token', 'refresh_token', 'twofa_token']
+                exposedHeaders: ['access_token', 'refresh_token', 'twofa_token', 'new_twofa_token'], 
+                allowedHeaders: ['X-Requested-With', 'X-HTTP-Method-Override', 'Content-Type', 'Accept', 'Content-Length', 'X-Foo', 'X-Bar', 'access_token', 'refresh_token', 'twofa_token', 'new_twofa_token']
             };
             console.log({ origin: true });
         }

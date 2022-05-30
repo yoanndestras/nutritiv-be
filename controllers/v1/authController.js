@@ -2,12 +2,17 @@ const authenticate = require("./authController");
 
 const express = require('express');
 const passport = require('passport');
+
 const LocalStrategy = require('passport-local').Strategy;
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const FacebookStrategy = require('passport-facebook').Strategy;
-const GitHubStrategy = require('passport-github').Strategy;
+const GitHubStrategy = require('passport-github2').Strategy;
+
 const User = require('../../models/User');
 const email_validator = require("email-validator");
+const { customAlphabet } = require('nanoid');
+const alphabet = '0123456789';
+const nanoid = customAlphabet(alphabet, 12);
 
 require('dotenv').config();
 
@@ -15,7 +20,6 @@ const passportJWT = require("passport-jwt");
 const JwtStrategy   = passportJWT.Strategy;
 const ExtractJwt = passportJWT.ExtractJwt;
 const jwt = require('jsonwebtoken');
-
 const app = express();
 
 app.use(express.json()); // to read JSON    
@@ -132,11 +136,11 @@ exports.jwtPassport = passport.use("email_jwt", new JwtStrategy(opts_email, (jwt
         })
 }));
 
-const opts_2fa = {}; //json web token and key
-opts_2fa.jwtFromRequest = ExtractJwt.fromHeader("twofa_token");
-opts_2fa.secretOrKey = process.env.REF_2AF_TOKEN;
+const opts_tfa = {}; //json web token and key
+opts_tfa.jwtFromRequest = ExtractJwt.fromHeader("twofa_token");
+opts_tfa.secretOrKey = process.env.REF_TFA_TOKEN;
 
-exports.TwoFAjwtPassport = passport.use("2fa_jwt", new JwtStrategy(opts_2fa, (jwtPayload, done) =>
+exports.TwoFAjwtPassport = passport.use("tfa_jwt", new JwtStrategy(opts_tfa, (jwtPayload, done) =>
 {
     User.findOne({_id: jwtPayload._id}, (err, user) =>
         {                
@@ -155,15 +159,39 @@ exports.TwoFAjwtPassport = passport.use("2fa_jwt", new JwtStrategy(opts_2fa, (jw
         })
 }));
 
+const opts_new_tfa = {}; //json web token and key
+opts_new_tfa.jwtFromRequest = ExtractJwt.fromHeader("new_twofa_token");
+opts_new_tfa.secretOrKey = process.env.NEW_TFA_TOKEN;
+
+exports.NewTwoFAjwtPassport = passport.use("new_tfa_jwt", new JwtStrategy(opts_new_tfa, (jwtPayload, done) =>
+{
+    let TFASecret = jwtPayload.TFASecret;
+    User.findOne({_id: jwtPayload._id}, (err, user) =>
+        {                
+            if(err)
+            {
+                return done(err, false, null);
+            }
+            else if(user)
+            {
+                return done(null, user, TFASecret);
+            }
+            else
+            {
+                return done(null, false, null);
+            }
+        })
+}));
+
 const opts_google = {};
 opts_google.clientID = process.env.GOOGLE_CLIENT_ID;
 opts_google.clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-opts_google.callbackURL = "http://localhost:3001/v1/auth/google/callback";
+opts_google.callbackURL = `${process.env.OAUTH_ADDRESS}v1/auth/google/callback`;
 
 exports.GooglePassport = passport.use("google", new GoogleStrategy(opts_google, 
     (accessToken, refreshToken, profile, done) =>
     {
-        User.findOne({ email: profile?.emails[0]?.value}, (err, user) =>
+        User.findOne({ email: profile?.emails[0]?.value, provider: profile.provider}, (err, user) =>
         {
             if(err)
             {
@@ -184,7 +212,7 @@ exports.GooglePassport = passport.use("google", new GoogleStrategy(opts_google,
 const opts_facebook = {};
 opts_facebook.clientID = process.env.FACEBOOK_APP_ID;
 opts_facebook.clientSecret = process.env.FACEBOOK_APP_SECRET;
-opts_facebook.callbackURL = "http://localhost:3001/v1/auth/facebook/callback";
+opts_facebook.callbackURL = `${process.env.OAUTH_ADDRESS}v1/auth/facebook/callback`;
 opts_facebook.profileFields = ['emails', 'name','displayName','photos'];
 
 exports.FacebookPassport = passport.use("facebook", new FacebookStrategy(opts_facebook, 
@@ -192,8 +220,8 @@ exports.FacebookPassport = passport.use("facebook", new FacebookStrategy(opts_fa
     {        
         let picture = profile?.photos[0]?.value ? `https://graph.facebook.com/${profile.id}/picture?width=200&height=200`+ "&access_token=" + accessToken : null;
         profile.photos[0].value = picture ? picture : 'PrPhdefaultAvatar.jpg';
-
-        User.findOne({ email: profile?.emails[0]?.value}, (err, user) =>
+        
+        User.findOne({ email: profile?.emails[0]?.value, provider: profile.provider}, (err, user) =>
         {
             if(err)
             {
@@ -214,16 +242,13 @@ exports.FacebookPassport = passport.use("facebook", new FacebookStrategy(opts_fa
 const opts_github = {};
 opts_github.clientID = process.env.GITHUB_CLIENT_ID;
 opts_github.clientSecret = process.env.GITHUB_CLIENT_SECRET;
-opts_github.callbackURL = "http://localhost:3001/v1/auth/github/callback";
+opts_github.callbackURL = `${process.env.OAUTH_ADDRESS}v1/auth/github/callback`;
+opts_github.scope = ['user:email'];
 
 exports.GithubPassport = passport.use("github", new GitHubStrategy(opts_github, 
     (accessToken, refreshToken, profile, done) =>
     {        
-        console.log(`profile = `, profile)
-        console.log(`profile.email = `, profile.emails)
-        
-        
-        User.findOne({ email: profile.emails}, (err, user) =>
+        User.findOne({ email: profile?.emails[0]?.value, provider: profile.provider}, (err, user) =>
         {
             if(err)
             {
@@ -260,6 +285,7 @@ exports.verifyProviderUser = async(req, res, next) =>
         ? scope = [ 'email']
         : scope = [ 'user:email'];
         
+        
         passport.authenticate(provider, 
         { 
             session: false,
@@ -271,13 +297,30 @@ exports.verifyProviderUser = async(req, res, next) =>
             {
                 let email;
                 
+                provider === "github" 
+                ? username = profile.username
+                : !profile.name.familyName 
+                ? username = profile.name.givenName
+                : username = profile.name.givenName + "_" + profile.name.familyName
+                
+                const usernameExist = await User.findOne({ username : username});
+                
+                usernameExist && (username = "user" + nanoid())
+                
                 !profile?.emails[0]?.value 
-                ? email = profile.name.familyName + profile.name.givenName + '@' + provider + '.com'
+                ? email = "error"
                 : email = profile.emails[0].value;
+                
+                if(email === "error")
+                {
+                    let err = new Error('Cannot access to your email address!');
+                    err.statusCode = 500;
+                    return next(err);
+                }
                 
                 user =  await new User(
                     {
-                        username: profile.displayName, 
+                        username: username, 
                         isVerified: true,
                         avatar: profile.photos[0].value,
                         email:  email,
@@ -289,8 +332,8 @@ exports.verifyProviderUser = async(req, res, next) =>
                     if(err)
                     {
                         res.redirect(process.env.SERVER_ADDRESS + 
-                            '/?status=failed' +
-                            '&message=Registration Failed! Please try again later!'+
+                            '?status=failed' +
+                            '&message='+ err.message +
                             '&statusCode=500'
                             )
                     }
@@ -299,8 +342,8 @@ exports.verifyProviderUser = async(req, res, next) =>
                         const accessToken = authenticate.GenerateAccessToken({_id: user._id});                            
                         
                         res.redirect(process.env.SERVER_ADDRESS + 
-                            '/?status=successRegistration' + 
-                            '&message=Registration successfull! Connect to your new account!'+
+                            '?status=successRegistration' + 
+                            '&message=Registration successfull!'+
                             '&accessToken=' + accessToken + 
                             '&statusCode=201'
                             )
@@ -309,52 +352,48 @@ exports.verifyProviderUser = async(req, res, next) =>
             }
             else if(user)
             {
-                if(user.provider)
+                
+                req.login(user, { session: false }, async(err) => 
                 {
-                    req.login(user, { session: false }, async(err) => 
+                    if(err)
                     {
-                        if(err)
-                        {
-                            res.redirect(process.env.SERVER_ADDRESS + 
-                                '/?status=failed' +
-                                '&message=Login Unsuccessfull!'+
-                                '&statusCode=500'
-                                )
-                        }
-                        else
-                        {
-                            const accessToken = authenticate.GenerateAccessToken({_id: req.user._id});                            
-                            
-                            res.redirect(process.env.SERVER_ADDRESS + 
-                                '/?status=successLogin' + 
-                                '&accessToken=' + accessToken + 
-                                '&statusCode=200'
+                        res.redirect(process.env.SERVER_ADDRESS + 
+                            '?status=failed' +
+                            '&message=Login Unsuccessfull!'+
+                            '&statusCode=500'
                             )
-                        }
-                    })
-                }
-                else
-                {
-                    res.redirect(process.env.SERVER_ADDRESS + 
-                        '/?status=failed' +
-                        '&message=An account with your mail address already exists without '+
-                        provider +
-                        ' please login with your Nutritiv account' +
-                        '&statusCode=400' +
-                        '&username=' + user.username
+                    }
+                    else
+                    {
+                        const accessToken = authenticate.GenerateAccessToken({_id: req.user._id});                            
+                        
+                        res.redirect(process.env.SERVER_ADDRESS + 
+                            '?status=successLogin' + 
+                            '&accessToken=' + accessToken + 
+                            '&statusCode=200'
                         )
-                }
+                    }
+                })
+                
+
+                //     res.redirect(process.env.SERVER_ADDRESS + 
+                //         '?status=failed' +
+                //         '&message=An account with your mail address already exists without '+
+                //         provider +
+                //         ' please login with your Nutritiv account' +
+                //         '&statusCode=400' +
+                //         '&username=' + user.username
+                //         )
             }
         })(req, res, next);
     }catch(err)
     {
         res.redirect(process.env.SERVER_ADDRESS + 
-            '/?status=failed' +
+            '?status=failed' +
             '/?message=Registration Failed! Please try again later!'+
             '/?statusCode=500'
             )
     }
-    
 }
 
 // VERIFY PRIVILEGES
@@ -376,7 +415,6 @@ exports.verifyAuthorization = async(req, res, next) =>
 {
     try
     {
-        
         let userId = JSON.stringify(req.user._id).replace(/\"/g, "");
         if( userId === req.params.id || req.user.isAdmin === true || userId === req.params.userId)
         {
@@ -391,9 +429,9 @@ exports.verifyAuthorization = async(req, res, next) =>
     }catch(err){next(err)}
 };
 
-exports.verifyUser2FA = async(req, res, next) =>
+exports.verifyUserTFA = async(req, res, next) =>
 {
-    passport.authenticate("2fa_jwt", { session: false }, (err, user, info) => 
+    passport.authenticate("tfa_jwt", { session: false }, (err, user, info) => 
     {
         if(err)
         {
@@ -418,6 +456,83 @@ exports.verifyUser2FA = async(req, res, next) =>
         }
     })(req, res, next); 
 }
+
+exports.verifyUserTFARecovery = async(req, res, next) =>
+{
+    passport.authenticate("tfa_jwt", { session: false }, (err, user, info) => 
+    {
+        if(err || !user)
+        {
+            passport.authenticate('jwt', { session: false }, (err, user, info) => 
+            {
+                if (err || !user) 
+                {               
+                    req.statusCode = 401;
+                    req.user = "error";
+                    return next();
+                }
+                else if (user.isVerified === false)
+                {
+                    let err = new Error('You account has not been verified. Please check your email to verify your account');
+                    err.statusCode = 401;
+                    return next(err);
+                }
+                else
+                {
+                    req.user = user;
+                    return next();
+                }
+            })(req, res, next); 
+        }
+        // else if (!user) 
+        // {               
+        //     let err = new Error('You are not authorized to perform this operation!');
+        //     err.statusCode = 401;
+        //     return next(err);
+        // }
+        else if (user.isVerified === false)
+        {
+            let err = new Error('You account has not been verified. Please check your email to verify your account');
+            err.statusCode = 401;
+            return next(err);
+        }
+        else
+        {
+            req.user = user;
+            return next();
+        }
+    })(req, res, next); 
+}
+
+exports.verifyUserNewTFA = async(req, res, next) =>
+{
+    passport.authenticate("new_tfa_jwt", { session: false }, (err, user, TFASecret) => 
+    {
+        if(err)
+        {
+            return next(err);
+        }
+        else if (!user) 
+        {               
+            let err = new Error('You are not authorized to perform this operation!');
+            err.statusCode = 401;
+            return next(err);
+        }
+        else if (user.isVerified === false)
+        {
+            let err = new Error('You account has not been verified. Please check your email to verify your account');
+            err.statusCode = 401;
+            return next(err);
+        }
+        else
+        {
+            req.user = user;
+            req.TFASecret = TFASecret;
+            return next();
+        }
+    })(req, res, next); 
+}
+
 exports.verifyUser = (req, res, next) => 
 {
     passport.authenticate('jwt', { session: false }, (err, user, info) => 
@@ -599,13 +714,23 @@ exports.GenerateAccessToken = function(_id)
     );
 };
 
-exports.Generate2AFToken = function(_id) 
+exports.GenerateTFAToken = function(_id) 
 {
     return jwt.sign
     (
         _id, 
-        process.env.REF_2AF_TOKEN, 
+        process.env.REF_TFA_TOKEN, 
         {expiresIn: "120s"} // expires in 2 minutes
+    );
+};
+
+exports.GenerateNewTFAToken = function(_id, TFASecret) 
+{
+    return jwt.sign
+    (
+        {_id, TFASecret},  
+        process.env.NEW_TFA_TOKEN, 
+        {expiresIn: "1800s"} // expires in 2 minutes
     );
 };
 

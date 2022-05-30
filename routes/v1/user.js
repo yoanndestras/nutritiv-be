@@ -31,7 +31,7 @@ router.get("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async
         let newUsersArray = [];
         users.map((user) =>
         {
-            let avatar = user.provider ? user.avatar : process.env.AWS_BUCKET_LINK + "usersAvatar/" + user.avatar;
+            let avatar = (user.avatar).substring(0, 4) === "http" ? user.avatar : process.env.AWS_BUCKET_LINK + "usersAvatar/" + user.avatar;
             
             let username = user.username;
             let userId = user._id;
@@ -89,11 +89,16 @@ async(req, res, next) =>
     try
     {
         const user =  await User.findOne({_id: req.user._id});
-        let avatar = user.provider ? user.avatar : process.env.AWS_BUCKET_LINK + "usersAvatar/" + user.avatar;
+        let avatar = (user.avatar).substring(0, 4) === "http" ? user.avatar : process.env.AWS_BUCKET_LINK + "usersAvatar/" + user.avatar;
         const { username, _id, email, isAdmin, isVerified, addressDetails} = req.user;
-        const chatExist = await Chat.findOne({members: {$in: [req.user._id]}})
-        let chat;
-        !chatExist ? chat = false : chat = true;
+        const chatExist = await Chat.findOne({members: {$in: [req.user._id]}});
+
+        let hasChat;
+        !chatExist ? hasChat = false : hasChat = true;
+        
+        let hasTFA;
+        !user.TFASecret ? hasTFA = false : hasTFA = true;
+
         res.status(200).json(
             {
                 loggedIn: true,
@@ -104,7 +109,8 @@ async(req, res, next) =>
                 isAdmin,
                 isVerified,
                 addressDetails,
-                chat,
+                hasTFA,
+                hasChat,
                 status: "User connected"
             });
     }catch(err){next(err)}
@@ -133,7 +139,7 @@ async(req, res, next) =>
     try
     {
         const user =  await User.findOne({_id: req.user._id});
-        let avatar = user.provider ? user.avatar : process.env.AWS_BUCKET_LINK + "usersAvatar/" + user.avatar;
+        let avatar = (user.avatar).substring(0, 4) === "http" ? user.avatar : process.env.AWS_BUCKET_LINK + "usersAvatar/" + user.avatar;
         // const readStream = fileUpload.getFileStream(avatar)
         
         res.status(200).json(
@@ -153,7 +159,7 @@ auth.verifyAuthorization, async (req, res, next) =>
         const user = await User.findById(req.params.userId);
         if(user)
         {
-            let avatar = user.provider ? user.avatar : process.env.AWS_BUCKET_LINK + "usersAvatar/" + user.avatar;
+            let avatar = (user.avatar).substring(0, 4) === "http" ? user.avatar : process.env.AWS_BUCKET_LINK + "usersAvatar/" + user.avatar;
             const {email, ...public} = user._doc;
             
             res.status(200).json({success: true, user: public, avatar});
@@ -182,7 +188,7 @@ router.get("/findUsers", cors.corsWithOptions, async (req, res, next) =>
                 const user = await User.findById(usersArray[i]);
                 if(user)
                 {
-                    let avatar = user.provider ? user.avatar : process.env.AWS_BUCKET_LINK + "usersAvatar/" + user.avatar;
+                    let avatar = (user.avatar).substring(0, 4) === "http" ? user.avatar : process.env.AWS_BUCKET_LINK + "usersAvatar/" + user.avatar;
                 
                     let username = user.username;
                     let userId = user._id
@@ -238,7 +244,7 @@ user.verifyEmail, user.updateEmail, mailer.sendUpdateEmail, async (req, res, nex
         res.status(201).json(
             {
                 success: true, 
-                status: user
+                status: user 
             });
     }catch(err){next(err)}
 })
@@ -300,7 +306,7 @@ upload.single('imageFile'), user.resizeUserAvatar, user.addUserAvatar, async (re
         const user = await User.findOne({_id: req.user._id});
         user.save();
         
-        let avatar = user.provider ? user.avatar : process.env.AWS_BUCKET_LINK + "usersAvatar/" + user.avatar;
+        let avatar = (user.avatar).substring(0, 4) === "http" ? user.avatar : process.env.AWS_BUCKET_LINK + "usersAvatar/" + user.avatar;
         
         res.status(201).json(
             {
@@ -330,7 +336,7 @@ auth.verifyNewPasswordSyntax, auth.verifyNewPasswordEquality, async(req, res, ne
                         {
                             success: true, 
                             status: 'Password has been modified!', 
-                            user: user.user
+                            user: user
                         });
                 }
             });
@@ -343,10 +349,29 @@ auth.verifyAuthorization, async (req, res, next) =>
 {
     try
     {
+        let user = req.user;
+        if((user.avatar).substring(0, 4) !== "http")
+        {
+            avatar = "usersAvatar/" + user.avatar;
+            
+            user.avatar !== "PrPhdefaultAvatar.jpg" ? fileUpload.deleteFile(avatar) : null;
+        }
+        
         await User.findByIdAndDelete(req.params.userId)
         res.status(200).json("User has been deleted...")
     }catch(err){next(err)}
-
 })
+
+
+// router.put('/provider', async(req, res, next) => 
+// {
+    
+//     const user = await User.find();
+//     user.map(async user => 
+//         {
+//             !user.provider ? user.provider = "local" : null;
+//             await user.save();
+//         })
+// }); // HEALTH CHECK ENDPOINT
 
 module.exports = router;

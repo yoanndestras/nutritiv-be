@@ -130,17 +130,27 @@ chat.verifyChatNotExist, async(req, res, next) =>
   try
   {
     const admins = await User.find({isAdmin: true});
-
+    const username = req.user.username;
+    
     let members = admins.map((admin) =>{return admin._id});
     if(members.some(member => member.toString() === req.user.id) === false)
     {
       members.push((req.user._id))
     }
     
-    const newChat = new Chat({members})
-    const savedChat = await newChat.save();
+    const newChat = new Chat({name: username, members})
+    await newChat.save();
     
-    res.status(201).json(savedChat);
+    // Chat
+    //   .findOne({name: username})
+    //   .populate('name').
+    //   exec(function (err, chat) 
+    //   {
+    //     // if (err) return next(err);
+    //     console.log(`chat = `, chat)
+    //   });
+
+    res.status(201).json(newChat);
     
   }catch(err){next(err)}
 })

@@ -223,7 +223,6 @@ router.post('/TFARecovery', cors.corsWithOptions, upload.any('imageFile'), auth.
             
             if(JSON.stringify(TFARecoveryInitial) == JSON.stringify(TFARecoveryEntered))
             {
-                // otpauth://totp/Nutritiv(yoannTestUser)?secret=LZQWGODMIRTGSSJPKFFEALSUNB3HQWZI
                 const TFASecret = req.user.TFASecret;
                 const otpAuthURL = `otpauth://totp/Nutritiv(${req.user.username})?secret=${TFASecret}`
                 

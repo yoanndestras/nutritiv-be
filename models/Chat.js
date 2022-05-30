@@ -4,11 +4,11 @@ const Schema = mongoose.Schema;
 
 const ChatSchema = new Schema
 ({
-    // name:
-    // {
-    //     type: String,
-    //     require: true
-    // },
+    name:
+    {
+        type: String,
+        required: true
+    },
     // hosts:
     // {
     //      type: Array,
@@ -26,7 +26,7 @@ const ChatSchema = new Schema
         
         sender:
         {
-            type: mongoose.Schema.Types.ObjectId,
+            type: Schema.Types.ObjectId,
             required: true
         },
         text:
@@ -36,12 +36,12 @@ const ChatSchema = new Schema
         },
         id:
         {
-            type: mongoose.Schema.Types.ObjectId,
+            type: Schema.Types.ObjectId,
             required: true
         },
         createdAt:
         {
-            type: mongoose.Schema.Types.Date,
+            type: Schema.Types.Date,
             required: true
         }
         // replyTo:

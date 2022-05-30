@@ -1,5 +1,6 @@
 const express = require('express');
 const User = require("../../models/User");
+const Chat = require('../../models/Chat')
 
 const mongoose = require('mongoose');
 const fs = require('fs');
@@ -226,6 +227,18 @@ exports.updateUsername = async(req, res, next) =>
       }
     )
     await updateUsername.save();
+
+    const userChat = await Chat.findOneAndUpdate(
+      {name : username},
+      {
+        $set:
+        {
+          name : username
+        }
+      });
+    
+    await userChat.save();
+
     next();
   
   }catch(err){next(err);}

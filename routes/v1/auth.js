@@ -232,7 +232,7 @@ router.post('/TFARecovery', cors.corsWithOptions, upload.any('imageFile'), auth.
                     // res.write(`<img src='${data}'>`);
                     // res.send();
                     
-                    res .status(200).json({data, secret : TFASecretBase32})
+                    res .status(200).json(otpAuthURL)
                         
                 })
             }
@@ -271,7 +271,8 @@ async(req, res, next) =>
                 })
             const TFASecretBase32 = TFASecret.base32;
             const twoFAToken = auth.GenerateNewTFAToken(req.user._id, TFASecretBase32);
-            
+            const otpAuthURL = TFASecret.otpauth_url;
+
             qrcode.toDataURL(TFASecret.otpauth_url, (err, data) =>
             {
                 // res .header('new_twofa_token', twoFAToken)
@@ -281,7 +282,7 @@ async(req, res, next) =>
                 // res.send();
                 
                 res .header('new_twofa_token', twoFAToken)
-                    .status(200).json({data, secret : TFASecretBase32})
+                    .status(200).json(otpAuthURL)
                     
             })
         }

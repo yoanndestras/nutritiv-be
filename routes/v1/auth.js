@@ -223,7 +223,7 @@ router.post('/TFARecovery', cors.corsWithOptions, upload.any('imageFile'), auth.
             
             if(JSON.stringify(TFARecoveryInitial) == JSON.stringify(TFARecoveryEntered))
             {
-                // otpauth://totp/Nutritiv(yoannTestUser)?secret=KJEUKUSPOY4UQVBDI5JGIVZ6MYTDYYTC
+                // otpauth://totp/Nutritiv(yoannTestUser)?secret=LZQWGODMIRTGSSJPKFFEALSUNB3HQWZI
                 const TFASecret = req.user.TFASecret;
                 const otpAuthURL = `otpauth://totp/Nutritiv(${req.user.username})?secret=${TFASecret}`
                 
@@ -233,7 +233,7 @@ router.post('/TFARecovery', cors.corsWithOptions, upload.any('imageFile'), auth.
                     // res.write(`<img src='${data}'>`);
                     // res.send();
                     
-                    res .status(200).json(data)
+                    res .status(200).json({data, secret : TFASecretBase32})
                         
                 })
             }
@@ -282,7 +282,7 @@ async(req, res, next) =>
                 // res.send();
                 
                 res .header('new_twofa_token', twoFAToken)
-                    .status(200).json(data)
+                    .status(200).json({data, secret : TFASecretBase32})
                     
             })
         }

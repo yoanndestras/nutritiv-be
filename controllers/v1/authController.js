@@ -457,6 +457,53 @@ exports.verifyUserTFA = async(req, res, next) =>
     })(req, res, next); 
 }
 
+exports.verifyUserTFARecovery = async(req, res, next) =>
+{
+    passport.authenticate("tfa_jwt", { session: false }, (err, user, info) => 
+    {
+        if(err || !user)
+        {
+            passport.authenticate('jwt', { session: false }, (err, user, info) => 
+            {
+                if (err || !user) 
+                {               
+                    req.statusCode = 401;
+                    req.user = "error";
+                    return next();
+                }
+                else if (user.isVerified === false)
+                {
+                    let err = new Error('You account has not been verified. Please check your email to verify your account');
+                    err.statusCode = 401;
+                    return next(err);
+                }
+                else
+                {
+                    req.user = user;
+                    return next();
+                }
+            })(req, res, next); 
+        }
+        // else if (!user) 
+        // {               
+        //     let err = new Error('You are not authorized to perform this operation!');
+        //     err.statusCode = 401;
+        //     return next(err);
+        // }
+        else if (user.isVerified === false)
+        {
+            let err = new Error('You account has not been verified. Please check your email to verify your account');
+            err.statusCode = 401;
+            return next(err);
+        }
+        else
+        {
+            req.user = user;
+            return next();
+        }
+    })(req, res, next); 
+}
+
 exports.verifyUserNewTFA = async(req, res, next) =>
 {
     passport.authenticate("new_tfa_jwt", { session: false }, (err, user, TFASecret) => 

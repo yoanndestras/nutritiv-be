@@ -10,6 +10,7 @@ const   speakeasy = require("speakeasy"),
 const cors = require('../../controllers/v1/corsController');
 const auth = require("../../controllers/v1/authController");
 const mailer = require("../../controllers/v1/mailerController");
+const {upload} = require('./upload');
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
@@ -210,8 +211,8 @@ router.post("/new_password", auth.verifyNewPasswordSyntax, auth.verifyNewPasswor
     }catch(err){next(err)}
 });
 
-//GENERATE RANDOM WORDS FOR TFA RECOVERY
-router.post('/TFARecovery', cors.corsWithOptions, auth.verifyUserTFA, async (req, res, next) =>
+//VERIFY TFA RECOVERY
+router.post('/TFARecovery', cors.corsWithOptions, upload.any('imageFile'), auth.verifyUserTFARecovery, auth.verifyRefresh, async (req, res, next) =>
 {
     try
     {
@@ -222,13 +223,19 @@ router.post('/TFARecovery', cors.corsWithOptions, auth.verifyUserTFA, async (req
             
             if(JSON.stringify(TFARecoveryInitial) == JSON.stringify(TFARecoveryEntered))
             {
-                let TFASecret = req.user.TFASecret;
-
-                res.status(200).json(
-                    {
-                        success: true,
-                        TFASecret
-                    });
+                // otpauth://totp/Nutritiv(yoannTestUser)?secret=KJEUKUSPOY4UQVBDI5JGIVZ6MYTDYYTC
+                const TFASecret = req.user.TFASecret;
+                const otpAuthURL = `otpauth://totp/Nutritiv(${req.user.username})?secret=${TFASecret}`
+                
+                qrcode.toDataURL(otpAuthURL, (err, data) =>
+                {
+                    // res.setHeader("Content-Type", "text/html");
+                    // res.write(`<img src='${data}'>`);
+                    // res.send();
+                    
+                    res .status(200).json(data)
+                        
+                })
             }
             else
             {
@@ -238,7 +245,6 @@ router.post('/TFARecovery', cors.corsWithOptions, auth.verifyUserTFA, async (req
                         status: "Your recovery sentence is false!"
                     })
             }
-            
         }
         else
         {
@@ -264,8 +270,8 @@ async(req, res, next) =>
                     name: `Nutritiv(${req.user.username})`,
                     length: 20
                 })
-            const TFASecretAscii = TFASecret.ascii;
-            const twoFAToken = auth.GenerateNewTFAToken(req.user._id, TFASecretAscii);
+            const TFASecretBase32 = TFASecret.base32;
+            const twoFAToken = auth.GenerateNewTFAToken(req.user._id, TFASecretBase32);
             
             qrcode.toDataURL(TFASecret.otpauth_url, (err, data) =>
             {
@@ -345,7 +351,7 @@ router.post('/disableTFA', auth.verifyUser, auth.verifyRefresh, async(req, res, 
                         const valid = speakeasy.totp.verify(
                             {
                                 secret: TFASecret,
-                                encoding: 'ascii',
+                                encoding: 'base32',
                                 token: token,
                                 window: 0
                             });
@@ -415,7 +421,7 @@ router.post('/enableTFA', cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                         const valid = speakeasy.totp.verify(
                             {
                                 secret: TFASecret,
-                                encoding: 'ascii',
+                                encoding: 'base32',
                                 token: token,
                                 window: 0
                             });
@@ -439,6 +445,7 @@ router.post('/enableTFA', cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                                 res.status(201).json(
                                     {
                                         success: true, 
+                                        TFARecovery,
                                         status: 'Your successfully enabled TFA!',
                                     });
                             }
@@ -456,7 +463,7 @@ router.post('/enableTFA', cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
             res.status(400).json(
                 {
                     success: true,
-                    status: "Your account already have TFA enabled!"
+                    status: "Your account already have enabled TFA!"
                 })
         }
     }catch(err){next(err)}
@@ -501,7 +508,7 @@ async(req, res, next) =>
         const valid = speakeasy.totp.verify(
             {
                 secret: TFASecret,
-                encoding: 'ascii',
+                encoding: 'base32',
                 token: token,
                 window: 0
             }

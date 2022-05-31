@@ -265,12 +265,13 @@ async(req, res, next) =>
             const TFASecret = speakeasy.generateSecret(
                 {
                     name: `Nutritiv(${req.user.username})`,
-                    length: 20
+                    length: 10
                 })
+
             const TFASecretBase32 = TFASecret.base32;
             const twoFAToken = auth.GenerateNewTFAToken(req.user._id, TFASecretBase32);
             const otpAuthURL = TFASecret.otpauth_url;
-
+            
             qrcode.toDataURL(TFASecret.otpauth_url, (err, data) =>
             {
                 // res .header('new_twofa_token', twoFAToken)

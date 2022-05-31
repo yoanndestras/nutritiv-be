@@ -6,8 +6,7 @@
   "scripts": {
     "start": "node app.js",
     "start-dev": "env-cmd -e development nodemon app.js",
-    "start-prod": "env-cmd -e production nodemon app.js",
-    "heroku-postbuild": "cd client && npm i && npm run build"
+    "start-prod": "env-cmd -e production nodemon app.js"
   },
   "repository": {
     "type": "git",

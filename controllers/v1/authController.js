@@ -612,6 +612,7 @@ exports.verifyRefresh = (req, res, next) =>
         {        
             if (err || !user) 
             {
+                console.log(info);
                 return res.status(req.statusCode).json(
                     {
                         success: false, 

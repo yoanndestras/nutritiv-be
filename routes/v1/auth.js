@@ -230,7 +230,7 @@ router.post('/TFARecovery', cors.corsWithOptions, upload.any('imageFile'), auth.
                     // res.write(`<img src='${data}'>`);
                     // res.send();
                     
-                    res .status(200).json({otpAuthURL, TFASecret})
+                    res .status(200).json({qrCodeUrl : otpAuthURL, qrCodeSecret : TFASecret})
                         
                 })
             }
@@ -280,7 +280,7 @@ async(req, res, next) =>
                 // res.send();
                 
                 res .header('new_twofa_token', twoFAToken)
-                    .status(200).json({otpAuthURL, TFASecretBase32})
+                    .status(200).json({qrCodeUrl : otpAuthURL, qrCodeSecret : TFASecretBase32})
                     
             })
         }

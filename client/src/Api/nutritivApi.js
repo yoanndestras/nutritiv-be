@@ -74,6 +74,11 @@ nutritivApi.interceptors.response.use(res => {
       "# Too many API requests :", 
       err.response.status
     )
+  } else if (err?.response?.status === 500) {
+    console.error(
+      "# Internal server error: ",
+      err.response.status
+    )
   }
   return Promise.reject(err)
 })

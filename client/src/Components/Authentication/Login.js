@@ -28,7 +28,7 @@ export default function LoginPage() {
     username: login.username,
     password: login.password,
   }
-  const [hasTwoFa, setHasTwoFa] = useState(false)
+  const [hasTFA, setHasTFA] = useState(false)
   
   
   useEffect(() => {
@@ -83,8 +83,8 @@ export default function LoginPage() {
           error: "",
         })
         // ASK FOR 2FA or REDIRECT
-        data.twoFA ? (
-          setHasTwoFa(data.twoFA)
+        data.hasTFA ? (
+          setHasTFA(data.hasTFA)
         ) : (
           getUserInfo()
         )
@@ -177,7 +177,7 @@ export default function LoginPage() {
       {
         location.state?.msg && <p style={{color: "orange"}}>{location.state.msg}</p>
       }
-      {hasTwoFa ? (
+      {hasTFA ? (
         <>
           <p>Enter your 2FA code</p>
           <form onSubmit={ handleSubmitTwoFa }>

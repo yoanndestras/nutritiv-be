@@ -82,8 +82,6 @@ router.get('/login/validateOauth', cors.corsWithOptions, auth.verifyUserQuery, (
                 status : 'Authentication failed'
             });
     }
-    
-
 })
 
 //FORGET PASSWORD EMAIL
@@ -232,7 +230,7 @@ router.post('/TFARecovery', cors.corsWithOptions, upload.any('imageFile'), auth.
                     // res.write(`<img src='${data}'>`);
                     // res.send();
                     
-                    res .status(200).json(otpAuthURL)
+                    res .status(200).json(otpAuthURL, TFASecret)
                         
                 })
             }
@@ -282,7 +280,7 @@ async(req, res, next) =>
                 // res.send();
                 
                 res .header('new_twofa_token', twoFAToken)
-                    .status(200).json(otpAuthURL)
+                    .status(200).json(otpAuthURL, TFASecretBase32)
                     
             })
         }
@@ -445,7 +443,6 @@ router.post('/enableTFA', cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                                 res.status(201).json(
                                     {
                                         success: true, 
-                                        TFARecovery,
                                         status: 'Your successfully enabled TFA!',
                                     });
                             }

@@ -82,8 +82,6 @@ router.get('/login/validateOauth', cors.corsWithOptions, auth.verifyUserQuery, (
                 status : 'Authentication failed'
             });
     }
-    
-
 })
 
 //FORGET PASSWORD EMAIL
@@ -232,7 +230,7 @@ router.post('/TFARecovery', cors.corsWithOptions, upload.any('imageFile'), auth.
                     // res.write(`<img src='${data}'>`);
                     // res.send();
                     
-                    res .status(200).json({data, secret : TFASecretBase32})
+                    res .status(200).json({qrCodeUrl : otpAuthURL, qrCodeSecret : TFASecret})
                         
                 })
             }
@@ -267,10 +265,12 @@ async(req, res, next) =>
             const TFASecret = speakeasy.generateSecret(
                 {
                     name: `Nutritiv(${req.user.username})`,
-                    length: 20
+                    length: 10
                 })
+
             const TFASecretBase32 = TFASecret.base32;
             const twoFAToken = auth.GenerateNewTFAToken(req.user._id, TFASecretBase32);
+            const otpAuthURL = TFASecret.otpauth_url;
             
             qrcode.toDataURL(TFASecret.otpauth_url, (err, data) =>
             {
@@ -281,7 +281,7 @@ async(req, res, next) =>
                 // res.send();
                 
                 res .header('new_twofa_token', twoFAToken)
-                    .status(200).json({data, secret : TFASecretBase32})
+                    .status(200).json({qrCodeUrl : otpAuthURL, qrCodeSecret : TFASecretBase32})
                     
             })
         }
@@ -444,7 +444,6 @@ router.post('/enableTFA', cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                                 res.status(201).json(
                                     {
                                         success: true, 
-                                        TFARecovery,
                                         status: 'Your successfully enabled TFA!',
                                     });
                             }

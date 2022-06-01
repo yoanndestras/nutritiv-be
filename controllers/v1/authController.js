@@ -922,21 +922,24 @@ exports.verifyNewEmail = (req, res, next) =>
         })
 };
 
-exports.verifyEmailExist = (req, res, next) =>
+exports.verifyEmailExist = async(req, res, next) =>
 {
-    User.findOne({email: req.body.email}, (err, user) =>
-        {
-            if(user !== null)
+    try
+    {
+        await User.findOne({email: req.body.email}, (err, user) =>
             {
-                req.user = user;
-                next();
-            }
-            else
-            {
-                err.statusCode = 400;
-                return next(err);
-            }
-        })
+                if(user !== null)
+                {
+                    req.user = user;
+                    return next();
+                }
+                else
+                {
+                    err.statusCode = 400;
+                    return next(err);
+                }
+            })
+    }catch(err){next(err)}
 };
 
 // exports.loginData = (req, res, next) => 

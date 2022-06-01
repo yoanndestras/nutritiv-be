@@ -41,7 +41,7 @@ const io = require("socket.io")(http,
         },
         cors:
         {
-            methods: ["GET", "POST"],
+            methods: ["GET", "POST"], 
             credentials: true
         },
     });

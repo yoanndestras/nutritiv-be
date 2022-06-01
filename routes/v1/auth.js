@@ -445,6 +445,7 @@ router.post('/enableTFA', cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                                     {
                                         success: true, 
                                         status: 'Your successfully enabled TFA!',
+                                        TFARecovery
                                     });
                             }
                             else

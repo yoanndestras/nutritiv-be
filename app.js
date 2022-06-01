@@ -90,7 +90,8 @@ app.use((err, req, res, next) =>
     ? res.status(500).json(
         {
             success: false, 
-            err: message
+            err: "Internal Server Error",
+            message: message
         })
     : res.status(err.statusCode).json(
         {

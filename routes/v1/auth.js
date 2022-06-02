@@ -219,7 +219,7 @@ router.post("/new_password", auth.verifyNewPasswordSyntax, auth.verifyNewPasswor
 });
 
 //VERIFY TFA RECOVERY
-router.post('/TFARecovery', cors.corsWithOptions, auth.verifyUserTFARecovery, auth.verifyRefresh, async (req, res, next) =>
+router.post('/TFARecovery', cors.corsWithOptions, upload.any('imageFile'), auth.verifyUserTFARecovery, auth.verifyRefresh, async (req, res, next) =>
 {
     try
     {

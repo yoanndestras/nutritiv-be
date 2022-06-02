@@ -228,6 +228,9 @@ router.post('/TFARecovery', cors.corsWithOptions, upload.any('imageFile'), auth.
             const TFARecoveryInitial = req.user.TFARecovery;
             const TFARecoveryEntered = req.body.TFARecovery;
             
+            console.log(`TFARecoveryInitial = `, TFARecoveryInitial)
+            console.log(`TFARecoveryEntered = `, TFARecoveryEntered)
+            
             if(JSON.stringify(TFARecoveryInitial) == JSON.stringify(TFARecoveryEntered))
             {
                 const TFASecret = req.user.TFASecret;

@@ -926,7 +926,6 @@ exports.verifyEmailExist = async(req, res, next) =>
 {
     try
     {
-        console.log(`req = `, req)
         await User.findOne({email: req.body?.email}, (err, user) =>
             {
                 if(user !== null)

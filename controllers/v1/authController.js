@@ -142,7 +142,6 @@ opts_tfa.secretOrKey = process.env.REF_TFA_TOKEN;
 
 exports.TwoFAjwtPassport = passport.use("tfa_jwt", new JwtStrategy(opts_tfa, (jwtPayload, done) =>
 {
-    console.log(`_id = `, jwtPayload._id)
     User.findOne({_id: jwtPayload._id}, (err, user) =>
         {                
             if(err)
@@ -607,6 +606,7 @@ exports.verifyUserCart = (req, res, next) =>
 
 exports.verifyRefresh = (req, res, next) => 
 {
+    console.log(`req.user = `, req.user)
     if(req.user === "error" || req.user === "emptyCart")
     {
         passport.authenticate('jwt_rt', { session: false }, (err, user, info) => 

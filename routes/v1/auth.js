@@ -18,11 +18,14 @@ router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); }
 //GOOGLE AUTH
 router.get('/google', (req, res, next) => 
 {
-    passport.authenticate('google', 
-    { 
-        session: false,
-        scope: [ 'email', 'profile' ]
-    })(req, res, next);
+    try
+    {
+        passport.authenticate('google', 
+        { 
+            session: false,
+            scope: [ 'email', 'profile' ]
+        })(req, res, next);
+    }catch (err){next(err)}
 });
 
 //GOOGLE AUTH CALLBACK
@@ -31,11 +34,14 @@ router.get('/google/callback', auth.verifyProviderUser, (req, res, next) => {});
 //FACEBOOK AUTH
 router.get('/facebook', (req, res, next) => 
 {
-    passport.authenticate('facebook', 
-    { 
-        session: false,
-        scope : ['email']
-    })(req, res, next);
+    try
+    {
+        passport.authenticate('facebook', 
+        { 
+            session: false,
+            scope : ['email']
+        })(req, res, next);
+    }catch (err){next(err)}
 });
 
 //FACEBOOK AUTH CALLBACK
@@ -44,11 +50,14 @@ router.get('/facebook/callback', auth.verifyProviderUser, (req, res, next) => {}
 //GITHUB AUTH
 router.get('/github', (req, res, next) => 
 {
-    passport.authenticate('github', 
-    { 
-        session: false,
-        scope : ['user:email']
-    })(req, res, next);
+    try
+    {
+        passport.authenticate('github', 
+        { 
+            session: false,
+            scope : ['user:email']
+        })(req, res, next);
+    }catch (err){next(err)}
 });
 
 //GITHUB AUTH CALLBACK
@@ -83,19 +92,6 @@ router.get('/login/validateOauth', cors.corsWithOptions, auth.verifyUserQuery, (
             });
     }
 })
-
-//FORGET PASSWORD EMAIL
-router.get("/forget_pwd", auth.verifyEmailExist, mailer.sendForgetPassword, async(req, res, next) =>
-{
-    try
-    {
-        res.status(200).json(
-            {
-                success: true, 
-                status: 'Check your emails!!'
-            });
-    }catch(err){next(err)}
-});
 
 //VERIFY FORGET PASSWORD EMAIL
 router.get("/verify_forget_pwd", auth.verifyEmailToken, async(req, res, next) =>
@@ -138,6 +134,19 @@ router.get("/verify_email", auth.verifyEmailToken, async(req, res, next) =>
                             status: 'User Verification Successfull!'
                         });
                 })
+    }catch(err){next(err)}
+});
+
+//FORGET PASSWORD EMAIL
+router.post("/forget_pwd", auth.verifyEmailExist, mailer.sendForgetPassword, async(req, res, next) =>
+{
+    try
+    {
+        res.status(200).json(
+            {
+                success: true, 
+                status: 'Check your emails!!'
+            });
     }catch(err){next(err)}
 });
 
@@ -231,7 +240,6 @@ router.post('/TFARecovery', cors.corsWithOptions, upload.any('imageFile'), auth.
                     // res.send();
                     
                     res .status(200).json({qrCodeUrl : otpAuthURL, qrCodeSecret : TFASecret})
-                        
                 })
             }
             else
@@ -445,6 +453,7 @@ router.post('/enableTFA', cors.corsWithOptions, auth.verifyUser, auth.verifyRefr
                                     {
                                         success: true, 
                                         status: 'Your successfully enabled TFA!',
+                                        TFARecovery
                                     });
                             }
                             else

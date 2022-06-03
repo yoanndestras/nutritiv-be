@@ -56,6 +56,7 @@ async(req, res, next)  =>
         shipping_address_collection: {
           allowed_countries: ['US', 'CA', 'FR', 'PT', 'ES']
         },
+        allow_promotion_codes: true
       });
     
       res.status(200).json(

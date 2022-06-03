@@ -57,7 +57,8 @@ exports.backupMongoDB = async(DB_NAME, ARCHIVE_PATH) =>
       `--archive=${ARCHIVE_PATH}`,
       '--gzip',
     ]);
-
+    
+    console.log(`child = `, child)
     // 
     child.stdout.on('data', (data) => 
     {

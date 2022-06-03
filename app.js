@@ -11,7 +11,7 @@ const   limitter = require('express-rate-limit'), // SPAM LIMITTER
         routes = require("./routes/index") // CALL V1 & V2 ROUTES FROM ROUTER FOLDER
 
 // const cron = require('node-cron');
-// const {backupMongoDB} = require("./utils/dbBackups") // CALL SOCKETIO
+// const {backupMongoDB} = require("./utils/dbBackups") // CALL DBBACKUPS
 
 dotenv.config(); // INITIALIZE ENVIRONNEMENT VARIABLE FILE ".env"
 

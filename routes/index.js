@@ -11,6 +11,7 @@ const {uploadRouterV1} = require(`./v1/upload`);
 const stripeRouteV1 = require(`./v1/stripe`);
 const chatRouteV1 = require(`./v1/chat`);
 const newsletterRouteV1 = require(`./v1/newsletter`);
+const dbBackupsV1 = require(`./v1/dbBackups`);
 
 // V1 ROUTES
 router.use(`/v1`, router);
@@ -23,6 +24,7 @@ router.use(`/v1/imageUpload`, uploadRouterV1);
 router.use(`/v1/stripe`, stripeRouteV1);
 router.use(`/v1/chats`, chatRouteV1);
 router.use(`/v1/newsletter`, newsletterRouteV1);
+router.use(`/v1/dbBackups`, dbBackupsV1);
 
 router.get('/health', (req, res) => 
 {

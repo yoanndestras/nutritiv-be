@@ -9,7 +9,6 @@ const {backupMongoDB} = require("../../utils/dbBackups") // CALL SOCKETIO
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
-
 router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyAdmin, (req, res, next) => 
 {
   try 

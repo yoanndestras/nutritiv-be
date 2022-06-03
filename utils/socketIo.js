@@ -79,6 +79,7 @@ exports.socketConnection = async(io) =>
             
             socket.on('chatting', ({text, id, token, roomId}) =>
             {
+                console.log(`req.headers.host = `, req.headers?.host)
                 console.log("Entered chatting");
                 jwt.verify(token, process.env.REF_JWT_SEC, async(err, decoded) =>
                 {
@@ -86,7 +87,7 @@ exports.socketConnection = async(io) =>
                     {
                         const senderRoom = await Room.findOne({_id: roomId});
                         let sender = decoded._id;
-
+                        
                         if(senderRoom && sender)
                         {
                             console.log("All verification ok for message!");

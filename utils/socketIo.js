@@ -79,7 +79,6 @@ exports.socketConnection = async(io) =>
             
             socket.on('chatting', ({text, id, token, roomId}) =>
             {
-                console.log(`req.headers.host = `, req.headers?.host)
                 console.log("Entered chatting");
                 jwt.verify(token, process.env.REF_JWT_SEC, async(err, decoded) =>
                 {

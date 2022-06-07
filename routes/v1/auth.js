@@ -203,6 +203,7 @@ auth.verifyNewPasswordEquality, async(req, res, next) =>
 
         const userId = req.user?._id
         const user = await User.findById(userId);
+        console.log(`user = `, user)
         const newPass = req.body.confirmNewPass;
         
         if(user && newPass)

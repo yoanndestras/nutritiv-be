@@ -747,7 +747,7 @@ exports.GenerateNewTFAToken = function(_id, TFASecret)
     (
         {_id, TFASecret},  
         process.env.NEW_TFA_TOKEN, 
-        {expiresIn: "3600"} // expires in 30 minutes
+        {expiresIn: "3600s"} // expires in 30 minutes
     );
 };
 

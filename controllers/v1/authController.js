@@ -468,6 +468,7 @@ exports.verifyUserTFARecovery = async(req, res, next) =>
             {
                 if (err || !user) 
                 {               
+                    console.log("object");
                     req.statusCode = 401;
                     req.user = "error";
                     return next();

@@ -245,14 +245,15 @@ router.post('/TFARecovery', cors.corsWithOptions, upload.any('imageFile'), auth.
             {
                 const TFASecret = req.user.TFASecret;
                 const otpAuthURL = `otpauth://totp/Nutritiv(${req.user.username})?secret=${TFASecret}`
-                
+                const twoFAToken = auth.GenerateNewTFAToken(req.user._id, TFASecret);
+
                 qrcode.toDataURL(otpAuthURL, (err, data) =>
                 {
                     // res.setHeader("Content-Type", "text/html");
                     // res.write(`<img src='${data}'>`);
                     // res.send();
-                    
-                    res .status(200).json({qrCodeUrl : otpAuthURL, qrCodeSecret : TFASecret})
+                    res .header('new_twofa_token', twoFAToken)
+                        .status(200).json({qrCodeUrl : otpAuthURL, qrCodeSecret : TFASecret})
                 })
             }
             else

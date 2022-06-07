@@ -50,7 +50,10 @@ socketConnection(io);
 // DATABASE ACCESS
 mongoose
     .connect(process.env.MONGO_URL)
-    .then(() => console.log("Connected to MongoDB"))
+    .then(async () => 
+    {
+        console.log("Connected to MongoDB")
+    })
     .catch((err)=>
     {
         console.log(err);

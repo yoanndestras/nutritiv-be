@@ -1,6 +1,7 @@
 const { spawn } = require('child_process'); // DATABASE BACKUP
 const fs = require('fs');
 const path = require('path'); // ACCESS TO FOLDERS PATHS
+const {MongoClient} = require('mongodb');
 
 // CONTROLLERS
 const fileUpload = require('../controllers/v1/fileUploadController');
@@ -43,10 +44,26 @@ exports.backupMongoDB = async(DB_NAME, ARCHIVE_PATH) =>
 {
   try
   {
-    const DB_HOST = process.env.DB_HOST;
+    const client = new MongoClient(process.env.MONGO_URL);
+    
+    const primaryHost = await client 
+        .connect()
+        .then(async () => 
+        {
+            const db = client.db(process.env.DB_NAME);
+            const result = await db.command( { isMaster: 1 } )
+            const primary = result.primary
+            return primary
+        })
+        .catch((err)=>
+        {
+            console.log(err);
+        });
+    
+    const DB_HOST = primaryHost;
     const DB_PASSWORD = process.env.DB_PASSWORD;
     const DB_USER = process.env.DB_USER;
-  
+    
     const child = spawn('mongodump', [
       `-h=${DB_HOST}`,
       `--ssl`,
@@ -58,7 +75,6 @@ exports.backupMongoDB = async(DB_NAME, ARCHIVE_PATH) =>
       '--gzip',
     ]);
     
-    console.log(`child = `, child)
     // 
     child.stdout.on('data', (data) => 
     {

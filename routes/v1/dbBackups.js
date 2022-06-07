@@ -1,5 +1,6 @@
 const router = require("express").Router(),
       path = require('path');
+      
 
 // CONTROLLERS
 const cors = require('../../controllers/v1/corsController');
@@ -10,14 +11,17 @@ const {backupMongoDB} = require("../../utils/dbBackups") // CALL SOCKETIO
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
 
-router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyAdmin, (req, res, next) => 
+router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, (req, res, next) => 
 {
   try 
   {
     const DB_NAME = process.env.DB_NAME;
-    const currentDay = new Date().toLocaleDateString('pt-PT').replace(/\//g,'-');
-
-    const ARCHIVE_PATH = path.join(__dirname, '../../public/dbBackups', `${currentDay}_${DB_NAME}.gzip`);
+        
+    const date = new Date();
+    const currentDay = new Date().toLocaleDateString('fr-FR').replace(/\//g,'-');
+    const currentHour = date.getHours() + '-' + date.getMinutes() + '-' + date.getSeconds();
+    
+    const ARCHIVE_PATH = path.join(__dirname, '../../public/dbBackups', `${currentDay}_${currentHour}_${DB_NAME}.gzip`);
     backupMongoDB(DB_NAME, ARCHIVE_PATH);
   
     res.status(200).json(

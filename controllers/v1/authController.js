@@ -922,11 +922,11 @@ exports.verifyNewEmail = (req, res, next) =>
         })
 };
 
-exports.verifyEmailExist = async(req, res, next) =>
+exports.verifyEmailExist = (req, res, next) =>
 {
     try
     {
-        await User.findOne({email: req.body?.email}, (err, user) =>
+        User.findOne({email: req.body?.email}, (err, user) =>
             {
                 if(user !== null)
                 {

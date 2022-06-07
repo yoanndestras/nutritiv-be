@@ -246,6 +246,11 @@ router.post('/TFARecovery', cors.corsWithOptions, upload.any('imageFile'), auth.
                 const TFASecret = req.user.TFASecret;
                 const otpAuthURL = `otpauth://totp/Nutritiv(${req.user.username})?secret=${TFASecret}`
                 const twoFAToken = auth.GenerateNewTFAToken(req.user._id, TFASecret);
+                
+                // let user = await User.findOneById(req.user._id)
+                // {
+                
+                // }
 
                 qrcode.toDataURL(otpAuthURL, (err, data) =>
                 {
@@ -418,8 +423,8 @@ router.post('/enableTFA', cors.corsWithOptions, auth.verifyUserNewTFA, auth.veri
     {
         let user = req.user, password = req.body.password;
         
-        if(!user.TFASecret)
-        {
+        // if(!user.TFASecret)
+        // {
             user.authenticate(password, async (err, user) => 
                 {
                     if(err)
@@ -478,15 +483,15 @@ router.post('/enableTFA', cors.corsWithOptions, auth.verifyUserNewTFA, auth.veri
                             }
                     }
                 })
-        }
-        else
-        {
-            res.status(400).json(
-                {
-                    success: true,
-                    status: "Your account already have enabled TFA!"
-                })
-        }
+        // }
+        // else
+        // {
+        //     res.status(400).json(
+        //         {
+        //             success: true,
+        //             status: "Your account already have enabled TFA!"
+        //         })
+        // }
     }catch(err){next(err)}
 })
 

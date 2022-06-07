@@ -119,7 +119,7 @@ opts_email.secretOrKey = process.env.JWT_EMAIL;
 
 exports.jwtPassport = passport.use("email_jwt", new JwtStrategy(opts_email, (jwtPayload, done) =>
 {
-    User.findOne({email: jwtPayload.email}, (err, user) =>
+    User.findOne({email: jwtPayload.email, provider: "local"}, (err, user) =>
         {                
             if(err)
             {

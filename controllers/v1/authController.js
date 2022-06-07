@@ -463,12 +463,10 @@ exports.verifyUserTFARecovery = async(req, res, next) =>
     {
         if(err || !user)
         {
-            req.tfa = "recovery";
             passport.authenticate('jwt', { session: false }, (err, user, info) => 
             {
                 if (err || !user) 
                 {               
-                    console.log("object");
                     req.statusCode = 401;
                     req.user = "error";
                     return next();
@@ -510,35 +508,44 @@ exports.verifyUserNewTFA = async(req, res, next) =>
 {
     passport.authenticate("new_tfa_jwt", { session: false }, (err, user, TFASecret) => 
     {
-        if(req.tfa === "recovery")
+        
+        if(err || !user)
         {
-            if(err)
+            passport.authenticate('jwt', { session: false }, (err, user, info) => 
             {
-                return next(err);
-            }
-            else if (!user) 
-            {               
-                let err = new Error('You are not authorized to perform this operation!');
-                err.statusCode = 401;
-                return next(err);
-            }
-            else if (user.isVerified === false)
-            {
-                let err = new Error('You account has not been verified. Please check your email to verify your account');
-                err.statusCode = 401;
-                return next(err);
-            }
-            else
-            {
-                req.user = user;
-                req.TFASecret = TFASecret;
-                return next();
-            }
+                if (err || !user) 
+                {               
+                    req.statusCode = 401;
+                    req.user = "error";
+                    return next();
+                }
+                else if (user.isVerified === false)
+                {
+                    let err = new Error('You account has not been verified. Please check your email to verify your account');
+                    err.statusCode = 401;
+                    return next(err);
+                }
+                else
+                {
+                    req.user = user;
+                    return next();
+                }
+            })(req, res, next); 
+        }
+        else if (user.isVerified === false)
+        {
+            let err = new Error('You account has not been verified. Please check your email to verify your account');
+            err.statusCode = 401;
+            return next(err);
         }
         else
         {
+            req.user = user;
+            req.TFASecret = TFASecret;
             return next();
         }
+        
+        
     })(req, res, next); 
 }
 

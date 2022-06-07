@@ -110,6 +110,7 @@ const Email_token = function(req)
 {
     let token = null;
     if (req && req.query) token = req.query?.token;
+    console.log(`req.query = `, req.query)
     return token;
 };
 

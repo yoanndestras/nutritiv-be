@@ -411,7 +411,7 @@ router.post('/disableTFA', auth.verifyUser, auth.verifyRefresh, async(req, res, 
 })
 
 //VERIFY TFA
-router.post('/enableTFA', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyUserNewTFA, async(req, res, next) =>
+router.post('/enableTFA', cors.corsWithOptions, auth.verifyUserTFARecovery, auth.verifyRefresh, auth.verifyUserNewTFA, async(req, res, next) =>
 {
     try
     {

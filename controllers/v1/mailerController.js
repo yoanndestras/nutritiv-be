@@ -64,7 +64,7 @@ exports.sendForgetPassword = async(req, res, next) =>
                     <p>Please click on the link below to reset your password.<br><br>
                     <a style="text-decoration: none;display:block; text-align: center;width:100%;font-weight: bold; padding: 10px; color: white; 
                     background-color: #00A8F3; border: none; border-radius:  5px;"
-                    href="${process.env.SERVER_ADDRESS}v1/auth/verify_forget_pwd?token=${Email_Token}">Reset Password</a><br>
+                    href="${process.env.OAUTH_ADDRESS}v1/auth/verify_forget_pwd?token=${Email_Token}">Reset Password</a><br>
                     Thanks,</p>
                     
                     <p>Nutritiv</p>

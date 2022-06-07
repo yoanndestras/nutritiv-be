@@ -109,7 +109,7 @@ exports.RFJwtPassport = passport.use("jwt_rt", new JwtStrategy(opts_ref, (jwtPay
 const Email_token = function(req) 
 {
     let token = null;
-    if (req && req.query) token = req.query.token;
+    if (req && req.query) token = req.query?.token;
     return token;
 };
 
@@ -870,6 +870,32 @@ exports.verifyNewPasswordSyntax = (req, res, next) =>
 
 // VERIFY EMAIL SENDING
 exports.verifyEmailToken = (req, res, next) => 
+{
+    passport.authenticate('email_jwt', { session: false }, (err, user, info) => 
+    {
+        if (err || !user) 
+        {   
+            // let err = new Error('TOKEN EXPIRED OR CORRUPTED');
+            // err.statusCode = 403;
+            // return next(err);
+
+            return res.redirect(process.env.SERVER_ADDRESS + 
+                'reset_password/'+
+                '?status=failed' 
+                // '&message=forgetPasswordURLVerified'+
+                // '&statusCode=200'
+                )
+        }
+        else
+        {
+            req.user = user;
+            return next();
+        }
+    })(req, res, next); 
+};
+
+// VERIFY EMAIL SENDING
+exports.verifyNewUserEmail = (req, res, next) => 
 {
     passport.authenticate('email_jwt', { session: false }, (err, user, info) => 
     {

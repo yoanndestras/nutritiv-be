@@ -98,11 +98,20 @@ router.get("/verify_forget_pwd", auth.verifyEmailToken, async(req, res, next) =>
 {
     try
     {
-        res.status(200).json(
-            {
-                success: true, 
-                status: 'Email verification successfull!'
-            });
+        // res.status(200).json(
+        //     {
+        //         success: true, 
+        //         status: 'Email verification successfull!'
+        //     });
+        
+        const token = auth.GenerateEmailToken({email: req.body.email});
+        
+        res.redirect(process.env.SERVER_ADDRESS + 
+            'reset_password/'+
+            '?status=successfull' +
+            `&token=${token}`
+            // '&statusCode=200'
+            )
     }catch(err){next(err)}
 });
 
@@ -120,7 +129,7 @@ router.get("/new_register_email", auth.verifyNewEmail, mailer.sendVerifyAccountM
 });
 
 //USER VERIFICATION
-router.get("/verify_email", auth.verifyEmailToken, async(req, res, next) =>
+router.get("/verify_email", auth.verifyNewUserEmail, async(req, res, next) =>
 {
     const user = req.user;
     try
@@ -185,19 +194,22 @@ auth.verifyPasswordSyntax, mailer.sendVerifyAccountMail, async(req, res, next) =
 
 //NEW PASSWORD AND RESET LOGIN ATTEMPTS
 //auth.verifyEmailToken
-router.post("/new_password", auth.verifyNewPasswordSyntax, auth.verifyNewPasswordEquality, async(req, res, next) =>
+router.post("/new_password", auth.verifyNewUserEmail, auth.verifyNewPasswordSyntax, 
+auth.verifyNewPasswordEquality, async(req, res, next) =>
 {
     try
     {
         //const user = req.user.username;
-        const user = await User.findOne({username: "yoann"});
+
+        const userId = req.user?._id
+        const user = await User.findById(userId);
         const newPass = req.body.confirmNewPass;
         
         if(user && newPass)
         {
             await user.resetAttempts();
             await user.setPassword(newPass);
-            user.forgetPass = false;
+            // user.forgetPass = false;
             await user.save();
             
             res.status(201).json(
@@ -208,7 +220,7 @@ router.post("/new_password", auth.verifyNewPasswordSyntax, auth.verifyNewPasswor
         }
         else
         {
-            res.status(500).json(
+            res.status(400).json(
                 {
                     success: false, 
                     status: 'No user found!', 

@@ -165,9 +165,8 @@ opts_new_tfa.secretOrKey = process.env.NEW_TFA_TOKEN;
 
 exports.NewTwoFAjwtPassport = passport.use("new_tfa_jwt", new JwtStrategy(opts_new_tfa, (jwtPayload, done) =>
 {
-    console.log(`TFASecret = `, TFASecret)
-    console.log(`jwtPayload._id = `, jwtPayload._id)
-    console.log("object");
+    
+    console.log(opts_new_tfa);
     let TFASecret = jwtPayload.TFASecret;
     User.findOne({_id: jwtPayload._id}, (err, user) =>
         {                

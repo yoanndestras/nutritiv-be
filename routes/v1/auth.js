@@ -106,7 +106,7 @@ router.get("/verify_forget_pwd", auth.verifyEmailToken, async(req, res, next) =>
         
         const token = auth.GenerateEmailToken({email: req.body.email});
         
-        res.redirect(process.env.SERVER_ADDRESS + 
+        res.redirect(process.env.OAUTH_ADDRESS + 
             'reset_password/'+
             '?status=successfull' +
             `&token=${token}`

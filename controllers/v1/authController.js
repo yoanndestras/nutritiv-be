@@ -901,7 +901,6 @@ exports.verifyNewUserEmail = (req, res, next) =>
     {
         if (err || !user) 
         {   
-            console.log(`err = `, err)
             let err = new Error('TOKEN EXPIRED OR CORRUPTED');
             err.statusCode = 403;
             return next(err);

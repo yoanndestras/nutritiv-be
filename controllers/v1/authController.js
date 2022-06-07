@@ -936,6 +936,7 @@ exports.verifyEmailExist = async(req, res, next) =>
         }
         else
         {
+            let err = new Error('This email do not refer to a registered account!')
             err.statusCode = 400;
             next(err);
         }

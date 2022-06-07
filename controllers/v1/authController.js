@@ -463,6 +463,7 @@ exports.verifyUserTFARecovery = async(req, res, next) =>
     {
         if(err || !user)
         {
+            console.log(`err = `, err)
             passport.authenticate('jwt', { session: false }, (err, user, info) => 
             {
                 if (err || !user) 

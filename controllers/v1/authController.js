@@ -165,8 +165,6 @@ opts_new_tfa.secretOrKey = process.env.NEW_TFA_TOKEN;
 
 exports.NewTwoFAjwtPassport = passport.use("new_tfa_jwt", new JwtStrategy(opts_new_tfa, (jwtPayload, done) =>
 {
-    
-    console.log(opts_new_tfa);
     let TFASecret = jwtPayload.TFASecret;
     User.findOne({_id: jwtPayload._id}, (err, user) =>
         {                
@@ -508,11 +506,13 @@ exports.verifyUserTFARecovery = async(req, res, next) =>
 
 exports.verifyUserNewTFA = async(req, res, next) =>
 {
+    console.log("object");
     passport.authenticate("new_tfa_jwt", { session: false }, (err, user, TFASecret) => 
     {
         
         if(err || !user)
         {
+            console.log(`err = `, err)
             passport.authenticate('jwt', { session: false }, (err, user, info) => 
             {
                 if (err || !user) 

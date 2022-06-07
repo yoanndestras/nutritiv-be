@@ -922,23 +922,24 @@ exports.verifyNewEmail = (req, res, next) =>
         })
 };
 
-exports.verifyEmailExist = (req, res, next) =>
+exports.verifyEmailExist = async(req, res, next) =>
 {
     try
     {
-        User.findOne({email: req.body?.email}, (err, user) =>
-            {
-                if(user !== null)
-                {
-                    req.user = user;
-                    return next();
-                }
-                else
-                {
-                    err.statusCode = 400;
-                    return next(err);
-                }
-            })
+        const user = await User.findOne({email: req.body?.email})
+
+            
+        if(user)
+        {
+            req.user = user;
+            next();
+        }
+        else
+        {
+            err.statusCode = 400;
+            next(err);
+        }
+
     }catch(err){next(err)}
 };
 

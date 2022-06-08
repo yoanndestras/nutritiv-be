@@ -119,7 +119,7 @@ opts_email.secretOrKey = process.env.JWT_EMAIL;
 
 exports.jwtPassport = passport.use("email_jwt", new JwtStrategy(opts_email, (jwtPayload, done) =>
 {
-    User.findOne({email: jwtPayload.email, provider: "local"}, (err, user) =>
+    User.findOne({email: jwtPayload.email, provider: "local", updatedAt: jwtPayload.updatedAt}, (err, user) =>
         {                
             if(err)
             {
@@ -739,11 +739,11 @@ exports.GenerateTFAToken = function(_id)
     );
 };
 
-exports.GenerateNewTFAToken = function(_id, TFASecret) 
+exports.GenerateNewTFAToken = function(_id, TFASecret, updatedAt) 
 {
     return jwt.sign
     (
-        {_id, TFASecret},  
+        {_id, TFASecret, updatedAt},  
         process.env.NEW_TFA_TOKEN, 
         {expiresIn: "3600s"} // expires in 30 minutes
     );
@@ -759,11 +759,11 @@ exports.GenerateRefreshToken = function(user)
     );
 };
 
-exports.GenerateEmailToken = function(user) 
+exports.GenerateEmailToken = function(email, updatedAt) 
 {
     return jwt.sign
     (
-        user, 
+        {email, updatedAt}, 
         process.env.JWT_EMAIL,
         {expiresIn: "1d"} // expires in 1 days
     );

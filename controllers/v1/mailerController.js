@@ -10,7 +10,7 @@ exports.sendVerifyAccountMail = async(req, res, next) =>
 {
     try
     {        
-        const Email_Token = auth.GenerateEmailToken({email: req.body.email});
+        const Email_Token = auth.GenerateEmailToken({email: req.body.email, updatedAt: req.user.updatedAt});
         sgMail.setApiKey(process.env.SENDGRID_API_KEY);
         
         const email = req.body.email;
@@ -41,7 +41,7 @@ exports.sendForgetPassword = async(req, res, next) =>
 {
     try
     {        
-        const Email_Token = auth.GenerateEmailToken({email: req.body.email});
+        const Email_Token = auth.GenerateEmailToken({email: req.body.email, updatedAt: req.user.updatedAt});
         sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
         const email = req.body.email, user = req.user;

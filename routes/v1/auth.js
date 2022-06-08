@@ -104,7 +104,7 @@ router.get("/verify_forget_pwd", auth.verifyEmailToken, async(req, res, next) =>
         //         status: 'Email verification successfull!'
         //     });
         
-        const token = auth.GenerateEmailToken({email: req.user.email});
+        const token = auth.GenerateEmailToken({email: req.user.email, updatedAt: req.user.updatedAt});
         
         res.redirect(process.env.SERVER_ADDRESS + 
             'reset-password/'+
@@ -203,14 +203,13 @@ auth.verifyNewPasswordEquality, async(req, res, next) =>
 
         const userId = req.user?._id
         const user = await User.findById(userId);
-        console.log(`user = `, user)
         const newPass = req.body.confirmNewPass;
         
         if(user && newPass)
         {
+            // user.forgetPass = false;
             await user.resetAttempts();
             await user.setPassword(newPass);
-            // user.forgetPass = false;
             await user.save();
             
             res.status(201).json(
@@ -245,13 +244,14 @@ router.post('/TFARecovery', cors.corsWithOptions, upload.any('imageFile'), auth.
             {
                 const TFASecret = req.user.TFASecret;
                 const otpAuthURL = `otpauth://totp/Nutritiv(${req.user.username})?secret=${TFASecret}`
+
                 const twoFAToken = auth.GenerateNewTFAToken(req.user._id, TFASecret);
                 
                 // let user = await User.findOneById(req.user._id)
                 // {
                 
                 // }
-
+                
                 qrcode.toDataURL(otpAuthURL, (err, data) =>
                 {
                     // res.setHeader("Content-Type", "text/html");
@@ -294,9 +294,11 @@ async(req, res, next) =>
                     name: `Nutritiv(${req.user.username})`,
                     length: 10
                 })
-
+            
             const TFASecretBase32 = TFASecret.base32;
+            
             const twoFAToken = auth.GenerateNewTFAToken(req.user._id, TFASecretBase32);
+
             const otpAuthURL = TFASecret.otpauth_url;
             
             qrcode.toDataURL(TFASecret.otpauth_url, (err, data) =>

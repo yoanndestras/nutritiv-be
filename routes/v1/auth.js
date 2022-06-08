@@ -98,12 +98,6 @@ router.get("/verify_forget_pwd", auth.verifyEmailToken, async(req, res, next) =>
 {
     try
     {
-        // res.status(200).json(
-        //     {
-        //         success: true, 
-        //         status: 'Email verification successfull!'
-        //     });
-        
         const token = auth.GenerateEmailToken(req.user.email, req.user.updatedAt);
         
         res.redirect(process.env.SERVER_ADDRESS + 
@@ -198,9 +192,7 @@ router.post("/new_password", auth.verifyNewUserEmail, auth.verifyNewPasswordSynt
 auth.verifyNewPasswordEquality, async(req, res, next) =>
 {
     try
-    {
-        //const user = req.user.username;
-
+    {        
         const userId = req.user?._id
         const user = await User.findById(userId);
         const newPass = req.body.confirmNewPass;
@@ -231,98 +223,42 @@ auth.verifyNewPasswordEquality, async(req, res, next) =>
 });
 
 //VERIFY TFA RECOVERY
-router.post('/TFARecovery', cors.corsWithOptions, upload.any('imageFile'), auth.verifyUserTFARecovery, auth.verifyRefresh, async (req, res, next) =>
+router.post('/TFARecovery', cors.corsWithOptions, upload.any('imageFile'), auth.verifyUserTFARecovery, 
+auth.verifyRefresh, auth.createTFARecovery, async (req, res, next) =>
 {
     try
     {
-        if(req.user.TFASecret && req.user.TFARecovery)
+        const twoFAToken = req.twoFAToken, otpAuthURL = req.otpAuthURL, TFASecret = req.TFASecret;
+        qrcode.toDataURL(otpAuthURL, (err, data) =>
         {
-            const TFARecoveryInitial = req.user.TFARecovery;
-            const TFARecoveryEntered = req.body.TFARecovery;
-            
-            if(JSON.stringify(TFARecoveryInitial) == JSON.stringify(TFARecoveryEntered))
-            {
-                const TFASecret = req.user.TFASecret;
-                const otpAuthURL = `otpauth://totp/Nutritiv(${req.user.username})?secret=${TFASecret}`
-
-                const twoFAToken = auth.GenerateNewTFAToken(req.user._id, TFASecret);
-                
-                // let user = await User.findOneById(req.user._id)
-                // {
-                
-                // }
-                
-                qrcode.toDataURL(otpAuthURL, (err, data) =>
-                {
-                    // res.setHeader("Content-Type", "text/html");
-                    // res.write(`<img src='${data}'>`);
-                    // res.send();
-                    res .header('new_twofa_token', twoFAToken)
-                        .status(200).json({qrCodeUrl : otpAuthURL, qrCodeSecret : TFASecret})
-                })
-            }
-            else
-            {
-                res.status(401).json(
-                    {
-                        success: false,
-                        status: "Your recovery sentence is false!"
-                    })
-            }
-        }
-        else
-        {
-            res.status(400).json(
-                {
-                    success: false,
-                    status: "Your account do not have TFA enabled!"
-                })
-        }
+            // res.setHeader("Content-Type", "text/html");
+            // res.write(`<img src='${data}'>`);
+            // res.send();
+            res .header('new_twofa_token', twoFAToken)
+                .status(200).json({qrCodeUrl : otpAuthURL, qrCodeSecret : TFASecret})
+        })
+    
     }catch(err){next(err);}
 })
 
 //CREATE SECRET TOTP
-router.post('/TFASecret', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
+router.post('/TFASecret', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.createTFASecret,
 async(req, res, next) => 
 {
     try
     {
-        if(!req.user.TFASecret)
+        const twoFAToken = req.twoFAToken, otpAuthURL = req.otpAuthURL, TFASecretBase32 = req.TFASecretBase32;
+        qrcode.toDataURL(otpAuthURL, (err, data) =>
         {
-            const TFASecret = speakeasy.generateSecret(
-                {
-                    name: `Nutritiv(${req.user.username})`,
-                    length: 10
-                })
+            // res .header('new_twofa_token', twoFAToken)
+            // res.setHeader("Content-Type", "text/html");
+            // res.write(`<img src='${data}'>`);
+            // res.send();
             
-            const TFASecretBase32 = TFASecret.base32;
-            
-            const twoFAToken = auth.GenerateNewTFAToken(req.user._id, TFASecretBase32);
-
-            const otpAuthURL = TFASecret.otpauth_url;
-            
-            qrcode.toDataURL(TFASecret.otpauth_url, (err, data) =>
-            {
-                // res .header('new_twofa_token', twoFAToken)
-                // res.setHeader("Content-Type", "text/html");
-                // res.write(`<img src='${data}'>`);
+            res .header('new_twofa_token', twoFAToken)
+                .status(200).json({qrCodeUrl : otpAuthURL, qrCodeSecret : TFASecretBase32})
                 
-                // res.send();
-                
-                res .header('new_twofa_token', twoFAToken)
-                    .status(200).json({qrCodeUrl : otpAuthURL, qrCodeSecret : TFASecretBase32})
-                    
-            })
-        }
-        else
-        {
-            res.status(400).json(
-                {
-                    success: false,
-                    status: "Your account already have TFA enabled!"
-                })
-        }
-        
+        })
     }catch(err){next(err)}
 })
 
@@ -349,317 +285,82 @@ async(req, res, next) =>
 // })
 
 //DISABLE TFA
-router.post('/disableTFA', auth.verifyUser, auth.verifyRefresh, async(req, res, next) =>
+router.post('/disableTFA', auth.verifyUser, auth.verifyRefresh, auth.disableTFA, async(req, res, next) =>
 {
     try
     {
-        let user = req.user, password = req.body.password;
-        if(user.TFASecret)
-        {
-            user.authenticate(password, async (err, user) => 
-                {
-                    if(err)
-                    {
-                        err.statusCode = 400;
-                        next(err);
-                    }
-                    else if(!user)
-                    {
-                        let err = new Error('Password is incorrect!');
-                        err.statusCode = 400;
-                        next(err);
-                    }
-                    else
-                    {
-                        console.log("Password is correct!");
-                        
-                        const TFASecret = user.TFASecret.toString();
-                        const token = req.body.code;
-                        
-                        const valid = speakeasy.totp.verify(
-                            {
-                                secret: TFASecret,
-                                encoding: 'base32',
-                                token: token,
-                                window: 0
-                            });
-                            
-                            if(valid === true)
-                            {
-                                const user = await User.findOneAndUpdate({_id: req.user._id},
-                                    {
-                                        $unset: {"TFASecret": "", "TFARecovery": ""}
-                                    });
-                                await user.save();
-                            
-                                res.status(201).json(
-                                    {
-                                        success: true, 
-                                        status: 'Your successfully disabled TFA!',
-                                    });
-                            }
-                            else
-                            {
-                                let err = new Error('The code is invalid or expired!');
-                                err.statusCode = 401;
-                                return next(err);
-                            }
-                    }
-                })
-        }
-        else
-        {
-            res.status(400).json(
-                {
-                    success: true,
-                    status: "Your account do not have enable TFA"
-                })
-        }
+        res.status(201).json(
+            {
+                success: true, 
+                status: 'Your successfully disabled TFA!',
+            });
     }catch(err){next(err)}
 })
 
 //VERIFY TFA
-router.post('/enableTFA', cors.corsWithOptions, auth.verifyUserNewTFA, auth.verifyRefresh, async(req, res, next) =>
+router.post('/enableTFA', cors.corsWithOptions, auth.verifyUserNewTFA, auth.verifyRefresh, 
+auth.enableTFA, async(req, res, next) =>
 {
     try
     {
-        let user = req.user, password = req.body.password;
-        
-        // if(!user.TFASecret)
-        // {
-            user.authenticate(password, async (err, user) => 
-                {
-                    if(err)
-                    {
-                        err.statusCode = 400;
-                        next(err);
-                    }
-                    else if(!user)
-                    {
-                        let err = new Error('Password is incorrect!');
-                        err.statusCode = 400;
-                        next(err);
-                    }
-                    else
-                    {
-                        console.log("Password is correct!");
-
-                        const TFASecret = req.TFASecret.toString();
-                        const token = req.body.code;
-                        const valid = speakeasy.totp.verify(
-                            {
-                                secret: TFASecret,
-                                encoding: 'base32',
-                                token: token,
-                                window: 0
-                            });
-                            
-                            if(valid === true)
-                            {
-                                let TFARecovery = [];
-        
-                                for(let i = 0; i < 12; i++){TFARecovery.push(randomWords())}
-                                                                
-                                const user = await User.findOneAndUpdate({_id: req.user._id},
-                                    {
-                                        $set:
-                                        {
-                                            "TFASecret": TFASecret,
-                                            "TFARecovery": TFARecovery
-                                        }
-                                    })
-                                await user.save();
-
-                                res.status(201).json(
-                                    {
-                                        success: true, 
-                                        status: 'Your successfully enabled TFA!',
-                                        TFARecovery
-                                    });
-                            }
-                            else
-                            {
-                                let err = new Error('The code is invalid or expired!');
-                                err.statusCode = 401;
-                                return next(err);
-                            }
-                    }
-                })
-        // }
-        // else
-        // {
-        //     res.status(400).json(
-        //         {
-        //             success: true,
-        //             status: "Your account already have enabled TFA!"
-        //         })
-        // }
+        res.status(201).json(
+            {
+                success: true, 
+                status: 'Your successfully enabled TFA!',
+                TFARecovery
+            });
     }catch(err){next(err)}
 })
 
-// router.post('/tfa', async(req, res, next) =>
-// {
-//     const users = await User.find();
-    
-//     users.map(async user => 
-//         {
-//             if(user.TFASecret)
-//             {
-//                 const test = await User.findOneAndUpdate({_id: user._id},
-//                     {
-//                         $unset: {TFASecret: ""}
-//                     });
-//                     console.log(`test = `, test)
-//                 await test.save();
-                
-//             }
-//         }
-//     )
-//     res.status(200).json(
-//         {
-//             success: true,
-//             users
-//         })
-// })
-
 //CREATE TOKEN FROM TOTP SECRET
 router.post('/TFAValidation', cors.corsWithOptions, auth.verifyNoRefresh, auth.verifyUserTFA, 
-async(req, res, next) => 
+auth.TFAValidation, async(req, res, next) => 
 {
     try
     {
-        const user = await User.findOne({_id: req.user._id});
+        const accessToken = req.accessToken, refreshToken = req.refreshToken, isAdmin = req.user.isAdmin;
 
-        const TFASecret = user.TFASecret.toString();
-        const token = req.body.code;
-        
-        const valid = speakeasy.totp.verify(
+        res .header('access_token', accessToken)
+            .header('refresh_token', refreshToken)
+            .cookie("refresh_token", refreshToken, 
             {
-                secret: TFASecret,
-                encoding: 'base32',
-                token: token,
-                window: 0
-            }
-        )
-
-        if(valid === true)
-        {
-            req.login(user, { session: false }, async(err) => 
-            {
-                if(err)
+                httpOnly: true,
+                secure: process.env.REF_JWT_SEC_COOKIE === "production"
+            })
+            .status(200).json(
                 {
-                    res.status(400).json(
-                        {
-                            success: false, 
-                            status: 'Login Unsuccessful!', 
-                            err: err
-                        });
-                }
-                else
-                {
-                    const accessToken = auth.GenerateAccessToken({_id: req.user._id});
-                    const refreshToken = auth.GenerateRefreshToken({_id: req.user._id});
-                    
-                    res.header('access_token', accessToken)
-                        .header('refresh_token', refreshToken)
-                        .cookie("refresh_token", refreshToken, 
-                        {
-                            httpOnly: true,
-                            secure: process.env.REF_JWT_SEC_COOKIE === "production"
-                        })
-                        .status(200).json(
-                            {
-                                success: true,
-                                loggedIn: true,
-                                isAdmin: req.user.isAdmin,
-                                status: 'Login Successful!'
-                            });
-                }
-            });
-        }
-        else
-        {
-            let err = new Error('The code is invalid or expired!');
-            err.statusCode = 401;
-            return next(err);
-        }
+                    success: true,
+                    loggedIn: true,
+                    isAdmin: isAdmin,
+                    status: 'Login Successful!'
+                });
     
     }catch(err){next(err)}
 })
 
 //LOGIN
-router.post("/login", cors.corsWithOptions, async(req, res, next)=>
+router.post("/login", cors.corsWithOptions, auth.login, async(req, res, next)=>
 {
     try
     {
-        //passport.authenticate('local', { successRedirect: '/',failureRedirect: '/login' }));
-        passport.authenticate('local', { session: false }, (err, user, info) => 
-        {
-            if(err || !user) 
+        const accessToken = req.accessToken, refreshToken = req.refreshToken, isAdmin = req.user.isAdmin;
+        
+        res .header('access_token', accessToken)
+            .header('refresh_token', refreshToken)
+            .cookie("refresh_token", refreshToken, 
             {
-                
-                res.status(400).json(
-                    {
-                        success: false, 
-                        status: 'Login Unsuccessful!', 
-                        err: err,
-                        info: info
-                    });
-            }
-            else if(user.isVerified === false)
-            {
-                let err = new Error('Your account is not verified!');
-                err.statusCode = 400;
-                return next(err);
-            }
-            else
-            {
-                req.login(user, { session: false }, async(err) => 
+                httpOnly: true,
+                secure: process.env.REF_JWT_SEC_COOKIE === "production"
+            })
+            .status(200).json(
                 {
-                    if(err)
-                    {
-                        res.status(400).json(
-                            {
-                                success: false, 
-                                status: 'Login Unsuccessful!', 
-                                err: err
-                            });
-                    }
-                    else if(user.TFASecret)
-                    {
-                        const twoFAToken = auth.GenerateTFAToken({_id: user._id});
-
-                        res.header('twofa_token', twoFAToken)
-                            .status(200).json(
-                            {
-                                success: true, 
-                                hasTFA: true // refirect to /TFAValidation
-                            })
-                    }
-                    else
-                    {
-                        const accessToken = auth.GenerateAccessToken({_id: req.user._id});
-                        const refreshToken = auth.GenerateRefreshToken({_id: req.user._id});
-                        
-                        res.header('access_token', accessToken)
-                            .header('refresh_token', refreshToken)
-                            .cookie("refresh_token", refreshToken, 
-                            {
-                                httpOnly: true,
-                                secure: process.env.REF_JWT_SEC_COOKIE === "production"
-                            })
-                            .status(200).json(
-                                {
-                                    success: true,
-                                    loggedIn: true,
-                                    hasTFA: false,
-                                    isAdmin: req.user.isAdmin,
-                                    status: 'Login Successful!'
-                                });
-                    }
-                })
-            };
-        })(req, res, next);
+                    success: true,
+                    loggedIn: true,
+                    hasTFA: false,
+                    isAdmin: isAdmin,
+                    status: 'Login Successful!'
+                });
+    
     }catch(err){next(err)}
 });
 
@@ -668,14 +369,14 @@ router.delete("/logout", cors.corsWithOptions, auth.verifyUser, auth.verifyRefre
 {   
     try
     {
-        return  res.clearCookie("refresh_token")
-                    .status(200)
-                    .json(
-                        {
-                            success: true, 
-                            loggedIn: false,
-                            status: "Successfully logged out!"
-                        });
+        res .clearCookie("refresh_token")
+            .status(200)
+            .json(
+                {
+                    success: true, 
+                    loggedIn: false,
+                    status: "Successfully logged out!"
+                });
     }catch(err){err.message = 'Logout Unsuccessfull!'; next(err)}
 });
 

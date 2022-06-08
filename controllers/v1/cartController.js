@@ -1,6 +1,7 @@
-const express = require('express');
 const cart = require('./cartController');
-const mongoose = require('mongoose');
+
+const appFunctions = require('../../app');
+
 const Cart = require("../../models/Cart");
 const Product = require("../../models/Product");
 
@@ -48,7 +49,7 @@ exports.productAndLoadExist = async(userId, newProdQty, calculatedPrice, newProd
             arrayFilters: 
             [
                 {
-                    'outer.productId': mongoose.Types.ObjectId(newProdId)
+                    'outer.productId': appFunctions.ObjectId(newProdId)
                 },
                 {
                     'inner.load': newProdLoad
@@ -71,13 +72,13 @@ exports.productExist = async(userId, newProdQty, calculatedPrice, newProdLoad, n
     try
     {
         let updatedCart = await Cart.findOneAndUpdate(
-        {"userId" : userId, "productId": mongoose.Types.ObjectId(newProdId)}, 
+        {"userId" : userId, "productId": appFunctions.ObjectId(newProdId)}, 
         {
             $push: 
             {
                 "products.$[outer].productItems": 
                 {
-                    id : mongoose.Types.ObjectId(),
+                    id : appFunctions.ObjectId(),
                     load : newProdLoad, 
                     quantity : newProdQty,
                     price : 
@@ -97,7 +98,7 @@ exports.productExist = async(userId, newProdQty, calculatedPrice, newProdLoad, n
             arrayFilters: 
             [
                 {
-                    'outer.productId': mongoose.Types.ObjectId(newProdId)
+                    'outer.productId': appFunctions.ObjectId(newProdId)
                 }
             ],
             multi: true,
@@ -124,14 +125,14 @@ exports.cartExist = async(userId, title, shape, imgs, newProdQty, calculatedPric
                 {
                     products: 
                     {
-                        productId : mongoose.Types.ObjectId(newProdId), 
+                        productId : appFunctions.ObjectId(newProdId), 
                         productTitle: title,
                         productImgs : imgs,
                         productShape: shape,
                         productItems: 
                         [
                             {
-                                id: mongoose.Types.ObjectId(),
+                                id: appFunctions.ObjectId(),
                                 load : newProdLoad, 
                                 quantity : newProdQty,
                                 price : 
@@ -168,14 +169,14 @@ exports.newCart = async(userId, title, shape, imgs, newProdQty, calculatedPrice,
         {"userId": userId,
             products: 
             [{
-                productId : mongoose.Types.ObjectId(newProdId),
+                productId : appFunctions.ObjectId(newProdId),
                 productTitle: title,
                 productImgs : imgs,
                 productShape: shape,
                 productItems: 
                 [
                     {
-                        id: mongoose.Types.ObjectId(),
+                        id: appFunctions.ObjectId(),
                         load : newProdLoad,
                         quantity : newProdQty,
                         price : 
@@ -242,7 +243,7 @@ exports.operation = async(userId, qty, val, newProdLoad, newProdId) =>
             {
                 arrayFilters: [
                 {
-                    'outer.productId': mongoose.Types.ObjectId(newProdId)
+                    'outer.productId': appFunctions.ObjectId(newProdId)
                 },
                 {
                     'inner.load': newProdLoad
@@ -286,7 +287,7 @@ exports.productQuantityIsZero = async(userId, newProdLoad, newProdId, emptyCart)
             let deleteProduct = findProduct !== null && findProduct !== -1 ? await Cart.findOneAndUpdate(
             {userId : userId}, 
             {$pull: {"products.$[outer].productItems": {load : newProdLoad} ,}},
-            {arrayFilters: [{'outer.productId': mongoose.Types.ObjectId(newProdId)}],new: true,},): null;
+            {arrayFilters: [{'outer.productId': appFunctions.ObjectId(newProdId)}],new: true,},): null;
     
             if(deleteProduct){await deleteProduct.save();}
             
@@ -296,7 +297,7 @@ exports.productQuantityIsZero = async(userId, newProdLoad, newProdId, emptyCart)
                 {
                     $pull: 
                     {
-                        "products": {productId : mongoose.Types.ObjectId(newProdId)}
+                        "products": {productId : appFunctions.ObjectId(newProdId)}
                     }
                 }
             ): null;
@@ -400,7 +401,7 @@ exports.deleteProductInCart = async(req, res, next) =>
                     {
                         $pull: 
                         {
-                            "products": {productId : mongoose.Types.ObjectId(productId)}
+                            "products": {productId : appFunctions.ObjectId(productId)}
                         }
                     }
                 ): null;
@@ -426,7 +427,7 @@ exports.deleteOperation = async(userId, newProdLoad, qty, productId, amount) =>
             {
                 arrayFilters: [
                 {
-                    'outer.productId': mongoose.Types.ObjectId(productId)
+                    'outer.productId': appFunctions.ObjectId(productId)
                 }
                 ]
             },
@@ -493,7 +494,7 @@ exports.deleteProductInCartById = async(req, res, next) =>
                     {
                         $pull: 
                         {
-                            "products": {productId : mongoose.Types.ObjectId(productId)}
+                            "products": {productId : appFunctions.ObjectId(productId)}
                         }
                     }
                 ): null;
@@ -519,7 +520,7 @@ exports.deleteOperationById = async(userId, load, qty, productId, amount) =>
             {
                 arrayFilters: [
                 {
-                    'outer.productId': mongoose.Types.ObjectId(productId)
+                    'outer.productId': appFunctions.ObjectId(productId)
                 }
                 ]
             },

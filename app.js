@@ -8,7 +8,14 @@ const   limitter = require('express-rate-limit'), // SPAM LIMITTER
         path = require('path'), // ACCESS TO FOLDERS PATHS
         cors = require('cors'), // CORS POLICY
         {socketConnection} = require("./utils/socketIo"), // CALL SOCKETIO
-        routes = require("./routes/index") // CALL V1 & V2 ROUTES FROM ROUTER FOLDER
+        routes = require("./routes/index"), // CALL V1 & V2 ROUTES FROM ROUTER FOLDER
+        ObjectId = mongoose.Types.ObjectId,
+        Schema =  mongoose.Schema,
+        SchemaObjectId = mongoose.Schema.Types.ObjectId;
+
+exports.ObjectId = ObjectId;
+exports.Schema = Schema;
+exports.SchemaObjectId = SchemaObjectId;
 
 // const cron = require('node-cron');
 // const {backupMongoDB} = require("./utils/dbBackups") // CALL DBBACKUPS

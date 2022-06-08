@@ -1,8 +1,6 @@
 const router = require("express").Router();
 const Chat = require('../../models/Chat')
 const User = require('../../models/User')
-const mongoose = require('mongoose');
-const ObjectId = mongoose.Types.ObjectId;
 
 // CONTROLLERS
 const cors = require('../../controllers/v1/corsController');

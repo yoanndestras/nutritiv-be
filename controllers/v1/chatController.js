@@ -1,6 +1,6 @@
 const Chat = require("../../models/Chat");
 const User = require("../../models/User");
-const ObjectId = require('mongoose').Types.ObjectId;
+const appFunctions = require('../../app');
 
 // exports.verifyAdminMembers = async(req, res, next) =>
 // {
@@ -53,7 +53,7 @@ const ObjectId = require('mongoose').Types.ObjectId;
         
 //     for(let i = 0; i < membersId.length; i++)
 //     {
-//       if(ObjectId.isValid(membersId[i]) === false)
+//       if(appFunctions.ObjectId.isValid(membersId[i]) === false)
 //         {
 //           let err = new Error(membersId[i] + " is not a valid ObjectId");
 //           err.statusCode = 400;
@@ -271,7 +271,7 @@ exports.createMessageByChatId = async(req, res, next) =>
           {
             sender,
             text,
-            id : new ObjectId(),
+            id : new appFunctions.ObjectId(),
             createdAt: new Date()
           }
         }

@@ -3,8 +3,7 @@ const Product = require("../../models/Product");
 const check = require('./productsController');
 const Cart = require("../../models/Cart");
 
-const mongoose = require('mongoose');
-const ObjectId = require('mongoose').Types.ObjectId;
+const appFunctions = require('../../app');
 const fs = require('fs');
 const sharp = require('sharp');
 const path = require('path');
@@ -203,7 +202,7 @@ exports.verifyProductId = async(req, res, next) =>
     {
         const productId = req.params.productId;
 
-        if(ObjectId.isValid(productId))
+        if(appFunctions.ObjectId.isValid(productId))
         {
             const product = await Product.findOne({_id :productId});
             if(product) return next()

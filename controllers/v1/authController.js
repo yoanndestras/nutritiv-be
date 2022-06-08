@@ -899,7 +899,7 @@ exports.verifyEmailToken = (req, res, next) =>
 
             return res.redirect(process.env.SERVER_ADDRESS + 
                 'reset_password/'+
-                '?status=failed' 
+                '?status=pwdFailed' 
                 // '&message=forgetPasswordURLVerified'+
                 // '&statusCode=200'
                 )

@@ -947,6 +947,7 @@ exports.verifyNewEmail = (req, res, next) =>
         {
             if(user !== null && user.isVerified !== true)
             {
+                req.user = user;
                 return next();
             }
             else if(user.isVerified)

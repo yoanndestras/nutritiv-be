@@ -24,7 +24,7 @@ exports.socketConnection = async(io) =>
                     console.log("token verification successful");
                     return next();
                 }
-                else
+                else 
                 {
                     let err = new Error('authentication_error')
                     err.data = { content : 'token error!' };

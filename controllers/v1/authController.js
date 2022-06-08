@@ -119,8 +119,10 @@ opts_email.secretOrKey = process.env.JWT_EMAIL;
 
 exports.jwtPassport = passport.use("email_jwt", new JwtStrategy(opts_email, (jwtPayload, done) =>
 {
-    User.findOne({email: jwtPayload.email, provider: "local", updatedAt: jwtPayload.updatedAt}, (err, user) =>
-        {                
+    User.findOne({email: jwtPayload.email, provider: "local", updatedAt: new Date(jwtPayload.updatedAt)}, (err, user) =>
+        {           
+            console.log(jwtPayload.email)    
+            
             if(err)
             {
                 return done(err, false);
@@ -969,7 +971,7 @@ exports.verifyEmailExist = async(req, res, next) =>
 {
     try
     {
-        const user = await User.findOne({email: req.body?.email})
+        const user = await User.findOne({email: req.body?.email, provider : "local"})
 
             
         if(user)

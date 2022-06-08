@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-
+const ObjectId = Schema.ObjectId;
 
 const ChatSchema = new Schema
 ({
@@ -26,7 +26,7 @@ const ChatSchema = new Schema
         
         sender:
         {
-            type: Schema.Types.ObjectId,
+            type: ObjectId,
             required: true
         },
         text:
@@ -36,7 +36,7 @@ const ChatSchema = new Schema
         },
         id:
         {
-            type: Schema.Types.ObjectId,
+            type: ObjectId,
             required: true
         },
         createdAt:
@@ -46,7 +46,7 @@ const ChatSchema = new Schema
         }
         // replyTo:
         // {
-        //     type: mongoose.Schema.Types.ObjectId,
+        //     type: ObjectId,
         // }
     },
     version: 

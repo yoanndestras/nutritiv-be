@@ -1,11 +1,12 @@
 const mongoose = require("mongoose")
 const Schema = mongoose.Schema;
+const ObjectId = Schema.ObjectId;
 
 const CartSchema = new Schema (
 {
     userId: 
     {
-        type: mongoose.Schema.Types.ObjectId,
+        type: ObjectId,
         required: true,
     },
     products:
@@ -14,7 +15,7 @@ const CartSchema = new Schema (
         required: true,
         productId:
         {
-            type: mongoose.Schema.Types.ObjectId,
+            type: ObjectId,
             required: true
         },
         productTitle:
@@ -38,7 +39,7 @@ const CartSchema = new Schema (
             {
                 id:
                 {
-                    type: mongoose.Schema.Types.ObjectId,
+                    type: ObjectId,
                     required: true
                 },
                 load:

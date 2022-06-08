@@ -739,11 +739,11 @@ exports.GenerateTFAToken = function(_id)
     );
 };
 
-exports.GenerateNewTFAToken = function(_id, TFASecret, updatedAt) 
+exports.GenerateNewTFAToken = function(_id, TFASecret) 
 {
     return jwt.sign
     (
-        {_id, TFASecret, updatedAt},  
+        {_id, TFASecret},  
         process.env.NEW_TFA_TOKEN, 
         {expiresIn: "3600s"} // expires in 30 minutes
     );

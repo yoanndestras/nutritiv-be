@@ -10,11 +10,9 @@ const   limitter = require('express-rate-limit'), // SPAM LIMITTER
         {socketConnection} = require("./utils/socketIo"), // CALL SOCKETIO
         routes = require("./routes/index"), // CALL V1 & V2 ROUTES FROM ROUTER FOLDER
         ObjectId = mongoose.Types.ObjectId,
-        Schema =  mongoose.Schema,
         SchemaObjectId = mongoose.Schema.Types.ObjectId;
 
 exports.ObjectId = ObjectId;
-exports.Schema = Schema;
 exports.SchemaObjectId = SchemaObjectId;
 
 // const cron = require('node-cron');

@@ -57,7 +57,7 @@ exports.newProduct = async(req, res, next) =>
             const { title, desc, countInStock } = req.body;
             req.title = title;
     
-            const product = new Product(
+            const newProduct = new Product(
                 {
                     title,
                     desc,
@@ -65,17 +65,34 @@ exports.newProduct = async(req, res, next) =>
                     tags : tagsArr,
                     productItems: product,
                     countInStock,
-                }, (err) =>
+                }, async(err) =>
                 {
                     if(err) return next(err);
+                
                 });
             
-            product.save();
+            await newProduct.save();
         }
         
-        
         next();
-    }catch(err){next(err)}
+    }
+    catch(err)
+    {
+        // let verifyProductExist = await Product.findOne({title: req.body.title, shape: req.body.shape});
+
+        // if(!verifyProductExist)
+        // {
+            let filesArr = req.files;
+            await Promise.all
+            (
+                filesArr.map(async file => 
+                    {
+                        fs.unlinkSync(path.resolve(file.destination,'productsImgs', file.filename))
+                    })
+            );
+        // }
+        next(err)
+    }
 }
 
 exports.discount = (values, price, el, keys) => 

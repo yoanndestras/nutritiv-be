@@ -8,10 +8,12 @@ const   limitter = require('express-rate-limit'), // SPAM LIMITTER
         path = require('path'), // ACCESS TO FOLDERS PATHS
         cors = require('cors'), // CORS POLICY
         {socketConnection} = require("./utils/socketIo"), // CALL SOCKETIO
-        routes = require("./routes/index"), // CALL V1 & V2 ROUTES FROM ROUTER FOLDER
         ObjectId = mongoose.Types.ObjectId,
+        Schema = mongoose.Schema,
         SchemaObjectId = mongoose.Schema.Types.ObjectId;
+        routes = require("./routes/index"), // CALL V1 & V2 ROUTES FROM ROUTER FOLDER
 
+exports.Schema = Schema;
 exports.ObjectId = ObjectId;
 exports.SchemaObjectId = SchemaObjectId;
 

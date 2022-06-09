@@ -57,7 +57,7 @@ exports.newProduct = async(req, res, next) =>
             const { title, desc, countInStock } = req.body;
             req.title = title;
     
-            Product.create(
+            const product = new Product(
                 {
                     title,
                     desc,
@@ -69,6 +69,8 @@ exports.newProduct = async(req, res, next) =>
                 {
                     if(err) return next(err);
                 });
+            
+            product.save();
         }
         
         

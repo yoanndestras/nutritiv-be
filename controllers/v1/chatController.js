@@ -2,69 +2,6 @@ const Chat = require("../../models/Chat");
 const User = require("../../models/User");
 const appFunctions = require('../../app');
 
-// exports.verifyAdminMembers = async(req, res, next) =>
-// {
-//   try
-//   {
-//     const membersId = req.body.members;
-        
-//     for(let i = 0; i < membersId.length; i++)
-//     {
-//       let user = await User.findById({_id: membersId[i]})
-//       if(user && user.isAdmin === false)
-//       {
-//         let err = new Error(user.username + " is not admin!");
-//         err.statusCode = 401;
-//         next(err);
-//       }
-//     }
-    
-//     next();
-//   }catch(err){next(err)}
-  
-// }
-
-// exports.verifyMembersExist = async(req, res, next) =>
-// {
-//   try 
-//   {
-//     const membersId = req.body.members;
-    
-//     for(let i = 0; i < membersId.length; i++)
-//     {
-//       let user = await User.findById({_id: membersId[i]})
-//       if(!user)
-//         {   
-//           let err = new Error(membersId[i] + " do not exist!");
-//           err.statusCode = 400;
-//           next(err);
-//         }
-//     }
-
-//     next();
-//   }catch(err){next(err)}
-// }
-
-// exports.verifySyntax = async(req, res, next) =>
-// {
-//   try
-//   {
-//     const membersId = req.body.members;
-        
-//     for(let i = 0; i < membersId.length; i++)
-//     {
-//       if(appFunctions.ObjectId.isValid(membersId[i]) === false)
-//         {
-//           let err = new Error(membersId[i] + " is not a valid ObjectId");
-//           err.statusCode = 400;
-//           next(err);
-//         }
-//     }
-    
-//     next();
-//   }catch(err){next(err)}
-// }
-
 exports.verifyChatNotExist = async(req, res, next) =>
 {
   try

@@ -2,10 +2,11 @@ const express = require('express');
 const Cart = require("../../models/Cart");
 const Product = require("../../models/Product");
 const Order = require("../../models/Order");
-const mongoose = require('mongoose');
+
+const appFunctions = require('../../app');
 const order = require('./ordersController');
 
-const addressValidator = require('address-validator');
+// const addressValidator = require('address-validator');
 
 const app = express();
 
@@ -37,7 +38,7 @@ exports.newOrder = async(req, res, next) =>
       
       const newOrder = new Order(
         {
-            userId: mongoose.Types.ObjectId(userId),
+            userId: appFunctions.ObjectId(userId),
             products,
             amount,
             orderDetails,

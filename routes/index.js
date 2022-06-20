@@ -1,32 +1,26 @@
 const express = require("express");
 const router = express.Router();
+const routers = require("./");
 
-// V1 ROUTER BASE ON URL
-const userRouteV1 = require(`./v1/user`);
-const authRouteV1 = require(`./v1/auth`);
-const productRouteV1 = require(`./v1/product`);
-const cartRouteV1 = require(`./v1/cart`);
-const orderRouteV1 = require(`./v1/order`);
-const {uploadRouterV1} = require(`./v1/upload`);
-const stripeRouteV1 = require(`./v1/stripe`);
-const chatRouteV1 = require(`./v1/chat`);
-const newsletterRouteV1 = require(`./v1/newsletter`);
-const dbBackupsV1 = require(`./v1/dbBackups`);
+exports.users = require(`./v1/user`);
+exports.auth = require(`./v1/auth`);
+exports.products = require(`./v1/product`);
+exports.carts = require(`./v1/cart`);
+exports.orders = require(`./v1/order`);
+exports.stripe = require(`./v1/stripe`);
+exports.chats = require(`./v1/chat`);
+exports.newsletter = require(`./v1/newsletter`);
+exports.dbBackups = require(`./v1/dbBackups`);
+// const {uploadRouterV1} = require(`./v1/upload`);
 
 // V1 ROUTES
-router.use(`/v1`, router);
-router.use(`/v1/users`, userRouteV1);
-router.use(`/v1/auth`, authRouteV1);
-router.use(`/v1/products`, productRouteV1);
-router.use(`/v1/carts`, cartRouteV1);
-router.use(`/v1/orders`, orderRouteV1);
-router.use(`/v1/imageUpload`, uploadRouterV1);
-router.use(`/v1/stripe`, stripeRouteV1);
-router.use(`/v1/chats`, chatRouteV1);
-router.use(`/v1/newsletter`, newsletterRouteV1);
-router.use(`/v1/dbBackups`, dbBackupsV1);
+for (const route in routers) 
+{
+    const myRoute = routers[route];
+    router.use(`/v1/${route}`, myRoute);
+}
 
-router.get('/health', (req, res) => 
+router.get('/v1/health', (req, res) => 
 {
     const data = {
         uptime: process.uptime(),

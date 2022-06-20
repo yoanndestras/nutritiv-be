@@ -33,4 +33,26 @@ router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth
   }catch (err){next(err)}
 })
 
+// router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, (req, res, next) => 
+// {
+//   try 
+//   {
+//     const DB_NAME = process.env.DB_NAME;
+        
+//     const date = new Date();
+//     const currentDay = new Date().toLocaleDateString('fr-FR').replace(/\//g,'-');
+//     const currentHour = date.getHours() + '-' + date.getMinutes() + '-' + date.getSeconds();
+    
+//     const ARCHIVE_PATH = path.join(__dirname, '../../public/dbBackups', `${currentDay}_${currentHour}_${DB_NAME}.gzip`);
+//     backupMongoDB(DB_NAME, ARCHIVE_PATH);
+  
+//     res.status(200).json(
+//         {
+//           success: true,
+//           status: "Database backup correctly created"
+//         }
+//       );
+//   }catch (err){next(err)}
+// })
+
 module.exports = router;

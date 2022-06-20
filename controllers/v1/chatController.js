@@ -220,7 +220,6 @@ exports.createMessageByChatId = async(req, res, next) =>
     await savedMessage.messages.map((message) => {if((message.sender.toString()) === sender.toString()){messages.push(message)}});
     let message = messages.reverse();
     let lastMessage = message[0];
-    
     req.message = lastMessage;
     next();
   }catch(err){next(err)}

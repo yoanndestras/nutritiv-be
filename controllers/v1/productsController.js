@@ -3,8 +3,7 @@ const Product = require("../../models/Product");
 const check = require('./productsController');
 const Cart = require("../../models/Cart");
 
-const mongoose = require('mongoose');
-const ObjectId = require('mongoose').Types.ObjectId;
+const appFunctions = require('../../app');
 const fs = require('fs');
 const sharp = require('sharp');
 const path = require('path');
@@ -58,7 +57,7 @@ exports.newProduct = async(req, res, next) =>
             const { title, desc, countInStock } = req.body;
             req.title = title;
     
-            Product.create(
+            const newProduct = new Product(
                 {
                     title,
                     desc,
@@ -66,15 +65,34 @@ exports.newProduct = async(req, res, next) =>
                     tags : tagsArr,
                     productItems: product,
                     countInStock,
-                }, (err) =>
+                }, async(err) =>
                 {
                     if(err) return next(err);
+                
                 });
+            
+            await newProduct.save();
         }
         
-        
         next();
-    }catch(err){next(err)}
+    }
+    catch(err)
+    {
+        // let verifyProductExist = await Product.findOne({title: req.body.title, shape: req.body.shape});
+
+        // if(!verifyProductExist)
+        // {
+            let filesArr = req.files;
+            await Promise.all
+            (
+                filesArr.map(async file => 
+                    {
+                        fs.unlinkSync(path.resolve(file.destination,'productsImgs', file.filename))
+                    })
+            );
+        // }
+        next(err)
+    }
 }
 
 exports.discount = (values, price, el, keys) => 
@@ -203,7 +221,7 @@ exports.verifyProductId = async(req, res, next) =>
     {
         const productId = req.params.productId;
 
-        if(ObjectId.isValid(productId))
+        if(appFunctions.ObjectId.isValid(productId))
         {
             const product = await Product.findOne({_id :productId});
             if(product) return next()
@@ -227,7 +245,7 @@ exports.removeImgs = async(req, res, next) =>
 {
     try
     {
-        const product = await Product.findOne({_id : req.params.productId})
+        const product = await Product.findOne({_id : req?.params?.productId})
         
         let imgs = product ? "productsImgs/" + product.imgs : null;
         imgs ? 
@@ -239,7 +257,13 @@ exports.removeImgs = async(req, res, next) =>
                 })
         ) : null;
         
-        next();
+        if(!imgs)
+        {
+            let err = new Error('This product do not exist!');
+            err.statusCode = 400;
+            next(err);
+        }
+        else next();
 
     }catch(err){next(err)}
     
@@ -334,15 +358,15 @@ exports.addProductImgs = async(req, res, next) =>
                     let file =  path.join(img.destination,'productsImgs', img.filename)
                     let filePath = file, fileName = "productsImgs/" + img.filename, fileType = img.mimetype;
                     
-                    let result = await fileUpload.uploadFile(filePath, fileName, fileType);
+                    await fileUpload.uploadFile(filePath, fileName, fileType);
 
                     imgs.push(img.filename); 
                     fs.unlinkSync(path.join("public/images/", fileName))
                 
                 })
         );
-        const newProduct = await Product.findOne({title : req.title})
-        const existingProduct = await Product.findOne({_id: req.params.productId});
+        const newProduct = await Product.findOne({title : req?.title})
+        const existingProduct = await Product.findOne({_id: req?.params?.productId});
 
         !newProduct 
         ? existingProduct.imgs = imgs

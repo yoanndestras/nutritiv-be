@@ -1,13 +1,9 @@
 //SOCKET IO BACK-END CONFIGURATION
-const express = require("express"); // EXPRESS FRAMEWORK
 const jwt = require('jsonwebtoken');
-const Room = require("../models/Chat");
-const mongoose = require('mongoose');
-const ObjectId = mongoose.Types.ObjectId;
-const cron = require('node-cron');
+const appFunctions = require('../app');
 
-// CONTROLLERS
-const chat = require('../controllers/v1/chatController');
+// MODELS
+const Room = require("../models/Chat");
 
 exports.socketConnection = async(io) =>
 {   
@@ -24,7 +20,7 @@ exports.socketConnection = async(io) =>
                     console.log("token verification successful");
                     return next();
                 }
-                else
+                else 
                 {
                     let err = new Error('authentication_error')
                     err.data = { content : 'token error!' };
@@ -44,7 +40,7 @@ exports.socketConnection = async(io) =>
                 {
                     if(decoded?._id && !err)
                     {
-                        let userId = ObjectId(decoded._id);                       
+                        let userId = appFunctions.ObjectId(decoded._id);                       
                         const senderRooms = await Room.find({members: {$in: [userId]}},).sort({updatedAt:-1});
                         
                         if(senderRooms && senderRooms.length > 0)

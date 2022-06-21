@@ -5,25 +5,16 @@ const router = require("express").Router(),
 // CONTROLLERS
 const cors = require('../../controllers/v1/corsController');
 const auth = require('../../controllers/v1/authController');
-const {backupMongoDB} = require("../../utils/dbBackups") // CALL SOCKETIO
+const {backupMongoDB, restoreBackup} = require("../../utils/dbBackups") // CALL SOCKETIO
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
 
-router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, (req, res, next) => 
+router.post("/", cors.corsWithOptions, backupMongoDB, restoreBackup, async(req, res, next) => 
 {
   try 
   {
-    const DB_NAME = process.env.DB_NAME;
-        
-    const date = new Date();
-    const currentDay = new Date().toLocaleDateString('fr-FR').replace(/\//g,'-');
-    const currentHour = date.getHours() + '-' + date.getMinutes() + '-' + date.getSeconds();
-    
-    const ARCHIVE_PATH = path.join(__dirname, '../../public/dbBackups', `${currentDay}_${currentHour}_${DB_NAME}.gzip`);
-    backupMongoDB(DB_NAME, ARCHIVE_PATH);
-  
     res.status(200).json(
         {
           success: true,
@@ -32,27 +23,5 @@ router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth
       );
   }catch (err){next(err)}
 })
-
-// router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, (req, res, next) => 
-// {
-//   try 
-//   {
-//     const DB_NAME = process.env.DB_NAME;
-        
-//     const date = new Date();
-//     const currentDay = new Date().toLocaleDateString('fr-FR').replace(/\//g,'-');
-//     const currentHour = date.getHours() + '-' + date.getMinutes() + '-' + date.getSeconds();
-    
-//     const ARCHIVE_PATH = path.join(__dirname, '../../public/dbBackups', `${currentDay}_${currentHour}_${DB_NAME}.gzip`);
-//     backupMongoDB(DB_NAME, ARCHIVE_PATH);
-  
-//     res.status(200).json(
-//         {
-//           success: true,
-//           status: "Database backup correctly created"
-//         }
-//       );
-//   }catch (err){next(err)}
-// })
 
 module.exports = router;

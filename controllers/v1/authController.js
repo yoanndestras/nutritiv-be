@@ -894,7 +894,7 @@ exports.verifyCaptcha = async(req, res, next) =>
         }
         
         let secretKey = process.env.RECAPTCHA_KEY;
-        let verifyUrl = `https://www.google/recaptcha/api/siteverify?secret=${secretKey}&response=${req.body.captcha}`
+        let verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${req.body.captcha}`
     
         let response = await fetch(verifyUrl,{method : 'POST'});
         let body = await response.json();

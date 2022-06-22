@@ -339,7 +339,7 @@ auth.TFAValidation, async(req, res, next) =>
 })
 
 //LOGIN
-router.post("/login", cors.corsWithOptions, auth.login, async(req, res, next)=>
+router.post("/login", cors.corsWithOptions, auth.verifyCaptcha, auth.login, async(req, res, next)=>
 {
     try
     {

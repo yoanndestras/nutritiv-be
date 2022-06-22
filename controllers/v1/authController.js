@@ -1309,7 +1309,7 @@ exports.login = async(req, res, next) =>
                     }
                     else if(user.TFASecret)
                     {
-                        const twoFAToken = auth.GenerateTFAToken({_id: user._id});
+                        const twoFAToken = authenticate.GenerateTFAToken({_id: user._id});
 
                         res.header('twofa_token', twoFAToken)
                             .status(200).json(

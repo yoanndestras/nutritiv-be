@@ -13,7 +13,7 @@ const email_validator = require("email-validator");
 const { customAlphabet } = require('nanoid');
 const alphabet = '0123456789';
 const nanoid = customAlphabet(alphabet, 12);
-
+const fetch = require("node-fetch");
 require('dotenv').config();
 
 const passportJWT = require("passport-jwt");
@@ -881,6 +881,37 @@ exports.verifyNewPasswordSyntax = (req, res, next) =>
     err.statusCode = 400;
     next(err);
 };
+
+exports.verifyCaptcha = async(req, res, next) => 
+{
+    try
+    {
+        if(!req.body.captcha)
+        {
+            let err = new Error('Please select captcha');
+            err.statusCode = 400;
+            next(err);
+        }
+
+        let secretKey = process.env.RECAPTCHA_KEY;
+        let verifyUrl = `https://www.google/recaptcha/api/siteverify?secret=${secretKey}&response=${req.body.captcha}`
+    
+        let response = await fetch(verifyUrl,{method : 'POST'});
+        let body = await response.json();
+        
+        console.log(`body.score = `, body.score)
+        
+        if(!body.success || body.score < 0.5)
+        {
+            let err = new Error('Your might be a robot, you are banned!');
+            err.statusCode = 400;
+            next(err);
+        }
+        next();
+        
+    
+    }catch(err){next(err)}
+}
 
 // VERIFY EMAIL SENDING
 exports.verifyEmailToken = (req, res, next) => 

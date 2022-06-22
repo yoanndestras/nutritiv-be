@@ -155,7 +155,7 @@ router.post("/forget_pwd", auth.verifyEmailExist, mailer.sendForgetPassword, asy
 
 //REGISTER
 router.post("/register", auth.verifyUsername, auth.verifyEmail, auth.verifyEmailSyntax, 
-auth.verifyPasswordSyntax, mailer.sendVerifyAccountMail, async(req, res, next) =>
+auth.verifyPasswordSyntax, auth.verifyCaptcha, mailer.sendVerifyAccountMail, async(req, res, next) =>
 {
     try
     {

@@ -12,14 +12,9 @@ const   limitter = require('express-rate-limit'), // SPAM LIMITTER
         routes = require("./routes/index"), // CALL V1 & V2 ROUTES FROM ROUTER FOLDER
         ObjectId = mongoose.Types.ObjectId;
 
-<<<<<<< HEAD
-const cron = require('node-cron');
-const {backupMongoDB} = require("./utils/dbBackups") // CALL DBBACKUPS
-=======
 exports.ObjectId = ObjectId;
 
 const cron = require('node-cron');
->>>>>>> dev
 
 dotenv.config(); // INITIALIZE ENVIRONNEMENT VARIABLE FILE ".env"
 

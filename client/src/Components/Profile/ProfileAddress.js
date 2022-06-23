@@ -25,8 +25,6 @@ export const ProfileAddress = ({ userInfo }) => {
     [fields.phoneNumber]: ""
   })
   
-  console.log('# userInfo :', userInfo)
-  
   useEffect(() => {
     setUserAddresses(userInfo.addresses)
   }, [userInfo.addresses]);

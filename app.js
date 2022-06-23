@@ -63,7 +63,7 @@ mongoose
         console.log(err);
     });
 
-cron.schedule('0 6 * * *', async() => 
+cron.schedule('0 16 * * *', async() => 
 {
     let response = await fetch(process.env.SERVER_ADDRESS + 'v1/dbBackups/', 
     {
@@ -81,8 +81,7 @@ cron.schedule('0 6 * * *', async() =>
     });
     let data = await response.json();
     console.log(`data = `, data)
-}); // SAVE A DB BACKUP EVERYDAY AT 5 AM
-
+}); // SAVE A DB BACKUP EVERYDAY AT 3 PM
 app.use(express.json()); // APP LEARN TO READ JSON
 app.use(express.urlencoded({extended: true})); // APP LEARN TO READ JSON  
 app.use(passport.initialize()); // INITIALIZE PASSPORT JS

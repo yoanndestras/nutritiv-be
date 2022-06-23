@@ -19,13 +19,11 @@ export const Chat = () => {
   
   const [allUsers, setAllUsers] = useState(null)
   
-  const [socketError, setSocketError] = useState(false)
+  const [socketError, setSocketError] = useState("")
   
   // CHATS INFO
   const [chatsInfos, setChatsInfos] = useState([])
   const [activeChatId, setActiveChatId] = useState(null)
-  
-  console.log('# chatsInfos :', chatsInfos)
   
   // CHATS CONTENT
   const [chat, setChat] = useState(null)
@@ -50,11 +48,11 @@ export const Chat = () => {
   // CONNECTIONS TO CHANNELS
   useEffect(() => {
     socket.on('connect', () => {
-      console.log("Connected to socket-io")
+      console.log("socket-io | connected")
     })
     // MESSAGE
     socket.on("chatting", ({ id, text, sender, roomId }) => {
-      console.log('# socket io res :', id, text, sender, roomId)
+      console.log('# socket-io | chatting res :', id, text, sender, roomId)
       setMessageToAdd({ id, text, sender, roomId })
     });
     // CREATE ROOM
@@ -63,19 +61,19 @@ export const Chat = () => {
     })
     // AUTH ERROR
     socket.on("connect_error", err => {
+      console.log('socket-io | connection error .:')
       console.log(err);
-      console.log('connect_error')
-      setSocketError({error: "connect_error"})
+      setSocketError(err.message)
     });
     // OTHER ERROR
     socket.on("error", err => {
-      console.log('error')
+      console.log('socket-io | error .:')
       console.log(err);
-      setSocketError({error: "error"})
+      setSocketError(err.message)
     });
     return () => {
       socket.on('disconnect', () => {
-        console.log("disconnected from socket-io")
+        console.log("socket-io | disconnected")
       })
     }
   }, []);
@@ -185,10 +183,11 @@ export const Chat = () => {
       "messages": [
         ...chat.messages,
         {
-          "id": tempMessageId,
-          "text": messageToBeSent,
-          "sender": userId,
-          "loading": true
+          id: tempMessageId,
+          text: messageToBeSent,
+          sender: userId,
+          loading: true,
+          error: false,
         }
       ]
     })
@@ -205,13 +204,29 @@ export const Chat = () => {
         ...chat,
         "messages": [
           ...chat.messages,
-          {...data, loading: false}
+          {
+            ...data, 
+            loading: false
+          }
         ]
       })
       const { text, id } = data;
       let roomId = activeChatId;
       socket.emit('chatting', {text, id, token, roomId})
     } catch(err) {
+      setChat({
+        ...chat,
+        "messages": [
+          ...chat.messages,
+          {
+            id: tempMessageId,
+            text: messageToBeSent,
+            sender: userId,
+            loading: false,
+            error: true,
+          }
+        ]
+      })
       console.error('/chats/message/ :', err)
     }
   }
@@ -244,14 +259,19 @@ export const Chat = () => {
         <React.Fragment key={chatInfo._id}>
           <br />
           {isAdmin && (
-            <button id={chatInfo._id} onClick={handleDeleteChat}>X</button>
+            <button 
+              id={chatInfo._id} 
+              onClick={handleDeleteChat}
+            >
+              X
+            </button>
           )}
           <button
             id={chatInfo._id} 
             onClick={handleActiveChat}
             style={chatInfo._id === activeChatId ? {color: "grey"} : undefined}
           >
-            {chatInfo._id}
+            {chatInfo.name}
           </button>
           {chatInfo._id === activeChatId && (
             <span role="img" aria-label='active' >
@@ -295,9 +315,15 @@ export const Chat = () => {
                             🕘
                           </span>
                         ) : (
-                          <span role="status" aria-label='sent'>
-                            ✔️
-                          </span>
+                          message.error ? (
+                            <span role="status" aria-label='sent'>
+                              ❌
+                            </span>
+                          ) : (
+                            <span role="status" aria-label='sent'>
+                              ✔️
+                            </span>
+                          )
                         )}
                         {message.text}
                       </p>

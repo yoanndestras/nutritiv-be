@@ -1,6 +1,8 @@
-import React from 'react'
+import React from 'react';
+import { Canvas } from '@react-three/fiber';
 import { useSelector } from 'react-redux';
 import styles from './Homepage.module.scss';
+import { Scene } from '../3D/Scene';
 
 const releases = [
   {
@@ -39,10 +41,8 @@ const releases = [
   },
 ]
 
-export const Welcome = () => {
-  
+export const Homepage = () => {
   const loggedIn = useSelector(state => state.user.loggedIn)
-  
   const pageAnimation = {
     exit: {
       opacity: 0,
@@ -103,6 +103,19 @@ export const Welcome = () => {
           </span>
         </h1>
       </div>
+      
+      {/* THREE JS TESTING */}
+      <div style={{
+          background: "transparent", 
+          height: "500px", 
+          width: "500px"
+      }}>
+        <Canvas shadows>
+          <Scene />
+        </Canvas>
+      </div>
+      
+      {/* ---------------- */}
       {
         !loggedIn && (
           <div>

@@ -971,6 +971,7 @@ exports.userVerification = async(req, res, next) =>
                 })
     }catch(err){next(err)}
 }
+
 exports.verifyNewEmail = (req, res, next) =>
 {
     User.findOne({email: req.body.email}, (err, user) =>

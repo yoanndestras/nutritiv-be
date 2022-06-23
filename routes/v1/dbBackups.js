@@ -10,12 +10,8 @@ const {backupMongoDB, restoreBackup} = require("../../utils/dbBackups") // CALL 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
-<<<<<<< HEAD
-router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyAdmin, (req, res, next) => 
-=======
 
 router.post("/", cors.corsWithOptions, backupMongoDB, restoreBackup, async(req, res, next) => 
->>>>>>> dev
 {
   try 
   {

@@ -1,54 +1,23 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import nutritivApi from '../../Api/nutritivApi'
 import { updateUser } from '../../Redux/reducers/user'
-import QRCodeStyling from "qr-code-styling";
-
-const qrCode = new QRCodeStyling({
-  width: 240,
-  height: 240,
-  type: "png",
-  image: "https://nutritiv.s3.eu-west-3.amazonaws.com/productsImgs/H9qPM60.png",
-  qrOptions: {
-    errorCorrectionLevel: "M"
-  },
-  imageOptions: {
-    imageSize: 1,
-    crossOrigin: "anonymous",
-    margin: 6
-  },
-  dotsOptions: {
-    color: "#024b11",
-    type: "rounded"
-  },
-  backgroundOptions: {
-    color: "#fff"
-  },
-  cornersSquareOptions: {
-    color: "#329a19",
-    type: "square"
-  }
-});
+import { QrCodeTFA } from '../Authentication/QrCodeTFA';
 
 const initialInputTFA = {
   code: "",
   password: ""
 }
 
-export const ProfileTFA = ({ userInfo }) => {
+export const ProfileTFA = () => {
   const dispatch = useDispatch();
+  const userInfo = useSelector(state => state.user)
   const [TFAStatus, setTFAStatus] = useState("disabled")
   const [qrCodeUrl, setQrCodeUrl] = useState(null)
+  const [qrCodeSecret, setQrCodeSecret] = useState(null)
   const [inputTFA, setInputTFA] = useState(initialInputTFA)
   
-  const ref = useRef(null);
-  
-  useEffect(() => {
-    qrCode.append(ref.current);
-    qrCode.update({
-      data: qrCodeUrl
-    });
-  }, [qrCodeUrl]);
+  const [error, setError] = useState("")
   
   // Check TFA status
   useEffect(() => {
@@ -62,37 +31,12 @@ export const ProfileTFA = ({ userInfo }) => {
       const { data } = await nutritivApi.post(
         `/auth/TFASecret`,
       )
-      setQrCodeUrl(data)
+      setQrCodeUrl(data.qrCodeUrl)
+      setQrCodeSecret(data.qrCodeSecret)
       console.log('# post /auth/TFASecret :', data)
     } catch(err) {
+      setError(err.response?.data?.err)
       console.error('/auth/TFASecret:', err)
-    }
-  }
-  
-  // Enable TFA
-  const handleSubmitEnableTFA = async (e) => {
-    e.preventDefault();
-    const newTwoFaToken = localStorage.getItem('new_twofa_token')
-    try {
-      await nutritivApi.post(
-        `/auth/enableTFA`,
-        {
-          code: inputTFA.code,
-          password: inputTFA.password,
-        },
-        {
-          headers: {
-            new_twofa_token: newTwoFaToken
-          }
-        }
-      )
-      setInputTFA(initialInputTFA)
-      setTFAStatus("enabled")
-      dispatch(
-        updateUser({hasTFA: true})
-      )
-    } catch(err) {
-      console.error(':', err)
     }
   }
   
@@ -115,6 +59,7 @@ export const ProfileTFA = ({ userInfo }) => {
       setInputTFA(initialInputTFA)
       console.log('# post /auth/disableTFA :', data)
     } catch(err) {
+      setError(err.response?.data?.err)
       console.error('/auth/disableTFA:', err)
     }
   }
@@ -125,13 +70,11 @@ export const ProfileTFA = ({ userInfo }) => {
       [e.target.name]: e.target.value
     })
   }
-  
-  console.log('# QRcode :', qrCodeUrl)
 
   return (
     <div>
       <h3>
-        2 Factor Authentication (TFA)
+        2 Factor Authentication (Google Authenticator)
       </h3>
       { 
         TFAStatus === "enabled" ? (
@@ -161,37 +104,12 @@ export const ProfileTFA = ({ userInfo }) => {
             </form>
           </>
         ) : (
-          qrCodeUrl ? (
-            <>
-              {/* <img 
-                src={qrCode}
-                alt="QR code"
-              /> */}
-              <div ref={ref} />
-              <p>
-                Scan the QRCode with TFA Google Authenticator and enter the code below:
-              </p>
-              <form onSubmit={handleSubmitEnableTFA}>
-                <input
-                  name="code" 
-                  onChange={handleChange}
-                  value={inputTFA.code}
-                  placeholder='TFA Code' 
-                  type="text"
-                />
-                <input 
-                  name="password" 
-                  onChange={handleChange}
-                  value={inputTFA.password}
-                  placeholder='Current password' 
-                  type="password" 
-                />
-                <input 
-                  value="Enable TFA !" 
-                  type="submit" 
-                />
-              </form>
-            </>
+          qrCodeUrl && qrCodeSecret ? (
+            <QrCodeTFA 
+              qrCodeUrl={qrCodeUrl}
+              qrCodeSecret={qrCodeSecret}
+              setTFAStatus={setTFAStatus}
+            />
           ) : (
             <>
               <p style={{color: "orange"}}>
@@ -203,6 +121,9 @@ export const ProfileTFA = ({ userInfo }) => {
             </>
           )
         )
+      }
+      {
+        error && <p style={{ color: "red" }}>{error}</p>
       }
     </div>
   )

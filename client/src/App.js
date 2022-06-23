@@ -13,11 +13,14 @@ import { CheckoutSuccess } from './Components/Payment/CheckoutSuccess';
 import { CheckoutCancel } from './Components/Payment/CheckoutCancel';
 import { ProductPage } from './Components/Products/ProductPage';
 import { Cart } from './Components/Payment/Cart';
-import { Welcome } from './Components/Homepage/Homepage';
+import { Homepage } from './Components/Homepage/Homepage';
 import { PageNotFound } from './Components/PageNotFound/PageNotFound';
 import { ChatConnection } from './Components/Chat/ChatConnection';
 import { AnimatePresence } from 'framer-motion';
 import Navbar from './Components/Navbar/Navbar';
+import { ForgotPassword } from './Components/Authentication/ForgotPassword';
+import { ForgotTFA } from './Components/Authentication/ForgotTFA';
+import { ResetPassword } from './Components/Authentication/ResetPassword';
 
 // init stripe
 const stripePromise = loadStripe(
@@ -31,20 +34,29 @@ function App() {
   const location = useLocation();
   const navigate = useNavigate();
   
-  console.log('# location.state :', location.state)
-  
   const [searchParams] = useSearchParams();
   const oAuthStatus = searchParams.get('status');
   const oAuthMessage = searchParams.get('message');
   const oAuthUsername = searchParams.get('username')
   const oAuthAccessToken = searchParams.get('accessToken');
-  // const oAuthStatusCode = searchParams.get('statusCode');
+  
+  // App titles
+  useEffect(() => {
+    const titleWithoutSpecials = location.pathname.replace(/[^a-zA-Z ]/g, "");
+    if(titleWithoutSpecials){
+      const fixedTitle = titleWithoutSpecials[0].toUpperCase() + titleWithoutSpecials.substring(1);
+      document.title = `Nutritiv | ${fixedTitle}`
+    } else {
+      document.title = "Nutritiv | Homepage"
+    }
+  }, [location.pathname]);
   
   // ON LOAD
   // Fetch user-self info
   useEffect(() => {
-    let isSubscribed = true;
 
+    let isSubscribed = true;
+    
     if(isSubscribed) {
       const method = "get"
       const requestsUrl = ['/users/self', '/carts/self']
@@ -79,7 +91,7 @@ function App() {
     return () => { isSubscribed = false }
   }, [dispatch, gettingUserInfo]);
   
-  // Validate oAuth
+  // oAuth
   useEffect(() => {
     if(
       oAuthStatus === "successLogin" ||
@@ -120,19 +132,18 @@ function App() {
   ]);
   
   // RESTRICTED ROUTES
-  const Restricted = ({ type }) => {
+  const Restricted = ({ routeType }) => {
     const cartSelection = location.state?.cartSelection;
-    console.log('# APP.JS - cartSelection :', cartSelection)
     const isLogged = () => {
       console.log('# loggedIn :', loggedIn)
       return loggedIn;
     }
     if(loggedIn !== null) {
-      if(type === "guest") {
+      if(routeType === "guest") {
         if(isLogged()){
           if(location.state?.from) {
-            return <Navigate 
-              replace 
+            return <Navigate
+              replace
               to={location.state.from}
               state={{cartSelection: cartSelection}}
             />
@@ -142,9 +153,9 @@ function App() {
         } else {
           return <Outlet />;
         }
-      } else if(type === "user") {
+      } else if(routeType === "user") {
         return isLogged() ? (
-          <Outlet /> 
+          <Outlet />
         ) : <Navigate replace to="/" />;
       }
     } else {
@@ -161,9 +172,10 @@ function App() {
       <AnimatePresence exitBeforeEnter>
         <Routes location={location} key={location.pathname}>
           {/* PUBLIC */}
-          {/* <Route path="*" element={<Navigate replace to="/page-not-found"/>} /> */}
           {/* <Route path="/" element={<GeneralLayout/>}> */}
-            <Route index element={<Welcome/>} />
+            {/* <Route index element={<Welcome/>} /> */}
+            <Route path="/" element={<Navigate replace to="/welcome"/>} />
+            <Route path="/welcome" element={<Homepage/>} />
             <Route path="/products" element={<Products/>} />
             <Route path="/product">
               <Route path=":productTitle" element={<ProductPage/>} />
@@ -174,14 +186,17 @@ function App() {
             <Route path="/page-not-found" element={<PageNotFound/>} />
             {/* PRIVATE */}
             {/* RESTRICTED - USER */}
-            <Route element={<Restricted type="user" />}>
+            <Route element={<Restricted routeType="user" />}>
               <Route path="/profile" element={<Profile/>} />
               <Route path="/cart" element={<Cart/>} />
             </Route>
             {/* RESTRICTED - GUEST */}
-            <Route element={<Restricted type="guest" />}>
-              <Route path="login" element={<Login/>} />
-              <Route path="register" element={<Register/>} />
+            <Route element={<Restricted routeType="guest" />}>
+              <Route path="/login" element={<Login/>} />
+              <Route path="/register" element={<Register/>} />
+              <Route path="/forgot-password" element={<ForgotPassword/>} />
+              <Route path="/reset-password" element={<ResetPassword/>} />
+              <Route path="/forgot-2FA" element={<ForgotTFA/>} />
             </Route>
           {/* </Route> */}
         </Routes>

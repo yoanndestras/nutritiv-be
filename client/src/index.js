@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import App from './App';
 
 import { createStore } from '@reduxjs/toolkit';
@@ -11,7 +11,7 @@ import { injectStore } from './Api/nutritivApi';
 export const store = createStore(
   entities,
   /* preloadedState, */
-  window.__REDUX_DEVTOOLS_EXTENSION__ && 
+  window.__REDUX_DEVTOOLS_EXTENSION__ &&
   window.__REDUX_DEVTOOLS_EXTENSION__({
     trace: true
   })
@@ -20,13 +20,15 @@ export const store = createStore(
 // INJECT STORE TO USE IT IN AXIOS INTERCEPTORS
 injectStore(store);
 
-ReactDOM.render(
-  <React.StrictMode>
+const container = document.getElementById('root');
+const root = createRoot(container);
+root.render(
+  // StrictMode causing bugs in React v18
+  // <React.StrictMode>
     <Provider store={store}>
       <BrowserRouter>
         <App />
       </BrowserRouter>
     </Provider>
-  </React.StrictMode>,
-  document.getElementById('root')
+  // </React.StrictMode>,
 );

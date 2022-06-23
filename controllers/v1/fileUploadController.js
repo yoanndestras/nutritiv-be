@@ -47,6 +47,18 @@ exports.getFileStream = (fileKey) =>
     Key: fileKey,
     Bucket: bucketName
   }
-
+  
   return s3.getObject(downloadParams).createReadStream()
 }
+
+// exports.getGZIPFileStream = (fileKey) =>
+// {
+//   const downloadParams = 
+//   {
+//     Key: fileKey,
+//     Bucket: bucketName
+//   }
+  
+//   let fileObj = s3.getObject(downloadParams).createReadStream();
+
+// }

@@ -5,13 +5,21 @@ const   limitter = require('express-rate-limit'), // SPAM LIMITTER
         cookieParser = require("cookie-parser"), //COOKIES
         passport = require('passport'), // PASSPORT FOR AUTH
         dotenv = require("dotenv"), // ENV FILES
+        fetch = require("node-fetch"),
         path = require('path'), // ACCESS TO FOLDERS PATHS
         cors = require('cors'), // CORS POLICY
         {socketConnection} = require("./utils/socketIo"), // CALL SOCKETIO
-        routes = require("./routes/index") // CALL V1 & V2 ROUTES FROM ROUTER FOLDER
+        routes = require("./routes/index"), // CALL V1 & V2 ROUTES FROM ROUTER FOLDER
+        ObjectId = mongoose.Types.ObjectId;
 
+<<<<<<< HEAD
 const cron = require('node-cron');
 const {backupMongoDB} = require("./utils/dbBackups") // CALL DBBACKUPS
+=======
+exports.ObjectId = ObjectId;
+
+const cron = require('node-cron');
+>>>>>>> dev
 
 dotenv.config(); // INITIALIZE ENVIRONNEMENT VARIABLE FILE ".env"
 
@@ -51,34 +59,52 @@ socketConnection(io);
 // DATABASE ACCESS
 mongoose
     .connect(process.env.MONGO_URL)
-    .then(() => console.log("Connected to MongoDB"))
+    .then(async () => 
+    {
+        console.log("Connected to MongoDB")
+    })
     .catch((err)=>
     {
         console.log(err);
     });
 
-const DB_NAME = process.env.DB_NAME;
-const currentDay = new Date().toLocaleDateString('pt-PT').replace(/\//g,'-');
-const ARCHIVE_PATH = path.join(__dirname, 'public/dbBackups', `${currentDay}_${DB_NAME}.gzip`);
-cron.schedule('0 6 * * *', () => backupMongoDB(DB_NAME, ARCHIVE_PATH)); // SAVE A DB BACKUP EVERYDAY AT 5 AM
+cron.schedule('0 6 * * *', async() => 
+{
+    let response = await fetch(process.env.SERVER_ADDRESS + 'v1/dbBackups/', 
+    {
+        method: 'POST',
+        body: JSON.stringify({
+            dbName : process.env.DB_NAME,
+            dbUser : process.env.DB_USER,
+            dbPassword : process.env.DB_PASSWORD
+        }),
+        headers: 
+        {
+            "Origin": process.env.SERVER_ADDRESS,
+            "Content-type": "application/json; charset=UTF-8"
+        },
+    });
+    let data = await response.json();
+    console.log(`data = `, data)
+}); // SAVE A DB BACKUP EVERYDAY AT 5 AM
 
 app.use(express.json()); // APP LEARN TO READ JSON
 app.use(express.urlencoded({extended: true})); // APP LEARN TO READ JSON  
 app.use(passport.initialize()); // INITIALIZE PASSPORT JS
 app.use(cookieParser()); // INITIALIZE COOKIES
 app.use(cors()); // INITIALIZE CORS  "app.options('*', cors());"
-app.use(routes); // CALL V1 & V2 ROUTES FROM ROUTER FOLDER
 app.use( 
     limitter(
         {
             windowMs: 5000,
-            max: 10,
+            max: 5,
             message: {
                 code: 429,
                 message: "Too many requests"
             }
         })
     ) // LIMIT SPAM REQUESTS TO MAX PER MILLISECONDS
+app.use(routes); // CALL V1 & V2 ROUTES FROM ROUTER FOLDER
 app.use(express.static(path.join(__dirname, 'public'))); // USE STATIC FILES ON PUBLIC FOLDER
 app.use(express.static(path.join(__dirname, "/client/build"))); // STATIC FILES FOR FRONT-END APP
 app.get("*", (req, res) =>{res.sendFile(path.join(__dirname, "/client/build", "index.html"))});

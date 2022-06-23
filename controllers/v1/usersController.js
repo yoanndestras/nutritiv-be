@@ -2,7 +2,7 @@ const express = require('express');
 const User = require("../../models/User");
 const Chat = require('../../models/Chat')
 
-const mongoose = require('mongoose');
+const appFunctions = require('../../app');
 const fs = require('fs');
 const sharp = require('sharp');
 const path = require('path');
@@ -163,7 +163,7 @@ exports.updateAddress = async(req, res, next) =>
       {
         arrayFilters: [
         {
-            'inner._id': mongoose.Types.ObjectId(req.adressId)
+            'inner._id': appFunctions.ObjectId(req.adressId)
         }
         ]
       },
@@ -184,7 +184,7 @@ exports.deleteAddress = async(req, res, next) =>
       {
         $pull:
         {
-          "addressDetails": {_id : mongoose.Types.ObjectId(req.adressId)}
+          "addressDetails": {_id : appFunctions.ObjectId(req.adressId)}
         },
       },
     );

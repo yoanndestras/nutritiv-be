@@ -1,7 +1,6 @@
 const Order = require("../../models/Order");
 const Cart = require("../../models/Cart");
 const router = require("express").Router();
-const mongoose = require('mongoose');
 
 // CONTROLLERS
 const cors = require('../../controllers/v1/corsController');

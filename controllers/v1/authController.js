@@ -13,7 +13,7 @@ const email_validator = require("email-validator");
 const { customAlphabet } = require('nanoid');
 const alphabet = '0123456789';
 const nanoid = customAlphabet(alphabet, 12);
-
+const fetch = require("node-fetch");
 require('dotenv').config();
 
 const passportJWT = require("passport-jwt");
@@ -109,7 +109,7 @@ exports.RFJwtPassport = passport.use("jwt_rt", new JwtStrategy(opts_ref, (jwtPay
 const Email_token = function(req) 
 {
     let token = null;
-    if (req && req.query) token = req.query.token;
+    if (req && req.query) token = req.query?.token;
     return token;
 };
 
@@ -119,8 +119,8 @@ opts_email.secretOrKey = process.env.JWT_EMAIL;
 
 exports.jwtPassport = passport.use("email_jwt", new JwtStrategy(opts_email, (jwtPayload, done) =>
 {
-    User.findOne({email: jwtPayload.email}, (err, user) =>
-        {                
+    User.findOne({email: jwtPayload.email, provider: "local", updatedAt: new Date(jwtPayload.updatedAt)}, (err, user) =>
+        {                       
             if(err)
             {
                 return done(err, false);
@@ -178,7 +178,7 @@ exports.NewTwoFAjwtPassport = passport.use("new_tfa_jwt", new JwtStrategy(opts_n
             }
             else
             {
-                return done(null, false, null);
+                return done(null, false, TFASecret);
             }
         })
 }));
@@ -508,15 +508,29 @@ exports.verifyUserNewTFA = async(req, res, next) =>
 {
     passport.authenticate("new_tfa_jwt", { session: false }, (err, user, TFASecret) => 
     {
-        if(err)
+        
+        if(err || !user)
         {
-            return next(err);
-        }
-        else if (!user) 
-        {               
-            let err = new Error('You are not authorized to perform this operation!');
-            err.statusCode = 401;
-            return next(err);
+            passport.authenticate('jwt', { session: false }, (err, user, info) => 
+            {
+                if (err || !user) 
+                {               
+                    req.statusCode = 401;
+                    req.user = "error";
+                    return next();
+                }
+                else if (user.isVerified === false)
+                {
+                    let err = new Error('You account has not been verified. Please check your email to verify your account');
+                    err.statusCode = 401;
+                    return next(err);
+                }
+                else
+                {
+                    req.user = user;
+                    return next();
+                }
+            })(req, res, next); 
         }
         else if (user.isVerified === false)
         {
@@ -530,6 +544,8 @@ exports.verifyUserNewTFA = async(req, res, next) =>
             req.TFASecret = TFASecret;
             return next();
         }
+        
+        
     })(req, res, next); 
 }
 
@@ -730,7 +746,7 @@ exports.GenerateNewTFAToken = function(_id, TFASecret)
     (
         {_id, TFASecret},  
         process.env.NEW_TFA_TOKEN, 
-        {expiresIn: "1800s"} // expires in 2 minutes
+        {expiresIn: "3600s"} // expires in 30 minutes
     );
 };
 
@@ -744,11 +760,11 @@ exports.GenerateRefreshToken = function(user)
     );
 };
 
-exports.GenerateEmailToken = function(user) 
+exports.GenerateEmailToken = function(email, updatedAt) 
 {
     return jwt.sign
     (
-        user, 
+        {email, updatedAt}, 
         process.env.JWT_EMAIL,
         {expiresIn: "1d"} // expires in 1 days
     );
@@ -793,7 +809,6 @@ exports.verifyPasswordSyntax = (req, res, next) =>
 exports.verifyUsername = (req, res, next) =>
 {
     const format = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
-    console.log(format.test(req.body.username));
     if(!format.test(req.body.username))
     {
         User.findOne({username: req.body.username}, (err, user) =>
@@ -849,7 +864,6 @@ exports.verifyNewPasswordEquality = (req, res, next) =>
     }
     else
     {
-        console.log("Im here password syntax");
         next();
     }
 };
@@ -869,8 +883,65 @@ exports.verifyNewPasswordSyntax = (req, res, next) =>
     next(err);
 };
 
+exports.verifyCaptcha = async(req, res, next) => 
+{
+    try
+    {
+        if(!req.body.captcha)
+        {
+            let err = new Error('Please select captcha');
+            err.statusCode = 400;
+            next(err);
+        }
+        
+        let secretKey = process.env.RECAPTCHA_KEY;
+        let verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${req.body.captcha}`
+    
+        let response = await fetch(verifyUrl,{method : 'POST'});
+        let body = await response.json();
+        
+        console.log(`body.score = `, body.score)
+        
+        if(!body.success || body.score < 0.5)
+        {
+            let err = new Error('Your might be a robot, you are banned!');
+            err.statusCode = 400;
+            next(err);
+        }
+        next();
+        
+    
+    }catch(err){next(err)}
+}
+
 // VERIFY EMAIL SENDING
 exports.verifyEmailToken = (req, res, next) => 
+{
+    passport.authenticate('email_jwt', { session: false }, (err, user, info) => 
+    {
+        if (err || !user) 
+        {   
+            // let err = new Error('TOKEN EXPIRED OR CORRUPTED');
+            // err.statusCode = 403;
+            // return next(err);
+
+            return res.redirect(process.env.SERVER_ADDRESS + 
+                'reset-password/'+
+                '?status=pwdFailed' 
+                // '&message=forgetPasswordURLVerified'+
+                // '&statusCode=200'
+                )
+        }
+        else
+        {
+            req.user = user;
+            return next();
+        }
+    })(req, res, next); 
+};
+
+// VERIFY EMAIL SENDING
+exports.verifyNewUserEmail = (req, res, next) => 
 {
     passport.authenticate('email_jwt', { session: false }, (err, user, info) => 
     {
@@ -906,6 +977,7 @@ exports.verifyNewEmail = (req, res, next) =>
         {
             if(user !== null && user.isVerified !== true)
             {
+                req.user = user;
                 return next();
             }
             else if(user.isVerified)
@@ -927,22 +999,340 @@ exports.verifyEmailExist = async(req, res, next) =>
 {
     try
     {
-        await User.findOne({email: req.body?.email}, (err, user) =>
-            {
-                if(user !== null)
-                {
-                    req.user = user;
-                    return next();
-                }
-                else
-                {
-                    err.statusCode = 400;
-                    return next(err);
-                }
-            })
+        const user = await User.findOne({email: req.body?.email, provider : "local"})
+
+            
+        if(user)
+        {
+            req.user = user;
+            next();
+        }
+        else
+        {
+            let err = new Error('This email do not refer to a registered account!')
+            err.statusCode = 400;
+            next(err);
+        }
+
     }catch(err){next(err)}
 };
 
+exports.createTFARecovery = async(req, res, next) =>
+{
+    if(req.user.TFASecret && req.user.TFARecovery)
+        {
+            const TFARecoveryInitial = req.user.TFARecovery;
+            const TFARecoveryEntered = req.body.TFARecovery;
+            
+            if(JSON.stringify(TFARecoveryInitial) == JSON.stringify(TFARecoveryEntered))
+            {
+                const TFASecret = req.user.TFASecret;
+                const otpAuthURL = `otpauth://totp/Nutritiv(${req.user.username})?secret=${TFASecret}`
+                const twoFAToken = authenticate.GenerateNewTFAToken(req.user._id, TFASecret);
+                
+                req.twoFAToken = twoFAToken;
+                req.otpAuthURL = otpAuthURL;
+                req.TFASecret = TFASecret;
+                next();
+            }
+            else
+            {
+                res.status(401).json(
+                    {
+                        success: false,
+                        status: "Your recovery sentence is false!"
+                    })
+            }
+        }
+        else
+        {
+            res.status(400).json(
+                {
+                    success: false,
+                    status: "Your account do not have TFA enabled!"
+                })
+        }
+}
+
+exports.createTFASecret = async(req, res, next) =>
+{
+    try
+    {
+        if(!req.user.TFASecret)
+        {
+            const TFASecret = speakeasy.generateSecret(
+                {
+                    name: `Nutritiv(${req.user.username})`,
+                    length: 10
+                })
+            
+            const TFASecretBase32 = TFASecret.base32;
+            const twoFAToken = authenticate.GenerateNewTFAToken(req.user._id, TFASecretBase32);
+            const otpAuthURL = TFASecret.otpauth_url;
+            
+            req.twoFAToken = twoFAToken;
+            req.otpAuthURL = otpAuthURL;
+            req.TFASecretBase32 = TFASecretBase32;
+            next();
+        }
+        else
+        {
+            res.status(400).json(
+                {
+                    success: false,
+                    status: "Your account already have TFA enabled!"
+                })
+        }
+    }catch(err){next(err)}
+}
+
+exports.disableTFA = async(req, res, next) =>
+{
+    try
+    {
+        let user = req.user, password = req.body.password;
+        if(user.TFASecret)
+        {
+            user.authenticate(password, async (err, user) => 
+                {
+                    if(err)
+                    {
+                        err.statusCode = 400;
+                        next(err);
+                    }
+                    else if(!user)
+                    {
+                        let err = new Error('Password is incorrect!');
+                        err.statusCode = 400;
+                        next(err);
+                    }
+                    else
+                    {                        
+                        const TFASecret = user.TFASecret.toString();
+                        const token = req.body.code;
+                        
+                        const valid = speakeasy.totp.verify(
+                            {
+                                secret: TFASecret,
+                                encoding: 'base32',
+                                token: token,
+                                window: 0
+                            });
+                            
+                            if(valid === true)
+                            {
+                                const user = await User.findOneAndUpdate({_id: req.user._id},
+                                    {
+                                        $unset: {"TFASecret": "", "TFARecovery": ""}
+                                    });
+                                await user.save();
+                                next();
+                            }
+                            else
+                            {
+                                let err = new Error('The code is invalid or expired!');
+                                err.statusCode = 401;
+                                return next(err);
+                            }
+                    }
+                })
+        }
+        else
+        {
+            res.status(400).json(
+                {
+                    success: true,
+                    status: "Your account do not have enable TFA"
+                })
+        }
+    }catch(err){next(err)}
+}
+
+exports.enableTFA = async(req, res, next) =>
+{
+    try
+    {
+        let user = req.user, password = req.body.password;
+        
+        // if(!user.TFASecret)
+        // {
+            user.authenticate(password, async (err, user) => 
+                {
+                    if(err)
+                    {
+                        err.statusCode = 400;
+                        next(err);
+                    }
+                    else if(!user)
+                    {
+                        let err = new Error('Password is incorrect!');
+                        err.statusCode = 400;
+                        next(err);
+                    }
+                    else
+                    {
+
+                        const TFASecret = req.TFASecret.toString();
+                        const token = req.body.code;
+                        const valid = speakeasy.totp.verify(
+                            {
+                                secret: TFASecret,
+                                encoding: 'base32',
+                                token: token,
+                                window: 0
+                            });
+                            
+                            if(valid === true)
+                            {
+                                let TFARecovery = [];
+        
+                                for(let i = 0; i < 12; i++){TFARecovery.push(randomWords())}
+                                                                
+                                const user = await User.findOneAndUpdate({_id: req.user._id},
+                                    {
+                                        $set:
+                                        {
+                                            "TFASecret": TFASecret,
+                                            "TFARecovery": TFARecovery
+                                        }
+                                    })
+                                await user.save();
+
+                                next();
+                            }
+                            else
+                            {
+                                let err = new Error('The code is invalid or expired!');
+                                err.statusCode = 401;
+                                return next(err);
+                            }
+                    }
+                })
+        // }
+        // else
+        // {
+        //     res.status(400).json(
+        //         {
+        //             success: true,
+        //             status: "Your account already have enabled TFA!"
+        //         })
+        // }
+    }catch(err){next(err)}
+}
+
+exports.TFAValidation = async(req, res, next) =>
+{
+    try
+    {
+        const user = await User.findOne({_id: req.user._id});
+
+        const TFASecret = user.TFASecret.toString();
+        const token = req.body.code;
+        
+        const valid = speakeasy.totp.verify(
+            {
+                secret: TFASecret,
+                encoding: 'base32',
+                token: token,
+                window: 0
+            }
+        )
+
+        if(valid === true)
+        {
+            req.login(user, { session: false }, async(err) => 
+            {
+                if(err)
+                {
+                    res.status(400).json(
+                        {
+                            success: false, 
+                            status: 'Login Unsuccessful!', 
+                            err: err
+                        });
+                }
+                else
+                {
+                    const accessToken = authenticate.GenerateAccessToken({_id: req.user._id});
+                    const refreshToken = authenticate.GenerateRefreshToken({_id: req.user._id});
+                    
+                    req.accessToken = accessToken;
+                    req.refreshToken = refreshToken;
+                    next();
+                }
+            });
+        }
+        else
+        {
+            let err = new Error('The code is invalid or expired!');
+            err.statusCode = 401;
+            return next(err);
+        }
+    
+    }catch(err){next(err)}
+}
+
+exports.login = async(req, res, next) =>
+{
+    try
+    {
+        passport.authenticate('local', { session: false }, (err, user, info) => 
+        {
+            if(err || !user) 
+            {
+                
+                res.status(400).json(
+                    {
+                        success: false, 
+                        status: 'Login Unsuccessful!', 
+                        err: err,
+                        info: info
+                    });
+            }
+            else if(user.isVerified === false)
+            {
+                let err = new Error('Your account is not verified!');
+                err.statusCode = 400;
+                return next(err);
+            }
+            else
+            {
+                req.login(user, { session: false }, async(err) => 
+                {
+                    if(err)
+                    {
+                        res.status(400).json(
+                            {
+                                success: false, 
+                                status: 'Login Unsuccessful!', 
+                                err: err
+                            });
+                    }
+                    else if(user.TFASecret)
+                    {
+                        const twoFAToken = authenticate.GenerateTFAToken({_id: user._id});
+
+                        res.header('twofa_token', twoFAToken)
+                            .status(200).json(
+                            {
+                                success: true, 
+                                hasTFA: true // refirect to /TFAValidation
+                            })
+                    }
+                    else
+                    {
+                        const accessToken = authenticate.GenerateAccessToken({_id: req.user._id});
+                        const refreshToken = authenticate.GenerateRefreshToken({_id: req.user._id});
+                        
+                        req.accessToken = accessToken;
+                        req.refreshToken = refreshToken;
+                        next();
+                    }
+                })
+            };
+        })(req, res, next);
+    }catch(err){next(err)}
+}
 // exports.loginData = (req, res, next) => 
 // {
 //     const loginData = req.body.loginData;
@@ -966,7 +1356,6 @@ exports.verifyEmailExist = async(req, res, next) =>
 // {
 //     try
 //     {
-//         console.log("test");
 //         limitter({
 //             windowMs: 5 * 60 * 1000, // 5 minutes in ms
 //             max: 2,

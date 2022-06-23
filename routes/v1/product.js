@@ -251,7 +251,7 @@ product.resizeProductImage, product.addProductImgs, async(req, res, next) =>
     try
     {
         const product = await Product.findOne({_id : req.params.productId});
-        product.save();
+        await product.save();
 
         res.status(201).json(
             {
@@ -304,7 +304,7 @@ auth.verifyAdmin, product.removeImgs, async(req, res, next) =>
 {
     try
     {
-        await Product.findByIdAndDelete(req.params.productId)
+        await Product.findByIdAndDelete(req?.params?.productId)
         
         res.status(200).json(
             {

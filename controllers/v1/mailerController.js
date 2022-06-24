@@ -15,7 +15,7 @@ exports.sendVerifyAccountMail = async(req, res, next) =>
         sgMail.setApiKey(process.env.SENDGRID_API_KEY);
         
         const email = req.body.email;
-        const link = `${req.protocol}://${req.headers.host}/v1/auth/verify_email?token=${Email_Token}` //  ${req.headers.Host}
+        const link = `${process.env.SERVER_ADDRESS}v1/auth/verify_email?token=${Email_Token}` //  ${req.headers.Host}
         const mailContent = 
         {
             to: email,
@@ -64,7 +64,7 @@ exports.sendForgetPassword = async(req, res, next) =>
                     <p>Please click on the link below to reset your password.<br><br>
                     <a style="text-decoration: none;display:block; text-align: center;width:100%;font-weight: bold; padding: 10px; color: white; 
                     background-color: #00A8F3; border: none; border-radius:  5px;"
-                    href="${process.env.OAUTH_ADDRESS}v1/auth/verify_forget_pwd?token=${Email_Token}">Reset Password</a><br>
+                    href="${process.env.SERVER_ADDRESS}v1/auth/verify_forget_pwd?token=${Email_Token}">Reset Password</a><br>
                     Thanks,</p>
                     
                     <p>Nutritiv</p>

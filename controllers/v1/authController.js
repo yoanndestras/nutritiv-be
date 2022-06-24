@@ -14,6 +14,7 @@ const { customAlphabet } = require('nanoid');
 const alphabet = '0123456789';
 const nanoid = customAlphabet(alphabet, 12);
 const fetch = require("node-fetch");
+const speakeasy = require("speakeasy");
 require('dotenv').config();
 
 const passportJWT = require("passport-jwt");

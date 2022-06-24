@@ -15,7 +15,7 @@ exports.sendVerifyAccountMail = async(req, res, next) =>
         sgMail.setApiKey(process.env.SENDGRID_API_KEY);
         
         const email = req.body.email;
-        const link = `${process.env.SERVER_ADDRESS}v1/auth/verify_email?token=${Email_Token}` //  ${req.headers.Host}
+        const link = `${process.env.SERVER_ADDRESS}verify_email/?verificationToken=${Email_Token}` //  ${req.headers.Host}
         const mailContent = 
         {
             to: email,

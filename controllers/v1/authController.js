@@ -339,12 +339,12 @@ exports.verifyProviderUser = async(req, res, next) =>
                     }
                     else
                     {
-                        const accessToken = authenticate.GenerateAccessToken({_id: user._id});                            
+                        const oAuthToken = authenticate.GenerateAccessToken({_id: user._id});                            
                         
                         res.redirect(process.env.SERVER_ADDRESS + 
                             '?status=successRegistration' + 
                             '&message=Registration successfull!'+
-                            '&accessToken=' + accessToken + 
+                            '&oAuthToken=' + oAuthToken + 
                             '&statusCode=201'
                             )
                     }
@@ -365,11 +365,11 @@ exports.verifyProviderUser = async(req, res, next) =>
                     }
                     else
                     {
-                        const accessToken = authenticate.GenerateAccessToken({_id: req.user._id});                            
+                        const oAuthToken = authenticate.GenerateAccessToken({_id: req.user._id});                            
                         
                         res.redirect(process.env.SERVER_ADDRESS + 
                             '?status=successLogin' + 
-                            '&accessToken=' + accessToken + 
+                            '&oAuthToken=' + oAuthToken + 
                             '&statusCode=200'
                         )
                     }

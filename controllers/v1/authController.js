@@ -1198,7 +1198,7 @@ exports.enableTFA = async(req, res, next) =>
                                         }
                                     })
                                 await user.save();
-
+                                req.TFARecovery = TFARecovery;
                                 next();
                             }
                             else

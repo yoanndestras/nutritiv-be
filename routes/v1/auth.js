@@ -124,7 +124,7 @@ async(req, res, next) =>
 });
 
 //USER VERIFICATION
-router.get("/verify_email", auth.verifyNewUserEmail, async(req, res, next) =>
+router.post("/verify_email", auth.verifyNewUserEmail, async(req, res, next) =>
 {
     const user = req.user;
     try

@@ -132,7 +132,7 @@ router.post("/verify_email", auth.verifyNewUserEmail, async(req, res, next) =>
         user.isVerified = true;
         await user.save(() => 
                 {
-                    res.status(200).json(
+                    res.status(201).json(
                         {
                             success: true, 
                             status: 'User Verification Successfull!'

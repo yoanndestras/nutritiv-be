@@ -10,7 +10,8 @@ exports.sendVerifyAccountMail = async(req, res, next) =>
 {
     try
     {        
-        const Email_Token = auth.GenerateEmailToken(req.body.email, req.user.updatedAt);
+        const updatedAt = req.updatedAt ? req.updatedAt : req.user.updatedAt;
+        const Email_Token = auth.GenerateEmailToken(req.body.email, updatedAt);
         sgMail.setApiKey(process.env.SENDGRID_API_KEY);
         
         const email = req.body.email;

@@ -1354,10 +1354,8 @@ exports.register = async(req, res, next) =>
             {
                 await user.save(async() => 
                 {
-                    req.user.updatedAt = user.updatedAt;
-                    if(user) return next();
-                
-                    return next(err);
+                    req.updatedAt = user.updatedAt;
+                    return next();
                 })
             }
         });

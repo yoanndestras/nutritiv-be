@@ -155,34 +155,15 @@ router.post("/forget_pwd", auth.verifyEmailExist, mailer.sendForgetPassword, asy
 
 //REGISTER
 router.post("/register", auth.verifyUsername, auth.verifyEmail, auth.verifyEmailSyntax, 
-auth.verifyPasswordSyntax, auth.verifyCaptcha, mailer.sendVerifyAccountMail, async(req, res, next) =>
+auth.verifyPasswordSyntax, auth.verifyCaptcha, auth.register, mailer.sendVerifyAccountMail, async(req, res, next) =>
 {
     try
     {
-        User.register(new User({username: req.body.username, email: req.body.email}), 
-        req.body.password, async(err, user) =>
-        {
-            if(err)
+        res.status(201).json(
             {
-                return res.status(500).json(
-                    {
-                        success: false, 
-                        status: 'Registration Failed! Please try again later!', 
-                        err: err
-                    });
-            } 
-            else 
-            {
-                await user.save(() => 
-                {
-                    res.status(201).json(
-                        {
-                            success: true, 
-                            status: 'Registration Successfull! Check your emails!'
-                        });
-                })
-            }
-        });
+                success: true, 
+                status: 'Registration Successfull! Check your emails!'
+            });
     }catch(err){next(err)}
 });
 

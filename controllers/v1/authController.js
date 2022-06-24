@@ -970,6 +970,7 @@ exports.userVerification = async(req, res, next) =>
                 })
     }catch(err){next(err)}
 }
+
 exports.verifyNewEmail = (req, res, next) =>
 {
     User.findOne({email: req.body.email}, (err, user) =>
@@ -1330,6 +1331,37 @@ exports.login = async(req, res, next) =>
                 })
             };
         })(req, res, next);
+    }catch(err){next(err)}
+}
+
+exports.register = async(req, res, next) =>
+{
+    try
+    {
+        User.register(new User({username: req.body.username, email: req.body.email}), 
+        req.body.password, async(err, user) =>
+        {
+            if(err)
+            {
+                return res.status(500).json(
+                    {
+                        success: false, 
+                        status: 'Registration Failed! Please try again later!', 
+                        err: err
+                    });
+            } 
+            else 
+            {
+                await user.save(async() => 
+                {
+                    const user = await User.findOne({username: req.body.username})
+                    req.user.updatedAt = user.updatedAt;
+                    if(user) return next();
+                
+                    return next(err);
+                })
+            }
+        });
     }catch(err){next(err)}
 }
 // exports.loginData = (req, res, next) => 

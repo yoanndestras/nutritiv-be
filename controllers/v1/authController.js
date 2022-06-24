@@ -1354,7 +1354,6 @@ exports.register = async(req, res, next) =>
             {
                 await user.save(async() => 
                 {
-                    const user = await User.findOne({username: req.body.username})
                     req.user.updatedAt = user.updatedAt;
                     if(user) return next();
                 

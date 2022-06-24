@@ -110,7 +110,8 @@ router.get("/verify_forget_pwd", auth.verifyEmailToken, async(req, res, next) =>
 });
 
 //GENERATE NEW EMAIL TOKEN
-router.get("/new_register_email", auth.verifyNewEmail, mailer.sendVerifyAccountMail, async(req, res, next) =>
+router.get("/new_register_email", auth.verifyNewEmail, mailer.sendVerifyAccountMail, 
+async(req, res, next) =>
 {
     try
     {

@@ -75,12 +75,12 @@ exports.jwtPassport = passport.use("jwt_query", new JwtStrategy(opts_query, (jwt
         })
 }));
 
-const cookieExtractor = function(req) 
-{
-    let token = null;
-    if (req && req.cookies) token = req.cookies['refreshToken'];
-    return token;
-};
+// const cookieExtractor = function(req) 
+// {
+//     let token = null;
+//     if (req && req.cookies) token = req.cookies['refreshToken'];
+//     return token;
+// };
 
 const opts_ref = {}; //json web token and key
 //opts_ref.jwtFromRequest = cookieExtractor;
@@ -184,10 +184,12 @@ exports.NewTwoFAjwtPassport = passport.use("new_tfa_jwt", new JwtStrategy(opts_n
         })
 }));
 
-const opts_google = {};
-opts_google.clientID = process.env.GOOGLE_CLIENT_ID;
-opts_google.clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-opts_google.callbackURL = `${process.env.OAUTH_ADDRESS}v1/auth/google/callback`;
+const opts_google = 
+{
+    clientID : process.env.GOOGLE_CLIENT_ID,
+    clientSecret : process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL : `${process.env.OAUTH_ADDRESS}v1/auth/google/callback`
+}
 
 exports.GooglePassport = passport.use("google", new GoogleStrategy(opts_google, 
     (accessToken, refreshToken, profile, done) =>
@@ -208,13 +210,15 @@ exports.GooglePassport = passport.use("google", new GoogleStrategy(opts_google,
             }
         })
     }
-))
+));
 
-const opts_facebook = {};
-opts_facebook.clientID = process.env.FACEBOOK_APP_ID;
-opts_facebook.clientSecret = process.env.FACEBOOK_APP_SECRET;
-opts_facebook.callbackURL = `${process.env.OAUTH_ADDRESS}v1/auth/facebook/callback`;
-opts_facebook.profileFields = ['emails', 'name','displayName','photos'];
+const opts_facebook = 
+{
+    clientID : process.env.FACEBOOK_APP_ID,
+    clientSecret : process.env.FACEBOOK_APP_SECRET,
+    callbackURL : `${process.env.OAUTH_ADDRESS}v1/auth/facebook/callback`,
+    profileFields : ['emails', 'name','displayName','photos']
+}
 
 exports.FacebookPassport = passport.use("facebook", new FacebookStrategy(opts_facebook, 
     (accessToken, refreshToken, profile, done) =>
@@ -238,13 +242,15 @@ exports.FacebookPassport = passport.use("facebook", new FacebookStrategy(opts_fa
             }
         })
     }
-))
+));
 
-const opts_github = {};
-opts_github.clientID = process.env.GITHUB_CLIENT_ID;
-opts_github.clientSecret = process.env.GITHUB_CLIENT_SECRET;
-opts_github.callbackURL = `${process.env.OAUTH_ADDRESS}v1/auth/github/callback`;
-opts_github.scope = ['user:email'];
+const opts_github = 
+{
+    clientID : process.env.GITHUB_CLIENT_ID,
+    clientSecret : process.env.GITHUB_CLIENT_SECRET,
+    callbackURL : `${process.env.OAUTH_ADDRESS}v1/auth/github/callback`,
+    scope : ['user:email']
+}
 
 exports.GithubPassport = passport.use("github", new GitHubStrategy(opts_github, 
     (accessToken, refreshToken, profile, done) =>
@@ -265,7 +271,7 @@ exports.GithubPassport = passport.use("github", new GitHubStrategy(opts_github,
             }
         })
     }
-))
+));
 
 // VERIFY GOOGLE USER
 exports.verifyProviderUser = async(req, res, next) =>
@@ -296,7 +302,7 @@ exports.verifyProviderUser = async(req, res, next) =>
             if(err) {return next(err);}
             else if(!user)
             {
-                let email;
+                let email, username;
                 
                 provider === "github" 
                 ? username = profile.username
@@ -395,7 +401,7 @@ exports.verifyProviderUser = async(req, res, next) =>
             '/?statusCode=500'
             )
     }
-}
+};
 
 // VERIFY PRIVILEGES
 exports.verifyAdmin = function(req, res, next)
@@ -456,7 +462,7 @@ exports.verifyUserTFA = async(req, res, next) =>
             return next();
         }
     })(req, res, next); 
-}
+};
 
 exports.verifyUserTFARecovery = async(req, res, next) =>
 {
@@ -503,7 +509,7 @@ exports.verifyUserTFARecovery = async(req, res, next) =>
             return next();
         }
     })(req, res, next); 
-}
+};
 
 exports.verifyUserNewTFA = async(req, res, next) =>
 {
@@ -548,7 +554,7 @@ exports.verifyUserNewTFA = async(req, res, next) =>
         
         
     })(req, res, next); 
-}
+};
 
 exports.verifyUser = (req, res, next) => 
 {
@@ -887,32 +893,36 @@ exports.verifyCaptcha = async(req, res, next) =>
 {
     try
     {
-        if(!req.body.captcha)
+        if(process.env.POSTMAN === false)
         {
-            let err = new Error('Please select captcha');
-            err.statusCode = 400;
-            next(err);
+            if(!req.body.captcha)
+            {
+                let err = new Error('Please select captcha');
+                err.statusCode = 400;
+                return next(err);
+            }
+            
+            let secretKey = process.env.RECAPTCHA_KEY;
+            let verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${req.body.captcha}`
+        
+            let response = await fetch(verifyUrl,{method : 'POST'});
+            let body = await response.json();
+            
+            console.log(`body.score = `, body.score)
+            
+            if(!body.success || body.score < 0.5)
+            {
+                let err = new Error('Your might be a robot, you are banned!');
+                err.statusCode = 400;
+                return next(err);
+            }
         }
         
-        let secretKey = process.env.RECAPTCHA_KEY;
-        let verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${req.body.captcha}`
-    
-        let response = await fetch(verifyUrl,{method : 'POST'});
-        let body = await response.json();
-        
-        console.log(`body.score = `, body.score)
-        
-        if(!body.success || body.score < 0.5)
-        {
-            let err = new Error('Your might be a robot, you are banned!');
-            err.statusCode = 400;
-            next(err);
-        }
         next();
         
     
     }catch(err){next(err)}
-}
+};
 
 // VERIFY EMAIL SENDING
 exports.verifyEmailToken = (req, res, next) => 
@@ -970,7 +980,7 @@ exports.userVerification = async(req, res, next) =>
                     next();
                 })
     }catch(err){next(err)}
-}
+};
 
 exports.verifyNewEmail = (req, res, next) =>
 {
@@ -1053,7 +1063,7 @@ exports.createTFARecovery = async(req, res, next) =>
                     status: "Your account do not have TFA enabled!"
                 })
         }
-}
+};
 
 exports.createTFASecret = async(req, res, next) =>
 {
@@ -1085,7 +1095,7 @@ exports.createTFASecret = async(req, res, next) =>
                 })
         }
     }catch(err){next(err)}
-}
+};
 
 exports.disableTFA = async(req, res, next) =>
 {
@@ -1147,7 +1157,7 @@ exports.disableTFA = async(req, res, next) =>
                 })
         }
     }catch(err){next(err)}
-}
+};
 
 exports.enableTFA = async(req, res, next) =>
 {
@@ -1219,7 +1229,7 @@ exports.enableTFA = async(req, res, next) =>
         //         })
         // }
     }catch(err){next(err)}
-}
+};
 
 exports.TFAValidation = async(req, res, next) =>
 {
@@ -1271,7 +1281,7 @@ exports.TFAValidation = async(req, res, next) =>
         }
     
     }catch(err){next(err)}
-}
+};
 
 exports.login = async(req, res, next) =>
 {
@@ -1333,7 +1343,7 @@ exports.login = async(req, res, next) =>
             };
         })(req, res, next);
     }catch(err){next(err)}
-}
+};
 
 exports.register = async(req, res, next) =>
 {
@@ -1361,7 +1371,7 @@ exports.register = async(req, res, next) =>
             }
         });
     }catch(err){next(err)}
-}
+};
 // exports.loginData = (req, res, next) => 
 // {
 //     const loginData = req.body.loginData;

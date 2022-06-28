@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const stripe = require("stripe")(process.env.STRIPE_KEY);
 const Cart = require("../../models/Cart");
+const Order = require("../../models/Order");
 const Product = require("../../models/Product");
 
 // CONTROLLERS
@@ -13,8 +14,9 @@ async(req, res, next)  =>
   try
   {
     const userId = req.user._id;
+    const userEmail = req.user.email;
     const cart = await Cart.findOne({userId : userId});
-
+    
     if(cart)
     {
       let line_items =  await Promise.all(cart.products.map(
@@ -52,10 +54,26 @@ async(req, res, next)  =>
         mode: 'payment',
         success_url: process.env.SERVER_ADDRESS + 'success',
         cancel_url: process.env.SERVER_ADDRESS + 'cancel',
-        billing_address_collection: "required",
-        shipping_address_collection: {
-          allowed_countries: ['US', 'CA', 'FR', 'PT', 'ES']
+        customer : userId,
+        customer_email : userEmail,
+        payment_intent_data: {
+          // setup_future_usage: "off_session",
+          receipt_email : userEmail,
+          shipping : {
+            name : "Maison",
+            address : 
+            {
+              line1 : "41 Avenue de verdun",
+              city : "Saint-André-Lez-Lille",
+              country : "FR",
+              postal_code : "59350",
+            }
+          }
         },
+        billing_address_collection: "required",
+        // shipping_address_collection: {
+        //   allowed_countries: ['US', 'CA', 'FR', 'PT', 'ES']
+        // },
         allow_promotion_codes: true,
         shipping_options: [
           {

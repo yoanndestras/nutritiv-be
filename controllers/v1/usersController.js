@@ -34,7 +34,7 @@ exports.resizeUserAvatar = async(req, res, next) =>
     {
       avatar = "usersAvatar/" + user.avatar;
 
-      user.avatar !== "PrPhdefaultAvatar.jpg" ? fileUpload.deleteFile(avatar) : null;
+      user.avatar !== "PrPhdefaultAvatar.jpg" && fileUpload.deleteFile(avatar);
     }
     
     let fileArray = [req.file];
@@ -67,7 +67,7 @@ exports.addUserAvatar = async(req, res, next) =>
     const fileType = req.file.mimetype;
     const result = await fileUpload.uploadFile(filePath, fileName, fileType);
 
-    let key = result.Key; 
+    // let key = result.Key; 
 
     fs.unlinkSync(path.join("public/images/usersAvatar", req.file.filename))
         

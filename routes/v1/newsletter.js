@@ -6,7 +6,7 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 // CONTROLLERS
 const cors = require('../../controllers/v1/corsController');
 const newsletter = require('../../controllers/v1/newsletterController')
-const {uploadHtml} = require('./upload');
+// const {uploadHtml} = require('./upload');
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
@@ -117,7 +117,7 @@ router.get('/delete', async (req, res, next) =>
     }
     else 
     {
-      let err = new Error('Confirmation number does not match or contact is not subscribed')
+      let err = new Error('Confirmation number does not match or contact is not subscribed');
       err.statusCode = 400; 
       next(err);
     }

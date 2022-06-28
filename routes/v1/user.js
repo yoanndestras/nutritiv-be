@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const User = require("../../models/User");
 const Chat = require("../../models/Chat");
-const aws = require('aws-sdk');
+// const aws = require('aws-sdk');
 
 // CONTROLLERS
 const cors = require('../../controllers/v1/corsController');
@@ -113,7 +113,7 @@ async(req, res, next) =>
                 hasChat,
                 status: "User connected"
             });
-    }catch(err){next(err)}
+    }catch(err){next(err);}
 })
 
 // GET USER ADDRESSES
@@ -174,15 +174,16 @@ auth.verifyAuthorization, async (req, res, next) =>
 })
 
 // GET USERS 
-router.get("/findUsers", cors.corsWithOptions, async (req, res, next) =>
+router.get("/findUsers", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin,
+async (req, res, next) =>
 {
     try
     {
         const usersArray = req.body?.users;
-        if(usersArray)
+        if(usersArray && usersArray.length)
         {
             let users = [];
-
+            
             for (let i = 0; i < usersArray.length; i++)
             {
                 const user = await User.findById(usersArray[i]);
@@ -352,9 +353,9 @@ auth.verifyAuthorization, async (req, res, next) =>
         let user = req.user;
         if((user.avatar).substring(0, 4) !== "http")
         {
-            avatar = "usersAvatar/" + user.avatar;
+            let avatar = "usersAvatar/" + user.avatar;
             
-            user.avatar !== "PrPhdefaultAvatar.jpg" ? fileUpload.deleteFile(avatar) : null;
+            user.avatar !== "PrPhdefaultAvatar.jpg" && fileUpload.deleteFile(avatar);
         }
         
         await User.findByIdAndDelete(req.params.userId)

@@ -23,7 +23,7 @@ exports.newProduct = async(req, res, next) =>
 
         const {shape, tags, load, pricePerCapsule, pricePerKilograms} = req.body
         const PPCapsule = pricePerCapsule, PPKg = pricePerKilograms;
-        let product;
+        let product, price;
         
         const req_tags = tags && Array.isArray(tags) ? tags : tags !== undefined ? [tags] : null;
         const loadArr = load && Array.isArray(load) ? load : load !== undefined ? [load] : null;
@@ -95,7 +95,7 @@ exports.newProduct = async(req, res, next) =>
     }
 }
 
-exports.discount = (values, price, el, keys) => 
+exports.discount = (values, price, qty, keys) => 
 {
     try
     {
@@ -103,10 +103,10 @@ exports.discount = (values, price, el, keys) =>
         const output = keys.reduce((prev, curr) => Math.abs(curr - el) < Math.abs(prev - el) ? curr : prev);
         let Index = keys.indexOf(output), discountedPrice = price - price * (values[Index]);
         price = Math.round(discountedPrice) - 0.01;
-        qty = parseFloat(el), price = parseFloat(price);
+        qty = parseFloat(qty), price = parseFloat(price);
         
         return {qty, price}
-    }catch(err){next(err)}
+    }catch(err){next(err);}
 }
 
 exports.verifyProduct = async(req, res, next) => 
@@ -118,7 +118,7 @@ exports.verifyProduct = async(req, res, next) =>
 
         const existingProduct = await Product.findById(newProductId);
         let productArray = existingProduct?.productItems;
-
+        
         let productLoadAndPrice = productArray ? productArray.map((el) => {if(el.load === newProductLoad && el.price.value === newProductPrice) {return el.load}}) : null;
         let productQuantityInStock = existingProduct ? existingProduct.countInStock >= newProductLoad ? true : false : null;
         productLoadAndPrice = productLoadAndPrice ? productLoadAndPrice.filter(el => el !== undefined) : null;
@@ -136,7 +136,7 @@ exports.verifyProduct = async(req, res, next) =>
             err.statusCode = 400;
             return next(err);
         }
-    }catch(err){next(err)}
+    }catch(err){next(err);}
 }
 
 exports.verifyPricePerProduct = async(req, res, next) => 
@@ -248,23 +248,24 @@ exports.removeImgs = async(req, res, next) =>
         const product = await Product.findOne({_id : req?.params?.productId})
         
         let imgs = product ? "productsImgs/" + product.imgs : null;
-        imgs ? 
+        
+        if(!imgs)
+        {
+            let err = new Error('This product do not exist!');
+            err.statusCode = 400;
+            return next(err);
+        }
+
         await Promise.all
         (
             imgs.map(async img =>
                 {
                     fileUpload.deleteFile(img)
                 })
-        ) : null;
-        
-        if(!imgs)
-        {
-            let err = new Error('This product do not exist!');
-            err.statusCode = 400;
-            next(err);
-        }
-        else next();
+        );
 
+        next();
+        
     }catch(err){next(err)}
     
 }

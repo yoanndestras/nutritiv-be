@@ -3,7 +3,7 @@ const Order = require("../../models/Order");
 
 const sgMail = require("@sendgrid/mail");
 const auth = require("./authController");
-const path = require('path');
+// const path = require('path');
 
 
 exports.sendVerifyAccountMail = async(req, res, next) =>

@@ -86,7 +86,7 @@ exports.socketConnection = async(io) =>
                         if(senderRoom && sender)
                         {
                             console.log("All verification ok for message!");
-                            console.log(`roomId = `, roomId)
+                            console.log(`roomId = `, roomId);
                             socket.join(roomId); // JOIN
                             socket.to(roomId).emit("chatting", ({text, id, sender, roomId})); // EMIT
                         }

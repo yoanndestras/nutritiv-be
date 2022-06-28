@@ -67,7 +67,7 @@ exports.countInStock = async(userId) =>
     let qty = cart.products.map(product => product.productItems.map((productItems) => {return productItems.quantity;})); // 2 = quantity
     let productArray = cart.products.map(product => product.productId);
     
-    let sumWithInitial, result, err, array = [];
+    let sumWithInitial, err, array = [];
   
     for (let i = 0; i < load.length; i++) 
     {
@@ -95,7 +95,7 @@ exports.countInStock = async(userId) =>
     
     for (let i = 0; i < load.length; i++) 
     {
-      result = await Product.findOneAndUpdate(
+      await Product.findOneAndUpdate(
         {_id: productArray[i]},
         {
           $inc :

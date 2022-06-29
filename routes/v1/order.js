@@ -84,11 +84,7 @@ router.get('/success', cors.corsWithOptions, async (req, res, next) =>
         const session = await stripe.checkout.sessions.retrieve(req.query.session_id);
         const customer = await stripe.customers.retrieve(session.customer);
         
-        console.log(`session = `, session)
-        console.log(`customer = `, customer)
-        console.log(`session.shipping = `, session.shipping)
-
-        let response = await fetch(process.env.SERVER_ADDRESS + 'v1/order/', 
+        let response = await fetch(process.env.SERVER_ADDRESS + 'v1/orders/', 
         {
             method: 'POST',
             body: JSON.stringify({
@@ -96,8 +92,9 @@ router.get('/success', cors.corsWithOptions, async (req, res, next) =>
                 zip : session.shipping.address.postal_code,
                 city : session.shipping.address.city,
                 name : session.shipping.name,
+                country : session.shipping.address.country,
                 customer : customer,
-                customer_email : session.customer.email
+                customer_email : customer.email
             }),
             headers: 
             {
@@ -106,12 +103,10 @@ router.get('/success', cors.corsWithOptions, async (req, res, next) =>
             },
         });
         let data = await response.json();
-        console.log(`data = `, data)
 
         res.status(200).json(
             {
-                success: true,
-                data: data
+                data
             });
     
     }catch(err){next(err);}

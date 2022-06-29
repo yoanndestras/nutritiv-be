@@ -198,7 +198,7 @@ exports.sendNewOrder = async(req, res, next) =>
         }   
         await sgMail.send(mailContent)
         next();
-    }catch(err){next(err)}
+    }catch(err){console.log(err);}
 }
 
 exports.orderShipping = async(req, res, next) =>
@@ -238,7 +238,7 @@ exports.orderShipping = async(req, res, next) =>
         }   
         await sgMail.send(mailContent)
         next();
-    }catch(err){next(err)}
+    }catch(err){console.log(err);}
 }
 
 exports.orderDelivered = async(req, res, next) =>
@@ -268,5 +268,5 @@ exports.orderDelivered = async(req, res, next) =>
         
         await sgMail.send(mailContent)
         next();
-    }catch(err){next(err)}
+    }catch(err){console.log(err);}
 }

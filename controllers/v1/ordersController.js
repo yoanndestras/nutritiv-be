@@ -36,8 +36,7 @@ exports.newOrder = async(req, res, next) =>
             street,
             zip,
             city,
-            country,
-            phoneNumber
+            country
         }
       
       const newOrder = new Order(

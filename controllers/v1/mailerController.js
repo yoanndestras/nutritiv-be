@@ -176,7 +176,7 @@ exports.sendNewOrder = async(req, res, next) =>
         sgMail.setApiKey(process.env.SENDGRID_API_KEY);
         
         const total = parseFloat(order.amount.value + 4.95) ;
-        const email = req.user.email, username = req.user.username;
+        const email = req.body.customer_email, username = req.user.username;
         
         const mailContent = 
         {
@@ -207,7 +207,7 @@ exports.orderShipping = async(req, res, next) =>
     {   
         sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-        const email = req.user.email, username = req.user.username, order = req.order;
+        const email = req.body.customer_email, username = req.user.username, order = req.order;
         const mailContent = 
         {
             to: email,
@@ -246,7 +246,7 @@ exports.orderDelivered = async(req, res, next) =>
     try
     {   
         sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-        const email = req.user.email, username = req.user.username, order = req.order,  date = new Date();
+        const email = req.body.customer_email, username = req.user.username, order = req.order,  date = new Date();
 
         const mailContent = 
         {

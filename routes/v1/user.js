@@ -11,6 +11,20 @@ const user = require("../../controllers/v1/usersController");
 const fileUpload = require('../../controllers/v1/fileUploadController');
 const {upload} = require('./upload');
 
+const limitter = require('express-rate-limit');
+
+// router.use( 
+//     limitter(
+//         {
+//             windowMs: 5000,
+//             max: 5,
+//             message: {
+//                 code: 429,
+//                 message: "Too many requests"
+//             }
+//         })
+//     ) // LIMIT SPAM REQUESTS TO MAX PER MILLISECONDS
+
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 

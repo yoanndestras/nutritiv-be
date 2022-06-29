@@ -2,6 +2,7 @@ const router = require("express").Router();
 const User = require("../../models/User");
 
 const   speakeasy = require("speakeasy"),
+        limitter = require('express-rate-limit'),
         qrcode = require("qrcode"),
         passport = require("passport");
         randomWords = require('random-words');
@@ -11,6 +12,18 @@ const cors = require('../../controllers/v1/corsController');
 const auth = require("../../controllers/v1/authController");
 const mailer = require("../../controllers/v1/mailerController");
 const {upload} = require('./upload');
+
+router.use( 
+    limitter(
+        {
+            windowMs: 5000,
+            max: 3,
+            message: {
+                code: 429,
+                message: "Too many requests"
+            }
+        })
+    ) // LIMIT SPAM REQUESTS TO MAX PER MILLISECONDS
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })

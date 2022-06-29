@@ -2,6 +2,9 @@ const express = require('express');
 const Cart = require("../../models/Cart");
 const Product = require("../../models/Product");
 const Order = require("../../models/Order");
+const User = require("../../models/User");
+
+// const stripe = require("stripe")(process.env.STRIPE_KEY);
 
 const appFunctions = require('../../app');
 const order = require('./ordersController');
@@ -17,16 +20,17 @@ exports.newOrder = async(req, res, next) =>
 {
   try
   {
-    const userId = req.user.id, cart = await Cart.findOne({userId : userId});
+    const user = await User.findOne({customerId : req.body.customer.id});
+    const userId = user.id, cart = await Cart.findOne({userId : userId});
     let countInStock = await order.countInStock(userId);
-    
+    req.user = user;
     let err =  countInStock && countInStock.err ? countInStock.err : null;
     if(err){return next(err);}
     
     if(cart)
     {
       let products =  cart.products, amount =  cart.amount;
-      const {street, zip, city, country, phoneNumber} = req.body;
+      const {street, zip, city, country} = req.body;
       let orderDetails =  
         {
             street,

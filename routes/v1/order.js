@@ -1,6 +1,8 @@
 const Order = require("../../models/Order");
 // const Cart = require("../../models/Cart");
 const router = require("express").Router();
+const stripe = require("stripe")(process.env.STRIPE_KEY);
+const fetch = require("node-fetch");
 
 // CONTROLLERS
 const cors = require('../../controllers/v1/corsController');
@@ -75,9 +77,56 @@ async (req, res, next) =>
     }catch(err){next(err)}
 });
 
+router.get('/success', cors.corsWithOptions, async (req, res, next) =>
+{
+    try
+    {
+        const session = await stripe.checkout.sessions.retrieve(req.query.session_id);
+        const customer = await stripe.customers.retrieve(session.customer);
+        
+        console.log(`session = `, session)
+        console.log(`customer = `, customer)
+        console.log(`session.shipping = `, session.shipping)
+
+        let response = await fetch(process.env.SERVER_ADDRESS + 'v1/order/', 
+        {
+            method: 'POST',
+            body: JSON.stringify({
+                street : session.shipping.address.line1,
+                zip : session.shipping.address.postal_code,
+                city : session.shipping.address.city,
+                name : session.shipping.name,
+                customer : customer,
+                customer_email : session.customer.email
+            }),
+            headers: 
+            {
+                "Origin": process.env.SERVER_ADDRESS,
+                "Content-type": "application/json; charset=UTF-8"
+            },
+        });
+        let data = await response.json();
+        console.log(`data = `, data)
+
+        res.status(200).json(
+            {
+                success: true,
+                data: data
+            });
+    
+    }catch(err){next(err);}
+})
+
+router.post('/expire-checkout-session', async (req, res, next) => 
+{
+    const session = await stripe.checkout.sessions.expire(
+    {
+        session_id: '{{SESSION_ID}}'
+    });
+});
+
 // CREATE ORDER
-router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
-order.newOrder, async (req, res, next) =>
+router.post("/", cors.corsWithOptions, order.newOrder, async (req, res, next) =>
 {    
     try
     {
@@ -90,7 +139,7 @@ order.newOrder, async (req, res, next) =>
             const order = await Order.findById(req.order._id);
             order.status = "delivered";
             await order.save();
-
+            
             res.status(200).json(
                 {
                     success: true,

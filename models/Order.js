@@ -19,36 +19,45 @@ const OrderSchema = new Schema
         type: Object,
         required: true
     },
+    sessionId: 
+    {
+        type: String,
+        required: true
+    },
     orderDetails:
-    [
+    {
+        name :
         {
-            street:
-            {
-                type: String,
-                required: true
-            },
-            zip:
-            {
-                type: Number,
-                required: true
-            },
-            city:
-            {
-                type: String,
-                required: true
-            },
-            country:
-            {
-                type: String,
-                required: true
-            },
-            // phoneNumber:
-            // {
-            //     type: Number,
-            //     required: true
-            // }
-        }
-    ],
+            type: String,
+            required: true
+        },
+        street:
+        {
+            type: String,
+            required: true
+        },
+        zip:
+        {
+            type: Number,
+            required: true
+        },
+        city:
+        {
+            type: String,
+            required: true
+        },
+        country:
+        {
+            type: String,
+            required: true
+        },
+        phoneNumber:
+        {
+            type: Number,
+            required: true
+        },
+    }
+    ,
     status:
     {
         type: String,

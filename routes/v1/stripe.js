@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const stripe = require("stripe")(process.env.STRIPE_KEY);
 const fetch = require("node-fetch");
+const order = require('../../controllers/v1/ordersController')
 
 const Cart = require("../../models/Cart");
 // const Order = require("../../models/Order");
@@ -13,7 +14,7 @@ const auth = require('../../controllers/v1/authController');
 // const order = require('../../controllers/v1/ordersController')
 
 router.post("/create-checkout-session", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
-async(req, res, next)  => 
+order.countInStock, async(req, res, next)  => 
 {
   try
   {
@@ -22,7 +23,7 @@ async(req, res, next)  =>
     // const {street, zip, city, country, phoneNumber} = req.body;
     
     if(cart)
-    {  
+    {        
       let line_items =  await Promise.all(cart.products.map(
         async(product) => 
         {
@@ -83,6 +84,9 @@ async(req, res, next)  =>
         billing_address_collection: "required",
         shipping_address_collection: {
           allowed_countries: ['US', 'CA', 'FR', 'PT', 'ES']
+        },
+        phone_number_collection: {
+          enabled: true,
         },
         payment_intent_data: {
           setup_future_usage: "off_session",

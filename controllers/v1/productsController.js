@@ -182,36 +182,36 @@ exports.verifyStock = async(req, res, next) =>
         const productId = req.body.productId, userId = req.user.id, cart = await Cart.findOne({userId : userId});
         let findProductId = cart ? cart.products.find(el => el.productId.toString() === productId) : null;
     
-        if(findProductId)
+        let sumWithInitial, emptyTable = []
+        
+        let load = findProductId ? findProductId.productItems.map((productItems) => {return productItems.load;}) : [productLoad];
+        let qty = findProductId ? findProductId.productItems.map((productItems) => {return productItems.quantity;}) : [productQuantity];
+        
+        for (let i = 0; i < load.length; i++) 
         {
-            let load = findProductId.productItems.map((productItems) => {return productItems.load;});
-            let qty = findProductId.productItems.map((productItems) => {return productItems.quantity;});
-    
-            let sumWithInitial, err, emptyTable = []
+            let initialValue = 0;
             
-            for (let i = 0; i < load.length; i++) 
+            emptyTable.push(load[i] * qty[i])
+            sumWithInitial = emptyTable.reduce(
+            (previousValue, currentValue) => previousValue + currentValue,
+            initialValue
+            );            
+            
+            let cartProduct = await Product.findOne({_id: productId});
+            let stockAvailable = cartProduct.countInStock;
+            
+            let stock = !findProductId ?  
+            (stockAvailable - sumWithInitial) : 
+            stockAvailable - (sumWithInitial + productLoad * productQuantity);
+            
+            if(stock <= 0)
             {
-                let initialValue = 0;
-                
-                emptyTable.push(load[i] * qty[i])
-                sumWithInitial = emptyTable.reduce(
-                (previousValue, currentValue) => previousValue + currentValue,
-                initialValue
-                );            
-                
-                let cartProduct = await Product.findOne({_id: productId});
-                let stockAvailable = cartProduct.countInStock;
-    
-                if(stockAvailable - (sumWithInitial + productLoad * productQuantity) <= 0)
-                {
-                    err = new Error('The stock for this product is not available : ' + cartProduct.title);
-                    err.statusCode = 403;
-                }
+                let err = new Error('The stock for this product is not available : ' + cartProduct.title);
+                err.statusCode = 403;
+                return next(err);
             }
-            if(err){next(err);}
-            else{next();}
         }
-        else{next();}
+        next();
     }catch(err){next(err)}
 }
 

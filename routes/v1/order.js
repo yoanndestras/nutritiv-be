@@ -83,7 +83,7 @@ router.get('/success', cors.corsWithOptions, async (req, res, next) =>
     {
         const session = await stripe.checkout.sessions.retrieve(req.query.session_id);
         const customer = await stripe.customers.retrieve(session.customer);
-        
+
         let response = await fetch(process.env.SERVER_ADDRESS + 'v1/orders/', 
         {
             method: 'POST',
@@ -93,8 +93,10 @@ router.get('/success', cors.corsWithOptions, async (req, res, next) =>
                 city : session.shipping.address.city,
                 name : session.shipping.name,
                 country : session.shipping.address.country,
-                customer : customer,
-                customer_email : customer.email
+                customerId : session.customer,
+                customer_email : customer.email,
+                phone : customer.phone,
+                order_id : session.id
             }),
             headers: 
             {
@@ -156,7 +158,7 @@ router.post('/expire-checkout-session', async (req, res, next) =>
 });
 
 // CREATE ORDER
-router.post("/", cors.corsWithOptions, order.newOrder, async (req, res, next) =>
+router.post("/", cors.corsWithOptions, order.countInStock, order.newOrder, async (req, res, next) =>
 {    
     try
     {

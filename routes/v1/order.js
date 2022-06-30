@@ -118,16 +118,17 @@ router.get('/cancel', cors.corsWithOptions, async (req, res, next) =>
 {
     try
     {
-        // const session = await stripe.checkout.sessions.retrieve(req.query.session_id);
-        // const customer = await stripe.customers.retrieve(session.customer);
-        
-        let session_id = req.query.session_id
+        const session = await stripe.checkout.sessions.retrieve(req.query.session_id);
+        const customer = await stripe.customers.retrieve(session.customer);
 
+        let session_id = req.query.session_id
+        
         let response = await fetch(process.env.SERVER_ADDRESS + 'v1/orders/expire-checkout-session', 
         {
             method: 'POST',
             body: JSON.stringify({
                 session_id : session_id,
+                customerId : customer.id
             }),
             headers: 
             {
@@ -141,11 +142,12 @@ router.get('/cancel', cors.corsWithOptions, async (req, res, next) =>
             {
                 data
             });
+        
     
     }catch(err){next(err);}
 })
 
-router.post('/expire-checkout-session', async (req, res, next) => 
+router.post('/expire-checkout-session', order.countInStock, async (req, res, next) => 
 {
     const session_id = req.body.session_id;
     const session = await stripe.checkout.sessions.expire(session_id);
@@ -158,7 +160,7 @@ router.post('/expire-checkout-session', async (req, res, next) =>
 });
 
 // CREATE ORDER
-router.post("/", cors.corsWithOptions, order.countInStock, order.newOrder, async (req, res, next) =>
+router.post("/", cors.corsWithOptions, order.newOrder, async (req, res, next) =>
 {    
     try
     {

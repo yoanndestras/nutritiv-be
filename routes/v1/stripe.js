@@ -159,18 +159,31 @@ order.countInStock, async(req, res, next)  =>
       setTimeout(async () => 
       {
         const session_id = session.id;
-        
-        let response = await fetch(process.env.SERVER_ADDRESS + 'v1/orders/cancel?session_id=' + session_id, 
+        const sessionToRetrieve = await stripe.checkout.sessions.retrieve(session_id);
+
+        if(sessionToRetrieve.status === 'open')
         {
-            method: 'GET',
-            headers: 
-            {
-                "Origin": process.env.SERVER_ADDRESS,
-            },
-        });
-        let data = await response.json();
-        
-        console.log(`data = `, data)
+          let response = await fetch(process.env.SERVER_ADDRESS + 'v1/orders/cancel?session_id=' + session_id, 
+          {
+              method: 'GET',
+              headers: 
+              {
+                  "Origin": process.env.SERVER_ADDRESS,
+              },
+          });
+          let data = await response.json();
+          
+          console.log(`data = `, data)
+        }
+        else
+        {
+            console.log(
+                {
+                    success: false,
+                    status: "Session already expired!"
+                }
+            );
+        }
       }, 600000); // 10 minutes = 600000
       
       res.status(200).json(

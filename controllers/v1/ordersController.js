@@ -67,17 +67,16 @@ exports.countInStock = async(req, res, next) =>
   try
   {
     let cart, user, load, productArray, qty, array = [];
-    if(req.route.path === "/")
+    if(req.route.path === "/expire-checkout-session")
     {
       user = await User.findOne({customerId : req.body.customerId});
       cart = await Cart.findOne({userId : user._id});
-    
     }
     else
     {
       cart = await Cart.findOne({userId : req.user._id});
     }
-
+    
     if(cart)
     {
       load = cart.products.map(product => product.productItems.map((productItems) => {return productItems.load;})); // 1 = load
@@ -102,7 +101,7 @@ exports.countInStock = async(req, res, next) =>
         
         let cartProduct = await Product.findOne({_id: productArray[i]}), stockAvailable = cartProduct.countInStock;
         
-        if(stockAvailable - sumWithInitial <= 0)
+        if(stockAvailable - sumWithInitial <= 0 && req.route.path !== "/expire-checkout-session")
         {
           let err = new Error('The stock for this product is not available : ' + cartProduct.title);
           err.statusCode = 403;
@@ -117,7 +116,7 @@ exports.countInStock = async(req, res, next) =>
       next(err);
     }
     
-    if(req.route.path === "/")
+    if(req.route.path === "/create-checkout-session")
     {
       for (let i = 0; i < load.length; i++) 
       {
@@ -127,6 +126,21 @@ exports.countInStock = async(req, res, next) =>
             $inc :
             {
               "countInStock" : - array[i]
+            }
+          }
+        )
+      }
+    }
+    else if(req.route.path === "/expire-checkout-session")
+    {
+      for (let i = 0; i < load.length; i++) 
+      {
+        await Product.findOneAndUpdate(
+          {_id: productArray[i]},
+          {
+            $inc :
+            {
+              "countInStock" : array[i]
             }
           }
         )

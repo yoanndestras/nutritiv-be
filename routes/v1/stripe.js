@@ -1,5 +1,7 @@
 const router = require("express").Router();
 const stripe = require("stripe")(process.env.STRIPE_KEY);
+const fetch = require("node-fetch");
+
 const Cart = require("../../models/Cart");
 // const Order = require("../../models/Order");
 const User = require("../../models/User");
@@ -8,7 +10,7 @@ const Product = require("../../models/Product");
 // CONTROLLERS
 const cors = require('../../controllers/v1/corsController');
 const auth = require('../../controllers/v1/authController');
-const order = require('../../controllers/v1/ordersController')
+// const order = require('../../controllers/v1/ordersController')
 
 router.post("/create-checkout-session", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
 async(req, res, next)  => 
@@ -20,24 +22,7 @@ async(req, res, next)  =>
     // const {street, zip, city, country, phoneNumber} = req.body;
     
     if(cart)
-    {
-      const customer =  await stripe.customers.create();
-  
-      let customerIdExist = !customerId  ? await User.findOneAndUpdate(
-        {_id},
-        {
-          $set:
-          {
-            "customerId": customer.id
-          }
-        },
-        {new: true}
-      ) : null;
-      
-      !customerId && await customerIdExist.save();
-      let stripeCustomerId = !customerIdExist ? customerId : customerIdExist.customerId;
-      
-
+    {  
       let line_items =  await Promise.all(cart.products.map(
         async(product) => 
         {
@@ -67,6 +52,22 @@ async(req, res, next)  =>
         }
       ))
       line_items = line_items.flat();
+      
+      const customer =  await stripe.customers.create();
+      
+      let customerIdExist = !customerId  ? await User.findOneAndUpdate(
+        {_id},
+        {
+          $set:
+          {
+            "customerId": customer.id
+          }
+        },
+        {new: true}
+      ) : null;
+      
+      !customerId && await customerIdExist.save();
+      let stripeCustomerId = !customerIdExist ? customerId : customerIdExist.customerId;
       
       
       const session = await stripe.checkout.sessions.create({
@@ -100,7 +101,7 @@ async(req, res, next)  =>
         expires_at: Math.floor(Date.now() / 1000) + 3600,
         allow_promotion_codes: true,
         success_url: process.env.SERVER_ADDRESS + 'v1/orders/success?session_id={CHECKOUT_SESSION_ID}',
-        cancel_url: process.env.SERVER_ADDRESS + 'cancel',
+        cancel_url: process.env.SERVER_ADDRESS + 'v1/orders/cancel?session_id={CHECKOUT_SESSION_ID}',
         // customer_email : userEmail,
         // tax_id_collection: {
           //   enabled: true,
@@ -151,6 +152,23 @@ async(req, res, next)  =>
         // ],
       });
     
+      setTimeout(async () => 
+      {
+        const session_id = session.id;
+        
+        let response = await fetch(process.env.SERVER_ADDRESS + 'v1/orders/cancel?session_id=' + session_id, 
+        {
+            method: 'GET',
+            headers: 
+            {
+                "Origin": process.env.SERVER_ADDRESS,
+            },
+        });
+        let data = await response.json();
+        
+        console.log(`data = `, data)
+      }, 600000); // 10 minutes = 600000
+      
       res.status(200).json(
         {
           success: true,

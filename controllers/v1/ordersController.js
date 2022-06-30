@@ -21,11 +21,13 @@ exports.newOrder = async(req, res, next) =>
   try
   {
     const user = await User.findOne({customerId : req.body.customer.id});
-    const userId = user.id, cart = await Cart.findOne({userId : userId});
-    let countInStock = await order.countInStock(userId);
     req.user = user;
-    let err =  countInStock && countInStock.err ? countInStock.err : null;
-    if(err){return next(err);}
+
+    const userId = user._id, cart = await Cart.findOne({userId : userId});
+
+    let countInStock = await order.countInStock(userId);
+    // let err =  countInStock && countInStock.err ? countInStock.err : null;
+    countInStock?.err && next(countInStock?.err);
     
     if(cart)
     {
@@ -108,7 +110,6 @@ exports.countInStock = async(userId) =>
         }
       )
     }
-  }
-  catch(err){return {err}}
+  }catch(err){return {err}}
   
 }

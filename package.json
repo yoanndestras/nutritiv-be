@@ -5,8 +5,8 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "start-dev": "env-cmd -e development nodemon app.js",
-    "start-prod": "env-cmd -e production nodemon app.js",
+    "start-dev": "nodemon app.js",
+    "start-prod": "nodemon app.js",
     "heroku-postbuild": "cd client && npm i && npm run build"
   },
   "repository": {

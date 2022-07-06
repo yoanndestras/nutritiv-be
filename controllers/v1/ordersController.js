@@ -113,7 +113,7 @@ exports.countInStock = async(req, res, next) =>
     {
       let err = new Error("You have no cart!");
       err.statusCode = 400;
-      next(err);
+      return next(err);
     }
     
     if(req.route.path === "/create-checkout-session")

@@ -70,7 +70,29 @@ order.countInStock, async(req, res, next)  =>
       !customerId && await customerIdExist.save();
       let stripeCustomerId = !customerIdExist ? customerId : customerIdExist.customerId;
       
-      
+      if(!customerIdExist)
+      {
+        const sessions = await stripe.checkout.sessions.list({
+          customer: customerId,
+        });
+        
+        await Promise.all(sessions.data.map(async session => 
+          {
+            if(session.status === 'open')
+            {
+              await fetch(process.env.SERVER_ADDRESS + 'v1/orders/cancel?session_id=' + session.id, 
+              {
+                  method: 'GET',
+                  headers: 
+                  {
+                      "Origin": process.env.SERVER_ADDRESS,
+                  },
+              });
+              return session
+            }
+          }
+        ));
+      }
       const session = await stripe.checkout.sessions.create({
         line_items,
         mode: 'payment',
@@ -110,50 +132,51 @@ order.countInStock, async(req, res, next)  =>
         // tax_id_collection: {
           //   enabled: true,
         // },
-        // shipping_options: [
-        //   {
-        //     shipping_rate_data: {
-        //       type: 'fixed_amount',
-        //       fixed_amount: {
-        //         amount: 0,
-        //         currency: 'eur',
-        //       },
-        //       display_name: 'Free shipping',
-        //       // Delivers between 5-7 business days
-        //       delivery_estimate: {
-        //         minimum: {
-        //           unit: 'business_day',
-        //           value: 5,
-        //         },
-        //         maximum: {
-        //           unit: 'business_day',
-        //           value: 7,
-        //         },
-        //       }
-        //     }
-        //   },
-        //   {
-        //     shipping_rate_data: {
-        //       type: 'fixed_amount',
-        //       fixed_amount: {
-        //         amount: 1500,
-        //         currency: 'eur',
-        //       },
-        //       display_name: 'Next day air',
-        //       // Delivers in exactly 1 business day
-        //       delivery_estimate: {
-        //         minimum: {
-        //           unit: 'business_day',
-        //           value: 1,
-        //         },
-        //         maximum: {
-        //           unit: 'business_day',
-        //           value: 1,
-        //         },
-        //       }
-        //     }
-        //   },
+        shipping_options: [
+          {
+            shipping_rate_data: {
+              type: 'fixed_amount',
+              fixed_amount: {
+                amount: 0,
+                currency: 'eur',
+              },
+              display_name: 'Free shipping',
+              // Delivers between 5-7 business days
+              delivery_estimate: {
+                minimum: {
+                  unit: 'business_day',
+                  value: 2,
+                },
+                maximum: {
+                  unit: 'business_day',
+                  value: 3,
+                },
+              }
+            }
+          },
         // ],
+          {
+            shipping_rate_data: {
+              type: 'fixed_amount',
+              fixed_amount: {
+                amount: 1500,
+                currency: 'eur',
+              },
+              display_name: 'Next day air',
+              // Delivers in exactly 1 business day
+              delivery_estimate: {
+                minimum: {
+                  unit: 'business_day',
+                  value: 1,
+                },
+                maximum: {
+                  unit: 'business_day',
+                  value: 1,
+                },
+              }
+            }
+          },
+        ],
       });
     
       setTimeout(async () => 

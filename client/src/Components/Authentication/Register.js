@@ -1,17 +1,23 @@
 import React, { useState } from 'react';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
+import { useNavigate } from 'react-router-dom';
 import nutritivApi from '../../Api/nutritivApi';
 import { OAuth } from './OAuth';
 
 export default function RegisterPage() {
   
+  const navigate = useNavigate();
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const [registerData, setRegisterData] = useState({
     username: "",
     email: "",
     password: "",
+  });
+  const [registerStatus, setRegisterStatus] = useState({
     loading: false,
     error: "",
     success: "",
-  });
+  })
   
   const handleChange = (e) => {
     setRegisterData({
@@ -21,19 +27,13 @@ export default function RegisterPage() {
   }
   
   const validation = () => {
-    setRegisterData({
-      ...registerData,
-      error: "",
-      success: ""
-    })
-    
     if(
       !registerData.username || 
       !registerData.email || 
       !registerData.password
     ) {
-      setRegisterData({
-        ...registerData,
+      setRegisterStatus({
+        loading: false,
         error: "Please fill in all the fields."
       })
       return false
@@ -44,23 +44,61 @@ export default function RegisterPage() {
   // SUBMIT
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+    setRegisterStatus({
+      loading: true,
+      error: "",
+      success: ""
+    })
+
     const isValid = validation();
     
+    // reCAPTCHA
+    if(!executeRecaptcha) {
+      setRegisterData({
+        loading: false,
+        error: "reCaptcha couldn't be loaded, please try again or contact the support."
+      })
+      return;
+    }
+    let reCaptchaToken;
+    try {
+      reCaptchaToken = await executeRecaptcha();
+    } catch(err) {
+      setRegisterStatus({
+        loading: false,
+        error: "There was an internal error with recaptcha."
+      })
+      console.error('# error in executeRecaptcha() :', err)
+    }
+    
     if(isValid) {
-      setRegisterData({...registerData, loading: true})
       try {
+        let req = {
+          ...registerData,
+          captcha: reCaptchaToken
+        } 
         await nutritivApi.post(
           '/auth/register',
-          registerData
+          req
         )
-        setRegisterData({
-          ...registerData,
-          success: "Your account has been successfully created."
+        setRegisterStatus({
+          loading: false,
+          error: "",
+          success: "Your account has been successfully created, check your email."
         })
+        // navigate(
+        //   '/login',
+        //   { state:
+        //     {
+        //       msg: "Account created, check your emails .",
+        //       success: true,
+        //       from: `/chat`
+        //     }
+        //   }
+        // )
       } catch({ response }) {
-        setRegisterData({
-          ...registerData,
+        console.log('# /auth/register error :', response)
+        setRegisterStatus({
           loading: false,
           error: response.data.err
         })
@@ -101,23 +139,23 @@ export default function RegisterPage() {
           />
         </label>
         {
-          registerData.loading && (
+          registerStatus.loading && (
             <p>
               Creating account...
             </p>
           )
         }
         {
-          registerData.error && (
+          registerStatus.error && (
             <p style={{color: "red"}}>
-              {registerData.error}
+              {registerStatus.error}
             </p>
           )
         }
         {
-          registerData.success && (
+          registerStatus.success && (
             <p style={{color: "green"}}>
-              {registerData.success}
+              {registerStatus.success}
             </p>
           )
         }

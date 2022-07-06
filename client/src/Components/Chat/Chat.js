@@ -4,79 +4,91 @@ import nutritivApi from '../../Api/nutritivApi';
 import { useDispatch, useSelector } from 'react-redux';
 import { addMessage, getLastMessageOfRoom } from '../../Redux/reducers/messages';
 
-const token = localStorage.getItem('refresh_token');
-const socket = io(
-  process.env.REACT_APP_API_ADDRESS_HOST,
-  {
-    query: { token },
-  },
-);
-
 export const Chat = () => {
+  // DISPATCH
   const dispatch = useDispatch();
-  const userId = useSelector(state => state.user._id)
-  const isAdmin = useSelector(state => state.user.isAdmin)
   
-  const [allUsers, setAllUsers] = useState(null)
-  
-  const [socketError, setSocketError] = useState("")
-  
-  // CHATS INFO
+  // USESTATES
+  // chats infos
   const [chatsInfos, setChatsInfos] = useState([])
   const [activeChatId, setActiveChatId] = useState(null)
-  
-  // CHATS CONTENT
+  // chats content
   const [chat, setChat] = useState(null)
   const [messageToAdd, setMessageToAdd] = useState(null)
   const [messageToBeSent, setMessageToBeSent] = useState("")
   const [tempMessageId, setTempMessageId] = useState(0)
+  // other
+  const [allUsers, setAllUsers] = useState(null)
+  const [socketError, setSocketError] = useState("")
+  const [socket, setSocket] = useState(null);
   
+  // SELECTORS
+  const userId = useSelector(state => state.user._id)
+  const isAdmin = useSelector(state => state.user.isAdmin)
   const lastMessageOfRoom = useSelector(state => (
     getLastMessageOfRoom(state, activeChatId)
   ))
   
+  // REFS
   const chatboxBottomRef = useRef();
   const chatRef = useRef(chat);
   
+  // OTHER
+  const token = localStorage.getItem('refresh_token');
+  
+  /* #################### */
+  
+  // ON EVERY RENDER
   useEffect(() => {
     chatRef.current = chat
   });
   
-  // ############### //
-  // ### SOCKETS ### //
-
-  // CONNECTIONS TO CHANNELS
+  // ON LOAD
   useEffect(() => {
-    socket.on('connect', () => {
-      console.log("socket-io | connected")
-    })
-    // MESSAGE
-    socket.on("chatting", ({ id, text, sender, roomId }) => {
-      console.log('# socket-io | chatting res :', id, text, sender, roomId)
-      setMessageToAdd({ id, text, sender, roomId })
-    });
-    // CREATE ROOM
-    socket.on("createRoom", ({ roomCreated }) => {
-      // console.log('# roomCreated :', roomCreated)
-    })
-    // AUTH ERROR
-    socket.on("connect_error", err => {
-      console.log('socket-io | connection error .:')
-      console.log(err);
-      setSocketError(err.message)
-    });
-    // OTHER ERROR
-    socket.on("error", err => {
-      console.log('socket-io | error .:')
-      console.log(err);
-      setSocketError(err.message)
-    });
-    return () => {
-      socket.on('disconnect', () => {
-        console.log("socket-io | disconnected")
+    if(socket) {
+      // CONNECTIONS TO CHANNELS
+      socket.on('connect', () => {
+        console.log("socket-io | connected")
       })
+      // MESSAGE
+      socket.on("chatting", ({ id, text, sender, roomId }) => {
+        console.log('# socket-io | chatting res :', id, text, sender, roomId)
+        setMessageToAdd({ id, text, sender, roomId })
+      });
+      // CREATE ROOM
+      socket.on("createRoom", ({ roomCreated }) => {
+        // console.log('# roomCreated :', roomCreated)
+      })
+      // AUTH ERROR
+      socket.on("connect_error", err => {
+        console.log('socket-io | connection error .:')
+        console.log(err);
+        setSocketError(err.message)
+      });
+      // OTHER ERROR
+      socket.on("error", err => {
+        console.log('socket-io | error .:')
+        console.log(err);
+        setSocketError(err.message)
+      });
+      return () => {
+        socket.on('disconnect', () => {
+          console.log("socket-io | disconnected")
+        })
+      }
     }
-  }, []);
+  }, [socket]);
+  
+  useEffect(() => {
+    if(token) {
+      setSocket(io(
+        process.env.REACT_APP_API_ADDRESS_HOST,
+        {
+          query: { token },
+        },
+      ))
+    }
+  }, [token])
   
   // ADD INCOMING MESSAGES TO REDUX
   useEffect(() => {
@@ -104,8 +116,6 @@ export const Chat = () => {
       console.log('# lastMessageOfRoom :', lastMessageOfRoom)
     // )
   }, [lastMessageOfRoom]);
-  
-  // ############### //
   
   // GET CHATS INFO
   useEffect(() => {
@@ -141,12 +151,13 @@ export const Chat = () => {
     }
     fetchApi();
   }, []);
-
+  
   // ACTIVE CHAT
   useEffect(() => {
     let roomId = activeChatId // ?
+    let token = localStorage.getItem("refresh_token")
     roomId && socket.emit("createRoom", ({ token }))
-
+    
     let fetchApi = async () => {
       try {
         const { data } = await nutritivApi.get(
@@ -176,6 +187,8 @@ export const Chat = () => {
   // SEND MESSAGE
   const handleSendMessage = async (e) => {
     e.preventDefault();
+    
+    let token = localStorage.getItem("refresh_token")
     
     setTempMessageId(tempMessageId + 1)
     setChat({

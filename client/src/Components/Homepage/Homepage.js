@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { useSelector } from 'react-redux';
 import styles from './Homepage.module.scss';
@@ -6,14 +6,28 @@ import { Scene } from '../3D/Scene';
 
 const releases = [
   {
-    version: "v1.2.1",
+    version: "v1.4.0",
+    note: "",
+    changes: [
+      "3D models",
+    ]
+  },
+  {
+    version: "v1.3.0",
+    note: "",
+    changes: [
+      "ReCaptcha",
+    ]
+  },
+  {
+    version: "v1.2.0",
     note: "",
     changes: [
       "Account Deletion",
     ]
   },
   {
-    version: "v1.1.1",
+    version: "v1.1.0",
     note: "",
     changes: [
       "2FA Authentication (Enable/Disable)",
@@ -43,6 +57,7 @@ const releases = [
 
 export const Homepage = () => {
   const loggedIn = useSelector(state => state.user.loggedIn)
+  
   const pageAnimation = {
     exit: {
       opacity: 0,
@@ -111,7 +126,16 @@ export const Homepage = () => {
           width: "500px"
       }}>
         <Canvas shadows>
-          <Scene />
+          <Scene type="pill" />
+        </Canvas>
+      </div>
+      <div style={{
+          background: "transparent", 
+          height: "500px", 
+          width: "500px"
+      }}>
+        <Canvas shadows>
+          <Scene type="jelly" />
         </Canvas>
       </div>
       

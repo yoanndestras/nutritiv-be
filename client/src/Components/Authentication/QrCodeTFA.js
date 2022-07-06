@@ -58,7 +58,7 @@ export const QrCodeTFA = ({ qrCodeUrl, qrCodeSecret, setTFAStatus }) => {
     e.preventDefault();
     const newTwoFaToken = localStorage.getItem('new_twofa_token')
     try {
-      const { data } = await nutritivApi.post(
+      const { data } = await nutritivApi.put(
         `/auth/enableTFA`,
         {
           code: inputTFA.code,

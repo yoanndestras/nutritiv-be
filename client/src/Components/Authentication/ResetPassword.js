@@ -42,7 +42,7 @@ export const ResetPassword = () => {
   const handleResetPassword = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await nutritivApi.post(
+      const { data } = await nutritivApi.put(
         `/auth/new_password/?token=${pwdToken}`,
         {
           newPass: pwd.newPassword,

@@ -44,7 +44,7 @@ export const ProfileTFA = () => {
   const handleDisableTFA = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await nutritivApi.post(
+      const { data } = await nutritivApi.put(
         `/auth/disableTFA`,
         {
           code: inputTFA.code,

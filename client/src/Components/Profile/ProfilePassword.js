@@ -1,118 +1,69 @@
-import React, { useReducer } from 'react'
+import React, { useState } from 'react'
 import nutritivApi from '../../Api/nutritivApi'
-
-const reducer = (prevState, action) => {
-  const { type, key, value } = action;
-  
-  if(type === 'INPUT') {
-    return {
-      ...prevState,
-      inputs: {
-        ...prevState.inputs,
-        [key]: value
-      }
-    } 
-  } else if(type === 'CLEAR_INPUTS') {
-    const clearedInputs = Object.keys(prevState.inputs).map(v => (
-      prevState.inputs[v] = ""
-    ))
-    return {
-      ...prevState,
-      inputs: clearedInputs
-    }
-  } else if(type === 'API') {
-    return {
-      ...prevState,
-      [key]: value,
-    }
-  } else if(type === 'LOADING') {
-    return {
-      ...prevState,
-      [key]: value
-    }
-  } else if(type === 'ERROR') {
-    return {
-      ...prevState,
-      errors: {
-        ...prevState.errors,
-        [key]: value
-      }
-    }
-  } else {
-    throw new Error(`useReducer -> ${type} does not exists`);
-  }
-}
 
 export const ProfilePassword = () => {
   
-  const [state, dispatch] = useReducer(reducer, {
-    inputs: {
-      oldPass: "",
-      newPass: "",
-      confirmNewPass: "",
-    },
-    errors: {
-      isEmpty: false,
-      isNotMatching: false,
-    },
-    loading: false,
-    response: null
+  const [passwordInput, setPasswordInput] = useState({
+    oldPass: "",
+    newPass: "",
+    confirmNewPass: ""
   })
-  const { inputs, errors, loading, response } = state;
+  const [success, setSuccess] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
   
-  const changeState = (type, key, value) => {
-    dispatch({ type, key, value })
+  const passwordInputsValidation = () => {
+    if(
+      !passwordInput.oldPass ||
+      !passwordInput.newPass ||
+      !passwordInput.confirmNewPass
+    ) {
+      setError("Please fill in all the fields.")
+      return false;
+    }
+    if(passwordInput.newPass !== passwordInput.confirmNewPass) {
+      setError("The password do not match the confirmation field.")
+      return false;
+    }
+    return true;
   }
   
-  const passwordInputsValidation = () => {  
-    
-    changeState('API', 'response', null)
-    let passwordEmpty = false;
-    let passwordNotMatching = false;
-    
-    if(
-      !inputs.oldPass ||
-      !inputs.newPass ||
-      !inputs.confirmNewPass
-    ) {
-      changeState('ERROR', 'isEmpty', true)
-      passwordEmpty = true;
-    } else {
-      changeState('ERROR', 'isEmpty', false)
-    }
-    
-    if(inputs.newPass !== inputs.confirmNewPass) {
-      changeState('ERROR', 'isNotMatching', true)
-      passwordNotMatching = true;
-    } else {
-      changeState('ERROR', 'isNotMatching', false)
-    }
-    return !passwordEmpty && !passwordNotMatching
+  const handlePasswordInputChange = (e) => {
+    setPasswordInput({
+      ...passwordInput,
+      [e.target.name]: e.target.value
+    })
   }
   
   const handleSubmitUpdatePassword = async (e) => {
     e.preventDefault()
+    setSuccess("")
+    setError("")
     
     const isValid = passwordInputsValidation();
     
     if(isValid) {
-      changeState('LOADING', 'serverResponse', true)
-      changeState('CLEAR_INPUTS')
+      setLoading(true)
+      setError("")
       try {
-        const { data } = await nutritivApi.put(
+        await nutritivApi.put(
           `/users/reset_password`,
-          inputs
+          passwordInput
         )
-        changeState('API', 'response', data)
-        changeState('CLEAR_INPUTS')
+        setSuccess("Password successfully changed.")
+        setPasswordInput({
+          oldPass: "",
+          newPass: "",
+          confirmNewPass: ""
+        })
       } catch (err) {
-        changeState('API', 'response', {})
-        console.log("# /users/reset_password :", err)
+        setError(err.response?.data?.err)
+        setSuccess("")
+        console.log('# /users/reset_password :', err)
       }
-      changeState('LOADING', 'serverResponse', false)
+      setLoading(false)
     }
   }
-
   return (
     <div>
       <form onSubmit={handleSubmitUpdatePassword}>
@@ -122,56 +73,41 @@ export const ProfilePassword = () => {
           </h3>
           <br />
           <input
-            onChange={e =>
-              changeState('INPUT', 'oldPass', e.target.value)
-            }
+            onChange={handlePasswordInputChange}
             name='oldPass'
             placeholder='Current password...'
             type="password"
-            value={inputs.oldPass}
+            value={passwordInput.oldPass}
           />
           <br />
           <input
-            onChange={e =>
-              changeState('INPUT', 'newPass', e.target.value)  
-            }
+            onChange={handlePasswordInputChange}
             name='newPass'
             placeholder='New password...'
             type="password"
-            value={inputs.newPass}
+            value={passwordInput.newPass}
           />
           <br />
           <input
-            onChange={e =>
-              changeState('INPUT', 'confirmNewPass', e.target.value)
-            }
+            onChange={handlePasswordInputChange}
             name='confirmNewPass'
             placeholder='Confirm new password...'
             type="password"
-            value={inputs.confirmNewPass}
+            value={passwordInput.confirmNewPass}
           />
           <br />
           <input
-            type="submit"
+            type="submit" 
             value="Change password"
           />
           <br />
           { 
-            errors.isNotMatching && (
+            error && (
               <span style={{color: "red"}}>
-                The password does not match the confirmation field.
+                {error}
               </span>
             )
           }
-          <br />
-          { 
-            errors.isEmpty && (
-              <span style={{color: "red"}}>
-                Please fill in all the fields.
-              </span>
-            )
-          }
-          <br />
           {
             loading && (
               <span>
@@ -179,18 +115,11 @@ export const ProfilePassword = () => {
               </span>
             )
           }
-          <br />
           {
-            response && (
-              response.success ? (
-                <span style={{color: "green"}}>
-                  Password successfully changed.
-                </span>
-              ) : (
-                <span style={{color: "red"}}>
-                  There was an error changing your password.
-                </span>
-              )
+            success && (
+              <span style={{color: "green"}}>
+                {success}
+              </span>
             )
           }
         </span>

@@ -17,10 +17,13 @@ import { Homepage } from './Components/Homepage/Homepage';
 import { PageNotFound } from './Components/PageNotFound/PageNotFound';
 import { ChatConnection } from './Components/Chat/ChatConnection';
 import { AnimatePresence } from 'framer-motion';
-import Navbar from './Components/Navbar/Navbar';
+import Navbar from './Components/Header/Navbar';
 import { ForgotPassword } from './Components/Authentication/ForgotPassword';
 import { ForgotTFA } from './Components/Authentication/ForgotTFA';
 import { ResetPassword } from './Components/Authentication/ResetPassword';
+import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
+import './App.scss';
+import { Footer } from './Footer/Footer';
 
 // init stripe
 const stripePromise = loadStripe(
@@ -37,8 +40,9 @@ function App() {
   const [searchParams] = useSearchParams();
   const oAuthStatus = searchParams.get('status');
   const oAuthMessage = searchParams.get('message');
-  const oAuthUsername = searchParams.get('username')
-  const oAuthAccessToken = searchParams.get('accessToken');
+  const oAuthUsername = searchParams.get('username');
+  const oAuthAccessToken = searchParams.get('oAuthToken');
+  const registrationToken = searchParams.get('verificationToken');
   
   // App titles
   useEffect(() => {
@@ -91,8 +95,8 @@ function App() {
     return () => { isSubscribed = false }
   }, [dispatch, gettingUserInfo]);
   
-  // oAuth
   useEffect(() => {
+    // oAUTH
     if(
       oAuthStatus === "successLogin" ||
       oAuthStatus === "successRegistration"
@@ -122,14 +126,43 @@ function App() {
           } 
         }
       )
+    // VERIFY REGISTRATION
+    } else if(registrationToken) {
+      let isMounted = true;
+      let fetchApi = async () => {
+        console.log('# registrationToken :', registrationToken)
+        try {
+          await nutritivApi.put(
+            `/auth/verify_email/?token=${registrationToken}`
+          )
+          console.log('# isMounted :', isMounted)
+          if(isMounted){
+            navigate(
+              '/login',
+              { state:
+                {
+                  msg: "Account verified, you can login.",
+                  status: "success",
+                }
+              }
+            )
+          }
+        } catch(err) {
+          console.error(
+            'auth/verify_email:', err
+          )
+        }
+      }
+      fetchApi();
     }
   }, [
-    navigate, 
-    oAuthAccessToken, 
-    oAuthMessage, 
-    oAuthStatus, 
-    oAuthUsername
-  ]);
+      navigate, 
+      oAuthAccessToken, 
+      oAuthMessage, 
+      oAuthStatus, 
+      oAuthUsername, 
+      registrationToken
+    ]);
   
   // RESTRICTED ROUTES
   const Restricted = ({ routeType }) => {
@@ -168,39 +201,44 @@ function App() {
       stripe={stripePromise}
       // options={stripeOptions}
     >
-      <Navbar />
-      <AnimatePresence exitBeforeEnter>
-        <Routes location={location} key={location.pathname}>
-          {/* PUBLIC */}
-          {/* <Route path="/" element={<GeneralLayout/>}> */}
-            {/* <Route index element={<Welcome/>} /> */}
-            <Route path="/" element={<Navigate replace to="/welcome"/>} />
-            <Route path="/welcome" element={<Homepage/>} />
-            <Route path="/products" element={<Products/>} />
-            <Route path="/product">
-              <Route path=":productTitle" element={<ProductPage/>} />
-            </Route>
-            <Route path="/chat" element={<ChatConnection/>} /> 
-            <Route path="/cancel" element={<CheckoutCancel/>} /> 
-            <Route path="/success" element={<CheckoutSuccess/>} />
-            <Route path="/page-not-found" element={<PageNotFound/>} />
-            {/* PRIVATE */}
-            {/* RESTRICTED - USER */}
-            <Route element={<Restricted routeType="user" />}>
-              <Route path="/profile" element={<Profile/>} />
-              <Route path="/cart" element={<Cart/>} />
-            </Route>
-            {/* RESTRICTED - GUEST */}
-            <Route element={<Restricted routeType="guest" />}>
-              <Route path="/login" element={<Login/>} />
-              <Route path="/register" element={<Register/>} />
-              <Route path="/forgot-password" element={<ForgotPassword/>} />
-              <Route path="/reset-password" element={<ResetPassword/>} />
-              <Route path="/forgot-2FA" element={<ForgotTFA/>} />
-            </Route>
-          {/* </Route> */}
-        </Routes>
-      </AnimatePresence>
+      <GoogleReCaptchaProvider
+        reCaptchaKey='6Lekw4sgAAAAAIY_DQO_d8uE7fOBQr-g9lqEOqGP'
+      >
+        <Navbar />
+        <AnimatePresence exitBeforeEnter>
+          <Routes location={location} key={location.pathname}>
+            {/* PUBLIC */}
+            {/* <Route path="/" element={<GeneralLayout/>}> */}
+              {/* <Route index element={<Welcome/>} /> */}
+              <Route path="/" element={<Navigate replace to="/welcome"/>} />
+              <Route path="/welcome" element={<Homepage/>} />
+              <Route path="/products" element={<Products/>} />
+              <Route path="/product">
+                <Route path=":productTitle" element={<ProductPage/>} />
+              </Route>
+              <Route path="/chat" element={<ChatConnection/>} /> 
+              <Route path="/cancel" element={<CheckoutCancel/>} /> 
+              <Route path="/success" element={<CheckoutSuccess/>} />
+              <Route path="/page-not-found" element={<PageNotFound/>} />
+              {/* PRIVATE */}
+              {/* RESTRICTED - USER */}
+              <Route element={<Restricted routeType="user" />}>
+                <Route path="/profile" element={<Profile/>} />
+                <Route path="/cart" element={<Cart/>} />
+              </Route>
+              {/* RESTRICTED - GUEST */}
+              <Route element={<Restricted routeType="guest" />}>
+                <Route path="/login" element={<Login/>} />
+                <Route path="/register" element={<Register/>} />
+                <Route path="/forgot-password" element={<ForgotPassword/>} />
+                <Route path="/reset-password" element={<ResetPassword/>} />
+                <Route path="/forgot-2FA" element={<ForgotTFA/>} />
+              </Route>
+            {/* </Route> */}
+          </Routes>
+        </AnimatePresence>
+        <Footer />
+      </GoogleReCaptchaProvider>
     </Elements>
   );
 }

@@ -26,7 +26,7 @@ async(req, res, next) =>
   try
   {
     res.status(200).json(req.chats);
-  }catch(err){next(err)}
+  }catch(err){next(err);}
 })
 
 router.get("/single/:chatId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, chat.getSingleChatById,
@@ -35,7 +35,7 @@ async(req, res, next) =>
   try
   {
     res.status(200).json(req.chat);
-  }catch(err){next(err)}
+  }catch(err){next(err);}
 })
 
 router.post("/create", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
@@ -44,7 +44,7 @@ chat.verifyChatNotExist, chat.createChat, async(req, res, next) =>
   try
   {
     res.status(201).json(req.chat);
-  }catch(err){next(err)}
+  }catch(err){next(err);}
 })
 
 router.post("/message/:chatId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
@@ -53,7 +53,7 @@ chat.verifyChatExist, chat.createMessageByChatId, async(req, res, next) =>
   try
   {
     res.status(201).send(req.message);
-  }catch(err){next(err)}
+  }catch(err){next(err);}
 })
 
 
@@ -71,7 +71,7 @@ auth.verifyAdmin, chat.verifyChatExist, async(req, res, next) =>
         success : true, 
         message : "Chat deleted"
       });
-  }catch(err) {next(err)}
+  }catch(err) {next(err);}
   
 })
 
@@ -101,7 +101,7 @@ chat.verifyChatExist, async(req, res, next) =>
         message : "Messages from this chat deleted successfully",
         chat: chat
       });
-  }catch(err) {next(err)}
+  }catch(err) {next(err);}
   
 })
 
@@ -147,7 +147,7 @@ async (req, res, next) =>
     {
         let income = await Chat.deleteMany( { "createdAt" : {$gt : lastDay } })
         res.status(200).json(income);
-    }catch(err){next(err)}
+    }catch(err){next(err);}
 
 })
 

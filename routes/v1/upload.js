@@ -3,7 +3,7 @@ const multer = require('multer');
 const { nanoid } = require('nanoid');
 
 // CONTROLLERS
-const auth = require('../../controllers/v1/authController');
+// const auth = require('../../controllers/v1/authController');
 const cors = require('../../controllers/v1/corsController');
 
 //OPTIONS FOR CORS CHECK

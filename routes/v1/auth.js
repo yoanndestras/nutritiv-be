@@ -2,6 +2,7 @@ const router = require("express").Router();
 const User = require("../../models/User");
 
 const   speakeasy = require("speakeasy"),
+        limitter = require('express-rate-limit'),
         qrcode = require("qrcode"),
         passport = require("passport");
         randomWords = require('random-words');
@@ -11,6 +12,18 @@ const cors = require('../../controllers/v1/corsController');
 const auth = require("../../controllers/v1/authController");
 const mailer = require("../../controllers/v1/mailerController");
 const {upload} = require('./upload');
+
+router.use( 
+    limitter(
+        {
+            windowMs: 5000,
+            max: 3,
+            message: {
+                code: 429,
+                message: "Too many requests"
+            }
+        })
+    ) // LIMIT SPAM REQUESTS TO MAX PER MILLISECONDS
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
@@ -110,7 +123,8 @@ router.get("/verify_forget_pwd", auth.verifyEmailToken, async(req, res, next) =>
 });
 
 //GENERATE NEW EMAIL TOKEN
-router.get("/new_register_email", auth.verifyNewEmail, mailer.sendVerifyAccountMail, async(req, res, next) =>
+router.get("/new_register_email", auth.verifyNewEmail, mailer.sendVerifyAccountMail, 
+async(req, res, next) =>
 {
     try
     {
@@ -122,23 +136,6 @@ router.get("/new_register_email", auth.verifyNewEmail, mailer.sendVerifyAccountM
     }catch(err){next(err)}
 });
 
-//USER VERIFICATION
-router.get("/verify_email", auth.verifyNewUserEmail, async(req, res, next) =>
-{
-    const user = req.user;
-    try
-    {
-        user.isVerified = true;
-        await user.save(() => 
-                {
-                    res.status(200).json(
-                        {
-                            success: true, 
-                            status: 'User Verification Successfull!'
-                        });
-                })
-    }catch(err){next(err)}
-});
 
 //FORGET PASSWORD EMAIL
 router.post("/forget_pwd", auth.verifyEmailExist, mailer.sendForgetPassword, async(req, res, next) =>
@@ -155,37 +152,18 @@ router.post("/forget_pwd", auth.verifyEmailExist, mailer.sendForgetPassword, asy
 
 //REGISTER
 router.post("/register", auth.verifyUsername, auth.verifyEmail, auth.verifyEmailSyntax, 
-auth.verifyPasswordSyntax, auth.verifyCaptcha, mailer.sendVerifyAccountMail, async(req, res, next) =>
+auth.verifyPasswordSyntax, auth.verifyCaptcha, auth.register, mailer.sendVerifyAccountMail, async(req, res, next) =>
 {
     try
     {
-        User.register(new User({username: req.body.username, email: req.body.email}), 
-        req.body.password, async(err, user) =>
-        {
-            if(err)
+        res.status(201).json(
             {
-                return res.status(500).json(
-                    {
-                        success: false, 
-                        status: 'Registration Failed! Please try again later!', 
-                        err: err
-                    });
-            } 
-            else 
-            {
-                await user.save(() => 
-                {
-                    res.status(201).json(
-                        {
-                            success: true, 
-                            status: 'Registration Successfull! Check your emails!'
-                        });
-                })
-            }
-        });
+                success: true, 
+                status: 'Registration Successfull! Check your emails!'
+            });
     }catch(err){next(err)}
 });
-
+    
 //NEW PASSWORD AND RESET LOGIN ATTEMPTS
 //auth.verifyEmailToken
 router.post("/new_password", auth.verifyNewUserEmail, auth.verifyNewPasswordSyntax, 
@@ -284,33 +262,6 @@ async(req, res, next) =>
 //     }catch(err){next(err)}
 // })
 
-//DISABLE TFA
-router.post('/disableTFA', auth.verifyUser, auth.verifyRefresh, auth.disableTFA, async(req, res, next) =>
-{
-    try
-    {
-        res.status(201).json(
-            {
-                success: true, 
-                status: 'Your successfully disabled TFA!',
-            });
-    }catch(err){next(err)}
-})
-
-//VERIFY TFA
-router.post('/enableTFA', cors.corsWithOptions, auth.verifyUserNewTFA, auth.verifyRefresh, 
-auth.enableTFA, async(req, res, next) =>
-{
-    try
-    {
-        res.status(201).json(
-            {
-                success: true, 
-                status: 'Your successfully enabled TFA!',
-                TFARecovery
-            });
-    }catch(err){next(err)}
-})
 
 //CREATE TOKEN FROM TOTP SECRET
 router.post('/TFAValidation', cors.corsWithOptions, auth.verifyNoRefresh, auth.verifyUserTFA, 
@@ -319,33 +270,33 @@ auth.TFAValidation, async(req, res, next) =>
     try
     {
         const accessToken = req.accessToken, refreshToken = req.refreshToken, isAdmin = req.user.isAdmin;
-
-        res .header('access_token', accessToken)
-            .header('refresh_token', refreshToken)
-            .cookie("refresh_token", refreshToken, 
-            {
-                httpOnly: true,
-                secure: process.env.REF_JWT_SEC_COOKIE === "production"
-            })
-            .status(200).json(
-                {
-                    success: true,
-                    loggedIn: true,
-                    isAdmin: isAdmin,
-                    status: 'Login Successful!'
-                });
-    
-    }catch(err){next(err)}
-})
-
-//LOGIN
-router.post("/login", cors.corsWithOptions, auth.verifyCaptcha, auth.login, async(req, res, next)=>
-{
-    try
-    {
-        const accessToken = req.accessToken, refreshToken = req.refreshToken, isAdmin = req.user.isAdmin;
         
         res .header('access_token', accessToken)
+        .header('refresh_token', refreshToken)
+        .cookie("refresh_token", refreshToken, 
+        {
+            httpOnly: true,
+            secure: process.env.REF_JWT_SEC_COOKIE === "production"
+        })
+        .status(200).json(
+            {
+                success: true,
+                loggedIn: true,
+                isAdmin: isAdmin,
+                status: 'Login Successful!'
+            });
+            
+        }catch(err){next(err)}
+    })
+    
+    //LOGIN
+    router.post("/login", cors.corsWithOptions, auth.verifyCaptcha, auth.login, async(req, res, next)=>
+    {
+        try
+        {
+            const accessToken = req.accessToken, refreshToken = req.refreshToken, isAdmin = req.user.isAdmin;
+            
+            res .header('access_token', accessToken)
             .header('refresh_token', refreshToken)
             .cookie("refresh_token", refreshToken, 
             {
@@ -360,15 +311,79 @@ router.post("/login", cors.corsWithOptions, auth.verifyCaptcha, auth.login, asyn
                     isAdmin: isAdmin,
                     status: 'Login Successful!'
                 });
-    
+                
+            }catch(err){next(err)}
+        });
+        
+//DISABLE TFA
+router.put('/disableTFA', auth.verifyUser, auth.verifyRefresh, auth.disableTFA, async(req, res, next) =>
+{
+    try
+    {
+        res.status(201).json(
+            {
+                success: true, 
+                status: 'Your successfully disabled TFA!',
+            });
+        }catch(err){next(err)}
+})
+                
+//VERIFY TFA
+router.put('/enableTFA', cors.corsWithOptions, auth.verifyUserNewTFA, auth.verifyRefresh, 
+auth.enableTFA, async(req, res, next) =>
+{
+    try
+    {
+        let TFARecovery = req.TFARecovery;
+        res.status(201).json(
+            {
+                success: true, 
+                status: 'Your successfully enabled TFA!',
+                TFARecovery
+            });
+    }catch(err){next(err)}
+})
+
+//USER VERIFICATION
+router.put("/verify_email", auth.verifyNewUserEmail, async(req, res, next) =>
+{
+    const user = req.user;
+    try
+    {
+        user.isVerified = true;
+        await user.save(() => 
+                {
+                    res.status(201).json(
+                        {
+                            success: true, 
+                            status: 'User Verification Successfull!'
+                        });
+                })
     }catch(err){next(err)}
 });
-
+        
 // CLEAR COOKIE TOKEN // LOGOUT
 router.delete("/logout", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async(req, res, next) =>
 {   
     try
     {
+                    //USER VERIFICATION
+                    router.put("/verify_email", auth.verifyNewUserEmail, async(req, res, next) =>
+                    {
+                        const user = req.user;
+                        try
+                        {
+                            user.isVerified = true;
+                            await user.save(() => 
+                                    {
+                                        res.status(201).json(
+                                            {
+                                                success: true, 
+                                                status: 'User Verification Successfull!'
+                                            });
+                                    })
+                        }catch(err){next(err)}
+                    });
         res .clearCookie("refresh_token")
             .status(200)
             .json(

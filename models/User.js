@@ -12,6 +12,10 @@ const UserSchema = new Schema
         required: true,
         unique: true
     },
+    customerId :
+    {
+        type: String,
+    },
     email: 
     {
         type: String,

@@ -154,7 +154,7 @@ exports.cartExist = async(userId, title, shape, imgs, newProdQty, calculatedPric
         if(updatedCart){await updatedCart.save()};
         
         let roundedAmount =  parseFloat((updatedCart?.amount?.value + calculatedPrice).toFixed(2));
-        setRoundedValue = roundedAmount ? await Cart.findOneAndUpdate({userId : userId}, {$set:{"amount.value" : roundedAmount}}) : null;
+        let setRoundedValue = roundedAmount ? await Cart.findOneAndUpdate({userId : userId}, {$set:{"amount.value" : roundedAmount}}) : null;
         if(setRoundedValue){await setRoundedValue.save()};
         
         return {updatedCart: await setRoundedValue}
@@ -344,7 +344,7 @@ exports.verifyStock = async(userId, productId, productLoad) =>
         }
         else
         {
-            err = new Error('Product not found');
+            let err = new Error('Product not found');
             err.statusCode = 400;
             return {err}
         }
@@ -378,7 +378,7 @@ exports.deleteProductInCart = async(req, res, next) =>
                 return productItems 
             }
         }) : null;
-        if(product){product = product.flat()};
+        // if(product){product = product.flat()};
         
         if(!amount)
         {
@@ -386,7 +386,7 @@ exports.deleteProductInCart = async(req, res, next) =>
             err.statusCode = 400;
             return next(err);
         }
-        else if(amount)
+        else
         {
             const deleteOperation = (await cart.deleteOperation(userId, newProdLoad, qty, productId, amount));
             let total = deleteOperation.setRoundedValue ? deleteOperation.setRoundedValue.amount.value <=  0 : null;
@@ -396,7 +396,7 @@ exports.deleteProductInCart = async(req, res, next) =>
             {
                 let prodIndex = deleteOperation.setRoundedValue.products.findIndex(product => product.productId.toString() === productId)
                 let productExist = deleteOperation.setRoundedValue ? (deleteOperation.setRoundedValue.products[prodIndex].productItems).length > 0 : null;
-                pullProduct = productExist === false ? await Cart.findOneAndUpdate(
+                let pullProduct = productExist === false ? await Cart.findOneAndUpdate(
                     {userId : userId}, 
                     {
                         $pull: 
@@ -455,7 +455,7 @@ exports.deleteProductInCartById = async(req, res, next) =>
         const existingCart = await Cart.findOne({userId : userId}), cartProducts = existingCart?.products;
         const prodExist =  cartProducts ? await cartProducts.some(product => product.productId.toString() === productId) : null;
         
-        let product = prodExist ? await cartProducts.filter((el) => 
+        prodExist && await cartProducts.filter((el) => 
         {
             if(el.productId.toString() === productId) 
             {
@@ -471,8 +471,8 @@ exports.deleteProductInCartById = async(req, res, next) =>
                 })
                 return productItems 
             }
-        }) : null;
-        if(product){product = product.flat()};
+        });
+        // if(product){product = product.flat()};
         
         if(!amount)
         {
@@ -480,7 +480,7 @@ exports.deleteProductInCartById = async(req, res, next) =>
             err.statusCode = 400;
             return next(err);
         }
-        else if(amount)
+        else
         {
             const deleteOperation = (await cart.deleteOperationById(userId, load, qty, productId, amount));
             let total = deleteOperation.setRoundedValue ? deleteOperation?.setRoundedValue?.amount?.value <=  0 : null;
@@ -489,7 +489,7 @@ exports.deleteProductInCartById = async(req, res, next) =>
             {
                 let prodIndex = deleteOperation.setRoundedValue.products.findIndex(product => product.productId.toString() === productId)
                 let productExist = deleteOperation.setRoundedValue ? (deleteOperation.setRoundedValue.products[prodIndex].productItems).length > 0 : null;
-                pullProduct = productExist === false ? await Cart.findOneAndUpdate(
+                let pullProduct = productExist === false ? await Cart.findOneAndUpdate(
                     {userId : userId}, 
                     {
                         $pull: 
@@ -528,7 +528,7 @@ exports.deleteOperationById = async(userId, load, qty, productId, amount) =>
         
         let roundedAmount =  parseFloat((updatedCart?.amount?.value - amount).toFixed(2));
         let roundedTotalQty = parseInt((updatedCart?.totalQuantity - qty));
-        setRoundedValue = roundedAmount !== null && roundedTotalQty !== null ? await Cart.findOneAndUpdate({userId : userId}, {$set:{"amount.value" : roundedAmount, totalQuantity : roundedTotalQty}}) : null;
+        let setRoundedValue = roundedAmount !== null && roundedTotalQty !== null ? await Cart.findOneAndUpdate({userId : userId}, {$set:{"amount.value" : roundedAmount, totalQuantity : roundedTotalQty}}) : null;
         
         let cart = await Cart.findOne({userId : userId});
         await cart.save();

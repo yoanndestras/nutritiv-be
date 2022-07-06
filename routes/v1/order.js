@@ -1,6 +1,8 @@
 const Order = require("../../models/Order");
-const Cart = require("../../models/Cart");
+// const Cart = require("../../models/Cart");
 const router = require("express").Router();
+const stripe = require("stripe")(process.env.STRIPE_KEY);
+const fetch = require("node-fetch");
 
 // CONTROLLERS
 const cors = require('../../controllers/v1/corsController');
@@ -75,9 +77,90 @@ async (req, res, next) =>
     }catch(err){next(err)}
 });
 
+router.get('/success', cors.corsWithOptions, async (req, res, next) =>
+{
+    try
+    {
+        const session = await stripe.checkout.sessions.retrieve(req.query.session_id);
+        const customer = await stripe.customers.retrieve(session.customer);
+
+        let response = await fetch(process.env.SERVER_ADDRESS + 'v1/orders/', 
+        {
+            method: 'POST',
+            body: JSON.stringify({
+                street : session.shipping.address.line1,
+                zip : session.shipping.address.postal_code,
+                city : session.shipping.address.city,
+                name : session.shipping.name,
+                country : session.shipping.address.country,
+                customerId : session.customer,
+                customer_email : customer.email,
+                phone : customer.phone,
+                order_id : session.id
+            }),
+            headers: 
+            {
+                "Origin": process.env.SERVER_ADDRESS,
+                "Content-type": "application/json; charset=UTF-8"
+            },
+        });
+        let data = await response.json();
+        
+        res.status(200).json(
+            {
+                data
+            });
+    
+    }catch(err){next(err);}
+})
+
+router.get('/cancel', cors.corsWithOptions, async (req, res, next) =>
+{
+    try
+    {
+        const session = await stripe.checkout.sessions.retrieve(req.query.session_id);
+        const customer = await stripe.customers.retrieve(session.customer);
+
+        let session_id = req.query.session_id
+        
+        let response = await fetch(process.env.SERVER_ADDRESS + 'v1/orders/expire-checkout-session', 
+        {
+            method: 'POST',
+            body: JSON.stringify({
+                session_id : session_id,
+                customerId : customer.id
+            }),
+            headers: 
+            {
+                "Origin": process.env.SERVER_ADDRESS,
+                "Content-type": "application/json; charset=UTF-8"
+            },
+        });
+        let data = await response.json();
+        
+        res.status(200).json(
+            {
+                data
+            });
+        
+    
+    }catch(err){next(err);}
+})
+
+router.post('/expire-checkout-session', order.countInStock, async (req, res, next) => 
+{
+    const session_id = req.body.session_id;
+    const session = await stripe.checkout.sessions.expire(session_id);
+
+    res.status(200).json(
+        {
+            success: true,
+            status : "Your payment session expired!"
+        });
+});
+
 // CREATE ORDER
-router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
-order.newOrder, async (req, res, next) =>
+router.post("/", cors.corsWithOptions, order.newOrder, async (req, res, next) =>
 {    
     try
     {
@@ -90,7 +173,7 @@ order.newOrder, async (req, res, next) =>
             const order = await Order.findById(req.order._id);
             order.status = "delivered";
             await order.save();
-
+            
             res.status(200).json(
                 {
                     success: true,

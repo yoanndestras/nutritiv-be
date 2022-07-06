@@ -42,7 +42,7 @@ const trimmer = (req, res, next) =>
         }
     }
     next();
-} // FUNCTION THAT REMOVE WHITESPACE
+}; // FUNCTION THAT REMOVE WHITESPACE
 
 router.use(trimmer);
 

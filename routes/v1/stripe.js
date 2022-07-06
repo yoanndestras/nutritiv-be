@@ -1,22 +1,29 @@
 const router = require("express").Router();
 const stripe = require("stripe")(process.env.STRIPE_KEY);
+const fetch = require("node-fetch");
+const order = require('../../controllers/v1/ordersController')
+
 const Cart = require("../../models/Cart");
+// const Order = require("../../models/Order");
+const User = require("../../models/User");
 const Product = require("../../models/Product");
 
 // CONTROLLERS
 const cors = require('../../controllers/v1/corsController');
 const auth = require('../../controllers/v1/authController');
+// const order = require('../../controllers/v1/ordersController')
 
-router.post("/create-checkout-session", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
-async(req, res, next)  => 
+router.post("/create-checkout-session", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh,
+order.countInStock, async(req, res, next)  => 
 {
   try
   {
-    const userId = req.user._id;
+    let {_id, email, customerId} = req.user, userId = _id, userEmail = email;
     const cart = await Cart.findOne({userId : userId});
-
+    // const {street, zip, city, country, phoneNumber} = req.body;
+    
     if(cart)
-    {
+    {        
       let line_items =  await Promise.all(cart.products.map(
         async(product) => 
         {
@@ -46,19 +53,162 @@ async(req, res, next)  =>
         }
       ))
       line_items = line_items.flat();
-          
+      
+      const customer =  await stripe.customers.create();
+      
+      let customerIdExist = !customerId  ? await User.findOneAndUpdate(
+        {_id},
+        {
+          $set:
+          {
+            "customerId": customer.id
+          }
+        },
+        {new: true}
+      ) : null;
+      
+      !customerId && await customerIdExist.save();
+      let stripeCustomerId = !customerIdExist ? customerId : customerIdExist.customerId;
+      
+      if(!customerIdExist)
+      {
+        const sessions = await stripe.checkout.sessions.list({
+          customer: customerId,
+        });
+        
+        await Promise.all(sessions.data.map(async session => 
+          {
+            if(session.status === 'open')
+            {
+              await fetch(process.env.SERVER_ADDRESS + 'v1/orders/cancel?session_id=' + session.id, 
+              {
+                  method: 'GET',
+                  headers: 
+                  {
+                      "Origin": process.env.SERVER_ADDRESS,
+                  },
+              });
+              return session
+            }
+          }
+        ));
+      }
       const session = await stripe.checkout.sessions.create({
         line_items,
         mode: 'payment',
-        success_url: process.env.SERVER_ADDRESS + 'success',
-        cancel_url: process.env.SERVER_ADDRESS + 'cancel',
+        payment_method_types : ["card", "sepa_debit"],
+        customer : stripeCustomerId,
+        customer_update : {
+          address : "auto",
+          name: "auto",
+          shipping: "auto"
+        },
         billing_address_collection: "required",
         shipping_address_collection: {
           allowed_countries: ['US', 'CA', 'FR', 'PT', 'ES']
         },
-        allow_promotion_codes: true
+        phone_number_collection: {
+          enabled: true,
+        },
+        payment_intent_data: {
+          setup_future_usage: "off_session",
+          receipt_email : userEmail,
+          // shipping : {
+          //   name : "Maison",
+          //   address : 
+          //   {
+          //     line1 : street,
+          //     city : city,
+          //     country : "FR",
+          //     postal_code : zip,
+          //   }
+          // }
+        },
+        expires_at: Math.floor(Date.now() / 1000) + 3600,
+        allow_promotion_codes: true,
+        success_url: process.env.SERVER_ADDRESS + 'v1/orders/success?session_id={CHECKOUT_SESSION_ID}',
+        cancel_url: process.env.SERVER_ADDRESS + 'v1/orders/cancel?session_id={CHECKOUT_SESSION_ID}',
+        // customer_email : userEmail,
+        // tax_id_collection: {
+          //   enabled: true,
+        // },
+        shipping_options: [
+          {
+            shipping_rate_data: {
+              type: 'fixed_amount',
+              fixed_amount: {
+                amount: 0,
+                currency: 'eur',
+              },
+              display_name: 'Free shipping',
+              // Delivers between 5-7 business days
+              delivery_estimate: {
+                minimum: {
+                  unit: 'business_day',
+                  value: 2,
+                },
+                maximum: {
+                  unit: 'business_day',
+                  value: 3,
+                },
+              }
+            }
+          },
+        // ],
+          {
+            shipping_rate_data: {
+              type: 'fixed_amount',
+              fixed_amount: {
+                amount: 1500,
+                currency: 'eur',
+              },
+              display_name: 'Next day air',
+              // Delivers in exactly 1 business day
+              delivery_estimate: {
+                minimum: {
+                  unit: 'business_day',
+                  value: 1,
+                },
+                maximum: {
+                  unit: 'business_day',
+                  value: 1,
+                },
+              }
+            }
+          },
+        ],
       });
     
+      setTimeout(async () => 
+      {
+        const session_id = session.id;
+        const sessionToRetrieve = await stripe.checkout.sessions.retrieve(session_id);
+
+        if(sessionToRetrieve.status === 'open')
+        {
+          let response = await fetch(process.env.SERVER_ADDRESS + 'v1/orders/cancel?session_id=' + session_id, 
+          {
+              method: 'GET',
+              headers: 
+              {
+                  "Origin": process.env.SERVER_ADDRESS,
+              },
+          });
+          let data = await response.json();
+          
+          console.log(`data = `, data)
+        }
+        else
+        {
+            console.log(
+                {
+                    success: false,
+                    status: "Session already expired!"
+                }
+            );
+        }
+      }, 600000); // 10 minutes = 600000
+      
       res.status(200).json(
         {
           success: true,

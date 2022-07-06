@@ -105,15 +105,15 @@ exports.backupMongoDB = async(req, res, next) =>
 {
   try
   {
-    if(!req.body?.dbName || !req.body?.dbPassword || !req.body?.dbuser)
+    if(!req.body.dbName || !req.body.dbPassword || !req.body.dbUser)
     {
       let err = new Error('Missing credentials!');
       err.statusCode = 400;
       next(err);
     }
-    const DB_NAME = req.body?.dbName;
-    const DB_PASSWORD = req.body?.dbPassword;
-    const DB_USER = req.body?.dbUser;
+    const DB_NAME = req.body.dbName;
+    const DB_PASSWORD = req.body.dbPassword;
+    const DB_USER = req.body.dbUser;
     
     const date = new Date();
     const currentDay = new Date().toLocaleDateString('fr-FR').replace(/\//g,'-');

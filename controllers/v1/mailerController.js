@@ -3,18 +3,20 @@ const Order = require("../../models/Order");
 
 const sgMail = require("@sendgrid/mail");
 const auth = require("./authController");
-const path = require('path');
+// const path = require('path');
+
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 
 exports.sendVerifyAccountMail = async(req, res, next) =>
 {
     try
     {        
-        const Email_Token = auth.GenerateEmailToken(req.body.email, req.user.updatedAt);
-        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+        const updatedAt = req.updatedAt ? req.updatedAt : req.user.updatedAt;
+        const Email_Token = auth.GenerateEmailToken(req.body.email, updatedAt);
         
         const email = req.body.email;
-        const link = `${req.protocol}://${req.headers.host}/v1/auth/verify_email?token=${Email_Token}` //  ${req.headers.Host}
+        const link = `${process.env.SERVER_ADDRESS}?verificationToken=${Email_Token}` //  ${req.headers.Host}
         const mailContent = 
         {
             to: email,
@@ -41,7 +43,6 @@ exports.sendForgetPassword = async(req, res, next) =>
     try
     {        
         const Email_Token = auth.GenerateEmailToken(req.body.email, req.user.updatedAt);
-        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
         
         const email = req.body.email, user = req.user;
         const mailContent = 
@@ -63,7 +64,7 @@ exports.sendForgetPassword = async(req, res, next) =>
                     <p>Please click on the link below to reset your password.<br><br>
                     <a style="text-decoration: none;display:block; text-align: center;width:100%;font-weight: bold; padding: 10px; color: white; 
                     background-color: #00A8F3; border: none; border-radius:  5px;"
-                    href="${process.env.OAUTH_ADDRESS}v1/auth/verify_forget_pwd?token=${Email_Token}">Reset Password</a><br>
+                    href="${process.env.SERVER_ADDRESS}v1/auth/verify_forget_pwd?token=${Email_Token}">Reset Password</a><br>
                     Thanks,</p>
                     
                     <p>Nutritiv</p>
@@ -87,7 +88,6 @@ exports.sendUpdateUsername = async(req, res, next) =>
     {   
         const user = await User.findOne({_id: req.user._id});
 
-        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
         
         const email = user.email, username = user.username;
         const mailContent = 
@@ -129,7 +129,6 @@ exports.sendUpdateEmail = async(req, res, next) =>
     {   
         const user = await User.findOne({_id: req.user._id});
 
-        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
         
         const email = user.email, username = user.username;
         const mailContent = 
@@ -168,18 +167,21 @@ exports.sendNewOrder = async(req, res, next) =>
 {
     try
     {   
+        const {street, city, zip, country, phone, customer_email, order_id} = req.body;
+        
         const orders = await Order.find({userId: req.user._id}).sort({updatedAt: -1});
-        let order = orders[0];
-        req.order = order;
-        const orderDetails = order.orderDetails[0];
-        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+        const order = orders[0], username = req.user.username;
+        req.order = order
+        // const orderDetails = order.orderDetails[0];
+        
+        // const date = new Date();
+        // const currentHour = date.getHours() + '-' + date.getMinutes() + '-' + date.getSeconds();
+        const currentDay = new Date().toLocaleDateString('fr-FR').replace(/\//g,'-');
         
         const total = parseFloat(order.amount.value + 4.95) ;
-        const email = req.user.email, username = req.user.username;
-        
         const mailContent = 
         {
-            to: email,
+            to: customer_email,
             from: 
             {
                 email: "nutritivshop@gmail.com",
@@ -188,25 +190,30 @@ exports.sendNewOrder = async(req, res, next) =>
             templateId: 'd-671ec15432884fa1ac0d5bc5cd85491d',
             dynamicTemplateData: 
             {
-                "order" : order,
+                "order_id" : order_id,
                 "username": username,
-                "email" : email,
+                "date": currentDay,
+                "email" : customer_email,
                 "total" : total,
-                "orderDetails": orderDetails
+                "orderDetails": {
+                    "street" : street,
+                    "zip": zip,
+                    "country": country,
+                    "city" : city,
+                    "phoneNumber": phone,
+                }
             },
         }   
         await sgMail.send(mailContent)
         next();
-    }catch(err){next(err)}
+    }catch(err){console.log(err);}
 }
 
 exports.orderShipping = async(req, res, next) =>
 {
     try
     {   
-        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
-        const email = req.user.email, username = req.user.username, order = req.order;
+        const email = req.body.customer_email, username = req.user.username, orderId = req.body.order_id;
         const mailContent = 
         {
             to: email,
@@ -224,7 +231,7 @@ exports.orderShipping = async(req, res, next) =>
                     <p>Hello, ${username}</p>
                     <p>Thank you for your order, your order has been successfully shipped by "Shipping Company"<br><br>
                     <hr>
-                    Your command : ${order._id} has been shipped !<br>
+                    Your command : ${orderId} has been shipped !<br>
                     Thanks,<br>
                     </p>
                 
@@ -237,19 +244,23 @@ exports.orderShipping = async(req, res, next) =>
         }   
         await sgMail.send(mailContent)
         next();
-    }catch(err){next(err)}
+    }catch(err){console.log(err);}
 }
 
 exports.orderDelivered = async(req, res, next) =>
 {
     try
     {   
-        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-        const email = req.user.email, username = req.user.username, order = req.order,  date = new Date();
+        const   username = req.user.username, 
+                date = new Date(),
+                currentDay = new Date().toLocaleDateString('fr-FR').replace(/\//g,'-'),
+                currentHour = date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
+
+        const {street, city, zip, country, phone, customer_email, order_id} = req.body;
 
         const mailContent = 
         {
-            to: email,
+            to: customer_email,
             from: 
             {
                 email: "nutritivshop@gmail.com",
@@ -258,14 +269,21 @@ exports.orderDelivered = async(req, res, next) =>
             templateId: 'd-1d060cd5e94843abacf710623dbe9d7a',
             dynamicTemplateData: 
             {
-                "order" : order,
+                "order_id" : order_id,
                 "username" : username,
-                "email" : email,
-                "date": date
+                "email" : customer_email,
+                "date": currentDay + " at " + currentHour,
+                "orderDetails": {
+                    "street" : street,
+                    "zip": zip,
+                    "country": country,
+                    "city" : city,
+                    "phoneNumber": phone,
+                }
             },
         }   
         
         await sgMail.send(mailContent)
         next();
-    }catch(err){next(err)}
+    }catch(err){console.log(err);}
 }

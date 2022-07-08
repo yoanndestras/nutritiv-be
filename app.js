@@ -53,7 +53,7 @@ socketConnection(io);
 // DATABASE ACCESS
 mongoose
     .connect(process.env.MONGO_URL)
-    .then(async () => 
+    .then(() => 
     {
         console.log("Connected to MongoDB")
     })
@@ -64,22 +64,25 @@ mongoose
 
 cron.schedule('0 16 * * *', async() => 
 {
-    let response = await fetch(process.env.SERVER_ADDRESS + 'v1/dbBackups/', 
+    if(process.env.DB_NAME === "Nutritiv-dev")
     {
-        method: 'POST',
-        body: JSON.stringify({
-            dbName : process.env.DB_NAME,
-            dbUser : process.env.DB_USER,
-            dbPassword : process.env.DB_PASSWORD
-        }),
-        headers: 
+        let response = await fetch(process.env.SERVER_ADDRESS + 'v1/dbBackups/', 
         {
-            "Origin": process.env.SERVER_ADDRESS,
-            "Content-type": "application/json; charset=UTF-8"
-        },
-    });
-    let data = await response.json();
-    console.log(`data = `, data)
+            method: 'POST',
+            body: JSON.stringify({
+                dbName : process.env.DB_NAME,
+                dbUser : process.env.DB_USER,
+                dbPassword : process.env.DB_PASSWORD
+            }),
+            headers: 
+            {
+                "Origin": process.env.SERVER_ADDRESS,
+                "Content-type": "application/json; charset=UTF-8"
+            },
+        });
+        let data = await response.json();
+        console.log(`data = `, data)
+    }
 }); // SAVE A DB BACKUP EVERYDAY AT 3 PM
 
 app.use(express.json()); // APP LEARN TO READ JSON

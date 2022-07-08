@@ -173,10 +173,11 @@ auth.verifyAuthorization, async (req, res, next) =>
         const user = await User.findById(req.params.userId);
         if(user)
         {
+
             let avatar = (user.avatar).substring(0, 4) === "http" ? user.avatar : process.env.AWS_BUCKET_LINK + "usersAvatar/" + user.avatar;
-            const {email, ...public} = user._doc;
+            const {email, ...publicInfo} = user._doc;
             
-            res.status(200).json({success: true, user: public, avatar});
+            res.status(200).json({success: true, user: publicInfo, avatar});
         }
         else if(!user)
         {

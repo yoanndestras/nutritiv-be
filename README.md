@@ -62,7 +62,7 @@ Thanks to middlewares, our application features handle differents scenario :
 - Payment *(stripe).*
 - Backend-end API requests *(node-fetch).*
 
-Learning :
+Integrating :
 - Tests *(Jest, Supertest).*
 
 To install a new middleware go in terminal :

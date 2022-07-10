@@ -58,7 +58,7 @@ Grâce aux middlewares, les fonctionnalités de nos applications gèrent les cas
 - Les procédures de paiement *(stripe).*
 - L'envoi de requêtes API via back-end *(node-fetch).*
 
-Apprentissage en cours :
+Intégration en cours :
 - Tests *(Jest, Supertest).*
 
 Pour installer un nouveau middleware, il faut entrer dans le terminal : 

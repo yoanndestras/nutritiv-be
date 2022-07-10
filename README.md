@@ -49,7 +49,7 @@ We use **MongoDB** with mongoose module, a schema based solution for our data.
 Thanks to middlewares, our application features handle differents scenario :
 
 - CORS policy, including a whitelist *(cors).*
-- Request spam *(limitter).*
+- Request spam *(express-rate-limit).*
 - Cookies *(cookieParser).*
 - SecretKeys *(dotenv).*
 - Static files *(path, fs, multer, sharp, nanoid).*
@@ -57,9 +57,13 @@ Thanks to middlewares, our application features handle differents scenario :
 - BDD backup file recurrent storage and upload *(cron, aws-sdk, child_process, mongodump & mongorestore).*
 - Registration, authentification... *(passport, passport-local, passport-jwt, jsonwebtoken).*
 - TFA authentication *(speakeasy, qrcode).*
-- Google and Facebook authentication *(passport-facebook, passport-google-oauth20).*
+- Google, Facebook and Github authentication *(passport-facebook, passport-google-oauth20, passport-github2).*
 - Mails *(sgMail, mailer, email_validator).*
 - Payment *(stripe).*
+- Backend-end API requests *(node-fetch).*
+
+Learning :
+- Tests *(Jest, Supertest).*
 
 To install a new middleware go in terminal :
 ```bash

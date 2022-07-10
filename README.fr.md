@@ -69,7 +69,7 @@ npm i "newMiddleware"
 ## Run the app
 
 >Il est impossible de lancer l'application sans le fichier .env.
-Notre applicayion est sur le fichier app.js, le serveur back-end démarre à la commande :
+Notre application est sur le fichier app.js, le serveur back-end démarre à la commande :
 ```bash
 npm run start-dev 
 ```

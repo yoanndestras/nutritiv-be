@@ -14,25 +14,24 @@ const   limitter = require('express-rate-limit'), // SPAM LIMITTER
 
 exports.ObjectId = ObjectId;
 
-const cron = require('node-cron');
-
 dotenv.config(); // INITIALIZE ENVIRONNEMENT VARIABLE FILE ".env"
 
-let whitelist = process.env.CORS_WHITELIST.split(' ');
-
-const app = express(); // EXPRESS APPLICATION
-
-const   http = require('http').createServer(app),
-        port = (process.env.PORT || 5000); // BACK-END PORT
+const   app = express(), // EXPRESS APPLICATION
+        http = require('http').createServer(app),
+        port = (process.env.PORT || 5000), // BACK-END PORT
+        cron = require('node-cron'),
+        whitelist = process.env.CORS_WHITELIST.split(' ');
 
 http.listen(port, () => 
 {
     // const host = http.address().address
-    const port = http.address().port
+    const port = http.address().port;
     {console.log(`Backend server is running on port : ${port}`);}
 })
-// app.listen(port, () =>{console.log(`Backend server is running on port : ${port}`);})
 
+exports.closeHTTPConnection = () => {return http.close()};
+
+// app.listen(port, () =>{console.log(`Backend server is running on port : ${port}`);})
 const io = require("socket.io")(http,
     {
         allowRequest: (req, callback) => 
@@ -50,18 +49,15 @@ const io = require("socket.io")(http,
 
 socketConnection(io);
 
-// DATABASE ACCESS
-mongoose
-    .connect(process.env.MONGO_URL)
-    .then(async () => console.log("Connected to MongoDB"))
-    .catch((err)=>
-    {
-        console.log(err);
-    });
-
-cron.schedule('0 16 * * *', async() => 
+if(process.env.DB_NAME !== "Nutritiv-testing")
 {
-    if(process.env.DB_NAME === "Nutritiv-dev")
+    // DATABASE ACCESS
+    mongoose
+        .connect(process.env.MONGO_URL)
+        .then(async () => console.log("Connected to MongoDB"))
+        .catch((err)=>{console.log(err)});
+
+    cron.schedule('0 16 * * *', async() => 
     {
         let response = await fetch(process.env.SERVER_ADDRESS + 'v1/dbBackups/', 
         {
@@ -79,8 +75,8 @@ cron.schedule('0 16 * * *', async() =>
         });
         let data = await response.json();
         console.log(`data = `, data)
-    }
-}); // SAVE A DB BACKUP EVERYDAY AT 3 PM
+    }); // SAVE A DB BACKUP EVERYDAY AT 3 PM
+}
 
 app.use(express.json()); // APP LEARN TO READ JSON
 app.use(express.urlencoded({extended: true})); // APP LEARN TO READ JSON  

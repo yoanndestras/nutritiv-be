@@ -53,20 +53,7 @@ socketConnection(io);
 // DATABASE ACCESS
 mongoose
     .connect(process.env.MONGO_URL)
-    .then(async () => 
-    {
-        if(process.env.DB_NAME === "Nutritiv-testing")
-        {
-            const db = mongoose.connection.db;
-            const collections = await db.listCollections().toArray();
-            
-            await Promise.all
-            (
-                collections
-                .map(async (collection) =>  await db.dropCollection(collection.name))
-            )
-        }
-    })
+    .then(async () => console.log("Connected to MongoDB"))
     .catch((err)=>
     {
         console.log(err);

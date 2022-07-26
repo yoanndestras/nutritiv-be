@@ -1,5 +1,4 @@
 const authenticate = require("./authController");
-
 const express = require('express');
 const passport = require('passport');
 

@@ -29,8 +29,6 @@ http.listen(port, () =>
     {console.log(`Backend server is running on port : ${port}`);}
 })
 
-exports.closeHTTPConnection = () => {return http.close()};
-
 // app.listen(port, () =>{console.log(`Backend server is running on port : ${port}`);})
 const io = require("socket.io")(http,
     {
@@ -117,6 +115,7 @@ app.use((err, req, res, next) =>
         })
 }); //ERROR HANDLING "(catch(err){next(err)})""
 
+app.http = http;
 module.exports = app;
 
 

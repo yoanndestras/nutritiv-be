@@ -1,16 +1,22 @@
-const request = require('supertest');
 // const express = require("express");
 // const router = express.Router();
 // const routers = require("../routes");
 
 // for (const route in routers) 
 // {
-//     const myRoute = routers[route];
-//     router.use(`/v1/${route}`, myRoute);
-// }
+  //     const myRoute = routers[route];
+  //     router.use(`/v1/${route}`, myRoute);
+  // }
+
+const request = require('supertest');
 const mongoose = require("mongoose");
+const testConfig = require("../utils/testConfig");
 const app = require("../app");
-console.log(app.ObjectId());
+
+for (const key in testConfig) 
+{
+  testConfig[key].replaceAll('"', '');
+}
 
 initializeTestingDatabase = async() =>
 {
@@ -40,7 +46,7 @@ beforeAll(async () =>
 afterAll(async () => 
 {
   await clearTestingDatabase();
-  console.log(await app.ObjectId.isValid("erere"));
+  app.http.close();
   await mongoose.connection.close();
 });
   
@@ -62,11 +68,8 @@ describe('Authentication routes', () =>
       
       // console.log(res.text);
       
-      expect(res.statusCode).toBe(201)
-      expect(res.body).toHaveProperty('success', true)
+      testConfig.successTrue, testConfig.successDefined, testConfig.jsonContent;
       expect(res.body).toHaveProperty('status', "Registration Successfull! Check your emails!")
-      expect(res.headers['content-type']).toEqual(expect.stringContaining("json"))
-      expect(res.body.success).toBeDefined()
     })
     
     test("shouldn't create a user, response : 400 statusCode ", async () => 
@@ -79,11 +82,8 @@ describe('Authentication routes', () =>
             password : "Password1"
           })
       
-      expect(res.statusCode).toBe(400)
-      expect(res.body).toHaveProperty('success', false)
+      testConfig.failed400, testConfig.successFalse, testConfig.jsonContent, testConfig.successDefined;
       expect(res.body).toHaveProperty('err', "Your Email syntax is wrong!")
-      expect(res.headers['content-type']).toEqual(expect.stringContaining("json"))
-      expect(res.body.success).toBeDefined()
     })
 
     test("shouldn't create a user, response : 400 statusCode", async () => 
@@ -96,11 +96,8 @@ describe('Authentication routes', () =>
             password : "Password"
           })
       
-      expect(res.statusCode).toBe(400)
-      expect(res.body).toHaveProperty('success', false)
+      testConfig.failed400, testConfig.successFalse, testConfig.jsonContent, testConfig.successDefined;
       expect(res.body).toHaveProperty('err', "Your password syntax is wrong!")
-      expect(res.headers['content-type']).toEqual(expect.stringContaining("json"))
-      expect(res.body.success).toBeDefined()
     })
   })
 })

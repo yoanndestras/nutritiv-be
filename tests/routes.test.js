@@ -12,15 +12,11 @@ const request = require('supertest');
 const mongoose = require("mongoose");
 const testConfig = require("../utils/testConfig");
 const app = require("../app");
-
-for (const key in testConfig) 
-{
-  testConfig[key].replaceAll('"', '');
-}
+const users = testConfig.users;
 
 initializeTestingDatabase = async() =>
 {
-  mongoose
+  await mongoose
     .connect(process.env.MONGO_URL)
     .then(async () => console.log("Connected to MongoDB"))
     .catch((err)=>{console.log(err)});
@@ -52,52 +48,46 @@ afterAll(async () =>
   
 describe('Authentication routes', () => 
 {
-  const auth = "/v1/auth";
+  const auth = "/v1/auth"
+  const register = auth + "/register";
+  const login = auth + "/login";
   
   describe('POST requests', () => 
   {
-    test('should create a user, response : 201 statusCode', async () => 
+    test('REGISTER success, response : 201 statusCode', async () => 
     {
-      const res = await request(app).post(`${auth}/register`)
-        .send(
-          {
-            username: "noError",
-            email: "noError@gmail.com",
-            password : "Password1"
-          })
-      
-      // console.log(res.text);
-      
-      testConfig.successTrue, testConfig.successDefined, testConfig.jsonContent;
+      const res = await request(app).post(`${register}`).send(users.sampleUser);
+      await testConfig.statusCode201(res), await testConfig.successTrue(res);
       expect(res.body).toHaveProperty('status', "Registration Successfull! Check your emails!")
     })
     
-    test("shouldn't create a user, response : 400 statusCode ", async () => 
+    test("REGISTER failed, response : 400 statusCode ", async () => 
     {
-      const res = await request(app).post(`${auth}/register`)
-        .send(
-          {
-            username: "emailError",
-            email: "emailError.com",
-            password : "Password1"
-          })
-      
-      testConfig.failed400, testConfig.successFalse, testConfig.jsonContent, testConfig.successDefined;
+      const res = await request(app).post(`${register}`).send(users.sampleUser)
+      await testConfig.status400AndSuccessFalse(res);
+      expect(res.body).toHaveProperty('err', 'An account with your username already exists!')
+    })
+    
+    test("REGISTER failed, response : 400 statusCode ", async () => 
+    {
+      const res = await request(app).post(`${register}`).send(users.emailErrorUser)
+      await testConfig.status400AndSuccessFalse(res);
       expect(res.body).toHaveProperty('err', "Your Email syntax is wrong!")
     })
 
-    test("shouldn't create a user, response : 400 statusCode", async () => 
+    test("REGISTER failed, response : 400 statusCode", async () => 
     {
-      const res = await request(app).post(`${auth}/register`)
-        .send(
-          {
-            username: "passwordError",
-            email: "passwordError@gmail.com",
-            password : "Password"
-          })
-      
-      testConfig.failed400, testConfig.successFalse, testConfig.jsonContent, testConfig.successDefined;
+      const res = await request(app).post(`${register}`).send(users.passwordErrorUser)
+      await testConfig.status400AndSuccessFalse(res);
       expect(res.body).toHaveProperty('err', "Your password syntax is wrong!")
+    })
+    
+    test("LOGIN unsuccessfull, response : 400 statusCode", async () => 
+    {
+      const user = {username : users.sampleUser.username, password : users.sampleUser.password}
+      const res = await request(app).post(`${login}`).send(user);
+      await testConfig.status400AndSuccessFalse(res);
+      expect(res.body).toHaveProperty('err', "Your account is not verified!")
     })
   })
 })

@@ -54,7 +54,7 @@ if(process.env.DB_NAME !== "Nutritiv-testing")
         .connect(process.env.MONGO_URL)
         .then(async () => console.log("Connected to MongoDB"))
         .catch((err)=>{console.log(err)});
-
+    
     cron.schedule('0 16 * * *', async() => 
     {
         let response = await fetch(process.env.SERVER_ADDRESS + 'v1/dbBackups/', 
@@ -74,6 +74,18 @@ if(process.env.DB_NAME !== "Nutritiv-testing")
         let data = await response.json();
         console.log(`data = `, data)
     }); // SAVE A DB BACKUP EVERYDAY AT 3 PM
+
+    app.use( 
+        limitter(
+            {
+                windowMs: 5000,
+                max: 10,
+                message: {
+                    code: 429,
+                    message: "Too many requests"
+                }
+            })
+        ) // LIMIT SPAM REQUESTS TO MAX PER MILLISECONDS
 }
 
 app.use(express.json()); // APP LEARN TO READ JSON
@@ -81,17 +93,6 @@ app.use(express.urlencoded({extended: true})); // APP LEARN TO READ JSON
 app.use(passport.initialize()); // INITIALIZE PASSPORT JS
 app.use(cookieParser()); // INITIALIZE COOKIES
 app.use(cors()); // INITIALIZE CORS  "app.options('*', cors());"
-app.use( 
-    limitter(
-        {
-            windowMs: 5000,
-            max: 10,
-            message: {
-                code: 429,
-                message: "Too many requests"
-            }
-        })
-    ) // LIMIT SPAM REQUESTS TO MAX PER MILLISECONDS
 app.use(routes); // CALL V1 & V2 ROUTES FROM ROUTER FOLDER
 app.use(express.static(path.join(__dirname, 'public'))); // USE STATIC FILES ON PUBLIC FOLDER
 // app.use(express.static(path.join(__dirname, "/client/build"))); // STATIC FILES FOR FRONT-END APP

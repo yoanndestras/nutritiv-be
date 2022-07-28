@@ -4,6 +4,7 @@ node_modules
 #misc
 .env
 .env-cmdrc.json
+.env.testing
 
 #custom vscode
 .vscode

@@ -1,18 +1,9 @@
-// const express = require("express");
-// const router = express.Router();
-// const routers = require("../routes");
-
-// for (const route in routers) 
-// {
-  //     const myRoute = routers[route];
-  //     router.use(`/v1/${route}`, myRoute);
-  // }
-
 const request = require('supertest');
 const mongoose = require("mongoose");
 const testConfig = require("../utils/testConfig");
 const app = require("../app");
 const users = testConfig.users;
+
 
 initializeTestingDatabase = async() =>
 {
@@ -51,44 +42,59 @@ describe('Authentication routes', () =>
   const auth = "/v1/auth"
   const register = auth + "/register";
   const login = auth + "/login";
-  
+  let accessToken;
+
   describe('POST requests', () => 
   {
-    test('REGISTER success, response : 201 statusCode', async () => 
+    it('REGISTER success, response : 201 statusCode', async () => 
     {
       const res = await request(app).post(`${register}`).send(users.sampleUser);
       await testConfig.statusCode201(res), await testConfig.successTrue(res);
-      expect(res.body).toHaveProperty('status', "Registration Successfull! Check your emails!")
+      expect(res.body).toHaveProperty('status', "Registration Successfull! Check your emails!");
+      // end(() => {accessToken = res.body.data[1].id;});
     })
     
-    test("REGISTER failed, response : 400 statusCode ", async () => 
+    it("REGISTER failed, response : 400 statusCode ", async () => 
     {
       const res = await request(app).post(`${register}`).send(users.sampleUser)
       await testConfig.status400AndSuccessFalse(res);
       expect(res.body).toHaveProperty('err', 'An account with your username already exists!')
     })
     
-    test("REGISTER failed, response : 400 statusCode ", async () => 
+    it("REGISTER failed, response : 400 statusCode ", async () => 
     {
       const res = await request(app).post(`${register}`).send(users.emailErrorUser)
       await testConfig.status400AndSuccessFalse(res);
       expect(res.body).toHaveProperty('err', "Your Email syntax is wrong!")
     })
 
-    test("REGISTER failed, response : 400 statusCode", async () => 
+    it("REGISTER failed, response : 400 statusCode", async () => 
     {
       const res = await request(app).post(`${register}`).send(users.passwordErrorUser)
       await testConfig.status400AndSuccessFalse(res);
       expect(res.body).toHaveProperty('err', "Your password syntax is wrong!")
     })
     
-    test("LOGIN unsuccessfull, response : 400 statusCode", async () => 
+    it("LOGIN unsuccessfull, response : 400 statusCode", async () => 
     {
       const user = {username : users.sampleUser.username, password : users.sampleUser.password}
       const res = await request(app).post(`${login}`).send(user);
       await testConfig.status400AndSuccessFalse(res);
       expect(res.body).toHaveProperty('err', "Your account is not verified!")
     })
+  })
+})
+
+describe("random TESTS", () =>
+{
+  it("1 + 2 = 3", () =>
+  {
+    let one = 1;
+
+    one = one + 2;
+
+    expect(one).toBe(3);
+    console.log(`one = `, one)
   })
 })
 

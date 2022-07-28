@@ -690,9 +690,9 @@ exports.verifyAuth = (req, res, next) =>
                 const refreshToken = authenticate.GenerateRefreshToken({_id: user._id});
                 
                 res
-                    .header('accessToken', accessToken)
-                    .header('refreshToken', refreshToken)
-                    .cookie("refreshToken", refreshToken, 
+                    .header('access_token', accessToken)
+                    .header('refresh_token', refreshToken)
+                    .cookie("refresh_token", refreshToken, 
                         {
                             httpOnly: true,
                             secure: process.env.REF_JWT_SEC_COOKIE === "prod"

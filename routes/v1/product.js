@@ -137,7 +137,7 @@ router.get("/length", cors.corsWithOptions, async(req, res, next) =>
 });
 
 // GET COUNTINSTOCK // 
-router.get('/countInStock/:productId', cors.corsWithOptions, auth.verifyUserCart, auth.verifyRefresh, 
+router.get('/countInStock/:productId', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
 product.verifyProductId, product.countInStock, async (req, res, next) =>
 {
     try

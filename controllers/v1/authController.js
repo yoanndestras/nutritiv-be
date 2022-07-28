@@ -604,32 +604,33 @@ exports.verifyUserQuery = (req, res, next) =>
     })(req, res, next); 
 };
 
-exports.verifyUserCart = (req, res, next) => 
-{
-    
-    passport.authenticate('jwt', { session: false }, (err, user, info) => 
-    {
-        if (err || !user) 
-        {
-            return next();
-        }
-        else if (user.isVerified === false)
-        {
-            let err = new Error('You account has not been verified. Please check your email to verify your account');
-            err.statusCode = 401;
-            return next(err);
-        }
-        else
-        {
-            req.user = user;
-            return next();
-        }
-    })(req, res, next); 
-};
+// exports.verifyUserCart = (req, res, next) => 
+// {
+//     passport.authenticate('jwt', { session: false }, (err, user, info) => 
+//     {
+//         if (err || !user) 
+//         {
+//             req.statusCode = 401;
+//             req.user = "error";
+//             return next();
+//         }
+//         else if (user.isVerified === false)
+//         {
+//             let err = new Error('You account has not been verified. Please check your email to verify your account');
+//             err.statusCode = 401;
+//             return next(err);
+//         }
+//         else
+//         {
+//             req.user = user;
+//             return next();
+//         }
+//     })(req, res, next); 
+// };
 
 exports.verifyRefresh = (req, res, next) => 
 {
-    if(req.user === "error" || req.user === "emptyCart")
+    if(req.user === "error")
     {
         passport.authenticate('jwt_rt', { session: false }, (err, user, info) => 
         {        
@@ -658,7 +659,7 @@ exports.verifyRefresh = (req, res, next) =>
                     //     })
                 
                 req.user = user;
-                next();
+                return next();
             }
             
             

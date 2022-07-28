@@ -12,12 +12,12 @@ const {upload} = require('./upload');
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
 // GET USER CART
-router.get("/self", cors.corsWithOptions, auth.verifyUserCart, auth.verifyRefresh, async (req, res, next) =>
+router.get("/self", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async (req, res, next) =>
 {
     try
     {
 
-        const cart = await Cart.findOne({userId: req?.user?._id});
+        const cart = await Cart.findOne({userId: req.user._id});
         
         if(cart)
         {

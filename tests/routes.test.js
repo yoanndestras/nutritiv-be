@@ -51,7 +51,7 @@ describe('Authentication routes', () =>
       const res = await request(app).post(`${register}`).send(users.sampleUser);
       await testConfig.statusCode201(res), await testConfig.successTrue(res);
       expect(res.body).toHaveProperty('status', "Registration Successfull! Check your emails!");
-      // end(() => {accessToken = res.body.data[1].id;});
+      accessToken = res.body.data[1].id
     })
     
     it("REGISTER failed, response : 400 statusCode ", async () => 

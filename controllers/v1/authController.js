@@ -603,32 +603,33 @@ exports.verifyUserQuery = (req, res, next) =>
     })(req, res, next); 
 };
 
-exports.verifyUserCart = (req, res, next) => 
-{
-    
-    passport.authenticate('jwt', { session: false }, (err, user, info) => 
-    {
-        if (err || !user) 
-        {
-            return next();
-        }
-        else if (user.isVerified === false)
-        {
-            let err = new Error('You account has not been verified. Please check your email to verify your account');
-            err.statusCode = 401;
-            return next(err);
-        }
-        else
-        {
-            req.user = user;
-            return next();
-        }
-    })(req, res, next); 
-};
+// exports.verifyUserCart = (req, res, next) => 
+// {
+//     passport.authenticate('jwt', { session: false }, (err, user, info) => 
+//     {
+//         if (err || !user) 
+//         {
+//             req.statusCode = 401;
+//             req.user = "error";
+//             return next();
+//         }
+//         else if (user.isVerified === false)
+//         {
+//             let err = new Error('You account has not been verified. Please check your email to verify your account');
+//             err.statusCode = 401;
+//             return next(err);
+//         }
+//         else
+//         {
+//             req.user = user;
+//             return next();
+//         }
+//     })(req, res, next); 
+// };
 
 exports.verifyRefresh = (req, res, next) => 
 {
-    if(req.user === "error" || req.user === "emptyCart")
+    if(req.user === "error")
     {
         passport.authenticate('jwt_rt', { session: false }, (err, user, info) => 
         {        
@@ -657,7 +658,7 @@ exports.verifyRefresh = (req, res, next) =>
                     //     })
                 
                 req.user = user;
-                next();
+                return next();
             }
             
             
@@ -689,9 +690,9 @@ exports.verifyAuth = (req, res, next) =>
                 const refreshToken = authenticate.GenerateRefreshToken({_id: user._id});
                 
                 res
-                    .header('accessToken', accessToken)
-                    .header('refreshToken', refreshToken)
-                    .cookie("refreshToken", refreshToken, 
+                    .header('access_token', accessToken)
+                    .header('refresh_token', refreshToken)
+                    .cookie("refresh_token", refreshToken, 
                         {
                             httpOnly: true,
                             secure: process.env.REF_JWT_SEC_COOKIE === "prod"
@@ -731,7 +732,7 @@ exports.GenerateAccessToken = function(_id)
     (
         _id, 
         process.env.JWT_SEC, 
-        {expiresIn: "1800s"} // expires in 15 minutes
+        {expiresIn: "15s"} // expires in 15 minutes
     );
 };
 

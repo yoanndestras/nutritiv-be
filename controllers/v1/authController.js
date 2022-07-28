@@ -732,7 +732,7 @@ exports.GenerateAccessToken = function(_id)
     (
         _id, 
         process.env.JWT_SEC, 
-        {expiresIn: "1800s"} // expires in 15 minutes
+        {expiresIn: "15sec"} // expires in 15 minutes
     );
 };
 

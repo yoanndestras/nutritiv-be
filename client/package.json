@@ -62,6 +62,6 @@
   },
   "devDependencies": {
     "customize-cra": "^1.0.0",
-    "eslint-plugin-react-hooks": "^4.3.0",
+    "eslint-plugin-react-hooks": "^4.3.0"
   }
 }

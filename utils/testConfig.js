@@ -51,6 +51,21 @@ exports.users =
   }
 }
 
+exports.products = 
+{
+  sampleProduct :
+  {
+    title: "randomTitle",
+    tags: ["randomTag"],
+    shape: "randomShape",
+    pricePerCapsule: "2",
+    desc : "randomDesc",
+    load : "60",
+    countInStock : "20000",
+    imageFile : "https://nutritiv.s3.eu-west-3.amazonaws.com/productsImgs/L_ptPilule_Bulle.jpg"
+  }
+}
+
 // CUSTOM EXPECTS FUNCTIONS
 
 exports.status400AndSuccessFalse =  async(res) =>

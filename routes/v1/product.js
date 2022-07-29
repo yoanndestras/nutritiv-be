@@ -9,7 +9,7 @@ const randomWords = require('random-words');
 const cors = require('../../controllers/v1/corsController');
 const auth = require('../../controllers/v1/authController');
 const product = require('../../controllers/v1/productsController');
-const {upload} = require('./upload');
+const {upload, upload3d} = require('./upload');
 // const { countInStock } = require("../../controllers/v1/ordersController");
 
 //OPTIONS FOR CORS CHECK
@@ -229,7 +229,7 @@ auth.verifyAdmin, async(req, res, next) =>
 
 // CREATE PRODUCT
 router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, 
-upload.any('imageFile'), product.resizeProductImage, product.newProduct, product.addProductImgs, async(req, res, next) =>
+upload3d.any('imageFile'), product.resizeProductImage, product.newProduct, product.addProductImgs, async(req, res, next) =>
 {
     try
     {

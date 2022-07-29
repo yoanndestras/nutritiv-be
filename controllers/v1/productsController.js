@@ -20,7 +20,6 @@ exports.newProduct = async(req, res, next) =>
 {
     try
     {
-
         const {shape, tags, load, pricePerCapsule, pricePerKilograms} = req.body
         const PPCapsule = pricePerCapsule, PPKg = pricePerKilograms;
         let product, price;
@@ -33,7 +32,7 @@ exports.newProduct = async(req, res, next) =>
         {
             let milestones = {30: 0.1, 60: 0.2, 120: 0.4, 210: 0.5}, keys = Object.keys(milestones), values = Object.values(milestones);
             product = loadArr.map((el, i) => {
-                price = el * parseFloat(PPCapsule);let discountValues = check.discount(values, price, el, keys);
+                price = el * parseFloat(PPCapsule);let discountValues = check.discount(values, price, el, keys, next);
                 return {load : discountValues.qty, price :{ value : discountValues.price, currency : "EUR"}}
             })
         }
@@ -41,7 +40,7 @@ exports.newProduct = async(req, res, next) =>
         {
             let milestones = { 60: 0, 150: 0.2, 350: 0.4, 1000: 0.5}, keys = Object.keys(milestones), values = Object.values(milestones);
             product = loadArr.map((el, i) => {
-                price = el * (parseFloat(PPKg)/1000);let discountValues = check.discount(values, price, el, keys);
+                price = el * (parseFloat(PPKg)/1000);let discountValues = check.discount(values, price, el, keys, next);
                 return {load : discountValues.qty, price :{ value : discountValues.price, currency : "EUR"}}
             })
         }
@@ -56,7 +55,7 @@ exports.newProduct = async(req, res, next) =>
         {
             const { title, desc, countInStock } = req.body;
             req.title = title;
-    
+            
             const newProduct = new Product(
                 {
                     title,
@@ -68,7 +67,6 @@ exports.newProduct = async(req, res, next) =>
                 }, async(err) =>
                 {
                     if(err) return next(err);
-                
                 });
             
             await newProduct.save();
@@ -79,7 +77,6 @@ exports.newProduct = async(req, res, next) =>
     catch(err)
     {
         // let verifyProductExist = await Product.findOne({title: req.body.title, shape: req.body.shape});
-
         // if(!verifyProductExist)
         // {
             let filesArr = req.files;
@@ -87,20 +84,25 @@ exports.newProduct = async(req, res, next) =>
             (
                 filesArr.map(async file => 
                     {
-                        fs.unlinkSync(path.resolve(file.destination,'productsImgs', file.filename))
+                        if(file.mimetype.startsWith('image')) 
+                        {
+                            fs.unlinkSync(path.resolve(file.destination,'productsImgs', file.filename))
+                        }
                     })
             );
         // }
+        
         next(err)
     }
 }
 
-exports.discount = (values, price, qty, keys) => 
+exports.discount = (values, price, qty, keys, next) => 
 {
     try
     {
 
-        const output = keys.reduce((prev, curr) => Math.abs(curr - el) < Math.abs(prev - el) ? curr : prev);
+        const output = keys.reduce((prev, curr) => Math.abs(curr - qty) < Math.abs(prev - qty) ? curr : prev);
+
         let Index = keys.indexOf(output), discountedPrice = price - price * (values[Index]);
         price = Math.round(discountedPrice) - 0.01;
         qty = parseFloat(qty), price = parseFloat(price);
@@ -333,10 +335,13 @@ exports.resizeProductImage = async(req, res, next) =>
         (
             filesArr.map(async file => 
                 {
-                    await sharp(file.path)
-                    .resize(200, 200)
-                    .toFile(path.resolve(file.destination,'productsImgs', file.filename))
-                    fs.unlinkSync(path.join("public/images/", file.filename))
+                    if(file.mimetype.startsWith('image'))
+                    {
+                        await sharp(file.path)
+                        .toFile(path.resolve(file.destination,'productsImgs', file.filename))
+                        .resize(200, 200)
+                        fs.unlinkSync(path.join("public/images/", file.filename))
+                    }
                 })
         );
         
@@ -353,15 +358,22 @@ exports.addProductImgs = async(req, res, next) =>
         let imgs = [];
         await Promise.all
         (
-            filesArr.map(async(img) => 
+            filesArr.map(async(file) => 
                 {
-                    
-                    let file =  path.join(img.destination,'productsImgs', img.filename)
-                    let filePath = file, fileName = "productsImgs/" + img.filename, fileType = img.mimetype;
+                    let filePath;
+                    if(file.mimetype.startsWith('image'))
+                    {
+                        filePath =  path.join(file.destination,'productsImgs', file.filename)
+                    }
+                    else if(file.mimetype.startsWith('model/gltf-binary'))
+                    {
+                        filePath =  path.join(file.destination, file.filename)
+                    }
+                    let fileName = "productsImgs/" + file.filename, fileType = file.mimetype;
                     
                     await fileUpload.uploadFile(filePath, fileName, fileType);
-
-                    imgs.push(img.filename); 
+                    
+                    imgs.push(file.filename); 
                     fs.unlinkSync(path.join("public/images/", fileName))
                 
                 })

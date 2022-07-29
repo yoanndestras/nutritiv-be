@@ -5,8 +5,6 @@ import nutritivApi from '../../Api/nutritivApi';
 import { OAuth } from './OAuth';
 
 export default function RegisterPage() {
-  
-  const navigate = useNavigate();
   const { executeRecaptcha } = useGoogleReCaptcha();
   const [registerData, setRegisterData] = useState({
     username: "",

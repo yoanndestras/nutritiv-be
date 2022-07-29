@@ -5,9 +5,10 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "start-dev": "nodemon app.js",
-    "start-prod": "nodemon app.js",
-    "heroku-postbuild": "cd client && npm i && npm run build"
+    "test": "env-cmd -e test jest --testTimeout=10000",
+    "start-dev": "env-cmd -e development nodemon app.js",
+    "start-prod": "env-cmd -e production nodemon app.js",
+    "heroku-postbuild": "cd client && npm install && npm run build"
   },
   "repository": {
     "type": "git",
@@ -32,6 +33,7 @@
     "express": "^4.17.1",
     "express-rate-limit": "^6.0.2",
     "http": "^0.0.1-security",
+    "jest": "^28.1.2",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.21",
     "mongoose": "^6.0.14",
@@ -57,9 +59,16 @@
     "socket.io": "^4.4.1",
     "speakeasy": "^2.0.0",
     "stripe": "^8.202.0",
+    "supertest": "^6.2.4",
     "validate-phone-number-node-js": "^0.0.1"
   },
   "engines": {
     "node": "16.14.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ]
   }
 }

@@ -45,17 +45,21 @@ Nous utilisons **MongoDB** avec le module mongoose, une solution basée sur un s
 >Nous avons séléctionné des middlewares en suivant certains critères, l'utilisabilité, la maintenabilité, les fonctionnalités...
 Grâce aux middlewares, les fonctionnalités de nos applications gèrent les cas de figures suivants :
 - La politique CORS, l'intégration d'une liste blanche *(cors).*
-- Le spam de requêtes *(limitter).*
+- Le spam de requêtes *(express-rate-limit).*
 - Les cookies *(cookieParser).*
 - Les clés secrètes *(dotenv).*
 - Les fichiers statiques *(path, fs, multer, sharp, nanoid).*
 - Le stockage de fichier sur un service web *(aws-sdk).*
 - La création et le stockage récurrent d'un fichier backup de la BDD *(cron, aws-sdk, child_process, mongodump & mongorestore).*
 - L'inscription, connexion... *(passport, passport-local, passport-jwt, jsonwebtoken).*
-- La connexion à double facteur *(speakeasy, qrcode).*
-- La connexion via Google et Facebook *(passport-facebook, passport-google-oauth20).*
+- L'authentication à double facteur *(speakeasy, qrcode).*
+- L'authentication via Google, Facebook et Github *(passport-facebook, passport-google-oauth20, passport-github2).*
 - L'envoi de mails *(sgMail, mailer, email_validator).*
 - Les procédures de paiement *(stripe).*
+- L'envoi de requêtes API via back-end *(node-fetch).*
+
+Intégration en cours :
+- Tests *(Jest, Supertest).*
 
 Pour installer un nouveau middleware, il faut entrer dans le terminal : 
 ```bash
@@ -65,7 +69,7 @@ npm i "newMiddleware"
 ## Run the app
 
 >Il est impossible de lancer l'application sans le fichier .env.
-Notre applicayion est sur le fichier app.js, le serveur back-end démarre à la commande :
+Notre application est sur le fichier app.js, le serveur back-end démarre à la commande :
 ```bash
 npm run start-dev 
 ```

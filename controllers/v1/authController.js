@@ -1,5 +1,4 @@
 const authenticate = require("./authController");
-
 const express = require('express');
 const passport = require('passport');
 
@@ -606,7 +605,6 @@ exports.verifyUserQuery = (req, res, next) =>
 
 exports.verifyUserCart = (req, res, next) => 
 {
-    
     passport.authenticate('jwt', { session: false }, (err, user, info) => 
     {
         if (err || !user) 
@@ -629,7 +627,7 @@ exports.verifyUserCart = (req, res, next) =>
 
 exports.verifyRefresh = (req, res, next) => 
 {
-    if(req.user === "error" || req.user === "emptyCart")
+    if(req.user === "error")
     {
         passport.authenticate('jwt_rt', { session: false }, (err, user, info) => 
         {        
@@ -659,7 +657,7 @@ exports.verifyRefresh = (req, res, next) =>
                     //     })
                 
                 req.user = user;
-                next();
+                return next();
             }
             
             
@@ -691,9 +689,9 @@ exports.verifyAuth = (req, res, next) =>
                 const refreshToken = authenticate.GenerateRefreshToken({_id: user._id});
                 
                 res
-                    .header('accessToken', accessToken)
-                    .header('refreshToken', refreshToken)
-                    .cookie("refreshToken", refreshToken, 
+                    .header('access_token', accessToken)
+                    .header('refresh_token', refreshToken)
+                    .cookie("refresh_token", refreshToken, 
                         {
                             httpOnly: true,
                             secure: process.env.REF_JWT_SEC_COOKIE === "prod"

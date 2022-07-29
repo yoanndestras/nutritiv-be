@@ -13,17 +13,20 @@ const auth = require("../../controllers/v1/authController");
 const mailer = require("../../controllers/v1/mailerController");
 const {upload} = require('./upload');
 
-router.use( 
-    limitter(
-        {
-            windowMs: 5000,
-            max: 3,
-            message: {
-                code: 429,
-                message: "Too many requests"
-            }
-        })
-    ) // LIMIT SPAM REQUESTS TO MAX PER MILLISECONDS
+if(process.env.DB_NAME !== "Nutritiv-testing")
+{
+    router.use( 
+        limitter(
+            {
+                windowMs: 5000,
+                max: 3,
+                message: {
+                    code: 429,
+                    message: "Too many requests"
+                }
+            })
+        ) // LIMIT SPAM REQUESTS TO MAX PER MILLISECONDS
+}
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
@@ -286,34 +289,34 @@ auth.TFAValidation, async(req, res, next) =>
                 status: 'Login Successful!'
             });
             
-        }catch(err){next(err)}
-    })
+    }catch(err){next(err)}
+})
     
-    //LOGIN
-    router.post("/login", cors.corsWithOptions, auth.verifyCaptcha, auth.login, async(req, res, next)=>
+//LOGIN
+router.post("/login", cors.corsWithOptions, auth.verifyCaptcha, auth.login, async(req, res, next)=>
+{
+    try
     {
-        try
+        const accessToken = req.accessToken, refreshToken = req.refreshToken, isAdmin = req.user.isAdmin;
+        
+        res .header('access_token', accessToken)
+        .header('refresh_token', refreshToken)
+        .cookie("refresh_token", refreshToken, 
         {
-            const accessToken = req.accessToken, refreshToken = req.refreshToken, isAdmin = req.user.isAdmin;
-            
-            res .header('access_token', accessToken)
-            .header('refresh_token', refreshToken)
-            .cookie("refresh_token", refreshToken, 
+            httpOnly: true,
+            secure: process.env.REF_JWT_SEC_COOKIE === "production"
+        })
+        .status(200).json(
             {
-                httpOnly: true,
-                secure: process.env.REF_JWT_SEC_COOKIE === "production"
-            })
-            .status(200).json(
-                {
-                    success: true,
-                    loggedIn: true,
-                    hasTFA: false,
-                    isAdmin: isAdmin,
-                    status: 'Login Successful!'
-                });
-                
-            }catch(err){next(err)}
-        });
+                success: true,
+                loggedIn: true,
+                hasTFA: false,
+                isAdmin: isAdmin,
+                status: 'Login Successfull!'
+            });
+            
+    }catch(err){next(err)}
+});
         
 //DISABLE TFA
 router.put('/disableTFA', auth.verifyUser, auth.verifyRefresh, auth.disableTFA, async(req, res, next) =>

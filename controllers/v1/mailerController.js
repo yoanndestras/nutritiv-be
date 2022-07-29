@@ -178,7 +178,7 @@ exports.sendNewOrder = async(req, res, next) =>
         // const currentHour = date.getHours() + '-' + date.getMinutes() + '-' + date.getSeconds();
         const currentDay = new Date().toLocaleDateString('fr-FR').replace(/\//g,'-');
         
-        const total = parseFloat(order.amount.value + 4.95) ;
+        const total = parseFloat(order.amount.value) ;
         const mailContent = 
         {
             to: customer_email,
@@ -201,7 +201,8 @@ exports.sendNewOrder = async(req, res, next) =>
                     "country": country,
                     "city" : city,
                     "phoneNumber": phone,
-                }
+                },
+                "order" : order,
             },
         }   
         await sgMail.send(mailContent)

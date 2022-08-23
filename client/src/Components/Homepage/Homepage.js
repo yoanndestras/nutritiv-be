@@ -7,6 +7,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { NutriButton } from '../NutriButton';
 import { css } from '@emotion/react';
 import { Icon } from '../Icons/Icon';
+import { Canvas } from '@react-three/fiber';
 
 const HomepageContentContainer = styled.div`
   margin: 0 auto;
@@ -103,10 +104,10 @@ export const Homepage = () => {
 
   const icebergVariants = {
     shadow: {
-      filter: `blur(0.7px) opacity(0.65) drop-shadow(0 0 4px ${tokens.color.accentStrong}`
+      filter: `drop-shadow(0 0 4px ${tokens.color.accentStrong}`
     },
     default: {
-      filter: `blur(0.7px) opacity(0.65) drop-shadow(0 0 1px ${tokens.color.transparent}`
+      filter: `drop-shadow(0 0 1px ${tokens.color.transparent}`
     },
     transition: {
       duration: 0.2,
@@ -262,8 +263,9 @@ export const Homepage = () => {
             </SectionTitle>
             {/* <DemoCard
               css={css`
-                height: 400px;
-                perspective: 1000px;
+                margin-top: ${tokens.spacing.lg};
+                height: 350px;
+                perspective: 2000px;
                 perspective-origin: center;
                 position: relative;
                 width: 800px;
@@ -277,7 +279,15 @@ export const Homepage = () => {
                 }
               `}
             >
-              
+              <div style={{
+                  background: "transparent", 
+                  height: "500px", 
+                  width: "500px"
+              }}>
+                <Canvas shadows>
+                  <Scene type="pill" />
+                </Canvas>
+              </div>
             </DemoCard> */}
           </ThirdBlock>
         </ViewHeightWrapper>

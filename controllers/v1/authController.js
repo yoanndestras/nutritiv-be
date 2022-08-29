@@ -608,7 +608,9 @@ exports.verifyUserCart = (req, res, next) =>
     passport.authenticate('jwt', { session: false }, (err, user, info) => 
     {
         if (err || !user) 
-        {
+        {            
+            req.user = "error";
+            req.cart = "cart_not_found";
             return next();
         }
         else if (user.isVerified === false)
@@ -628,10 +630,15 @@ exports.verifyUserCart = (req, res, next) =>
 exports.verifyRefresh = (req, res, next) => 
 {
     if(req.user === "error")
-    {
+    {        
         passport.authenticate('jwt_rt', { session: false }, (err, user, info) => 
         {        
-            if (err || !user) 
+            if (err || !user && req.cart === "cart_not_found") 
+            {
+                req.user = null;
+                return next();
+            }
+            else if(err || !user)
             {
                 return res.status(req.statusCode).json(
                     {
@@ -639,6 +646,11 @@ exports.verifyRefresh = (req, res, next) =>
                         status: "You are not connected", 
                         err: "No refreshToken found or its not valid",
                     });
+            }
+            else if(req.cart === "cart_not_found")
+            {
+                req.user = user;
+                return next();
             }
             else
             {
@@ -658,8 +670,6 @@ exports.verifyRefresh = (req, res, next) =>
                 req.user = user;
                 return next();
             }
-            
-            
         })(req, res, next);  
     }
     else

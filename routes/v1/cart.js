@@ -16,7 +16,6 @@ router.get("/self", cors.corsWithOptions, auth.verifyUserCart, auth.verifyRefres
 {
     try
     {
-
         const cart = await Cart.findOne({userId: req?.user?._id});
         
         if(cart)

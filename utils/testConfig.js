@@ -57,12 +57,11 @@ exports.products =
   {
     title: "randomTitle",
     tags: ["randomTag"],
-    shape: "randomShape",
+    shape: "capsules",
     pricePerCapsule: "2",
     desc : "randomDesc",
     load : "60",
-    countInStock : "20000",
-    imageFile : "https://nutritiv.s3.eu-west-3.amazonaws.com/productsImgs/L_ptPilule_Bulle.jpg"
+    countInStock : "20000"
   }
 }
 

@@ -229,7 +229,7 @@ auth.verifyAdmin, async(req, res, next) =>
 
 // CREATE PRODUCT
 router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, 
-upload3d.any('imageFile'), product.resizeProductImage, product.newProduct, product.addProductImgs, async(req, res, next) =>
+upload.any('imageFile'), product.resizeProductImage, product.newProduct, product.addProductImgs, async(req, res, next) =>
 {
     try
     {

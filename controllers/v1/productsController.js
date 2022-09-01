@@ -338,8 +338,8 @@ exports.resizeProductImage = async(req, res, next) =>
                     if(file.mimetype.startsWith('image'))
                     {
                         await sharp(file.path)
-                        .toFile(path.resolve(file.destination,'productsImgs', file.filename))
                         .resize(200, 200)
+                        .toFile(path.resolve(file.destination,'productsImgs', file.filename))
                         fs.unlinkSync(path.join("public/images/", file.filename))
                     }
                 })

@@ -19,7 +19,7 @@
     "date-fns": "^2.28.0",
     "env-cmd": "^10.1.0",
     "facepaint": "^1.2.1",
-    "framer-motion": "^6.3.3",
+    "framer-motion": "^6.5.1",
     "immer": "^9.0.12",
     "multiselect-react-dropdown": "^2.0.21",
     "qr-code-styling": "^1.6.0-rc.1",

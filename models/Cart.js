@@ -24,11 +24,12 @@ const CartSchema = new Schema (
             required: true
         },
         productImgs:
-        {
-            type: String,
-            type: Array,
-            required: true
-        },
+        [
+            {
+                type: String,
+                required: true
+            }
+        ],
         productShape:
         {
             type: String,

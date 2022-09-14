@@ -35,19 +35,19 @@ exports.users =
   {
     username: "noError",
     email: "noError@gmail.com",
-    password : "Password1"
+    password : process.env.SAMPLE_USER
   },
   emailErrorUser : 
   {
     username: "emailError",
     email: "emailError.com",
-    password : "Password1"
+    password : process.env.EMAIL_ERROR
   },
   passwordErrorUser : 
   {
     username: "passwordError",
     email: "passwordError@gmail.com",
-    password : "Password"
+    password : process.env.PASSWORD_ERROR
   }
 }
 

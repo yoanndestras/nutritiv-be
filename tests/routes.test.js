@@ -48,7 +48,7 @@ describe('Authentication routes', () =>
   const auth = "/v1/auth"
   const register = auth + "/register";
   const login = auth + "/login";
-
+  
   describe('POST requests', () => 
   {
     it('register a new user', async () => 
@@ -75,7 +75,7 @@ describe('Authentication routes', () =>
       await testConfig.status400AndSuccessFalse(res);
       expect(res.body).toHaveProperty('err', "Your Email syntax is wrong!")
     })
-
+    
     it("return error password", async () => 
     {
       const res = await request(app).post(`${register}`).send(users.passwordErrorUser)
@@ -124,9 +124,9 @@ describe("Products routes", () =>
         .field(products.sampleProduct)
         .set({'refresh_token': refreshToken})
         .attach('imageFile', `${__dirname}/test.jpg`)
-
+        
         await testConfig.successTrue(res);
-
+        
         let productArray = await Product.find();
         productId = productArray[0]._id; 
         productPrice = productArray[0].productItems[0].price.value;
@@ -181,7 +181,7 @@ describe("random TESTS", () =>
     let one = 1;
     
     one = one + 2;
-
+    
     expect(one).toBe(3);
     console.log(`one = `, one)
   })

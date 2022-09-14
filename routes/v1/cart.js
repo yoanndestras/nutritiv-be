@@ -35,7 +35,10 @@ router.get("/self", cors.corsWithOptions, auth.verifyUserCart, auth.verifyRefres
                     status: "No cart has been found!"
                 });
         }
-    }catch(err){next(err)}
+    }catch(err)
+    {
+        next(err)
+    }
 })
 
 // GET ALL 

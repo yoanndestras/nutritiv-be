@@ -87,7 +87,7 @@ if(process.env.DB_NAME !== "Nutritiv-testing")
             })
         ) // LIMIT SPAM REQUESTS TO MAX PER MILLISECONDS
 }
-
+app.disable('x-powered-by');
 app.use(express.json()); // APP LEARN TO READ JSON
 app.use(express.urlencoded({extended: true})); // APP LEARN TO READ JSON  
 app.use(passport.initialize()); // INITIALIZE PASSPORT JS

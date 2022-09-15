@@ -249,24 +249,25 @@ exports.removeImgs = async(req, res, next) =>
     {
         const product = await Product.findOne({_id : req?.params?.productId})
         
-        let imgs = product ? "productsImgs/" + product.imgs : null;
-        
-        if(!imgs)
+        if(!product)
         {
             let err = new Error('This product do not exist!');
             err.statusCode = 400;
             return next(err);
         }
-
-        await Promise.all
-        (
-            imgs.map(async img =>
-                {
-                    fileUpload.deleteFile(img)
-                })
-        );
-
-        next();
+        else
+        {
+            await Promise.all
+            (
+                product.imgs.map(async img =>
+                    {
+                        let imgKey =  process.env.DB_NAME + "/productsImgs/" + img;
+                        fileUpload.deleteFile(imgKey)
+                    })
+            );
+            return next();
+        }
+        // process.env.DB_NAME + "/productsImgs/" +
         
     }catch(err){next(err)}
     
@@ -369,12 +370,12 @@ exports.addProductImgs = async(req, res, next) =>
                     {
                         filePath =  path.join(file.destination, file.filename)
                     }
-                    let fileName = "productsImgs/" + file.filename, fileType = file.mimetype;
+                    let fileName = process.env.DB_NAME + "/productsImgs/" + file.filename, fileType = file.mimetype;
                     
                     await fileUpload.uploadFile(filePath, fileName, fileType);
                     
                     imgs.push(file.filename); 
-                    fs.unlinkSync(path.join("public/images/", fileName))
+                    fs.unlinkSync(filePath)
                 
                 })
         );

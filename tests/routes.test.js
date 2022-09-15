@@ -168,8 +168,27 @@ describe("Carts routes", () =>
       .delete(`${deleteCart}/${userId}`)
       .set({'refresh_token': refreshToken});
       
-      console.log(res.body);
       await testConfig.successTrue(res);
+    })
+  })
+})
+
+describe("Products routes", () => 
+{
+  const product = "/v1/products";
+
+  describe("DELETE routes", () => 
+  {
+    
+    it("Delete an existing product", async() =>
+    {
+      const deleteProduct = product + "/single/" + productId;
+      
+      const res = await request(app)
+        .delete(`${deleteProduct}`)
+        .set({'refresh_token': refreshToken})
+        
+        await testConfig.successTrue(res);
     })
   })
 })

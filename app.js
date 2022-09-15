@@ -17,6 +17,7 @@ exports.ObjectId = ObjectId;
 dotenv.config(); // INITIALIZE ENVIRONNEMENT VARIABLE FILE ".env"
 
 const   app = express(), // EXPRESS APPLICATION
+        helmet = require("helmet"), // HTTP HEADER SECURITY
         http = require('http').createServer(app),
         port = (process.env.PORT || 5000), // BACK-END PORT
         cron = require('node-cron'),
@@ -87,7 +88,8 @@ if(process.env.DB_NAME !== "Nutritiv-testing")
             })
         ) // LIMIT SPAM REQUESTS TO MAX PER MILLISECONDS
 }
-app.disable('x-powered-by');
+
+app.use(helmet()); // APP APPLY SECURITY HEADER
 app.use(express.json()); // APP LEARN TO READ JSON
 app.use(express.urlencoded({extended: true})); // APP LEARN TO READ JSON  
 app.use(passport.initialize()); // INITIALIZE PASSPORT JS

@@ -25,14 +25,15 @@ exports.resizeUserAvatar = async(req, res, next) =>
     const user = await User.findOne({_id: req.user._id})
     if (!req.file)
     {
-      let err = new Error('File not found!')
-      next(err);
+      let err = new Error('File not found!');
+      err.status = 404;
+      return next(err);
     };
-
+    
     let avatar;
     if((user.avatar).substring(0, 4) !== "http")
     {
-      avatar = "usersAvatar/" + user.avatar;
+      avatar = process.env.DB_NAME + "/usersAvatar/" + user.avatar;
 
       user.avatar !== "PrPhdefaultAvatar.jpg" && fileUpload.deleteFile(avatar);
     }
@@ -63,12 +64,12 @@ exports.addUserAvatar = async(req, res, next) =>
     file = path.join(file.destination,'usersAvatar', file.filename)
     
     const filePath = file;
-    const fileName = "usersAvatar/" + req.file.filename
+    const fileName = process.env.DB_NAME + "/usersAvatar/" + req.file.filename
     const fileType = req.file.mimetype;
     const result = await fileUpload.uploadFile(filePath, fileName, fileType);
 
     // let key = result.Key; 
-
+    
     fs.unlinkSync(path.join("public/images/usersAvatar", req.file.filename))
         
     const user = await User.findOneAndUpdate({_id: req.user._id},

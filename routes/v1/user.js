@@ -368,7 +368,7 @@ auth.verifyAuthorization, async (req, res, next) =>
         let user = req.user;
         if((user.avatar).substring(0, 4) !== "http")
         {
-            let avatar = "usersAvatar/" + user.avatar;
+            let avatar = process.env.DB_NAME + "/usersAvatar/" + user.avatar;
             
             user.avatar !== "PrPhdefaultAvatar.jpg" && fileUpload.deleteFile(avatar);
         }

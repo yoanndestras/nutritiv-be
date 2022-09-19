@@ -266,7 +266,7 @@ export const NavbarMenu = ({ open }) => {
                   name="login"
                 />
                 <label>
-                  Sign In
+                  Login
                 </label>
               </SignInContainer>
             )}

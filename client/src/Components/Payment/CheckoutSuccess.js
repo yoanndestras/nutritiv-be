@@ -1,7 +1,9 @@
-import React from 'react'
+import React, { forwardRef } from 'react'
 
-export const CheckoutSuccess = () => {
+const CheckoutSuccess = forwardRef((props, ref) => {
   return (
     <div>Checkout success oui oui oui !!</div>
   )
-}
+});
+
+export default CheckoutSuccess;

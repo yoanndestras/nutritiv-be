@@ -49,7 +49,7 @@ export const Logout = ({ label, style }) => {
       />
       {label && (
         <label style={{cursor: "pointer"}}>
-          Sign Out
+          Logout
         </label>
       )}
     </Container>

@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { forwardRef } from 'react'
 import { Link } from 'react-router-dom'
 
-export const AboutUs = () => {
+const AboutUs = forwardRef((props, ref) => {
   return (
     <div>
       <h2>
@@ -30,4 +30,6 @@ export const AboutUs = () => {
       </h2>
     </div>
   )
-}
+});
+
+export default AboutUs;

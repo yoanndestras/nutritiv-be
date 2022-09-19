@@ -1,6 +1,6 @@
 import facepaint from "facepaint"
 
-const breakpoints = [
+export const breakpoints = [
   576, // 0
   768, // 1
   1024, // 2

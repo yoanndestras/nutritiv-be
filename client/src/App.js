@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { Routes, Route, useLocation, Navigate, Outlet, useSearchParams, useNavigate } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
@@ -8,28 +8,35 @@ import { Elements } from '@stripe/react-stripe-js';
 import Register from './Components/Authentication/Register.js';
 import Login from './Components/Authentication/Login.js';
 import Profile from './Components/Profile/Profile';
-import { Shop } from './Components/Products/Shop';
-import { CheckoutSuccess } from './Components/Payment/CheckoutSuccess';
-import { CheckoutCancel } from './Components/Payment/CheckoutCancel';
-import { ProductPage } from './Components/Products/ProductPage';
+import Shop from './Components/Products/Shop';
+import CheckoutSuccess from './Components/Payment/CheckoutSuccess';
+import CheckoutCancel from './Components/Payment/CheckoutCancel';
+import ProductPage from './Components/Products/ProductPage';
 import { Cart } from './Components/Payment/Cart';
-import { Homepage } from './Components/Homepage/Homepage';
-import { PageNotFound } from './Components/PageNotFound/PageNotFound';
-import { ChatConnection } from './Components/Chat/ChatConnection';
+import Homepage from './Components/Homepage/Homepage';
+import PageNotFound from './Components/PageNotFound/PageNotFound';
+import ChatConnection from './Components/Chat/ChatConnection';
 import { AnimatePresence } from 'framer-motion';
 import { ForgotPassword } from './Components/Authentication/ForgotPassword';
 import { ForgotTFA } from './Components/Authentication/ForgotTFA';
 import { ResetPassword } from './Components/Authentication/ResetPassword';
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
-import { ReleaseNotes } from './Components/Releases/ReleaseNotes';
+import ReleaseNotes from './Components/Releases/ReleaseNotes';
 import { Global, css } from '@emotion/react';
 import './App.scss';
 import { tokens } from './Helpers/styleTokens';
 import { PageContainer } from './Components/PageContainer';
-import { AboutUs } from './Components/AboutUs/AboutUs';
+import AboutUs from './Components/AboutUs/AboutUs';
 import { NavbarMenu } from './Components/Header/NavbarMenu';
-import { PagesWrapper } from './Components/PagesWrapper';
+import PagesWrapper from './Components/PagesWrapper';
 import { GradientBackground } from './Components/GradientBackground';
+import useRefs from 'react-use-refs';
+import { Canvas } from '@react-three/fiber';
+import { Environment, Plane, Preload, 
+  // View 
+} from '@react-three/drei';
+import { View } from './Components/View';
+import { Scene } from './Components/3D/Scene';
 
 // init stripe
 const stripePromise = loadStripe(
@@ -37,6 +44,8 @@ const stripePromise = loadStripe(
 );
 
 function App() {
+  const [canvasWrapperRef, canvasView1, canvasView2] = useRefs();
+  const canvasRefs = { canvasView1, canvasView2 };
   const [gettingUserInfo, setGettingUserInfo] = useState(false);
   const dispatch = useDispatch();
   const loggedIn = useSelector(state => state.user.loggedIn);
@@ -203,131 +212,161 @@ function App() {
   }
   
   return (
-    <Elements
-      stripe={stripePromise}
-      // options={stripeOptions}
-    >
-      <GoogleReCaptchaProvider
-        reCaptchaKey='6Lekw4sgAAAAAIY_DQO_d8uE7fOBQr-g9lqEOqGP'
+    <div ref={canvasWrapperRef}>
+      <Elements
+        stripe={stripePromise}
+        // options={stripeOptions}
       >
-        {/* Global styles */}
-        <Global 
-          styles={
-            css`
-              * {
-                max-width: ${tokens.maxWidth.xl};
-              }
-              body {
-                background: black;
-                color: ${tokens.color.contrastLight};
-                font-family: 'Roboto', sans-serif;
-                position: relative;
-              }
-              html, body, 
-              #iceberg-container, #iceberg-video,
-              #root, #gradient-background {
-                max-width: none;
-              }
-              #root {
-                min-height: 100%;
-                height: auto;
-                perspective: 3000px;
-                perspective-origin: ${mobileNavMenu ? "-100% 50%" : "center"};
-                > div {
+        <GoogleReCaptchaProvider
+          reCaptchaKey='6Lekw4sgAAAAAIY_DQO_d8uE7fOBQr-g9lqEOqGP'
+        >
+          {/* Global styles */}
+          <Global 
+            styles={
+              css`
+                * {
+                  max-width: ${tokens.maxWidth.xl};
+                }
+                body {
+                  background: black;
+                  color: ${tokens.color.contrastLight};
+                  font-family: 'Roboto', sans-serif;
+                  position: relative;
+                }
+                html, body, 
+                #iceberg-container, #iceberg-video,
+                #root, #gradient-background {
                   max-width: none;
                 }
-              }
-            `
-          }
-        />
-        <GradientBackground
-          firstColor={tokens.color.secondary}
-          secondColor={tokens.color.primary}
-          minimizedHomepageColor={tokens.color.primary}
-          minimizedDefaultColor={tokens.color.secondary}
-        />
-        <NavbarMenu open={mobileNavMenu} />
-        <AnimatePresence exitBeforeEnter>
-          <Routes
-            location={location} 
-            key={location.pathname}
-          >
-            <Route path="" element={
-              <PagesWrapper minimized={mobileNavMenu}/>
-            }>
-              {/* PUBLIC */}
-              <Route
-                path="*"
-                element={<Navigate to="/page-not-found" replace/>}
-              />
-              <Route
-                index
-                path="/welcome"
-                element={<Homepage/>}
-              />
-              <Route path="/team" element={
-                <PageContainer><AboutUs/></PageContainer>
-              }/>
-              <Route path="/shop" element={
-                <PageContainer><Shop/></PageContainer>
-              }/>
-              <Route path="/product">
-                <Route path=":productTitle" element={
-                  <PageContainer><ProductPage/></PageContainer>
-                }/>
-              </Route>
-              <Route path="/chat" element={
-                <PageContainer><ChatConnection/></PageContainer>
-              }/> 
-              <Route path="/releases" element={
-                <PageContainer><ReleaseNotes/></PageContainer>
-              }/>
-              <Route path="/cancel" element={
-                <PageContainer><CheckoutCancel/></PageContainer>
-              }/>
-              <Route path="/success" element={
-                <PageContainer><CheckoutSuccess/></PageContainer>
-              }/>
-              <Route path="/page-not-found" element={
-                <PageContainer><PageNotFound/></PageContainer>
-              }/>
-              <Route
-                path="/"
-                element={<Navigate to="/welcome" replace/>}
-              />
-              {/* PRIVATE */}
-              {/* RESTRICTED - USER */}
-              <Route element={<Restricted routeType="user" />}>
-                <Route path="/profile" element={
-                  <PageContainer><Profile/></PageContainer>
-                }/>
-                <Route path="/cart" element={
-                  <PageContainer><Cart/></PageContainer>
-                }/>
-              </Route>
-              {/* RESTRICTED - GUEST */}
-              <Route element={<Restricted routeType="guest" />}>
-                <Route path="/login" element={
-                  <PageContainer><Login/></PageContainer>
-                }/>
-                <Route path="/register" element={
-                  <PageContainer><Register/></PageContainer>
-                }/>
-                <Route path="/forgot-password" element={
-                  <PageContainer><ForgotPassword/></PageContainer>
-                }/>
-                <Route path="/reset-password" element={
-                  <PageContainer><ResetPassword/></PageContainer>
-                }/>
-                <Route path="/forgot-2FA" element={
-                  <PageContainer><ForgotTFA/></PageContainer>
-                }/>
-              </Route>
-            </Route>
-          </Routes>
-        </AnimatePresence>
-      </GoogleReCaptchaProvider>
-    </Elements>
+                .canvas, .canvas > div, canvas {
+                  max-width: none;
+                }
+                #root {
+                  height: auto;
+                  min-height: 100%;
+                  perspective: ${mobileNavMenu ? "3000px" : "none"};
+                  perspective-origin: ${mobileNavMenu ? "-100% 50%" : "center"};
+                  > div {
+                    max-width: none;
+                  }
+                  position: relative;
+                }
+                .canvas {
+                  pointer-events: none !important;
+                  position: fixed !important;
+                  top: 0px;
+                  left: 0px;
+                  width: 100% !important;
+                  height: 100% !important;
+                }
+              `
+            }
+          />
+          <GradientBackground
+            firstColor={tokens.color.secondary}
+            secondColor={tokens.color.primary}
+            minimizedHomepageColor={tokens.color.primary}
+            minimizedDefaultColor={tokens.color.secondary}
+          />
+          <NavbarMenu open={mobileNavMenu} />
+            <Suspense fallback={null}>
+              <AnimatePresence exitBeforeEnter>
+                <Routes
+                  location={location} 
+                  key={location.pathname}
+                >
+                  <Route path="" element={
+                    <PagesWrapper ref={canvasRefs} minimized={mobileNavMenu}/>
+                  }>
+                    {/* PUBLIC */}
+                    <Route
+                      path="*"
+                      element={<Navigate to="/page-not-found" replace/>}
+                    />
+                    <Route
+                      index
+                      path="/welcome"
+                      element={<Homepage ref={canvasRefs} />}
+                    />
+                    <Route path="/team" element={
+                      <PageContainer><AboutUs ref={canvasRefs}/></PageContainer>
+                    }/>
+                    <Route path="/shop" element={
+                      <PageContainer><Shop ref={canvasRefs}/></PageContainer>
+                    }/>
+                    <Route path="/product">
+                      <Route path=":productTitle" element={
+                        <PageContainer><ProductPage ref={canvasRefs}/></PageContainer>
+                      }/>
+                    </Route>
+                    <Route path="/chat" element={
+                      <PageContainer><ChatConnection ref={canvasRefs}/></PageContainer>
+                    }/> 
+                    <Route path="/releases" element={
+                      <PageContainer><ReleaseNotes ref={canvasRefs}/></PageContainer>
+                    }/>
+                    <Route path="/cancel" element={
+                      <PageContainer><CheckoutCancel ref={canvasRefs}/></PageContainer>
+                    }/>
+                    <Route path="/success" element={
+                      <PageContainer><CheckoutSuccess ref={canvasRefs}/></PageContainer>
+                    }/>
+                    <Route path="/page-not-found" element={
+                      <PageContainer><PageNotFound ref={canvasRefs}/></PageContainer>
+                    }/>
+                    <Route
+                      path="/"
+                      element={<Navigate to="/welcome" replace/>}
+                    />
+                    {/* PRIVATE */}
+                    {/* RESTRICTED - USER */}
+                    <Route element={<Restricted routeType="user" />}>
+                      <Route path="/profile" element={
+                        <PageContainer><Profile ref={canvasRefs}/></PageContainer>
+                      }/>
+                      <Route path="/cart" element={
+                        <PageContainer><Cart ref={canvasRefs}/></PageContainer>
+                      }/>
+                    </Route>
+                    {/* RESTRICTED - GUEST */}
+                    <Route element={<Restricted routeType="guest" />}>
+                      <Route path="/login" element={
+                        <PageContainer><Login ref={canvasRefs}/></PageContainer>
+                      }/>
+                      <Route path="/register" element={
+                        <PageContainer><Register ref={canvasRefs}/></PageContainer>
+                      }/>
+                      <Route path="/forgot-password" element={
+                        <PageContainer><ForgotPassword ref={canvasRefs}/></PageContainer>
+                      }/>
+                      <Route path="/reset-password" element={
+                        <PageContainer><ResetPassword ref={canvasRefs}/></PageContainer>
+                      }/>
+                      <Route path="/forgot-2FA" element={
+                        <PageContainer><ForgotTFA ref={canvasRefs}/></PageContainer>
+                      }/>
+                    </Route>
+                  </Route>
+                </Routes>
+              </AnimatePresence>
+              <Canvas
+                onCreated={(state) =>
+                  state.events.connect(canvasWrapperRef.current)
+                }
+                className="canvas"
+              >
+                <View track={canvasView1}>
+                  <Scene
+                    type="pill"
+                    homepageCard
+                  />
+                </View>
+                <Preload all />
+              </Canvas>
+            </Suspense>
+        </GoogleReCaptchaProvider>
+      </Elements>
+    </div>
   );
 }
 

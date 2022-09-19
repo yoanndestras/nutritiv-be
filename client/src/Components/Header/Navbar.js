@@ -121,11 +121,11 @@ const LogoLink = styled(Link)`
 const ProfileLink = styled(Link)`
   align-items: center;
   background-color: ${props => 
-      (props.active && props.lastLink) ? `${tokens.color.contrastLight}` : `transparent`
+      (props.active && props.lastlink) ? `${tokens.color.contrastLight}` : `transparent`
   };
   border-radius: ${tokens.borderRadius.max};
   color: ${props =>
-    (props.active && props.lastLink) ? `${tokens.color.contrastDark}` : `inherit`
+    (props.active && props.lastlink) ? `${tokens.color.contrastDark}` : `inherit`
   };
   display: flex;
   height: 24px;
@@ -136,7 +136,7 @@ const ProfileLink = styled(Link)`
   transition: all ease .2s;
   &:hover {
     ${props =>
-      props.active && props.lastLink ? (
+      props.active && props.lastlink ? (
         mediaQueries({
           backgroundColor: ["transparent", "transparent", "transparent",  tokens.color.contrastLight],
         })
@@ -400,7 +400,7 @@ export default function Navbar() {
               active={location.pathname === "/profile" ? 1 : undefined}
               onMouseEnter={() => handleHoverProfileEnter()}
               onMouseLeave={() => handleHoverProfileLeave()}
-              lastLink
+              lastlink={1}
               to="/profile"
             >
               <Username>

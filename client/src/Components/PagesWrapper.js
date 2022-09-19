@@ -1,12 +1,14 @@
 /** @jsxImportSource @emotion/react */
 import styled from '@emotion/styled'
 import { motion } from 'framer-motion'
+import { forwardRef } from 'react'
 import { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { Outlet, useLocation } from 'react-router-dom'
 import { Footer } from '../Footer/Footer'
 import { tokens } from '../Helpers/styleTokens'
 import { closeMobileNavMenu } from '../Redux/reducers/modals'
+import CanvasDefaultList from './3D/CanvasDefaultList'
 import Navbar from './Header/Navbar'
 
 const Pages = styled(({ homepage, minimized, ...props }) => <motion.div {...props} />)`
@@ -20,6 +22,7 @@ const Pages = styled(({ homepage, minimized, ...props }) => <motion.div {...prop
     )
   };
   color: ${tokens.color.contrastLight};
+  max-width: none;
   min-height: 100vh;
   overflow: hidden;
   position: relative;
@@ -42,7 +45,7 @@ const Pages = styled(({ homepage, minimized, ...props }) => <motion.div {...prop
   }
 `
 
-export const PagesWrapper = ({ minimized }) => {
+const PagesWrapper = forwardRef(({ minimized }, ref) => {
   const dispatch = useDispatch();
   const location = useLocation();
   const [duration, setDuration] = useState(0);
@@ -179,8 +182,11 @@ export const PagesWrapper = ({ minimized }) => {
       variants={pagesVariants}
     >
       <Navbar />
+      <CanvasDefaultList ref={ref} />
       <Outlet />
       <Footer />
     </Pages>
   )
-}
+});
+
+export default PagesWrapper;

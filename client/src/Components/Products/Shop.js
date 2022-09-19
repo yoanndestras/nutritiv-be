@@ -5,8 +5,9 @@ import nutritivApi from '../../Api/nutritivApi';
 import { ProductCard } from './ProductCard';
 import { Pagination } from '@mui/material';
 import { AnimatePresence, LayoutGroup, motion, Reorder } from 'framer-motion';
+import { forwardRef } from 'react';
 
-export const Shop = () => {  
+const Shop = forwardRef((props, ref) => {  
   console.log("###########-Products-###########")
   
   const [allProducts, setAllProducts] = useState([])
@@ -301,4 +302,6 @@ export const Shop = () => {
       }
     </motion.div>
   )
-}
+});
+
+export default Shop;

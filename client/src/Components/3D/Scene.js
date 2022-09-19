@@ -1,7 +1,7 @@
 import { Environment, OrbitControls, PerspectiveCamera, Plane, softShadows, Stats, useHelper } from '@react-three/drei'
-import React, { Suspense, useRef } from 'react'
-import JellyModel from './models/Jelly';
-import PillModel from './models/Pill';
+import React, { Suspense, useEffect, useRef, useState } from 'react'
+import GummyModel from './models/Gummy';
+import CapsuleModel from './models/Capsule';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import angleToRadians from '../../Helpers/angleToRadians';
@@ -14,7 +14,7 @@ softShadows({
   rings: 11, // Rings (default: 11) must be a int
 })
 
-export const Scene = ({ type }) => {
+export const Scene = ({ type, homepageCard }) => {
   const modelRotation = useRef(0);
   const orbitControlsRef = useRef(null);
   const directionalLightRef = useRef(null);
@@ -58,9 +58,17 @@ export const Scene = ({ type }) => {
         autoRotate
         autoRotateSpeed={2}
         enablePan={false}
-        enableZoom={true}
-        minDistance={type === "pill" ? 5 : 7}
-        maxDistance={type === "pill" ? 7 : 9}
+        enableZoom={homepageCard ? false : true}
+        minDistance={
+          type === "pill" ? 2.65 : 7
+        }
+        maxDistance={
+          homepageCard ? (
+            type === "pill" ? 2.65 : 7
+          ) : (
+            type === "pill" ? 7 : 9
+          )
+        }
         minPolarAngle={angleToRadians(70)}
         maxPolarAngle={angleToRadians(100)}
         makeDefault
@@ -70,9 +78,9 @@ export const Scene = ({ type }) => {
       {/* MODEL */}
       {
         type === "jelly" ? (
-          <JellyModel forwardRef={modelRotation} /> 
+          <GummyModel forwardRef={modelRotation} /> 
         ) : (
-          <PillModel forwardRef={modelRotation} />
+          <CapsuleModel forwardRef={modelRotation} />
         )
       }
       
@@ -81,25 +89,28 @@ export const Scene = ({ type }) => {
         // preset="park"
         files={['px.png', 'nx.png', 'py.png', 'ny.png', 'pz.png', 'nz.png']}
         path="/hdri/venice/"
-        intensity={0.5}
+        intensity={3}
       >
         <mesh scale={100}>
           <sphereGeometry args={[1, 64, 64]} />
-          <meshBasicMaterial color="grey" side={THREE.BackSide} />
+          <meshBasicMaterial side={THREE.FrontSide} />
         </mesh>
       </Environment>
-
+      
       {/* GROUND */}
       {/* <Plane receiveShadow rotation-x={-Math.PI / 2} position={[0, -1.7, 0]} args={[10, 10, 4, 4]}>
         <meshBasicMaterial opacity={0.5} />
       </Plane> */}
       {/* SHADOW */}
-      <Plane receiveShadow rotation-x={-Math.PI / 2} position={[0, -1.9, 0]} args={[10, 10, 4, 4]}>
-        <shadowMaterial opacity={0.5} />
-      </Plane>
+      
+      {!homepageCard && (
+        <Plane receiveShadow rotation-x={-Math.PI / 2} position={[0, -1.9, 0]} args={[10, 10, 4, 4]}>
+          <shadowMaterial opacity={0.5} />
+        </Plane>
+      )}
       
       {/* LIGHTS */}
-      <directionalLight
+      {/* <directionalLight
         castShadow
         intensity={3}
         position={[0, 6, 0]}
@@ -111,7 +122,7 @@ export const Scene = ({ type }) => {
         shadow-camera-right={10}
         shadow-camera-top={10}
         shadow-camera-bottom={-10}
-      />
+      /> */}
       
       <pointLight 
         intensity={20}

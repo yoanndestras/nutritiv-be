@@ -1,4 +1,5 @@
 import React, {
+  forwardRef,
   useEffect, 
   useState 
 } from 'react'
@@ -8,7 +9,7 @@ import nutritivApi, { s3URL } from '../../Api/nutritivApi';
 import { updateUserCartQuantity } from '../../Redux/reducers/user';
 import { motion } from 'framer-motion';
 
-export const ProductPage = () => {
+const ProductPage = forwardRef((props, ref) => {
   const loggedIn = useSelector(state => state.user.loggedIn)
   const dispatch = useDispatch();
   const { productTitle } = useParams();
@@ -260,4 +261,6 @@ export const ProductPage = () => {
       }
     </motion.div>
   )
-}
+});
+
+export default ProductPage;

@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react'
+import React, { forwardRef, useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import nutritivApi from '../../Api/nutritivApi'
 import { updateUser } from '../../Redux/reducers/user'
 import { Chat } from './Chat'
 
-export const ChatConnection = () => {
+const ChatConnection = forwardRef((props, ref) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const loggedIn = useSelector(state => state.user.loggedIn)
@@ -81,4 +81,6 @@ export const ChatConnection = () => {
       }
     </div>
   )
-}
+});
+
+export default ChatConnection;

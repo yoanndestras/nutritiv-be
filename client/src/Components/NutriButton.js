@@ -58,20 +58,25 @@ export const NutriButton = React.memo(function NutriButton(props) {
         props.type === "filled" ? (
         css`
           background: ${tokens.color.accentStrong};
-          color: ${tokens.color.contrastDark};
           border: none;
-          /* &:hover {
+          color: ${tokens.color.contrastDark};
+          transition: all .2s ease;
+          &:hover {
             box-shadow: 0 0 6px ${tokens.color.accentStrong};
-          } */
+            transition: all .2s ease;
+          }
         `
       ) : (
         css`
+          transition: all .2s ease;
           background-color: ${tokens.color.transparent};
           border: 1px solid ${tokens.color.accentTransparent};
+          box-shadow: 0 0 0px ${tokens.color.accentTransparent};
           color: ${tokens.color.contrastLight};
-          /* &:hover {
+          &:hover {
             box-shadow: 0 0 6px ${tokens.color.accentTransparent};
-          } */
+            transition: all .2s ease;
+          }
         `
       ))
     }};
@@ -153,7 +158,7 @@ export const NutriButton = React.memo(function NutriButton(props) {
     <StyledButton
       initial={{
         animationDuration: "6.5s",
-        filter: "brightness(1.15)",
+        filter: "brightness(1.12)",
         backgroundPositionY: "100px",
       }}
       animate={{
@@ -161,11 +166,10 @@ export const NutriButton = React.memo(function NutriButton(props) {
       }}
       whileHover={{
         animationDuration: "3.25s",
-        filter: "brightness(1)",
-        boxShadow: `0 0 6px ${tokens.color.accentStrong}`
       }}
       whileTap={{
         backgroundPositionY: "-100px",
+        filter: "brightness(1)",
       }}
       transition={{
         backgroundPositionY: {

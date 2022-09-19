@@ -499,7 +499,7 @@ const Homepage = forwardRef((props, ref) => {
           height="100%"
           width="100%"
         >
-          <source src="https://nutritiv.s3.eu-west-3.amazonaws.com/assets/video_iceberg.mov" type="video/quicktime" />
+          <source src="https://nutritiv.s3.eu-west-3.amazonaws.com/assets/video_iceberg.mov" type='video/mp4; codecs="hvc1"'></source>
           <source src="https://nutritiv.s3.eu-west-3.amazonaws.com/assets/video_iceberg.webm" type="video/webm" />
           {/* <source src="/video_iceberg.webm" type="video/webm" /> */}
         </Video>

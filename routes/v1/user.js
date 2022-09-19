@@ -13,17 +13,17 @@ const {upload} = require('./upload');
 
 const limitter = require('express-rate-limit');
 
-// router.use( 
-//     limitter(
-//         {
-//             windowMs: 5000,
-//             max: 5,
-//             message: {
-//                 code: 429,
-//                 message: "Too many requests"
-//             }
-//         })
-//     ) // LIMIT SPAM REQUESTS TO MAX PER MILLISECONDS
+router.use( 
+    limitter(
+        {
+            windowMs: 5000,
+            max: 5,
+            message: {
+                code: 429,
+                message: "Too many requests"
+            }
+        })
+    ) // LIMIT SPAM REQUESTS TO MAX PER MILLISECONDS
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
@@ -43,7 +43,7 @@ router.get("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, async
             : await User.find()
         
         let newUsersArray = [];
-        users.map((user) =>
+        users.forEach((user) =>
         {
             let avatar = (user.avatar).substring(0, 4) === "http" ? user.avatar : process.env.AWS_BUCKET_LINK + "usersAvatar/" + user.avatar;
             
@@ -195,7 +195,7 @@ async (req, res, next) =>
     try
     {
         const usersArray = req.body?.users;
-        if(usersArray && usersArray.length)
+        if(usersArray && Array.isArray(usersArray))
         {
             let users = [];
             

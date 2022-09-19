@@ -86,7 +86,8 @@ exports.newProduct = async(req, res, next) =>
                     {
                         if(file.mimetype.startsWith('image')) 
                         {
-                            fs.unlinkSync(path.resolve(file.destination,'productsImgs', file.filename))
+                            // deepcode ignore PT: <please specify a reason of ignoring this>
+                            fs.unlinkSync(path.resolve(file.destination,'productsImgs', encodeURIComponent(file.filename)))
                         }
                     })
             );
@@ -261,7 +262,7 @@ exports.removeImgs = async(req, res, next) =>
             (
                 product.imgs.map(async img =>
                     {
-                        let imgKey =  process.env.DB_NAME + "/productsImgs/" + img;
+                        let imgKey =  process.env.DB_NAME + "/productsImgs/" + encodeURIComponent(img);
                         fileUpload.deleteFile(imgKey)
                     })
             );
@@ -340,8 +341,9 @@ exports.resizeProductImage = async(req, res, next) =>
                     {
                         await sharp(file.path)
                         .resize(200, 200)
-                        .toFile(path.resolve(file.destination,'productsImgs', file.filename))
-                        fs.unlinkSync(path.join("public/images/", file.filename))
+                        .toFile(path.resolve(file.destination,'productsImgs', encodeURIComponent(file.filename)))
+
+                        fs.unlinkSync(path.join("public/images/", encodeURIComponent(file.filename)))
                     }
                 })
         );
@@ -361,20 +363,23 @@ exports.addProductImgs = async(req, res, next) =>
         (
             filesArr.map(async(file) => 
                 {
-                    let filePath;
+                    let sanitizeFileName = encodeURIComponent(file.filename)
+                    let filePath, fileType = file.mimetype;
                     if(file.mimetype.startsWith('image'))
                     {
-                        filePath =  path.join(file.destination,'productsImgs', file.filename)
+                        filePath =  path.join(file.destination,'productsImgs', sanitizeFileName)
                     }
                     else if(file.mimetype.startsWith('model/gltf-binary'))
                     {
-                        filePath =  path.join(file.destination, file.filename)
+                        filePath =  path.join(file.destination, sanitizeFileName)
                     }
-                    let fileName = process.env.DB_NAME + "/productsImgs/" + file.filename, fileType = file.mimetype;
+                    let fileName = process.env.DB_NAME + "/productsImgs/" + sanitizeFileName;
                     
+                    // deepcode ignore PT: <please specify a reason of ignoring this>
                     await fileUpload.uploadFile(filePath, fileName, fileType);
                     
-                    imgs.push(file.filename); 
+                    imgs.push(sanitizeFileName); 
+                    // deepcode ignore PT: <please specify a reason of ignoring this>
                     fs.unlinkSync(filePath)
                 
                 })

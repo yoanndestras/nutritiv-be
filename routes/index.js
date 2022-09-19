@@ -38,7 +38,7 @@ const trimmer = (req, res, next) =>
         for(const [key, value] of Object.entries(req.body)) 
         {
             if(typeof(value) === 'string')
-                req.body[key] = value.trim();
+                req.body[key] = value.trim(); // replace blank before and after string
         }
     }
     next();

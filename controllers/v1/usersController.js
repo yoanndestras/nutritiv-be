@@ -18,7 +18,7 @@ app.use(express.json()); // to read JSON
 app.use(express.urlencoded({extended: true}));
 
 // RESIZE USER AVATAR
-exports.resizeUserAvatar = async(req, res, next) => 
+exports.resizeUserAvatar = async(req, _res, next) => 
 {
   try
   {
@@ -46,8 +46,15 @@ exports.resizeUserAvatar = async(req, res, next) =>
                 await sharp(file.path)
                 .resize(200, 200)
                 .toFile(path.resolve(file.destination,'usersAvatar', file.filename))
-
-                fs.unlinkSync(path.join("public/images/", req.file.filename))
+                
+                if((ARCHIVE_PATH.indexOf(path.join(__dirname, '../public/dbBackups')) !== 0))
+                {
+                    let err = new Error(`File ${fileKey} does not exist`);
+                    err.statusCode = 400;
+                    next(err);
+                }
+                
+                fs.unlinkSync(path.join("public/images/", encodeURIComponent(req.file.filename)))
             })
     );
     // if(avatar){fs.unlinkSync(path.join("public/images/usersAvatar/", avatar))}
@@ -60,17 +67,16 @@ exports.addUserAvatar = async(req, res, next) =>
 {
   try
   {
-    let file = req.file;
-    file = path.join(file.destination,'usersAvatar', file.filename)
-    
-    const filePath = file;
-    const fileName = process.env.DB_NAME + "/usersAvatar/" + req.file.filename
+    let sanitizeFileName = encodeURIComponent(req.file.filename)
+    const filePath = path.join(req.file.destination,'usersAvatar', sanitizeFileName);
+    const fileName = process.env.DB_NAME + "/usersAvatar/" + sanitizeFileName;
     const fileType = req.file.mimetype;
+    // deepcode ignore PT: <please specify a reason of ignoring this>
     const result = await fileUpload.uploadFile(filePath, fileName, fileType);
-
+    
     // let key = result.Key; 
     
-    fs.unlinkSync(path.join("public/images/usersAvatar", req.file.filename))
+    fs.unlinkSync(path.join("public/images/usersAvatar", sanitizeFileName))
         
     const user = await User.findOneAndUpdate({_id: req.user._id},
     {
@@ -86,7 +92,7 @@ exports.addUserAvatar = async(req, res, next) =>
   
 }
 
-exports.verifyAddress = async(req, res, next) => 
+exports.verifyAddress = async(req, _res, next) => 
 {
   try
   {
@@ -103,7 +109,7 @@ exports.verifyAddress = async(req, res, next) =>
   
 }
 
-exports.maxAmountOfAdresses = async(req, res, next) =>
+exports.maxAmountOfAdresses = async(req, _res, next) =>
 {
   try
   {
@@ -124,7 +130,7 @@ exports.maxAmountOfAdresses = async(req, res, next) =>
   
 }
 
-exports.verifyAdressId = async(req, res, next) =>
+exports.verifyAdressId = async(req, _res, next) =>
 {
   try
   {
@@ -147,7 +153,7 @@ exports.verifyAdressId = async(req, res, next) =>
   }catch(err){next(err)}
 }
 
-exports.updateAddress = async(req, res, next) =>
+exports.updateAddress = async(req, _res, next) =>
 {
   try
   {
@@ -176,7 +182,7 @@ exports.updateAddress = async(req, res, next) =>
   }catch(err){next(err);}
 }
 
-exports.deleteAddress = async(req, res, next) =>
+exports.deleteAddress = async(req, _res, next) =>
 {
   try
   {
@@ -196,9 +202,9 @@ exports.deleteAddress = async(req, res, next) =>
   }catch(err){next(err);}
 }
 
-exports.verifyUsername = (req, res, next) =>
+exports.verifyUsername = (req, _res, next) =>
 {
-    User.findOne({username: req.body.username}, (err, user) =>
+    User.findOne({username: req.body.username}, (_err, user) =>
         {
             if(user !== null)
             {
@@ -213,7 +219,7 @@ exports.verifyUsername = (req, res, next) =>
         })
 };
 
-exports.updateUsername = async(req, res, next) =>
+exports.updateUsername = async(req, _res, next) =>
 {
   try
   {
@@ -246,9 +252,9 @@ exports.updateUsername = async(req, res, next) =>
 }
 
 
-exports.verifyEmail = (req, res, next) =>
+exports.verifyEmail = (req, _res, next) =>
 {
-    User.findOne({email: req.body.email}, (err, user) =>
+    User.findOne({email: req.body.email}, (_err, user) =>
         {
             if(user !== null)
             {
@@ -264,7 +270,7 @@ exports.verifyEmail = (req, res, next) =>
 };
 
 
-exports.updateEmail = async(req, res, next) =>
+exports.updateEmail = async(req, _res, next) =>
 {
   try
   {

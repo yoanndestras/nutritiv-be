@@ -11,6 +11,7 @@ import useWindowDimensions from '../../Helpers/useWindowDimensions';
 import { Canvas } from '@react-three/fiber';
 import { Scene } from '../3D/Scene';
 import CanvasDefaultList from '../3D/CanvasDefaultList';
+import { osName, isIOS } from "react-device-detect";
 
 const HomepageContentContainer = styled.div`
   margin: 0 auto;
@@ -30,6 +31,20 @@ const VideoContainer = styled.div`
   top: 500px;
   z-index: 0;
   ${mediaQueries({
+    top: ["380px", "420px", "470px", "500px"],
+    left: ["-45%", "-40%", "-10%", "0",],
+    right: ["-45%", "-40%", "-10%", "0",]
+  })}
+`
+const ImageContainer = styled.div`
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 0;
+  ${mediaQueries({
+    // top: ["380px", "420px", "213px", "200px", "180px"],
+    // left: ["-45%", "-40%", "-14%", "0",],
+    // right: ["-45%", "-40%", "-17%", "-2%",]
     top: ["380px", "420px", "470px", "500px"],
     left: ["-45%", "-40%", "-10%", "0",],
     right: ["-45%", "-40%", "-10%", "0",]
@@ -98,16 +113,28 @@ const Homepage = forwardRef((props, ref) => {
   const [icebergShadow, setIcebergShadow] = useState(false)
   const [arrowHovered, setArrowHovered] = useState(false)
   const [fillDelay, setFillDelay] = useState(false)
+  const [isAppleDevice, setIsAppleDevice] = useState(true);
+  
   const { width } = useWindowDimensions()
   
   useEffect(() => {
-    if(width > breakpoints[2]) {
-      videoRef.current.play();
+    if (osName === "Mac OS" || isIOS) {
+      console.log('# osName :', osName)
+      console.log('# isIOS :', isIOS)
+      setIsAppleDevice(true);
     } else {
-      videoRef.current.pause();
+      setIsAppleDevice(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if(width > breakpoints[2]) {
+      videoRef.current && videoRef.current.play();
+    } else {
+      videoRef.current && videoRef.current.pause();
     }
   }, [width]);
-
+  
   useEffect(() => {
     if(arrowHovered) {
       const timer = setTimeout(() => {
@@ -483,27 +510,41 @@ const Homepage = forwardRef((props, ref) => {
           </ThirdBlock>
         </ViewHeightWrapper>
       </HomepageContentContainer>
-      <VideoContainer id="iceberg-container">
-        <Video
-          variants={icebergVariants}
-          animate={
-            icebergShadow ? "shadow" : "default" 
-          }
-          autoPlay={true}
-          id="iceberg-video"
-          loop
-          muted
-          playsInline
-          preload="auto"
-          ref={videoRef}
-          height="100%"
-          width="100%"
-        >
-          <source src="https://nutritiv.s3.eu-west-3.amazonaws.com/assets/video_iceberg.mov" type='video/mp4; codecs="hvc1"'></source>
-          <source src="https://nutritiv.s3.eu-west-3.amazonaws.com/assets/video_iceberg.webm" type="video/webm" />
-          {/* <source src="/video_iceberg.webm" type="video/webm" /> */}
-        </Video>
-      </VideoContainer>
+        {isAppleDevice ? (
+          <ImageContainer className="iceberg-container">
+            <motion.img 
+              animate={
+                icebergShadow ? "shadow" : "default" 
+              }
+              alt="iceberg" 
+              id='iceberg-image'
+              src="https://nutritiv.s3.eu-west-3.amazonaws.com/assets/image-iceberg.png"
+              style={{height: "100%", width: "100%"}} 
+              variants={icebergVariants}
+            />
+          </ImageContainer>
+        ) : (
+          <VideoContainer className="iceberg-container">
+            <Video
+              animate={
+                icebergShadow ? "shadow" : "default" 
+              }
+              autoPlay={true}
+              id="iceberg-video"
+              loop
+              muted
+              playsInline
+              preload="auto"
+              ref={videoRef}
+              variants={icebergVariants}
+              height="100%"
+              width="100%"
+            >
+              <source src="https://nutritiv.s3.eu-west-3.amazonaws.com/assets/video_iceberg.mov" type='video/mp4; codecs="hvc1"'></source>
+              <source src="https://nutritiv.s3.eu-west-3.amazonaws.com/assets/video_iceberg.webm" type="video/webm" />
+            </Video>
+          </VideoContainer>
+        )}
     </>
   )
 });

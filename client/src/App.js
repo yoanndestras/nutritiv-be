@@ -234,7 +234,7 @@ function App() {
                   position: relative;
                 }
                 html, body, 
-                #iceberg-container, #iceberg-video,
+                .iceberg-container, #iceberg-video, #iceberg-image,
                 #root, #gradient-background {
                   max-width: none;
                 }

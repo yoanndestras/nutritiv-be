@@ -14,14 +14,10 @@ const auth = require('../../controllers/v1/authController');
 
 
 router.post("/create-order", cors.corsWithOptions, auth.verifyUser, 
-auth.verifyRefresh, order.countInStock, async(req, res, next)  => 
+auth.verifyRefresh, order.countInStock, paypal.createOrder, async(req, res, next) => 
 {
-  try
-  {
-    const order = await paypal.createOrder();
-    res.json(order);
-  }catch(err) {next(err)}
-
+  try{res.json(req.order)}
+  catch(err){next(err)}
 });
 
 router.post("/capture/:orderID", cors.corsWithOptions, auth.verifyUser, 

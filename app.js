@@ -22,6 +22,7 @@ const   app = express(), // EXPRESS APPLICATION
         cron = require('node-cron'),
         whitelist = process.env.CORS_WHITELIST.split(' ');
 
+console.log(`process.env.JWT_SEC = `, process.env.JWT_SEC)
 http.listen(port, () => 
 {
     // commentaire

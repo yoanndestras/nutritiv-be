@@ -1,7 +1,9 @@
 const authenticate = require("./authController");
 const express = require('express');
 const passport = require('passport');
-require("dotenv").config();
+const dotenv = require('dotenv');
+
+dotenv.config(); // INITIALIZE ENVIRONNEMENT VARIABLE FILE ".env"
 
 const LocalStrategy = require('passport-local').Strategy;
 const GoogleStrategy = require('passport-google-oauth20').Strategy;

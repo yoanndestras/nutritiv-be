@@ -17,7 +17,6 @@ const alphabet = '0123456789';
 const nanoid = customAlphabet(alphabet, 12);
 const fetch = require("node-fetch");
 const speakeasy = require("speakeasy");
-require('dotenv').config();
 
 const passportJWT = require("passport-jwt");
 const JwtStrategy   = passportJWT.Strategy;
@@ -139,6 +138,7 @@ exports.jwtPassport = passport.use("email_jwt", new JwtStrategy(opts_email, (jwt
         })
 }));
 
+console.log(`process.env.REF_TFA_TOKEN = `, process.env.REF_TFA_TOKEN)
 const opts_tfa = {}; //json web token and key
 opts_tfa.jwtFromRequest = ExtractJwt.fromHeader("twofa_token");
 opts_tfa.secretOrKey = process.env.REF_TFA_TOKEN;

@@ -138,7 +138,6 @@ exports.jwtPassport = passport.use("email_jwt", new JwtStrategy(opts_email, (jwt
         })
 }));
 
-console.log(`process.env.REF_JWT_SEC_COOKIE = `, process.env.REF_JWT_SEC_COOKIE)
 const opts_tfa = {}; //json web token and key
 opts_tfa.jwtFromRequest = ExtractJwt.fromHeader("twofa_token");
 opts_tfa.secretOrKey = process.env.REF_TFA_TOKEN;

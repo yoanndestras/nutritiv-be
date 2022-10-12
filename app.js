@@ -16,6 +16,11 @@ exports.ObjectId = ObjectId;
 
 dotenv.config(); // INITIALIZE ENVIRONNEMENT VARIABLE FILE ".env"
 console.log(`process.env.DB_NAME = `, process.env.DB_NAME)
+console.log(`process.env.DB_NAME = `, process.env.DB_NAME)
+console.log(`process.env.DB_NAME = `, process.env.DB_NAME)
+console.log(`process.env.DB_NAME = `, process.env.DB_NAME)
+console.log(`process.env.DB_NAME = `, process.env.DB_NAME)
+console.log(`process.env.DB_NAME = `, process.env.DB_NAME)
 const   app = express(), // EXPRESS APPLICATION
         http = require('http').createServer(app),
         port = (process.env.PORT || 5000), // BACK-END PORT

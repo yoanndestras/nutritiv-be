@@ -22,6 +22,12 @@ const corsOptionsDelegate = (req, callback) =>
                 allowedHeaders: ['X-Requested-With', 'X-HTTP-Method-Override', 'Content-Type', 'Accept', 'Content-Length', 'X-Foo', 'X-Bar', 'access_token', 'refresh_token', 'twofa_token', 'new_twofa_token']
             };
             console.log({ origin: true });
+            console.log(`process.env.DB_NAME = `, process.env.DB_NAME)
+            console.log(`process.env.DB_NAME = `, process.env.DB_NAME)
+            console.log(`process.env.DB_NAME = `, process.env.DB_NAME)
+            console.log(`process.env.DB_NAME = `, process.env.DB_NAME)
+            console.log(`process.env.DB_NAME = `, process.env.DB_NAME)
+            console.log(`process.env.DB_NAME = `, process.env.DB_NAME)
         }
     else 
         {

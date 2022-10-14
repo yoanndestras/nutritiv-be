@@ -36,6 +36,7 @@ opts.secretOrKey = process.env.JWT_SEC;
 
 exports.jwtPassport = passport.use("jwt", new JwtStrategy(opts, (jwtPayload, done) =>
 {
+    console.log(`opts = `, opts)
     User.findOne({_id: jwtPayload._id}, (err, user) =>
         {                
             if(err)
@@ -559,7 +560,6 @@ exports.verifyUserNewTFA = async(req, res, next) =>
 
 exports.verifyUser = (req, res, next) => 
 {
-    console.log("TESTAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
     passport.authenticate('jwt', { session: false }, (err, user, info) => 
     {
         if(err)console.log(`err = `, err)

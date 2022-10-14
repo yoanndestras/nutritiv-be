@@ -564,6 +564,7 @@ exports.verifyUser = (req, res, next) =>
     {
         if(err)console.log(`err = `, err)
         if(user)console.log(`user = `, user)
+        if(!user)console.log("NO USER FOUND")
         
         if (err || !user)
         {               

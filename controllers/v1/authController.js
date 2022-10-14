@@ -561,11 +561,9 @@ exports.verifyUser = (req, res, next) =>
 {
     passport.authenticate('jwt', { session: false }, (err, user, info) => 
     {
-        console.log(req.headers.origin);
-        console.log(req.headers.host);
-        
         if (err || !user)
         {               
+            console.log(`req.headers = `, req.headers)
             req.statusCode = 401;
             req.user = "error";
             return next();

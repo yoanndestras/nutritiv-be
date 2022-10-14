@@ -36,7 +36,6 @@ opts.secretOrKey = process.env.JWT_SEC;
 
 exports.jwtPassport = passport.use("jwt", new JwtStrategy(opts, (jwtPayload, done) =>
 {
-    console.log(`_id = `, _id)
     User.findOne({_id: jwtPayload._id}, (err, user) =>
         {                
             if(err)
@@ -562,7 +561,10 @@ exports.verifyUser = (req, res, next) =>
 {
     passport.authenticate('jwt', { session: false }, (err, user, info) => 
     {
-        if (err || !user) 
+        if(err)console.log(`err = `, err)
+        if(user)console.log(`user = `, user)
+        
+        if (err || !user)
         {               
             req.statusCode = 401;
             req.user = "error";

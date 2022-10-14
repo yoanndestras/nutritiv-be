@@ -36,7 +36,6 @@ opts.secretOrKey = process.env.JWT_SEC;
 
 exports.jwtPassport = passport.use("jwt", new JwtStrategy(opts, (jwtPayload, done) =>
 {
-    console.log(`opts = `, opts)
     User.findOne({_id: jwtPayload._id}, (err, user) =>
         {                
             if(err)
@@ -49,6 +48,7 @@ exports.jwtPassport = passport.use("jwt", new JwtStrategy(opts, (jwtPayload, don
             }
             else
             {
+                console.log(`access_token = `, opts.jwtFromRequest)
                 return done(null, false);
             }
         })

@@ -48,7 +48,6 @@ exports.jwtPassport = passport.use("jwt", new JwtStrategy(opts, (jwtPayload, don
             }
             else
             {
-                console.log(`access_token = `, opts.jwtFromRequest)
                 return done(null, false);
             }
         })
@@ -562,9 +561,8 @@ exports.verifyUser = (req, res, next) =>
 {
     passport.authenticate('jwt', { session: false }, (err, user, info) => 
     {
-        if(err)console.log(`err = `, err)
-        if(user)console.log(`user = `, user)
-        if(!user)console.log("NO USER FOUND")
+        console.log(req.headers.origin);
+        console.log(req.headers.host);
         
         if (err || !user)
         {               

@@ -559,6 +559,7 @@ exports.verifyUserNewTFA = async(req, res, next) =>
 
 exports.verifyUser = (req, res, next) => 
 {
+    console.log("TESTAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
     passport.authenticate('jwt', { session: false }, (err, user, info) => 
     {
         if(err)console.log(`err = `, err)

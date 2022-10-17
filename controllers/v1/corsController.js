@@ -12,7 +12,6 @@ const corsOptionsDelegate = (req, callback) =>
     
     let origin = req.headers?.origin ? req.headers.origin : req.headers?.host;
     
-    console.log(`req.headers = `, req.headers)
     if(whitelist.indexOf(origin) !== -1) 
         {
             // corsOptions = 

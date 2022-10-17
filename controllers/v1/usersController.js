@@ -27,6 +27,7 @@ exports.resizeUserAvatar = async(req, res, next) =>
     {
       let err = new Error('File not found!')
       next(err);
+      console.log(`req.file = `, req.file)
     };
 
     let avatar;

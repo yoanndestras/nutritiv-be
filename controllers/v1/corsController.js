@@ -12,15 +12,16 @@ const corsOptionsDelegate = (req, callback) =>
     
     let origin = req.headers?.origin ? req.headers.origin : req.headers?.host;
     
+    console.log(`req.headers = `, req.headers)
     if(whitelist.indexOf(origin) !== -1) 
         {
-            corsOptions = 
-            { 
-                origin: true, 
-                credentials: true, 
-                exposedHeaders: ['access_token', 'refresh_token', 'twofa_token', 'new_twofa_token'], 
-                allowedHeaders: ['X-Requested-With', 'X-HTTP-Method-Override', 'Content-Type', 'Accept', 'Content-Length', 'X-Foo', 'X-Bar', 'access_token', 'refresh_token', 'twofa_token', 'new_twofa_token']
-            };
+            // corsOptions = 
+            // { 
+            //     origin: true, 
+            //     credentials: true, 
+            //     exposedHeaders: ['access_token', 'refresh_token', 'twofa_token', 'new_twofa_token'], 
+            //     allowedHeaders: ['X-Requested-With', 'X-HTTP-Method-Override', 'Content-Type', 'Accept', 'Content-Length', 'X-Foo', 'X-Bar', 'access_token', 'refresh_token', 'twofa_token', 'new_twofa_token']
+            // };
             console.log({ origin: true });
         }
     else 

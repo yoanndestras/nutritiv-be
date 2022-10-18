@@ -35,7 +35,7 @@ const storage3d = multer.diskStorage(
 
 const imageFileFilter = (req, file, cb) => 
 {    
-    
+    console.log(`file = `, file)
     if(file.mimetype.startsWith('image')) 
     {
         cb(null, true);

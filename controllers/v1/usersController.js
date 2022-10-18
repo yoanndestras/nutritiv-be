@@ -22,7 +22,6 @@ exports.resizeUserAvatar = async(req, res, next) =>
 {
   try
   {
-    console.log(`req.file = `, req.file)
     const user = await User.findOne({_id: req.user._id})
     if (!req.file)
     {

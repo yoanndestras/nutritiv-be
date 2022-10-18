@@ -630,6 +630,7 @@ exports.verifyUserCart = (req, res, next) =>
 
 exports.verifyRefresh = (req, res, next) => 
 {
+    console.log(`req = `, req)
     if(req.user === "error")
     {
         passport.authenticate('jwt_rt', { session: false }, (err, user, info) => 

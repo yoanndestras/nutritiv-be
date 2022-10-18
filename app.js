@@ -96,8 +96,7 @@ app.use(passport.initialize()); // INITIALIZE PASSPORT JS
 app.use(cookieParser()); // INITIALIZE COOKIES
 app.use(cors()); // INITIALIZE CORS  "app.options('*', cors());"
 app.use(routes); // CALL V1 & V2 ROUTES FROM ROUTER FOLDER
-app.use(express.static(path.join(__dirname, 'public'))); // USE STATIC FILES ON PUBLIC FOLDER
-console.log(`path.join(__dirname, 'public') = `, path.join(__dirname, 'public'))
+app.use(express.static('public')); // USE STATIC FILES ON PUBLIC FOLDER
 // app.use(express.static(path.join(__dirname, "/client/build"))); // STATIC FILES FOR FRONT-END APP
 // app.get("*", (req, res) =>{res.sendFile(path.join(__dirname, "/client/build", "index.html"))});
 

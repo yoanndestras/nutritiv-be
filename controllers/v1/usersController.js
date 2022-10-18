@@ -46,13 +46,15 @@ exports.resizeUserAvatar = async(req, _res, next) =>
                 await sharp(file.path)
                 .resize(200, 200)
                 .toFile(path.resolve(file.destination,'usersAvatar', file.filename))
-                
-                if((ARCHIVE_PATH.indexOf(path.join(__dirname, '../public/dbBackups')) !== 0))
-                {
-                    let err = new Error(`File ${fileKey} does not exist`);
-                    err.statusCode = 400;
-                    next(err);
-                }
+
+                // let ARCHIVE_PATH = path.join(__dirname, '../public/', fileKey);
+
+                // if((ARCHIVE_PATH.indexOf(path.join(__dirname, '../public/dbBackups')) !== 0))
+                // {
+                //     let err = new Error(`File ${fileKey} does not exist`);
+                //     err.statusCode = 400;
+                //     next(err);
+                // }
                 
                 fs.unlinkSync(path.join("public/images/", encodeURIComponent(req.file.filename)))
             })

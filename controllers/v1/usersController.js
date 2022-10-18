@@ -22,12 +22,12 @@ exports.resizeUserAvatar = async(req, res, next) =>
 {
   try
   {
+    console.log(path.join("public/images/", req.file.filename));
     const user = await User.findOne({_id: req.user._id})
     if (!req.file)
     {
       let err = new Error('File not found!')
       next(err);
-      console.log(`req.file = `, req.file)
     };
 
     let avatar;
@@ -46,7 +46,7 @@ exports.resizeUserAvatar = async(req, res, next) =>
                 await sharp(file.path)
                 .resize(200, 200)
                 .toFile(path.resolve(file.destination,'usersAvatar', file.filename))
-
+                
                 fs.unlinkSync(path.join("public/images/", req.file.filename))
             })
     );

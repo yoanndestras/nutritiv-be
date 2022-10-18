@@ -9,7 +9,6 @@ const User = require("../../models/User");
 const appFunctions = require('../../app');
 const order = require('./ordersController');
 
-// const addressValidator = require('address-validator');
 
 const app = express();
 

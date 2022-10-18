@@ -86,7 +86,8 @@ exports.newProduct = async(req, res, next) =>
                     {
                         if(file.mimetype.startsWith('image')) 
                         {
-                            fs.unlinkSync(path.resolve(file.destination,'productsImgs', file.filename))
+                            // deepcode ignore PT: <please specify a reason of ignoring this>
+                            fs.unlinkSync(path.resolve(file.destination,'productsImgs', encodeURIComponent(file.filename)))
                         }
                     })
             );
@@ -249,24 +250,25 @@ exports.removeImgs = async(req, res, next) =>
     {
         const product = await Product.findOne({_id : req?.params?.productId})
         
-        let imgs = product ? "productsImgs/" + product.imgs : null;
-        
-        if(!imgs)
+        if(!product)
         {
             let err = new Error('This product do not exist!');
             err.statusCode = 400;
             return next(err);
         }
-
-        await Promise.all
-        (
-            imgs.map(async img =>
-                {
-                    fileUpload.deleteFile(img)
-                })
-        );
-
-        next();
+        else
+        {
+            await Promise.all
+            (
+                product.imgs.map(async img =>
+                    {
+                        let imgKey =  process.env.DB_NAME + "/productsImgs/" + encodeURIComponent(img);
+                        fileUpload.deleteFile(imgKey)
+                    })
+            );
+            return next();
+        }
+        // process.env.DB_NAME + "/productsImgs/" +
         
     }catch(err){next(err)}
     
@@ -338,9 +340,10 @@ exports.resizeProductImage = async(req, res, next) =>
                     if(file.mimetype.startsWith('image'))
                     {
                         await sharp(file.path)
-                        .toFile(path.resolve(file.destination,'productsImgs', file.filename))
                         .resize(200, 200)
-                        fs.unlinkSync(path.join("public/images/", file.filename))
+                        .toFile(path.resolve(file.destination,'productsImgs', encodeURIComponent(file.filename)))
+
+                        fs.unlinkSync(path.join("public/images/", encodeURIComponent(file.filename)))
                     }
                 })
         );
@@ -360,21 +363,24 @@ exports.addProductImgs = async(req, res, next) =>
         (
             filesArr.map(async(file) => 
                 {
-                    let filePath;
+                    let sanitizeFileName = encodeURIComponent(file.filename)
+                    let filePath, fileType = file.mimetype;
                     if(file.mimetype.startsWith('image'))
                     {
-                        filePath =  path.join(file.destination,'productsImgs', file.filename)
+                        filePath =  path.join(file.destination,'productsImgs', sanitizeFileName)
                     }
                     else if(file.mimetype.startsWith('model/gltf-binary'))
                     {
-                        filePath =  path.join(file.destination, file.filename)
+                        filePath =  path.join(file.destination, sanitizeFileName)
                     }
-                    let fileName = "productsImgs/" + file.filename, fileType = file.mimetype;
+                    let fileName = process.env.DB_NAME + "/productsImgs/" + sanitizeFileName;
                     
+                    // deepcode ignore PT: <please specify a reason of ignoring this>
                     await fileUpload.uploadFile(filePath, fileName, fileType);
                     
-                    imgs.push(file.filename); 
-                    fs.unlinkSync(path.join("public/images/", fileName))
+                    imgs.push(sanitizeFileName); 
+                    // deepcode ignore PT: <please specify a reason of ignoring this>
+                    fs.unlinkSync(filePath)
                 
                 })
         );

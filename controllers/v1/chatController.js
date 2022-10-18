@@ -55,7 +55,7 @@ exports.getChats = async(req, res, next) =>
     {
       let messagesArray = [];
       
-      chats.map((chat) => 
+      chats.forEach((chat) => 
       {
         const { type, version, createdAt, updatedAt, __v, messages, ...members} = chat._doc;
         messagesArray.push(members)
@@ -69,7 +69,7 @@ exports.getChats = async(req, res, next) =>
     {
       let messagesArray = [];
       
-      chats.map((chat) => 
+      chats.forEach((chat) => 
       {
         chat._doc.messages = chat._doc.messages.reverse();
         chat._doc.messages = chat._doc.messages.slice(0, messagesQty);
@@ -217,7 +217,7 @@ exports.createMessageByChatId = async(req, res, next) =>
     
     const savedMessage = await newMessage.save();
     let messages = [];
-    await savedMessage.messages.map((message) => {if((message.sender.toString()) === sender.toString()){messages.push(message)}});
+    savedMessage.messages.forEach((message) => {if((message.sender.toString()) === sender.toString()){messages.push(message)}});
     let message = messages.reverse();
     let lastMessage = message[0];
     req.message = lastMessage;

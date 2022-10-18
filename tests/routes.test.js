@@ -5,6 +5,7 @@ const app = require("../app");
 const users = testConfig.users;
 const products = testConfig.products;
 const User = require("../models/User");
+const Product = require("../models/Product");
 
 
 initializeTestingDatabase = async() =>
@@ -40,14 +41,14 @@ afterAll(async () =>
   await mongoose.connection.close();
 });
   
-let refreshToken;
+let refreshToken, productId, productPrice;
 
 describe('Authentication routes', () => 
 {
   const auth = "/v1/auth"
   const register = auth + "/register";
   const login = auth + "/login";
-
+  
   describe('POST requests', () => 
   {
     it('register a new user', async () => 
@@ -74,7 +75,7 @@ describe('Authentication routes', () =>
       await testConfig.status400AndSuccessFalse(res);
       expect(res.body).toHaveProperty('err', "Your Email syntax is wrong!")
     })
-
+    
     it("return error password", async () => 
     {
       const res = await request(app).post(`${register}`).send(users.passwordErrorUser)
@@ -110,38 +111,87 @@ describe("Users requests", () =>
   })
 })
 
-// describe("Products routes", () => 
-// {
-//   const product = "/v1/products"
+describe("Products routes", () => 
+{
+  const product = "/v1/products"
 
-//   describe("POST routes", () => 
-//   {
-//     it("create a new product", async() =>
-//     {
-//       const res = await request(app)
-//         .post(`${product}`)
-//         .send(products.sampleProduct)
-//         .set({'refresh_token': refreshToken});
+  describe("POST routes", () => 
+  {
+    it("create a new product", async() =>
+    {
+      const res = await request(app)
+        .post(`${product}`)
+        .field(products.sampleProduct)
+        .set({'refresh_token': refreshToken})
+        .attach('imageFile', `${__dirname}/test.jpg`)
+        
+        await testConfig.successTrue(res);
+        
+        let productArray = await Product.find();
+        productId = productArray[0]._id; 
+        productPrice = productArray[0].productItems[0].price.value;
+    })
+  })
+})
 
-//       expect(res.body).toHaveProperty('test')
-//       await testConfig.successTrue(res);
-//     })
-//   })
-// })
+describe("Carts routes", () => 
+{
+  const cart = "/v1/carts";
+  const addToCart = cart + "/addToCart";
+  const deleteCart = cart;
 
-// describe("Carts routes", () => 
-// {
-//   const cart = "/v1/carts";
-//   const addToCart = cart + "/addToCart";
+  describe("POST routes", () =>
+  {
+    it("create a new cart", async () =>
+    {
+      const res = await request(app)
+      .post(`${addToCart}`)
+      .send(
+        {
+          productId: productId,
+          load: products.sampleProduct.load,
+          price: productPrice,
+          quantity: 1
+        })
+        .set({'refresh_token': refreshToken});
+        await testConfig.successTrue(res);
+    })
+  })
+  describe("DELETE routes", () =>
+  {
+    it("delete an existing cart", async () =>
+    {
+      let user = await User.findOne({username: users.sampleUser.username})
+      let userId = user._id;
+      
+      const res = await request(app)
+      .delete(`${deleteCart}/${userId}`)
+      .set({'refresh_token': refreshToken});
+      
+      await testConfig.successTrue(res);
+    })
+  })
+})
 
-//   describe("POST routes", () =>
-//   {
-//     it("create a new cart", async () =>
-//     {
-//       const res = await request(app).post(`${addToCart}`).send()
-//     })
-//   })
-// })
+describe("Products routes", () => 
+{
+  const product = "/v1/products";
+
+  describe("DELETE routes", () => 
+  {
+    
+    it("Delete an existing product", async() =>
+    {
+      const deleteProduct = product + "/single/" + productId;
+      
+      const res = await request(app)
+        .delete(`${deleteProduct}`)
+        .set({'refresh_token': refreshToken})
+        
+        await testConfig.successTrue(res);
+    })
+  })
+})
 
 describe("random TESTS", () =>
 {
@@ -150,7 +200,7 @@ describe("random TESTS", () =>
     let one = 1;
     
     one = one + 2;
-
+    
     expect(one).toBe(3);
     console.log(`one = `, one)
   })

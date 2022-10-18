@@ -7,6 +7,7 @@ exports.auth = require(`./v1/auth`);
 exports.products = require(`./v1/product`);
 exports.carts = require(`./v1/cart`);
 exports.orders = require(`./v1/order`);
+exports.paypal = require(`./v1/paypal`);
 exports.stripe = require(`./v1/stripe`);
 exports.chats = require(`./v1/chat`);
 exports.newsletter = require(`./v1/newsletter`);
@@ -38,7 +39,7 @@ const trimmer = (req, res, next) =>
         for(const [key, value] of Object.entries(req.body)) 
         {
             if(typeof(value) === 'string')
-                req.body[key] = value.trim();
+                req.body[key] = value.trim(); // replace blank before and after string
         }
     }
     next();

@@ -13,7 +13,7 @@ const GitHubStrategy = require('passport-github2').Strategy;
 const User = require('../../models/User');
 const email_validator = require("email-validator");
 const { customAlphabet } = require('nanoid');
-const alphabet = '0123456789';
+const alphabet = process.env.ALPHABET;
 const nanoid = customAlphabet(alphabet, 12);
 const fetch = require("node-fetch");
 const speakeasy = require("speakeasy");
@@ -611,7 +611,9 @@ exports.verifyUserCart = (req, res, next) =>
     passport.authenticate('jwt', { session: false }, (err, user, info) => 
     {
         if (err || !user) 
-        {
+        {            
+            req.user = "error";
+            req.cart = "cart_not_found";
             return next();
         }
         else if (user.isVerified === false)
@@ -631,10 +633,15 @@ exports.verifyUserCart = (req, res, next) =>
 exports.verifyRefresh = (req, res, next) => 
 {
     if(req.user === "error")
-    {
+    {        
         passport.authenticate('jwt_rt', { session: false }, (err, user, info) => 
         {        
-            if (err || !user) 
+            if (err || !user && req.cart === "cart_not_found") 
+            {
+                req.user = null;
+                return next();
+            }
+            else if(err || !user)
             {
                 console.log(info);
                 return res.status(req.statusCode).json(
@@ -643,6 +650,11 @@ exports.verifyRefresh = (req, res, next) =>
                         status: "You are not connected", 
                         err: "No refreshToken found or its not valid",
                     });
+            }
+            else if(req.cart === "cart_not_found")
+            {
+                req.user = user;
+                return next();
             }
             else
             {
@@ -662,8 +674,6 @@ exports.verifyRefresh = (req, res, next) =>
                 req.user = user;
                 return next();
             }
-            
-            
         })(req, res, next);  
     }
     else
@@ -804,7 +814,9 @@ exports.verifyEmailSyntax = (req, res, next) =>
 
 exports.verifyPasswordSyntax = (req, res, next) =>
 {
-    if(req.body.password.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/)) // password 8 characters, 1 low 1 upper 1 number
+    let password = req.body.password;
+
+    if(typeof password === 'string' && password.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/)) // password 8 characters, 1 low 1 upper 1 number
     {next();}
     else
     {
@@ -884,7 +896,8 @@ exports.verifyNewPasswordSyntax = (req, res, next) =>
     // 1 lower case, 1 upper case, 1 number, minimum 8 length
     let regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/;
     
-    if(newPass.match(regex) && confirmNewPass.match(regex)) return next()
+    if(newPass.match(regex) && confirmNewPass.match(regex) 
+    && typeof confirmNewPass === 'string' && typeof newPass === 'string') return next()
     
     let err = new Error('You password syntax is wrong!');
     err.statusCode = 400;
@@ -907,6 +920,7 @@ exports.verifyCaptcha = async(req, res, next) =>
             let secretKey = process.env.RECAPTCHA_KEY;
             let verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${req.body.captcha}`
         
+            // deepcode ignore Ssrf: <please specify a reason of ignoring this>
             let response = await fetch(verifyUrl,{method : 'POST'});
             let body = await response.json();
             

@@ -27,6 +27,29 @@ Using mongorestore - without any args:
 // Scheduling the backup every 5 seconds (using node-cron)
 // cron.schedule('*/5 * * * * *', () => backupMongoDB());
 
+exports.verifyAuth = async(req, res, next) => 
+{
+  let dbName = req.body.dbName;
+  let dbPassword = req.body.dbPassword;
+  let dbUser = req.body.dbUser;
+
+  if(!dbName || !dbPassword || !dbUser)
+    {
+      let err = new Error('Missing credentials!');
+      err.statusCode = 400;
+      next(err);
+    }
+  else if(dbName !== process.env.DB_NAME ||
+          dbPassword !== process.env.DB_PASSWORD ||
+          dbUser !== process.env.DB_USER)
+    {
+      let err = new Error('Wrong credentials!');
+      err.statusCode = 400;
+      next(err);
+    }
+  next();
+}
+
 exports.storeOnAWS = async(ARCHIVE_PATH) =>
 {
   try 
@@ -105,12 +128,6 @@ exports.backupMongoDB = async(req, res, next) =>
 {
   try
   {
-    if(!req.body.dbName || !req.body.dbPassword || !req.body.dbUser)
-    {
-      let err = new Error('Missing credentials!');
-      err.statusCode = 400;
-      next(err);
-    }
     const DB_NAME = req.body.dbName;
     const DB_PASSWORD = req.body.dbPassword;
     const DB_USER = req.body.dbUser;
@@ -169,7 +186,15 @@ exports.backupMongoDB = async(req, res, next) =>
       if (code) console.log('Process exit with code:', code);
       else if (signal) console.log('Process killed with signal:', signal);
       else 
-      {
+      {        
+        if((ARCHIVE_PATH.indexOf(path.join(__dirname, '../public/dbBackups')) !== 0))
+        {
+            let err = new Error(`File ${fileKey} does not exist`);
+            err.statusCode = 400;
+            next(err);
+        }
+
+        // deepcode ignore PT: <please specify a reason of ignoring this>
         await backup.storeOnAWS(ARCHIVE_PATH);
         console.log('Backup is successfull ✅');
         req.dbHost = DB_HOST;

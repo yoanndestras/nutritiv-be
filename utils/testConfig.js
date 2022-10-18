@@ -35,19 +35,19 @@ exports.users =
   {
     username: "noError",
     email: "noError@gmail.com",
-    password : "Password1"
+    password : process.env.SAMPLE_USER
   },
   emailErrorUser : 
   {
     username: "emailError",
     email: "emailError.com",
-    password : "Password1"
+    password : process.env.EMAIL_ERROR
   },
   passwordErrorUser : 
   {
     username: "passwordError",
     email: "passwordError@gmail.com",
-    password : "Password"
+    password : process.env.PASSWORD_ERROR
   }
 }
 
@@ -57,12 +57,11 @@ exports.products =
   {
     title: "randomTitle",
     tags: ["randomTag"],
-    shape: "randomShape",
+    shape: "capsules",
     pricePerCapsule: "2",
     desc : "randomDesc",
     load : "60",
-    countInStock : "20000",
-    imageFile : "https://nutritiv.s3.eu-west-3.amazonaws.com/productsImgs/L_ptPilule_Bulle.jpg"
+    countInStock : "20000"
   }
 }
 

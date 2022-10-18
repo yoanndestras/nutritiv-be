@@ -33,7 +33,10 @@ order.countInStock, async(req, res, next)  =>
           let myProducts = product.productItems.map(productItem =>
             {
               let currency = productItem.price.currency;
-              let unitAmountArr = myProduct.productItems.filter(product => product.load === productItem.load);
+              let unitAmountArr = myProduct.productItems.filter
+              (
+                product => product.load === productItem.load
+              );
               let unit_amount = Math.round(unitAmountArr[0].price.value * 100);
               let quantity = productItem.quantity;
               return{

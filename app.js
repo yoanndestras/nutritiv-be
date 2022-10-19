@@ -99,12 +99,28 @@ app.use(cookieParser()); // INITIALIZE COOKIES
 app.use(cors()); // INITIALIZE CORS  "app.options('*', cors());"
 app.use(routes); // CALL V1 & V2 ROUTES FROM ROUTER FOLDER
 app.use(express.static(path.join(__dirname, '/public'))); // USE STATIC FILES ON PUBLIC FOLDER
+
+const fs = require('fs');
+const publicFolder = path.join(__dirname, 'public/images/');
+const readPublicFolder = async() =>
+{
+  fs.readdir(publicFolder, (err, files) => {
+    files.forEach(file => {
+      console.log(file);
+    });
+  });
+}
+
+readPublicFolder();
+
 // app.use(express.static(path.join(__dirname, "/client/build"))); // STATIC FILES FOR FRONT-END APP
 // app.get("*", (req, res) =>{res.sendFile(path.join(__dirname, "/client/build", "index.html"))});
 
 app.use((err, req, res, next) =>
 {
     let message = err.message ? err.message : "Unsuccessfull request!"
+    
+    readPublicFolder();
     
     !err.statusCode 
     ? res.status(500).json(

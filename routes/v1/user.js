@@ -315,7 +315,7 @@ user.verifyAdressId, user.deleteAddress, async (req, res, next) =>
 
 //ADD OR REPLACE USER ICON
 router.post('/addAvatar', cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
-upload.single('imageFile'), user.resizeUserAvatar, user.addUserAvatar, async (req, res, next) =>
+upload.single('imageFile'), user.readPublicFolder, user.resizeUserAvatar, user.addUserAvatar, async (req, res, next) =>
 {
     try
     {

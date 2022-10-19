@@ -17,6 +17,18 @@ const app = express();
 app.use(express.json()); // to read JSON    
 app.use(express.urlencoded({extended: true}));
 
+const publicFolder = path.join(__dirname, '../../public/images/');;
+exports.readPublicFolder = async(req, res, next) =>
+{
+  fs.readdir(publicFolder, (err, files) => {
+    files.forEach(file => {
+      console.log(file);
+    });
+    if(err) return next(err);
+  });
+  next();
+}
+
 // RESIZE USER AVATAR
 exports.resizeUserAvatar = async(req, _res, next) => 
 {

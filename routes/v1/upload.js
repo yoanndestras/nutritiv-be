@@ -17,6 +17,7 @@ const storage = multer.diskStorage(
     },
     filename: (req, file, cb) => 
     {      
+        console.log(`file = `, file)
         cb(null, (nanoid(4) + file.originalname ).split(' ').join('_'))
     }
 });

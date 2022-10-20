@@ -58,7 +58,7 @@ if(process.env.DB_NAME !== "Nutritiv-testing")
         .then(async () => console.log("Connected to MongoDB"))
         .catch((err)=>{console.log(err)});
     
-    cron.schedule('0 16 * * *', async() => 
+    cron.schedule('0 19 * * *', async() => 
     {
         let response = await fetch(process.env.SERVER_ADDRESS + 'v1/dbBackups/', 
         {

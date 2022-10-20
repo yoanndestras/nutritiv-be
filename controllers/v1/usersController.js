@@ -56,7 +56,7 @@ exports.resizeUserAvatar = async(req, _res, next) =>
                 //     next(err);
                 // }
                 
-                fs.unlinkSync(path.join("public/images/", encodeURIComponent(req.file.filename)))
+                fs.unlinkSync(path.join(__dirname, "../../public/images/", encodeURIComponent(req.file.filename)))
             })
     );
     // if(avatar){fs.unlinkSync(path.join("public/images/usersAvatar/", avatar))}

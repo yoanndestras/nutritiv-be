@@ -57,22 +57,31 @@ Grâce aux middlewares, les fonctionnalités de nos applications gèrent les cas
 - L'envoi de mails *(sgMail, mailer, email_validator).*
 - Les procédures de paiement *(stripe).*
 - L'envoi de requêtes API via back-end *(node-fetch).*
-
-Intégration en cours :
 - Tests *(Jest, Supertest).*
+- Sécurité *(helmet).*
 
 Pour installer un nouveau middleware, il faut entrer dans le terminal : 
 ```bash
 npm i "newMiddleware"
 ```
 
-## Run the app
+## Lancer l'app
 
 >Il est impossible de lancer l'application sans le fichier .env.
 Notre application est sur le fichier app.js, le serveur back-end démarre à la commande :
 ```bash
 npm run start-dev 
 ```
+
+## Déploiement de l'application
+
+> [**API Back-end**](https://api.nutritiv.app/) déployé avec AWS EC2
+- Connecté via SSH à un serveur sur Amazon Linux 2 avec PuTTy
+- Configuration de Nginx et du HTTPS avec un certificat SSL Let's Encrypt
+- Configuration DNS à un sous-domaine
+
+> [**App Front-end**](https://www.nutritiv.app/) déployé avec AWS Amplify
+- Configuration DNS géré avec AWS Route 53
 
 ### Informations supplémentaires
 

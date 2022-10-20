@@ -61,9 +61,8 @@ Thanks to middlewares, our application features handle differents scenario :
 - Mails *(sgMail, mailer, email_validator).*
 - Payment *(stripe).*
 - Backend-end API requests *(node-fetch).*
-
-Integrating :
 - Tests *(Jest, Supertest).*
+- Security *(helmet).*
 
 To install a new middleware go in terminal :
 ```bash
@@ -76,6 +75,16 @@ Our app file is app.js, running this command will start the back-end server :
 ```bash
 npm run start-dev 
 ```
+
+## Application deployment
+
+> [**Back-end API**](https://api.nutritiv.app/) deployed with AWS EC2
+- Connect via SSH to Amazon Linux 2 server with PuTTy
+- Nginx config for proxy and HTTPS with Let's Encrypt SSL certificate
+- DNS config to a subdomain
+
+> [**Front-end app**](https://www.nutritiv.app/) deployed with AWS Amplify
+- DNS config with AWS Route 53 
 ### Additionnal informations
 
 Our team use Trello to organize tasks and manage the project.

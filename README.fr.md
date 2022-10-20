@@ -58,7 +58,7 @@ Grâce aux middlewares, les fonctionnalités de nos applications gèrent les cas
 - Les procédures de paiement *(stripe).*
 - L'envoi de requêtes API via back-end *(node-fetch).*
 - Tests *(Jest, Supertest).*
-- Sécurité *(helmet).*
+- Sécurité des en-têtes HTTP *(helmet).*
 
 Pour installer un nouveau middleware, il faut entrer dans le terminal : 
 ```bash

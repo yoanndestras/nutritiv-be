@@ -62,7 +62,7 @@ Thanks to middlewares, our application features handle differents scenario :
 - Payment *(stripe).*
 - Backend-end API requests *(node-fetch).*
 - Tests *(Jest, Supertest).*
-- Security *(helmet).*
+- HTTP headers security *(helmet).*
 
 To install a new middleware go in terminal :
 ```bash

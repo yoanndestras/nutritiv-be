@@ -78,7 +78,7 @@ exports.addUserAvatar = async(req, res, next) =>
     
     // let key = result.Key; 
     
-    fs.unlinkSync(path.join("public/images/usersAvatar", sanitizeFileName))
+    fs.unlinkSync(path.join(__dirname, "../../public/images/usersAvatar", sanitizeFileName))
         
     const user = await User.findOneAndUpdate({_id: req.user._id},
     {

@@ -1,6 +1,7 @@
 const uploadRouterV1 = require("express").Router();
 const multer = require('multer');
 const { nanoid } = require('nanoid');
+const path = require('path');
 
 // CONTROLLERS
 // const auth = require('../../controllers/v1/authController');
@@ -13,7 +14,7 @@ const storage = multer.diskStorage(
 {
     destination: (req, file, cb) => 
     {   
-        cb(null, 'public/images');
+        cb(null, path.join(__dirname, '../../public/images'));
     },
     filename: (req, file, cb) => 
     {      

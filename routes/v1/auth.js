@@ -276,11 +276,11 @@ auth.TFAValidation, async(req, res, next) =>
         
         res .header('access_token', accessToken)
         .header('refresh_token', refreshToken)
-        .cookie("refresh_token", refreshToken, 
-        {
-            httpOnly: true,
-            secure: process.env.REF_JWT_SEC_COOKIE === "production"
-        })
+        // .cookie("refresh_token", refreshToken, 
+        // {
+        //     httpOnly: true,
+        //     secure: process.env.REF_JWT_SEC_COOKIE === "production"
+        // })
         .status(200).json(
             {
                 success: true,
@@ -301,11 +301,11 @@ router.post("/login", cors.corsWithOptions, auth.verifyCaptcha, auth.login, asyn
         
         res .header('access_token', accessToken)
         .header('refresh_token', refreshToken)
-        .cookie("refresh_token", refreshToken, 
-        {
-            httpOnly: true,
-            secure: process.env.REF_JWT_SEC_COOKIE === "production"
-        })
+        // .cookie("refresh_token", refreshToken, 
+        // {
+        //     httpOnly: true,
+        //     secure: process.env.REF_JWT_SEC_COOKIE === "production"
+        // })
         .status(200).json(
             {
                 success: true,
@@ -370,25 +370,8 @@ router.delete("/logout", cors.corsWithOptions, auth.verifyUser, auth.verifyRefre
 {   
     try
     {
-                    //USER VERIFICATION
-                    router.put("/verify_email", auth.verifyNewUserEmail, async(req, res, next) =>
-                    {
-                        const user = req.user;
-                        try
-                        {
-                            user.isVerified = true;
-                            await user.save(() => 
-                                    {
-                                        res.status(201).json(
-                                            {
-                                                success: true, 
-                                                status: 'User Verification Successfull!'
-                                            });
-                                    })
-                        }catch(err){next(err)}
-                    });
-        res .clearCookie("refresh_token")
-            .status(200)
+        res .status(200)
+            // .clearCookie("refresh_token")
             .json(
                 {
                     success: true, 

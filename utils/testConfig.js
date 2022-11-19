@@ -56,7 +56,7 @@ exports.products =
   sampleProduct :
   {
     title: "randomTitle",
-    tags: ["randomTag"],
+    categories: "randomCategory",
     shape: "capsules",
     pricePerCapsule: "2",
     desc : "randomDesc",

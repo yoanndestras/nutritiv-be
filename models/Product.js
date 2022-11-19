@@ -15,9 +15,9 @@ const ProductSchema = new Schema
         type: String,
         required: true
     },
-    tags: 
+    category: 
     {
-        type: Array,
+        type: String,
         required: true
     },
     shape: 

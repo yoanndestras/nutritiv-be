@@ -33,6 +33,25 @@ const storage3d = multer.diskStorage(
     }
 });
 
+const storageAny = multer.diskStorage(
+{
+    destination: (req, file, cb) => 
+    {   
+        if(file.mimetype.startsWith('image'))
+        {
+            cb(null, 'public/images');
+        }
+        else if(file.mimetype.startsWith('model/gltf-binary'))
+        {
+            cb(null, 'public/images/productsImgs');
+        }
+    },
+    filename: (req, file, cb) => 
+    {      
+        cb(null, (nanoid(4) + file.originalname ).split(' ').join('_'))
+    }
+});
+
 const imageFileFilter = (req, file, cb) => 
 {    
     
@@ -71,6 +90,18 @@ const glbFileFilter = (req, file, cb) =>
     }
 };
 
+const anyFilter = (req, file, cb) => 
+{
+    if(file.mimetype.startsWith('model/gltf-binary') || file.mimetype.startsWith('image')) 
+    {
+        cb(null, true);
+    }
+    else
+    {
+        return cb(new Error('You can upload only glb and image files!'), false);
+    }
+}
+
 const upload3d = multer(
     { 
         storage: storage3d, 
@@ -88,9 +119,15 @@ const uploadHtml = multer(
         fileFilter: htmlFileFilter,
     });
 
+const uploadAny = multer(
+    {
+        storage : storageAny,
+        fileFilter : anyFilter
+    });
+
 uploadRouterV1.route('/')
 
-module.exports = {uploadRouterV1, upload, uploadHtml, upload3d};
+module.exports = {uploadRouterV1, upload, uploadHtml, upload3d, uploadAny};
 
 // .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 // .get(cors.cors, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, (req, res) => 

@@ -20,13 +20,11 @@ exports.newProduct = async(req, res, next) =>
 {
     try
     {
-        const {shape, tags, load, pricePerCapsule, pricePerKilograms} = req.body
-        const PPCapsule = pricePerCapsule, PPKg = pricePerKilograms;
+        const {shape, load, pricePerCapsule, pricePerGummy} = req.body
+        const PPCapsule = pricePerCapsule, PPGummy = pricePerGummy;
         let product, price;
         
-        const req_tags = tags && Array.isArray(tags) ? tags : tags !== undefined ? [tags] : null;
         const loadArr = load && Array.isArray(load) ? load : load !== undefined ? [load] : null;
-        let tagsArr = req_tags ? req_tags.map((el, i) => {return el}) : null;    
         
         if(shape === "capsules" && PPCapsule)
         {
@@ -36,11 +34,11 @@ exports.newProduct = async(req, res, next) =>
                 return {load : discountValues.qty, price :{ value : discountValues.price, currency : "EUR"}}
             })
         }
-        else if(shape === "powder" && PPKg)
+        else if(shape === "gummies" && PPGummy)
         {
-            let milestones = { 60: 0, 150: 0.2, 350: 0.4, 1000: 0.5}, keys = Object.keys(milestones), values = Object.values(milestones);
+            let milestones = {60: 0.1, 120: 0.2, 240: 0.4, 420: 0.5}, keys = Object.keys(milestones), values = Object.values(milestones);
             product = loadArr.map((el, i) => {
-                price = el * (parseFloat(PPKg)/1000);let discountValues = check.discount(values, price, el, keys, next);
+                price = el * (parseFloat(PPGummy));let discountValues = check.discount(values, price, el, keys, next);
                 return {load : discountValues.qty, price :{ value : discountValues.price, currency : "EUR"}}
             })
         }
@@ -53,7 +51,7 @@ exports.newProduct = async(req, res, next) =>
         
         if(!req.params.productId)
         {
-            const { title, desc, countInStock } = req.body;
+            const { title, category, desc, countInStock } = req.body;
             req.title = title;
             
             const newProduct = new Product(
@@ -61,7 +59,7 @@ exports.newProduct = async(req, res, next) =>
                     title,
                     desc,
                     shape,
-                    tags : tagsArr,
+                    category,
                     productItems: product,
                     countInStock,
                 }, async(err) =>

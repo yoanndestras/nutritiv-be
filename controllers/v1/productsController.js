@@ -28,7 +28,7 @@ exports.newProduct = async(req, res, next) =>
         
         if(shape === "capsules" && PPCapsule)
         {
-            let milestones = {30: 0.1, 60: 0.2, 120: 0.4, 210: 0.5}, keys = Object.keys(milestones), values = Object.values(milestones);
+            let milestones = {15: 0.1, 30: 0.2, 60: 0.2, 90: 0.3}, keys = Object.keys(milestones), values = Object.values(milestones);
             product = loadArr.map((el, i) => {
                 price = el * parseFloat(PPCapsule);let discountValues = check.discount(values, price, el, keys, next);
                 return {load : discountValues.qty, price :{ value : discountValues.price, currency : "EUR"}}
@@ -36,7 +36,7 @@ exports.newProduct = async(req, res, next) =>
         }
         else if(shape === "gummies" && PPGummy)
         {
-            let milestones = {60: 0.1, 120: 0.2, 240: 0.4, 420: 0.5}, keys = Object.keys(milestones), values = Object.values(milestones);
+            let milestones = {30: 0.1, 60: 0.2, 90: 0.2, 120: 0.2}, keys = Object.keys(milestones), values = Object.values(milestones);
             product = loadArr.map((el, i) => {
                 price = el * (parseFloat(PPGummy));let discountValues = check.discount(values, price, el, keys, next);
                 return {load : discountValues.qty, price :{ value : discountValues.price, currency : "EUR"}}

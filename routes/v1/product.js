@@ -329,6 +329,18 @@ async (req, res, next) =>
 
 })
 
+//DELETE ALL PRODUCTS
+// router.delete("/all", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, 
+// async (req, res, next) =>
+// {
+//     try
+//     {
+//         let income = await Product.deleteMany({});
+//         res.status(200).json(income);
+//     }catch(err){next(err)}
+
+// })
+
 // router.get("/rename", async (req, res, next) =>
 // {
 //     try

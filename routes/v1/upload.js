@@ -48,7 +48,14 @@ const storageAny = multer.diskStorage(
     },
     filename: (req, file, cb) => 
     {      
-        cb(null, (nanoid(4) + file.originalname ).split(' ').join('_'))
+        if(file.mimetype.startsWith('image'))
+        {
+            cb(null, (nanoid(4) + file.originalname ).split(' ').join('_'));
+        }
+        else if(file.mimetype.startsWith('model/gltf-binary'))
+        {
+            cb(null, (file.originalname).split(' ').join('_'))
+        }
     }
 });
 

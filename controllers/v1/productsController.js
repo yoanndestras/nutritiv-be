@@ -362,16 +362,17 @@ exports.addProductImgs = async(req, res, next) =>
             filesArr.map(async(file) => 
                 {
                     let sanitizeFileName = encodeURIComponent(file.filename)
-                    let filePath, fileType = file.mimetype;
+                    let filePath, fileName, fileType = file.mimetype;
                     if(file.mimetype.startsWith('image'))
                     {
                         filePath =  path.join(file.destination,'productsImgs', sanitizeFileName)
+                        fileName = process.env.DB_NAME + "/productsImgs/" + sanitizeFileName;
                     }
                     else if(file.mimetype.startsWith('model/gltf-binary'))
                     {
                         filePath =  path.join(file.destination, sanitizeFileName)
+                        fileName =  "assets/" + sanitizeFileName;
                     }
-                    let fileName = process.env.DB_NAME + "/productsImgs/" + sanitizeFileName;
                     
                     // deepcode ignore PT: <please specify a reason of ignoring this>
                     await fileUpload.uploadFile(filePath, fileName, fileType);

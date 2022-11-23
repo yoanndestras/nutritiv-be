@@ -299,6 +299,30 @@ product.resizeProductImage, product.addProductImgs, async(req, res, next) =>
 //     }catch(err){next(err)}
 // });
 
+// DELETE ALL GLB FILES
+router.put("/glb", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+auth.verifyAdmin, async(req, res, next) =>
+{
+    try
+    {
+        await Product.updateMany({}, [
+            {$set: {imgs: {
+                    $concatArrays: [ 
+                            {$slice: ["$imgs", 1]}, 
+                            {$slice: ["$imgs", {$add: [1, 1]}, {$size: "$imgs"}]}
+                    ]
+            }}}
+        ]);
+        
+        res.status(200).json(
+            {
+                success: true,
+                status: "Glb files has been deleted from database"
+            });
+
+    }catch(err){next(err)}
+});
+
 // DELETE
 router.delete("/single/:productId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
 auth.verifyAdmin, product.removeImgs, async(req, res, next) =>

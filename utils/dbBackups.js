@@ -71,18 +71,17 @@ exports.restoreBackup = async(req, res, next) =>
   {
     let fileKey = req.fileKey;
 
-    let readStream = fileUpload.getFileStream(fileKey);
+    let readStream = fileUpload.getFileStream(fileKey), overwrite;
     let writeStream = fs.createWriteStream(path.join(__dirname, '../public/', fileKey));
     readStream.pipe(writeStream);
     
     
-    let DB_HOST = req.dbHost;
-    let DB_OLD = req.dbName;
-    let DB_NEW = process.env.STAGE_DB_NAME;
-    let DB_USER = req.dbUser;
-    let DB_PASSWORD = req.dbPassword;
+    let DB_HOST = req.dbHost, DB_OLD = req.dbOld, DB_NEW = req.dbNew, DB_OVERWRITE = req.overwrite;
+    let DB_USER = req.dbUser, DB_PASSWORD = req.dbPassword;
     let ARCHIVE_PATH = path.join(__dirname, '../public/', fileKey);
-
+    
+    DB_OVERWRITE === true ? overwrite = "--drop" : overwrite = "";
+    
     const child = spawn('mongorestore', [
       `-h=${DB_HOST}`,
       `--ssl`,
@@ -93,6 +92,7 @@ exports.restoreBackup = async(req, res, next) =>
       `--archive=${ARCHIVE_PATH}`,
       `--nsFrom=${DB_OLD}.*`,
       `--nsTo=${DB_NEW}.*`,
+      `${overwrite}`,
     ]);
 
     child.stdout.on('data', (data) => 
@@ -117,7 +117,7 @@ exports.restoreBackup = async(req, res, next) =>
       else 
       {
         await backup.storeOnAWS(ARCHIVE_PATH);
-        console.log('Backup succesfully restored on production ✅');
+        console.log('Backup succesfully restored on stage ✅');
         next();
       }
     });
@@ -128,9 +128,11 @@ exports.backupMongoDB = async(req, res, next) =>
 {
   try
   {
-    const DB_NAME = req.body.dbName;
+    const DB_OLD = req.body.dbOld;
+    const DB_NEW = req.body.dbNew;
     const DB_PASSWORD = req.body.dbPassword;
     const DB_USER = req.body.dbUser;
+    const DB_OVERWRITE = req.body.overwrite;
     
     const date = new Date();
     const currentDay = new Date().toLocaleDateString('fr-FR').replace(/\//g,'-');
@@ -198,7 +200,9 @@ exports.backupMongoDB = async(req, res, next) =>
         await backup.storeOnAWS(ARCHIVE_PATH);
         console.log('Backup is successfull ✅');
         req.dbHost = DB_HOST;
-        req.dbName = DB_NAME;
+        req.dbOld = DB_OLD;
+        req.dbNew = DB_NEW;
+        req.overwrite = DB_OVERWRITE;
         req.dbUser = DB_USER;
         req.dbPassword = DB_PASSWORD;
         req.fileKey = fileKey;

@@ -9,7 +9,7 @@ const randomWords = require('random-words');
 const cors = require('../../controllers/v1/corsController');
 const auth = require('../../controllers/v1/authController');
 const product = require('../../controllers/v1/productsController');
-const {upload, upload3d} = require('./upload');
+const {upload, uploadAny} = require('./upload');
 // const { countInStock } = require("../../controllers/v1/ordersController");
 
 //OPTIONS FOR CORS CHECK
@@ -24,7 +24,7 @@ router.get("/", cors.corsWithOptions, async(req, res, next) =>
         const allProducts = await Product.find();
         const productsLength = allProducts.length;
         
-        const queryNew = req.query.new, queryTags = req.query.tags;
+        const queryNew = req.query.new, queryCategory = req.query.category;
         const queryLimit = parseInt(req.query.limit); 
         
         const queryStart = req.query.start && req.query.start < 0 ? req.query.start = 0 : parseInt(req.query.start);
@@ -36,9 +36,9 @@ router.get("/", cors.corsWithOptions, async(req, res, next) =>
         {
             products = await Product.find().sort({_id:-1}).limit(1).lean();
         }
-        else if(queryTags)
+        else if(queryCategory)
         {
-            products = await Product.find({tags:{$in: [queryTags]}}).lean();
+            products = await Product.find({category:{$in: [queryCategory]}}).lean();
         }
         else if(queryLimit)
         {
@@ -151,85 +151,86 @@ product.verifyProductId, product.countInStock, async (req, res, next) =>
     }catch(err){next(err)}
 });
 
-// GET TAGS THAT EXIST ON THE LIST OF PRODUCTS
-router.get('/tags', cors.corsWithOptions, async (req, res, next) =>
+// GET CATEGORIES THAT EXIST ON THE LIST OF PRODUCTS
+router.get('/categories', cors.corsWithOptions, async (req, res, next) =>
 {
     try
     {
         let products = await Product.find().lean();
-        let tags = products.map((product) => product.tags).flat();
-        let uniqueTags = [...new Set(tags)]
+        let categories = products.map((product) => product.category);
+        let uniqueCategory = [...new Set(categories)]
         
         res.status(200).json(
             {
-                uniqueTags
+                uniqueCategory
             });
     }catch(err){next(err)}
 })
 
 // GENERATE PRODUCTS
-router.post("/generate/:value", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
-auth.verifyAdmin, async(req, res, next) =>
-{
-    try
-    {
-        let value = req.params.value, newProduct, newProducts = [];
-        const shape = ["powder", "capsules"];
+// router.post("/generate/:value", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+// auth.verifyAdmin, async(req, res, next) =>
+// {
+//     try
+//     {
+//         let value = req.params.value, newProduct, newProducts = [];
+//         const shape = ["powder", "capsules"];
         
-        const tags = [
-            "anti-oxydant",
-            "immunity",
-            "longevity",
-            "skin",
-            "joints",
-            "anti-inflammatory",
-            "endurance"
-        ]
+//         const tags = [
+//             "anti-oxydant",
+//             "immunity",
+//             "longevity",
+//             "skin",
+//             "joints",
+//             "anti-inflammatory",
+//             "endurance"
+//         ]
         
-        function randomShapeFunction(){return Math.floor(Math.random() * shape.length)}
-        function randomTagFunction(){return Math.floor(Math.random() * tags.length)}
-        function randomLoadFunction(){return Math.floor(Math.random()*50)*40}
-        function randomPriceFunction(){return Math.floor(Math.random()*50)*10}
+//         function randomShapeFunction(){return Math.floor(Math.random() * shape.length)}
+//         function randomTagFunction(){return Math.floor(Math.random() * tags.length)}
+//         function randomLoadFunction(){return Math.floor(Math.random()*50)*40}
+//         function randomPriceFunction(){return Math.floor(Math.random()*50)*10}
         
-        for(let i = 0; i < value; i++)
-        {
-            let randomTitle = randomWords(), randomDesc = randomWords(), randomTag = tags[randomTagFunction()];
-            let randomLoad = randomLoadFunction(), randomPrice = randomPriceFunction(), randomShape = shape[randomShapeFunction()];
+//         for(let i = 0; i < value; i++)
+//         {
+//             let randomTitle = randomWords(), randomDesc = randomWords(), randomTag = tags[randomTagFunction()];
+//             let randomLoad = randomLoadFunction(), randomPrice = randomPriceFunction(), randomShape = shape[randomShapeFunction()];
             
-            newProduct = await new Product(
-                {
-                    title : randomTitle,
-                    desc : randomDesc,
-                    shape : randomShape,
-                    tags : [randomTag],
-                    imgs : ["CDimMultivitamines_powder.png"],
-                    productItems : [
-                    {
-                        load : randomLoad,
-                        price : 
-                        {
-                            value : randomPrice,
-                            currency : "EUR"
-                        }
-                    }],
-                    countInStock : 20000
-                })
-            newProducts.push(newProduct);
-            await newProduct.save();
-        }
+//             newProduct = await new Product(
+//                 {
+//                     title : randomTitle,
+//                     desc : randomDesc,
+//                     shape : randomShape,
+//                     tags : [randomTag],
+//                     imgs : ["CDimMultivitamines_powder.png"],
+//                     productItems : [
+//                     {
+//                         load : randomLoad,
+//                         price : 
+//                         {
+//                             value : randomPrice,
+//                             currency : "EUR"
+//                         }
+//                     }],
+//                     countInStock : 20000
+//                 })
+//             newProducts.push(newProduct);
+//             await newProduct.save();
+//         }
         
-        res.status(201).json(
-            {
-                newProducts
-            });
+//         res.status(201).json(
+//             {
+//                 newProducts
+//             });
     
-    }catch(err){next(err)}
+//     }catch(err){next(err)}
     
-})
+// })
 
 // CREATE PRODUCT
 router.post("/", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, 
-upload.any('imageFile'), product.resizeProductImage, product.newProduct, product.addProductImgs, async(req, res, next) =>
+uploadAny.any('anyFile'), product.resizeProductImage, product.newProduct, 
+product.addProductImgs, async(req, res, next) =>
 {
     try
     {
@@ -327,6 +328,18 @@ async (req, res, next) =>
     }catch(err){next(err)}
 
 })
+
+//DELETE ALL PRODUCTS
+// router.delete("/all", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, auth.verifyAdmin, 
+// async (req, res, next) =>
+// {
+//     try
+//     {
+//         let income = await Product.deleteMany({});
+//         res.status(200).json(income);
+//     }catch(err){next(err)}
+
+// })
 
 // router.get("/rename", async (req, res, next) =>
 // {

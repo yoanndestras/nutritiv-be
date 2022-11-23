@@ -367,6 +367,7 @@ exports.addProductImgs = async(req, res, next) =>
                     {
                         filePath =  path.join(file.destination,'productsImgs', sanitizeFileName)
                         fileName = process.env.DB_NAME + "/productsImgs/" + sanitizeFileName;
+                        imgs.push(sanitizeFileName);
                     }
                     else if(file.mimetype.startsWith('model/gltf-binary'))
                     {
@@ -377,7 +378,6 @@ exports.addProductImgs = async(req, res, next) =>
                     // deepcode ignore PT: <please specify a reason of ignoring this>
                     await fileUpload.uploadFile(filePath, fileName, fileType);
                     
-                    imgs.push(sanitizeFileName); 
                     // deepcode ignore PT: <please specify a reason of ignoring this>
                     fs.unlinkSync(filePath)
                 

@@ -58,7 +58,7 @@ exports.sendForgetPassword = async(req, res, next) =>
             <div style="width: 100%; background-color: #F6F9FC; font-size: 15px ;font-family: -apple-system,
                 BlinkMacSystemFont,'Segoe UI', Roboto, 'Helvetica Neue', Ubuntu, sans-serif; color: rgb(82, 95, 127) !important">
                 <div style="max-width:500px;margin: auto; padding: 50px; background-color:white">
-                    <h1 style="font-size:2em; color: #00A8F3">Nutritiv</h1>
+                    <h1 style="font-size:2em;"><a style="text-decoration: none; color: #00A8F3" href="https://www.nutritiv.app/">Nutritiv</a></h1>
                     <hr>
                     <p>Hello, ${user.username}</p>
                     <p>Please click on the link below to reset your password.<br><br>
@@ -68,8 +68,11 @@ exports.sendForgetPassword = async(req, res, next) =>
                     Thanks,</p>
                     
                     <p>Nutritiv</p>
+                    <div style="text-align: center">
+                    <a style="text-decoration: none; color: #00A8F3" href="https://www.nutritiv.app/">www.nutritiv.app</a>
+                    </div>
                     <hr>
-                    <p style="font-size: 0.75em; color: #88B4D6">Nutritiv, 245 Rue du Tilleul, Paris, France</p>
+                    <p style="font-size: 0.75em; color: #88B4D6">Champ de Mars, 5 Av. Anatole France, 75007 Paris</p>
                 </div>
             </div>
             `
@@ -102,7 +105,7 @@ exports.sendUpdateUsername = async(req, res, next) =>
             <div style="width: 100%; background-color: #F6F9FC; font-size: 15px ;font-family: -apple-system, 
                 BlinkMacSystemFont,'Segoe UI', Roboto, 'Helvetica Neue', Ubuntu, sans-serif; color: rgb(82, 95, 127) !important">
                 <div style="max-width: 500px; margin: auto; padding: 50px; background-color:white">
-                    <h1 style="font-size:2em; color: #00A8F3">Nutritiv</h1>
+                <h1 style="font-size:2em;"><a style="text-decoration: none; color: #00A8F3" href="https://www.nutritiv.app/">Nutritiv</a></h1>
                     <hr>
                     <p>Hello, ${username}</p>
                     <p>Your username has been updated from <span style="font-weight:bold">${req.user.username}</span> to <span style="font-weight:bold">${username}</span>.<br><br>
@@ -110,8 +113,11 @@ exports.sendUpdateUsername = async(req, res, next) =>
                     </p>
                 
                     <p>Nutritiv</p>
+                    <div style="text-align: center">
+                    <a style="text-decoration: none; color: #00A8F3" href="https://www.nutritiv.app/">www.nutritiv.app</a>
+                    </div>
                     <hr>
-                    <p style="font-size: 0.75em; color: #88B4D6">Nutritiv, 245 Rue du Tilleul, Paris, France</p>
+                    <p style="font-size: 0.75em; color: #88B4D6">Champ de Mars, 5 Av. Anatole France, 75007 Paris</p>
                 </div>
             </div>
             `
@@ -143,7 +149,7 @@ exports.sendUpdateEmail = async(req, res, next) =>
             <div style="width: 100%; background-color: #F6F9FC; font-size: 15px ;font-family: -apple-system, 
                 BlinkMacSystemFont,'Segoe UI', Roboto, 'Helvetica Neue', Ubuntu, sans-serif; color: rgb(82, 95, 127) !important">
                 <div style="max-width: 500px; margin: auto; padding: 50px; background-color:white">
-                    <h1 style="font-size:2em; color: #00A8F3">Nutritiv</h1>
+                    <h1 style="font-size:2em;"><a style="text-decoration: none; color: #00A8F3" href="https://www.nutritiv.app/">Nutritiv</a></h1>
                     <hr>
                     <p>Hello, ${username}</p>
                     <p>Your email has been updated from <span style="font-weight:bold">${req.user.email}</span> to <span style="font-weight:bold">${email}</span>.<br><br>
@@ -151,8 +157,11 @@ exports.sendUpdateEmail = async(req, res, next) =>
                     </p>
                 
                     <p>Nutritiv</p>
+                    <div style="text-align: center">
+                    <a style="text-decoration: none; color: #00A8F3" href="https://www.nutritiv.app/">www.nutritiv.app</a>
+                    </div>
                     <hr>
-                    <p style="font-size: 0.75em; color: #88B4D6">Nutritiv, 245 Rue du Tilleul, Paris, France</p>
+                    <p style="font-size: 0.75em; color: #88B4D6">Champ de Mars, 5 Av. Anatole France, 75007 Paris</p>
                 </div>
             </div>
             `
@@ -203,6 +212,7 @@ exports.sendNewOrder = async(req, res, next) =>
                     "phoneNumber": phone,
                 },
                 "order" : order,
+                "DB_NAME" : process.env.DB_NAME
             },
         }   
         await sgMail.send(mailContent)
@@ -227,7 +237,7 @@ exports.orderShipping = async(req, res, next) =>
             <div style="width: 100%; background-color: #F6F9FC; font-size: 15px ;font-family: -apple-system, 
                 BlinkMacSystemFont,'Segoe UI', Roboto, 'Helvetica Neue', Ubuntu, sans-serif; color: rgb(82, 95, 127) !important">
                 <div style="max-width: 500px;margin: auto; padding: 50px; background-color:white">
-                    <h1 style="font-size:2em; color: #00A8F3">Nutritiv</h1>
+                    <h1 style="font-size:2em;"><a style="text-decoration: none; color: #00A8F3" href="https://www.nutritiv.app/">Nutritiv</a></h1>
                     <hr>
                     <p>Hello, ${username}</p>
                     <p>Thank you for your order, your order has been successfully shipped by "Shipping Company"<br><br>
@@ -237,8 +247,11 @@ exports.orderShipping = async(req, res, next) =>
                     </p>
                 
                     <p>Nutritiv</p>
+                    <div style="text-align: center">
+                    <a style="text-decoration: none; color: #00A8F3" href="https://www.nutritiv.app/">www.nutritiv.app</a>
+                    </div>
                     <hr>
-                    <p style="font-size: 0.75em; color: #88B4D6">Nutritiv, 245 Rue du Tilleul, Paris, France</p>
+                    <p style="font-size: 0.75em; color: #88B4D6">Champ de Mars, 5 Av. Anatole France, 75007 Paris</p>
                 </div>
             </div>
             `

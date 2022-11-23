@@ -180,6 +180,7 @@ exports.sendNewOrder = async(req, res, next) =>
         
         const orders = await Order.find({userId: req.user._id}).sort({updatedAt: -1});
         const order = orders[0], username = req.user.username;
+        const DB_NAME = process.env.DB_NAME;
         req.order = order
         // const orderDetails = order.orderDetails[0];
         
@@ -204,6 +205,7 @@ exports.sendNewOrder = async(req, res, next) =>
                 "date": currentDay,
                 "email" : customer_email,
                 "total" : total,
+                "dbName" : DB_NAME,
                 "orderDetails": {
                     "street" : street,
                     "zip": zip,
@@ -212,7 +214,6 @@ exports.sendNewOrder = async(req, res, next) =>
                     "phoneNumber": phone,
                 },
                 "order" : order,
-                "DB_NAME" : process.env.DB_NAME
             },
         }   
         await sgMail.send(mailContent)

@@ -29,7 +29,7 @@ Using mongorestore - without any args:
 
 exports.verifyAuth = async(req, res, next) => 
 {
-  let dbName = req.body.dbName;
+  let dbName = req.body.dbOld;
   let dbPassword = req.body.dbPassword;
   let dbUser = req.body.dbUser;
 
@@ -104,7 +104,7 @@ exports.restoreBackup = async(req, res, next) =>
     {
       console.log('stderr:\n', Buffer.from(data).toString());
     });
-
+    
     child.on('error', (error) => 
     {
       console.log('error:\n', error);
@@ -137,8 +137,8 @@ exports.backupMongoDB = async(req, res, next) =>
     const date = new Date();
     const currentDay = new Date().toLocaleDateString('fr-FR').replace(/\//g,'-');
     const currentHour = date.getHours() + '-' + date.getMinutes() + '-' + date.getSeconds();
-    const ARCHIVE_PATH = path.join(__dirname, '../public/dbBackups', `${currentDay}_${currentHour}_${DB_NAME}.gzip`);
-    const fileKey = 'dbBackups/' + `${currentDay}_${currentHour}_${DB_NAME}.gzip`;
+    const ARCHIVE_PATH = path.join(__dirname, '../public/dbBackups', `${currentDay}_${currentHour}_${DB_OLD}.gzip`);
+    const fileKey = 'dbBackups/' + `${currentDay}_${currentHour}_${DB_OLD}.gzip`;
 
     const client = new MongoClient(process.env.MONGO_URL);
     
@@ -146,7 +146,7 @@ exports.backupMongoDB = async(req, res, next) =>
         .connect()
         .then(async () => 
         {
-            const db = client.db(DB_NAME);
+            const db = client.db(DB_OLD);
             const result = await db.command( { isMaster: 1 } )
             const primary = result.primary
             return primary
@@ -159,7 +159,7 @@ exports.backupMongoDB = async(req, res, next) =>
     const child = spawn('mongodump', [
       `-h=${DB_HOST}`,
       `--ssl`,
-      `-d=${DB_NAME}`,
+      `-d=${DB_OLD}`,
       `-u=${DB_USER}`,
       `-p=${DB_PASSWORD}`,
       `--authenticationDatabase=admin`,

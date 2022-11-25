@@ -12,6 +12,7 @@ const fileUpload = require('../../controllers/v1/fileUploadController');
 const {upload} = require('./upload');
 
 const limitter = require('express-rate-limit');
+const Product = require("../../models/Product");
 
 router.use( 
     limitter(
@@ -358,6 +359,19 @@ auth.verifyNewPasswordSyntax, auth.verifyNewPasswordEquality, async(req, res, ne
             });
     }catch(err){next(err)}
 });
+
+//RESET PASSWORD
+// router.put("/adressDetails", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+// auth.verifyAdmin, async(req, res, next) =>
+// {
+//     try
+//     {
+//         await User.updateMany({}, 
+//             {
+//                 {}
+//             }) 
+//     }catch(err){next(err)}
+// });
 
 // DELETE
 router.delete("/:userId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 

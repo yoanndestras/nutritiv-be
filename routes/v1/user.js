@@ -12,7 +12,6 @@ const fileUpload = require('../../controllers/v1/fileUploadController');
 const {upload} = require('./upload');
 
 const limitter = require('express-rate-limit');
-const Product = require("../../models/Product");
 
 router.use( 
     limitter(

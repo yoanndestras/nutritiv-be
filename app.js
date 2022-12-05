@@ -62,9 +62,11 @@ if(process.env.DB_NAME !== "Nutritiv-testing")
         {
             method: 'POST',
             body: JSON.stringify({
-                dbName : process.env.DB_NAME,
+                dbOld : process.env.DB_NAME,
+                dbNew : process.env.STAGE_DB_NAME,
                 dbUser : process.env.DB_USER,
-                dbPassword : process.env.DB_PASSWORD
+                dbPassword : process.env.DB_PASSWORD,
+                overwrite : "false"
             }),
             headers: 
             {

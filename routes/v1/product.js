@@ -21,7 +21,7 @@ router.get("/", cors.corsWithOptions, async(req, res, next) =>
 {
     try
     {
-        const allProducts = await Product.find();
+        const allProducts = await Product.find().sort({ title: 1 }).collation({ locale: "en", caseLevel: true });
         const productsLength = allProducts.length;
         
         const queryNew = req.query.new, queryCategory = req.query.category;
@@ -300,28 +300,51 @@ product.resizeProductImage, product.addProductImgs, async(req, res, next) =>
 // });
 
 // DELETE ALL GLB FILES
-router.put("/glb", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
-auth.verifyAdmin, async(req, res, next) =>
-{
-    try
-    {
-        await Product.updateMany({}, [
-            {$set: {imgs: {
-                    $concatArrays: [ 
-                            {$slice: ["$imgs", 1]}, 
-                            {$slice: ["$imgs", {$add: [1, 1]}, {$size: "$imgs"}]}
-                    ]
-            }}}
-        ]);
+// router.put("/glb", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+// auth.verifyAdmin, async(req, res, next) =>
+// {
+//     try
+//     {
+//         await Product.updateMany({}, [
+//             {$set: {imgs: {
+//                     $concatArrays: [ 
+//                             {$slice: ["$imgs", 1]}, 
+//                             {$slice: ["$imgs", {$add: [1, 1]}, {$size: "$imgs"}]}
+//                     ]
+//             }}}
+//         ]);
         
-        res.status(200).json(
-            {
-                success: true,
-                status: "Glb files has been deleted from database"
-            });
+//         res.status(200).json(
+//             {
+//                 success: true,
+//                 status: "Glb files has been deleted from database"
+//             });
 
-    }catch(err){next(err)}
-});
+//     }catch(err){next(err)}
+// });
+
+// CHANGE SHAPE NAME FROM PLURIAL TO SINGLE
+// router.put("/shapes", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+// auth.verifyAdmin, async(req, res, next) =>
+// {
+//     try
+//     {
+//         await Product.updateMany({shape : "gummies"}, [
+//             {$set: 
+//                 {
+//                     shape: "gummy"
+//                 }
+//             }
+//         ]);
+        
+//         res.status(200).json(
+//             {
+//                 success: true,
+//                 status: "Products shape name updated"
+//             });
+    
+//     }catch(err){next(err)}
+// });
 
 // DELETE
 router.delete("/single/:productId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 

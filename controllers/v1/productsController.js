@@ -26,7 +26,7 @@ exports.newProduct = async(req, res, next) =>
         
         const loadArr = load && Array.isArray(load) ? load : load !== undefined ? [load] : null;
         
-        if(shape === "capsules" && PPCapsule)
+        if(shape === "capsule" && PPCapsule)
         {
             let milestones = {15: 0.1, 30: 0.2, 60: 0.2, 90: 0.3}, keys = Object.keys(milestones), values = Object.values(milestones);
             product = loadArr.map((el, i) => {
@@ -34,7 +34,7 @@ exports.newProduct = async(req, res, next) =>
                 return {load : discountValues.qty, price :{ value : discountValues.price, currency : "EUR"}}
             })
         }
-        else if(shape === "gummies" && PPGummy)
+        else if(shape === "gummy" && PPGummy)
         {
             let milestones = {30: 0.1, 60: 0.2, 90: 0.2, 120: 0.2}, keys = Object.keys(milestones), values = Object.values(milestones);
             product = loadArr.map((el, i) => {

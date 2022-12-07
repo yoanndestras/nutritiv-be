@@ -346,6 +346,53 @@ product.resizeProductImage, product.addProductImgs, async(req, res, next) =>
 //     }catch(err){next(err)}
 // });
 
+// CHANGE CATEGORY TYPE FROM STRING TO ARRAY
+// router.put("/categories", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+// auth.verifyAdmin, async(req, res, next) =>
+// {
+//     try
+//     {
+//         await Product.updateMany({categoriy : "unique"}, [
+//             {$set: 
+//                 {
+//                     categories: ["unique"]
+//                 }
+//             }
+//         ]);
+        
+//         res.status(200).json(
+//             {
+//                 success: true,
+//                 status: "Products categories updated"
+//             });
+    
+//     }catch(err){next(err)}
+// });
+
+// // CHANGE CATEGORY TYPE FROM STRING TO ARRAY
+// router.put("/category", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+// auth.verifyAdmin, async(req, res, next) =>
+// {
+//     try
+//     {
+//         await Product.updateMany({}, 
+//             {$unset: 
+//                 {
+//                     category: "",
+//                 }
+//             }
+//         );
+        
+
+//         res.status(200).json(
+//             {
+//                 success: true,
+//                 status: "Products category field deleted"
+//             });
+    
+//     }catch(err){next(err)}
+// });
+
 // DELETE
 router.delete("/single/:productId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
 auth.verifyAdmin, product.removeImgs, async(req, res, next) =>

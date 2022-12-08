@@ -24,7 +24,7 @@ router.get("/", cors.corsWithOptions, async(req, res, next) =>
         const allProducts = await Product.find().sort({ title: 1 }).collation({ locale: "en", caseLevel: true });
         const productsLength = allProducts.length;
         
-        const queryNew = req.query.new, queryCategory = req.query.category;
+        const queryNew = req.query.new, queryCategory = req.query.categories;
         const queryLimit = parseInt(req.query.limit); 
         
         const queryStart = req.query.start && req.query.start < 0 ? req.query.start = 0 : parseInt(req.query.start);
@@ -38,7 +38,7 @@ router.get("/", cors.corsWithOptions, async(req, res, next) =>
         }
         else if(queryCategory)
         {
-            products = await Product.find({category:{$in: [queryCategory]}}).lean();
+            products = await Product.find({categories:{$in: [queryCategory]}}).lean();
         }
         else if(queryLimit)
         {
@@ -156,8 +156,8 @@ router.get('/categories', cors.corsWithOptions, async (req, res, next) =>
 {
     try
     {
-        let products = await Product.find().lean();
-        let categories = products.map((product) => product.category);
+        let products = await Product.find();
+        let categories = products.map((product) => product.categories[0]);
         let uniqueCategory = [...new Set(categories)]
         
         res.status(200).json(

@@ -38,7 +38,7 @@ router.get("/", cors.corsWithOptions, async(req, res, next) =>
         }
         else if(queryCategory)
         {
-            products = await Product.find({categories:{$in: [queryCategory]}}).lean();
+            products = await Product.find({categories:{$in: [queryCategory]}}).sort({ title: 1 }).collation({ locale: "en", caseLevel: true }).lean();
         }
         else if(queryLimit)
         {

@@ -359,6 +359,19 @@ auth.verifyNewPasswordSyntax, auth.verifyNewPasswordEquality, async(req, res, ne
     }catch(err){next(err)}
 });
 
+//RESET PASSWORD
+// router.put("/adressDetails", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+// auth.verifyAdmin, async(req, res, next) =>
+// {
+//     try
+//     {
+//         await User.updateMany({}, 
+//             {
+//                 {}
+//             }) 
+//     }catch(err){next(err)}
+// });
+
 // DELETE
 router.delete("/:userId", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
 auth.verifyAuthorization, async (req, res, next) =>

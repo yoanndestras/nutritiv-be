@@ -54,31 +54,31 @@ const UserSchema = new Schema
         type: String,
         default: 'local',
     },
-    addressDetails:
-    [
-        {
-            street:
-            {
-                type: String,
-            },
-            zip:
-            {
-                type: Number,
-            },
-            city:
-            {
-                type: String,
-            },
-            country:
-            {
-                type: String,
-            },
-            phoneNumber:
-            {
-                type: Number,
-            }
-        }
-    ],
+    // addressDetails:
+    // [
+    //     {
+    //         street:
+    //         {
+    //             type: String,
+    //         },
+    //         zip:
+    //         {
+    //             type: Number,
+    //         },
+    //         city:
+    //         {
+    //             type: String,
+    //         },
+    //         country:
+    //         {
+    //             type: String,
+    //         },
+    //         phoneNumber:
+    //         {
+    //             type: Number,
+    //         }
+    //     }
+    // ],
     version: 
     {
         type: Number,

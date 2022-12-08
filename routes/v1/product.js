@@ -21,10 +21,10 @@ router.get("/", cors.corsWithOptions, async(req, res, next) =>
 {
     try
     {
-        const allProducts = await Product.find();
+        const allProducts = await Product.find().sort({ title: 1 }).collation({ locale: "en", caseLevel: true });
         const productsLength = allProducts.length;
         
-        const queryNew = req.query.new, queryCategory = req.query.category;
+        const queryNew = req.query.new, queryCategory = req.query.categories;
         const queryLimit = parseInt(req.query.limit); 
         
         const queryStart = req.query.start && req.query.start < 0 ? req.query.start = 0 : parseInt(req.query.start);
@@ -38,7 +38,7 @@ router.get("/", cors.corsWithOptions, async(req, res, next) =>
         }
         else if(queryCategory)
         {
-            products = await Product.find({category:{$in: [queryCategory]}}).lean();
+            products = await Product.find({categories:{$in: [queryCategory]}}).sort({ title: 1 }).collation({ locale: "en", caseLevel: true }).lean();
         }
         else if(queryLimit)
         {
@@ -156,8 +156,8 @@ router.get('/categories', cors.corsWithOptions, async (req, res, next) =>
 {
     try
     {
-        let products = await Product.find().lean();
-        let categories = products.map((product) => product.category);
+        let products = await Product.find();
+        let categories = products.map((product) => product.categories[0]);
         let uniqueCategory = [...new Set(categories)]
         
         res.status(200).json(
@@ -296,6 +296,100 @@ product.resizeProductImage, product.addProductImgs, async(req, res, next) =>
 //                 Updated_product: updatedProduct
 //             });
         
+//     }catch(err){next(err)}
+// });
+
+// DELETE ALL GLB FILES
+// router.put("/glb", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+// auth.verifyAdmin, async(req, res, next) =>
+// {
+//     try
+//     {
+//         await Product.updateMany({}, [
+//             {$set: {imgs: {
+//                     $concatArrays: [ 
+//                             {$slice: ["$imgs", 1]}, 
+//                             {$slice: ["$imgs", {$add: [1, 1]}, {$size: "$imgs"}]}
+//                     ]
+//             }}}
+//         ]);
+        
+//         res.status(200).json(
+//             {
+//                 success: true,
+//                 status: "Glb files has been deleted from database"
+//             });
+
+//     }catch(err){next(err)}
+// });
+
+// CHANGE SHAPE NAME FROM PLURIAL TO SINGLE
+// router.put("/shapes", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+// auth.verifyAdmin, async(req, res, next) =>
+// {
+//     try
+//     {
+//         await Product.updateMany({shape : "gummies"}, [
+//             {$set: 
+//                 {
+//                     shape: "gummy"
+//                 }
+//             }
+//         ]);
+        
+//         res.status(200).json(
+//             {
+//                 success: true,
+//                 status: "Products shape name updated"
+//             });
+    
+//     }catch(err){next(err)}
+// });
+
+// CHANGE CATEGORY TYPE FROM STRING TO ARRAY
+// router.put("/categories", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+// auth.verifyAdmin, async(req, res, next) =>
+// {
+//     try
+//     {
+//         await Product.updateMany({categoriy : "unique"}, [
+//             {$set: 
+//                 {
+//                     categories: ["unique"]
+//                 }
+//             }
+//         ]);
+        
+//         res.status(200).json(
+//             {
+//                 success: true,
+//                 status: "Products categories updated"
+//             });
+    
+//     }catch(err){next(err)}
+// });
+
+// // CHANGE CATEGORY TYPE FROM STRING TO ARRAY
+// router.put("/category", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+// auth.verifyAdmin, async(req, res, next) =>
+// {
+//     try
+//     {
+//         await Product.updateMany({}, 
+//             {$unset: 
+//                 {
+//                     category: "",
+//                 }
+//             }
+//         );
+        
+
+//         res.status(200).json(
+//             {
+//                 success: true,
+//                 status: "Products category field deleted"
+//             });
+    
 //     }catch(err){next(err)}
 // });
 

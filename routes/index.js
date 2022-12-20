@@ -1,4 +1,5 @@
 const express = require("express");
+const limitter = require('express-rate-limit'); // SPAM LIMITTER
 const router = express.Router();
 const routers = require("./");
 

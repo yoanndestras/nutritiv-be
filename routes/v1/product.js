@@ -1,6 +1,7 @@
 const Product = require("../../models/Product");
 const router = require("express").Router();
 const _ = require("lodash")
+const limitter = require('express-rate-limit')
 // const { slice } = require("lodash");
 // const fs = require('fs');
 const randomWords = require('random-words');
@@ -11,6 +12,19 @@ const auth = require('../../controllers/v1/authController');
 const product = require('../../controllers/v1/productsController');
 const {upload, uploadAny} = require('./upload');
 // const { countInStock } = require("../../controllers/v1/ordersController");
+
+
+router.use( 
+    limitter(
+        {
+            windowMs: 5000,
+            max: 20,
+            message: {
+                code: 429,
+                message: "Too many requests"
+            }
+        })
+    ) // LIMIT SPAM REQUESTS TO MAX PER MILLISECONDS
 
 //OPTIONS FOR CORS CHECK
 router.options("*", cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
@@ -345,6 +359,67 @@ product.resizeProductImage, product.addProductImgs, async(req, res, next) =>
     
 //     }catch(err){next(err)}
 // });
+
+// CHANGE ALL PRODUCTS COUNTINSTOCK OR SPECIFIC PRODUCT COUNTINSTOCK
+router.put("/countInStock", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 
+auth.verifyAdmin, async(req, res, next) =>
+{
+    try
+    {
+        const productTitle = req.query?.productTitle, productShape = req.query?.productShape;
+        const countInStock = req.body.countInStock ? parseInt(req.body.countInStock) : null;
+        
+        if(productTitle && productShape && countInStock)
+        {
+            let product = await Product.find({"title" : productTitle, "shape" : productShape});
+            if(product.length > 0)
+            {
+                await Product.updateOne({"title": productTitle, "shape": productShape}, [
+                    {$set: 
+                        {
+                            countInStock
+                        }
+                    }
+                ]);
+            }
+            else
+            {
+                let err = new Error("Product not found!");
+                err.status = 400;
+                return next(err);
+            }
+        }
+        else if((productTitle && !productShape) || (productShape && !productTitle))
+        {
+            let err = new Error("Missing product title or product shape!");
+            err.status = 400;
+            return next(err);
+        }
+        else if(countInStock)
+        {
+            await Product.updateMany({}, [
+                {$set: 
+                    {
+                        countInStock
+                    }
+                }
+            ]);
+        }
+        else
+        {
+            let err = new Error("Missing or wrong element!");
+            err.status = 400;
+            return next(err);
+        }
+        
+        res.status(200).json(
+            {
+                success: true,
+                status: "Products countInStock updated successfully"
+            });
+    
+    }catch(err){next(err)}
+});
 
 // CHANGE CATEGORY TYPE FROM STRING TO ARRAY
 // router.put("/categories", cors.corsWithOptions, auth.verifyUser, auth.verifyRefresh, 

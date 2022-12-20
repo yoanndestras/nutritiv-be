@@ -117,7 +117,7 @@ exports.restoreBackup = async(req, res, next) =>
       else 
       {
         await backup.storeOnAWS(ARCHIVE_PATH);
-        console.log('Backup succesfully restored on stage ✅');
+        console.log(`Backup succesfully restored on ${DB_NEW} ✅`);
         next();
       }
     });
